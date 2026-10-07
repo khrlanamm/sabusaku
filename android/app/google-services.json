@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "577458550553",
+    "project_id": "sabusaku",
+    "storage_bucket": "sabusaku.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:577458550553:android:ec03d28765170785487788",
+        "android_client_info": {
+          "package_name": "com.sabu.saku"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBXvLeNvgAWAV56ViZjU-QblrHWsZ-NVvw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
