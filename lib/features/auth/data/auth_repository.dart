@@ -227,9 +227,17 @@ Session? session(Ref ref) {
 }
 
 /// For code that only runs inside a role shell, where a session always exists.
+///
+/// While signing out, screens are still mounted for a frame before the router
+/// redirects; they keep the last session instead of throwing mid-build.
 @Riverpod(keepAlive: true)
-Session currentSession(Ref ref) {
-  final session = ref.watch(sessionProvider);
-  if (session == null) throw const AppException(AppErrorCode.sessionExpired);
-  return session;
+class CurrentSession extends _$CurrentSession {
+  Session? _last;
+
+  @override
+  Session build() {
+    final session = ref.watch(sessionProvider) ?? _last;
+    if (session == null) throw const AppException(AppErrorCode.sessionExpired);
+    return _last = session;
+  }
 }

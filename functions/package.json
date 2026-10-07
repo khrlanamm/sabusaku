@@ -9,8 +9,9 @@
     "build": "tsc",
     "typecheck": "tsc -p tsconfig.check.json",
     "test": "vitest run test/domain --passWithNoTests",
-    "test:emulator": "vitest run test/rules test/integration --passWithNoTests",
-    "test:all": "firebase emulators:exec --project demo-sabusaku --only auth,firestore,functions \"npm run test:emulator\"",
+    "test:rules": "vitest run test/rules",
+    "test:integration": "vitest run test/integration",
+    "test:all": "firebase emulators:exec --project demo-sabusaku --only firestore \"npm run test:rules\" && npm run build && firebase emulators:exec --project demo-sabusaku --only auth,firestore,functions \"npm run test:integration\"",
     "emulators": "npm run build && firebase emulators:start --project sabusaku",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log"

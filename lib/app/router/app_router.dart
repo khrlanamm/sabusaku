@@ -5,6 +5,14 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../core/widgets/brand.dart';
 import '../../core/widgets/role_shell.dart';
 import '../../core/widgets/states.dart';
+import '../../features/admin/presentation/add_user_screen.dart';
+import '../../features/admin/presentation/admin_home_screen.dart';
+import '../../features/admin/presentation/admin_settings_screen.dart';
+import '../../features/admin/presentation/class_detail_screen.dart';
+import '../../features/admin/presentation/classes_screen.dart';
+import '../../features/admin/presentation/import_csv_screen.dart';
+import '../../features/admin/presentation/user_detail_screen.dart';
+import '../../features/admin/presentation/users_screen.dart';
 import '../../features/auth/data/auth_repository.dart';
 import '../../features/auth/domain/session.dart';
 import '../../features/auth/presentation/account_section.dart';
@@ -108,11 +116,29 @@ GoRouter appRouter(Ref ref) {
         builder: (_, _, shell) =>
             RoleShell(navigationShell: shell, tabs: _adminTabs),
         branches: [
-          tab(Routes.adminHome, const _Placeholder('Beranda')),
-          tab(Routes.adminClasses, const _Placeholder('Kelas')),
-          tab(Routes.adminUsers, const _Placeholder('Pengguna')),
-          tab(Routes.adminSettings, const _Placeholder('Pengaturan')),
+          tab(Routes.adminHome, const AdminHomeScreen()),
+          tab(Routes.adminClasses, const ClassesScreen()),
+          tab(Routes.adminUsers, const UsersScreen()),
+          tab(Routes.adminSettings, const AdminSettingsScreen()),
         ],
+      ),
+      GoRoute(
+        path: '/admin/kelas/:classId',
+        builder: (_, state) =>
+            ClassDetailScreen(classId: state.pathParameters['classId']!),
+      ),
+      GoRoute(
+        path: Routes.adminAddUser,
+        builder: (_, _) => const AddUserScreen(),
+      ),
+      GoRoute(
+        path: Routes.adminImport,
+        builder: (_, _) => const ImportCsvScreen(),
+      ),
+      GoRoute(
+        path: '/admin/pengguna/detail/:uid',
+        builder: (_, state) =>
+            UserDetailScreen(uid: state.pathParameters['uid']!),
       ),
     ],
   );

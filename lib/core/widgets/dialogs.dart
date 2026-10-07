@@ -43,3 +43,32 @@ void showSnack(BuildContext context, String message) {
 
 void showErrorSnack(BuildContext context, Object error) =>
     showSnack(context, mapError(error).userMessage);
+
+/// Runs [action] behind a blocking progress indicator. Returns its result, or
+/// null after showing the error when it throws.
+Future<T?> runWithProgress<T>(
+  BuildContext context,
+  Future<T> Function() action,
+) async {
+  final navigator = Navigator.of(context, rootNavigator: true);
+  final messenger = ScaffoldMessenger.of(context);
+  showDialog<void>(
+    context: context,
+    barrierDismissible: false,
+    useRootNavigator: true,
+    builder: (_) => const PopScope(
+      canPop: false,
+      child: Center(child: CircularProgressIndicator()),
+    ),
+  );
+  try {
+    return await action();
+  } catch (error) {
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(mapError(error).userMessage)));
+    return null;
+  } finally {
+    navigator.pop();
+  }
+}

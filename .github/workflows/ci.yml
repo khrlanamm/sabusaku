@@ -45,5 +45,9 @@ jobs:
       - run: npm run build
       - run: npm run typecheck
       - run: npm test
-      - name: Rules and integration tests on the Firebase Emulator
-        run: npx --yes firebase-tools@15 emulators:exec --project demo-sabusaku --only auth,firestore,functions "npm run test:emulator"
+      # Rules run without the Functions emulator so triggers do not react to
+      # their fixture writes.
+      - name: Security rules tests
+        run: npx --yes firebase-tools@15 emulators:exec --project demo-sabusaku --only firestore "npm run test:rules"
+      - name: Callable and trigger integration tests
+        run: npx --yes firebase-tools@15 emulators:exec --project demo-sabusaku --only auth,firestore,functions "npm run test:integration"

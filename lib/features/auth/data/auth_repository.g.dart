@@ -131,16 +131,23 @@ final class SessionProvider
 String _$sessionHash() => r'2f60b79b9f77d4d99b3151f7ad3658721c8705dd';
 
 /// For code that only runs inside a role shell, where a session always exists.
+///
+/// While signing out, screens are still mounted for a frame before the router
+/// redirects; they keep the last session instead of throwing mid-build.
 
-@ProviderFor(currentSession)
+@ProviderFor(CurrentSession)
 final currentSessionProvider = CurrentSessionProvider._();
 
 /// For code that only runs inside a role shell, where a session always exists.
-
+///
+/// While signing out, screens are still mounted for a frame before the router
+/// redirects; they keep the last session instead of throwing mid-build.
 final class CurrentSessionProvider
-    extends $FunctionalProvider<Session, Session, Session>
-    with $Provider<Session> {
+    extends $NotifierProvider<CurrentSession, Session> {
   /// For code that only runs inside a role shell, where a session always exists.
+  ///
+  /// While signing out, screens are still mounted for a frame before the router
+  /// redirects; they keep the last session instead of throwing mid-build.
   CurrentSessionProvider._()
     : super(
         from: null,
@@ -157,13 +164,7 @@ final class CurrentSessionProvider
 
   @$internal
   @override
-  $ProviderElement<Session> $createElement($ProviderPointer pointer) =>
-      $ProviderElement(pointer);
-
-  @override
-  Session create(Ref ref) {
-    return currentSession(ref);
-  }
+  CurrentSession create() => CurrentSession();
 
   /// {@macro riverpod.override_with_value}
   Override overrideWithValue(Session value) {
@@ -174,4 +175,27 @@ final class CurrentSessionProvider
   }
 }
 
-String _$currentSessionHash() => r'c433c78a4b3024d049910a73c4efc68964400bc2';
+String _$currentSessionHash() => r'84062b2667a4dc0df584bb90c7af3aa16bf1f0a1';
+
+/// For code that only runs inside a role shell, where a session always exists.
+///
+/// While signing out, screens are still mounted for a frame before the router
+/// redirects; they keep the last session instead of throwing mid-build.
+
+abstract class _$CurrentSession extends $Notifier<Session> {
+  Session build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<Session, Session>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<Session, Session>,
+              Session,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}

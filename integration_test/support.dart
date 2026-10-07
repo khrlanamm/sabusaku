@@ -12,6 +12,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 const e2eSchool = 'e2e';
 const e2eInitialPassword = 'awal1234';
 const e2eNewPassword = 'baru12345';
+const e2eClass = 'XII IPA 1';
+const e2eTeacher = 'sari';
+const e2eStudent = '1001';
+
+/// Initial passwords captured when the admin creates the accounts; later
+/// tests sign in with them.
+String teacherPassword = '';
+String studentPassword = '';
+
+/// A destination of the bottom navigation bar.
+Finder navTab(String label) =>
+    find.descendant(of: find.byType(NavigationBar), matching: find.text(label));
 
 /// Starts the real app against the Firebase Emulator Suite, signed out.
 Future<void> startApp(WidgetTester tester) async {
@@ -45,6 +57,20 @@ Future<void> waitFor(
     if (finder.evaluate().isNotEmpty) return;
   }
   fail('Timed out waiting for $finder');
+}
+
+/// Pumps until [finder] no longer matches, e.g. a SnackBar covering a button.
+Future<void> waitForGone(
+  WidgetTester tester,
+  Finder finder, {
+  Duration timeout = const Duration(seconds: 15),
+}) async {
+  final end = DateTime.now().add(timeout);
+  while (DateTime.now().isBefore(end)) {
+    await tester.pump(const Duration(milliseconds: 200));
+    if (finder.evaluate().isEmpty) return;
+  }
+  fail('Timed out waiting for $finder to disappear');
 }
 
 /// Scrolls [finder] into view first: the on-screen keyboard can cover it.
@@ -82,4 +108,28 @@ Future<void> setNewPassword(WidgetTester tester) async {
 Future<void> signOut(WidgetTester tester) async {
   await FirebaseAuth.instance.signOut();
   await waitFor(tester, find.byKey(const Key('login-submit')));
+}
+
+/// Admin › Pengguna › + › "Tambah satu pengguna".
+Future<void> openAddUser(WidgetTester tester) async {
+  await waitFor(tester, find.byKey(const Key('users-add')));
+  // A floating SnackBar from the previous action can sit on top of the FAB.
+  await waitForGone(tester, find.byType(SnackBar));
+  await tester.tap(find.byKey(const Key('users-add')));
+  await waitFor(tester, find.byKey(const Key('users-add-manual')));
+  await tester.tap(find.byKey(const Key('users-add-manual')));
+  await waitFor(tester, find.byKey(const Key('add-user-submit')));
+}
+
+/// Reads the password from the one-time credential dialog and dismisses it.
+Future<String> readCredentialAndClose(WidgetTester tester) async {
+  final field = find.descendant(
+    of: find.byKey(const Key('credential-password')),
+    matching: find.byType(SelectableText),
+  );
+  await waitFor(tester, field);
+  final password = tester.widget<SelectableText>(field).data!;
+  await tester.tap(find.byKey(const Key('credential-close')));
+  await tester.pump(const Duration(milliseconds: 500));
+  return password;
 }
