@@ -100,7 +100,27 @@ The sign-in screen has three fields. School code (Kode Sekolah): demo. Username:
 | Financial features | None |
 | Health features | None |
 | Target audience | 13-15, 16-17 and 18+. Not designed for children under 13 |
+| Content rating (IARC) | Everyone / 3+ with "Users interact". See the answers below |
 | AI-generated assets | Not labelled: the graphics are real app screens in a layout |
+
+### Content rating questionnaire
+
+Category: all other app types. Contact email: the developer email.
+
+| Question | Answer |
+|---|---|
+| Rating-relevant content (sex, violence, language) in the app package | No |
+| Users can interact or exchange content | Yes (a teacher comments on a student's journal) |
+| Shared user content is the main content | No (a journal is the student's own record) |
+| Public sharing of nudity or real-life graphic violence | No |
+| Block users, report users, chat moderation | No |
+| Interaction limited to invited people | Yes (only the teachers of the student's class) |
+| Online content from outside the app | No |
+| Promotes age-restricted products | No |
+| Shares precise location, digital purchases, cash rewards, web browser | No |
+| Primarily an educational or news product | Yes |
+
+Submit a new questionnaire when a feature changes one of these answers.
 
 ### Data safety
 
@@ -124,3 +144,9 @@ and required (users cannot turn it off).
 
 Update this table and the Data safety form together whenever an SDK or a
 stored field changes.
+
+## Testing track
+
+Closed testing (Alpha) targets Indonesia. On a personal developer account
+Google Play requires a closed test with at least 12 testers for 14 days
+before it opens production access.
