@@ -64,7 +64,14 @@ ThemeData buildAppTheme() {
       elevation: 0,
       scrolledUnderElevation: 0.5,
       centerTitle: false,
-      titleTextStyle: text.titleLarge,
+      // Explicit size: text theme styles carry no font size until they are
+      // resolved through Theme.of, so `text.titleLarge` would render at 14.
+      titleTextStyle: const TextStyle(
+        fontFamily: _fontFamily,
+        fontSize: 20,
+        fontWeight: FontWeight.w700,
+        color: AppColors.navy,
+      ),
     ),
     cardTheme: const CardThemeData(
       color: AppColors.surface,

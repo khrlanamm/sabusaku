@@ -173,14 +173,14 @@ class JournalOutbox extends _$JournalOutbox {
 
   /// Settles entries left pending by a previous run of the app.
   void _settleLeftovers() {
-    final reading = ref.read(readingRepositoryProvider);
     for (final entry in state) {
       if (entry.status != OutboxStatus.pending ||
           _live.contains(entry.key) ||
           _watchers.containsKey(entry.key)) {
         continue;
       }
-      _watchers[entry.key] = reading
+      _watchers[entry.key] = ref
+          .read(readingRepositoryProvider)
           .journals(entry.programId)
           .doc(entry.date)
           .snapshots(includeMetadataChanges: true)

@@ -15,6 +15,8 @@ Bagian ini mengalahkan isi dokumen 01–07 bila berbeda.
 | Paket | Remote Config, `connectivity_plus`, `flutter_local_notifications`, `fake_cloud_firestore` | Tidak dipakai. Channel notifikasi dibuat native; notifikasi saat aplikasi terbuka tampil sebagai banner dalam aplikasi |
 | Skrip developer | `tools/` di akar | `functions/tools/` (berbagi `node_modules` dan kode dengan Functions) |
 | Urutan M3/M4 | UI siswa dulu | Perhitungan server dulu, UI siswa langsung memakai `studentStats` |
+| App Check | Aktif dengan Play Integrity | Terpasang tetapi hanya aktif bila di-build dengan `--dart-define=APP_CHECK=true`. Sebelum aplikasi didistribusikan lewat Google Play dan Play Integrity tertaut, permintaan token gagal lambat dan menunda login pertama sekitar 20 detik. Enforcement di server belum dinyalakan |
+| Model | `freezed` + `json_serializable` | `freezed` saja; dokumen Firestore dipetakan manual (`fromMap`) |
 
 ## 1. Keputusan yang sudah Anda tetapkan
 

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
@@ -24,6 +25,8 @@ const _emulatorHost = String.fromEnvironment(
   defaultValue: '10.0.2.2',
 );
 
+const _appCheck = bool.fromEnvironment('APP_CHECK');
+
 bool _firebaseReady = false;
 
 /// Safe to call more than once (integration tests start the app repeatedly).
@@ -39,15 +42,30 @@ Future<void> initFirebase() async {
         .useFunctionsEmulator(_emulatorHost, 5001);
   }
 
+  // App Check proves requests come from this app (docs/03 §4). It is off
+  // unless built with `--dart-define=APP_CHECK=true`: until the app is
+  // distributed through Google Play and Play Integrity is linked, every token
+  // request fails slowly and delays the first sign-in by about 20 seconds.
+  if (_appCheck && !useEmulators) {
+    await FirebaseAppCheck.instance.activate(
+      providerAndroid: kDebugMode
+          ? const AndroidDebugProvider()
+          : const AndroidPlayIntegrityProvider(),
+    );
+  }
+
+  // Crash reports only from release builds against production. Debug and
+  // test runs keep Flutter's own error handling, which tests rely on.
+  final reportCrashes = !kDebugMode && !useEmulators;
   final crashlytics = FirebaseCrashlytics.instance;
-  await crashlytics.setCrashlyticsCollectionEnabled(
-    !kDebugMode && !useEmulators,
-  );
-  FlutterError.onError = crashlytics.recordFlutterFatalError;
-  PlatformDispatcher.instance.onError = (error, stack) {
-    crashlytics.recordError(error, stack, fatal: true);
-    return true;
-  };
+  await crashlytics.setCrashlyticsCollectionEnabled(reportCrashes);
+  if (reportCrashes) {
+    FlutterError.onError = crashlytics.recordFlutterFatalError;
+    PlatformDispatcher.instance.onError = (error, stack) {
+      crashlytics.recordError(error, stack, fatal: true);
+      return true;
+    };
+  }
 }
 
 Future<void> bootstrap() async {

@@ -29,12 +29,18 @@ String studentPassword = '';
 Finder navTab(String label) =>
     find.descendant(of: find.byType(NavigationBar), matching: find.text(label));
 
-/// Starts the real app against the Firebase Emulator Suite, signed out.
-Future<void> startApp(WidgetTester tester) async {
-  assert(
-    useEmulators,
-    'Run with --dart-define=USE_EMULATORS=true so tests never touch production',
-  );
+/// Starts the real app, signed out. Tests run against the Firebase Emulator
+/// Suite; only the read-only production smoke test passes [allowProduction].
+Future<void> startApp(
+  WidgetTester tester, {
+  bool allowProduction = false,
+}) async {
+  if (!useEmulators && !allowProduction) {
+    fail(
+      'Run with --dart-define=USE_EMULATORS=true so tests never touch '
+      'production',
+    );
+  }
   await initFirebase();
   await FirebaseAuth.instance.signOut();
   await initializeDateFormatting('id_ID');
