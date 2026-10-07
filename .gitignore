@@ -46,3 +46,10 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Secrets (service account, keystore, key.properties)
+/secret/
+
+# Firebase
+.firebase/
+firebase-debug.log*
