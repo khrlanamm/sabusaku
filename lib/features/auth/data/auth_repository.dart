@@ -41,6 +41,7 @@ class AuthRepository {
     StreamSubscription<User?>? authSub;
     StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? profileSub;
     var generation = 0;
+    String? refreshedFor;
 
     Future<void> onUser(User? user) async {
       final current = ++generation;
@@ -70,6 +71,16 @@ class AuthRepository {
           if (!profile.active) {
             _auth.signOut();
             return;
+          }
+          // An admin changed this teacher's classes: the token still carries
+          // the old list. Refresh once per change; the new token re-enters
+          // through idTokenChanges.
+          final profileClasses = profile.classIds.join(',');
+          if (profile.role == UserRole.guru &&
+              profileClasses != claims.classIds.join(',') &&
+              profileClasses != refreshedFor) {
+            refreshedFor = profileClasses;
+            refreshClaims();
           }
           controller.add(
             AuthSignedIn(

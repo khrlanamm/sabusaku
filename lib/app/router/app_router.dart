@@ -4,7 +4,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/widgets/brand.dart';
 import '../../core/widgets/role_shell.dart';
-import '../../core/widgets/states.dart';
 import '../../features/admin/presentation/add_user_screen.dart';
 import '../../features/admin/presentation/admin_home_screen.dart';
 import '../../features/admin/presentation/admin_settings_screen.dart';
@@ -15,7 +14,6 @@ import '../../features/admin/presentation/user_detail_screen.dart';
 import '../../features/admin/presentation/users_screen.dart';
 import '../../features/auth/data/auth_repository.dart';
 import '../../features/auth/domain/session.dart';
-import '../../features/auth/presentation/account_section.dart';
 import '../../features/auth/presentation/change_password_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/student/presentation/book_screen.dart';
@@ -24,6 +22,11 @@ import '../../features/student/presentation/journal_form_screen.dart';
 import '../../features/student/presentation/journal_history_screen.dart';
 import '../../features/student/presentation/student_home_screen.dart';
 import '../../features/student/presentation/student_profile_screen.dart';
+import '../../features/teacher/presentation/teacher_dashboard_screen.dart';
+import '../../features/teacher/presentation/teacher_journal_detail_screen.dart';
+import '../../features/teacher/presentation/teacher_profile_screen.dart';
+import '../../features/teacher/presentation/teacher_student_detail_screen.dart';
+import '../../features/teacher/presentation/teacher_students_screen.dart';
 import 'routes.dart';
 
 part 'app_router.g.dart';
@@ -129,10 +132,30 @@ GoRouter appRouter(Ref ref) {
         builder: (_, _, shell) =>
             RoleShell(navigationShell: shell, tabs: _teacherTabs),
         branches: [
-          tab(Routes.teacherDashboard, const _Placeholder('Dashboard')),
-          tab(Routes.teacherStudents, const _Placeholder('Siswa')),
-          tab(Routes.teacherProfile, const _Placeholder('Profil')),
+          tab(Routes.teacherDashboard, const TeacherDashboardScreen()),
+          tab(Routes.teacherStudents, const TeacherStudentsScreen()),
+          tab(Routes.teacherProfile, const TeacherProfileScreen()),
         ],
+      ),
+      GoRoute(
+        path: '/guru/siswa/:studentId',
+        builder: (_, state) => TeacherStudentDetailScreen(
+          studentId: state.pathParameters['studentId']!,
+        ),
+      ),
+      GoRoute(
+        path: '/guru/siswa/:studentId/buku/:programId',
+        builder: (_, state) => TeacherProgramJournalsScreen(
+          studentId: state.pathParameters['studentId']!,
+          programId: state.pathParameters['programId']!,
+        ),
+      ),
+      GoRoute(
+        path: '/guru/siswa/:studentId/buku/:programId/jurnal/:date',
+        builder: (_, state) => TeacherJournalDetailScreen(
+          programId: state.pathParameters['programId']!,
+          date: state.pathParameters['date']!,
+        ),
       ),
 
       // ---------- Admin ----------
@@ -166,30 +189,4 @@ GoRouter appRouter(Ref ref) {
       ),
     ],
   );
-}
-
-/// Stand-in for tabs whose feature lands in a later stage.
-class _Placeholder extends StatelessWidget {
-  const _Placeholder(this.title);
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(title)),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: const [
-          AccountSection(),
-          SizedBox(height: 24),
-          EmptyState(
-            icon: Icons.construction,
-            title: 'Segera hadir',
-            message: 'Fitur ini sedang dibangun.',
-          ),
-        ],
-      ),
-    );
-  }
 }

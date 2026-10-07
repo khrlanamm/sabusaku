@@ -3,15 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/router/routes.dart';
-import '../../../app/theme/colors.dart';
 import '../../../core/data/reading_repository.dart';
-import '../../../core/models/journal.dart';
 import '../../../core/models/program.dart';
-import '../../../core/widgets/journal_view.dart';
+import '../../../core/widgets/journal_list.dart';
 import '../../../core/widgets/states.dart';
 import '../data/student_repository.dart';
-
-const _pageSize = 20;
 
 /// "Riwayat Jurnal" tab: journals of the book being read, or of the most
 /// recent book when none is active.
@@ -43,7 +39,11 @@ class JournalHistoryTab extends ConsumerWidget {
                 child: const Text('Mulai Buku'),
               ),
             )
-          : JournalList(program: program);
+          : JournalList(
+              program: program,
+              onOpen: (journal) =>
+                  context.push(Routes.studentJournal(program.id, journal.date)),
+            );
     }
 
     return Scaffold(
@@ -81,75 +81,12 @@ class ProgramJournalsScreen extends ConsumerWidget {
                 icon: Icons.menu_book_outlined,
                 title: 'Buku tidak ditemukan',
               )
-            : JournalList(program: data),
+            : JournalList(
+                program: data,
+                onOpen: (journal) =>
+                    context.push(Routes.studentJournal(data.id, journal.date)),
+              ),
       ),
-    );
-  }
-}
-
-/// Newest first, 20 at a time.
-class JournalList extends ConsumerStatefulWidget {
-  const JournalList({super.key, required this.program});
-
-  final Program program;
-
-  @override
-  ConsumerState<JournalList> createState() => _JournalListState();
-}
-
-class _JournalListState extends ConsumerState<JournalList> {
-  int _limit = _pageSize;
-
-  @override
-  Widget build(BuildContext context) {
-    final program = widget.program;
-    final journals = ref.watch(journalsProvider(program.id, _limit));
-    final theme = Theme.of(context);
-
-    return AsyncView<List<Journal>>(
-      value: journals,
-      onRetry: () => ref.invalidate(journalsProvider(program.id, _limit)),
-      data: (items) {
-        if (items.isEmpty) {
-          return EmptyState(
-            icon: Icons.edit_note,
-            title: 'Belum ada jurnal',
-            message: program.isActive
-                ? 'Tulis jurnal pertamamu untuk "${program.book.title}".'
-                : null,
-          );
-        }
-        final hasMore = items.length >= _limit;
-        return ListView.separated(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
-          itemCount: items.length + 2,
-          separatorBuilder: (_, _) => const SizedBox(height: 10),
-          itemBuilder: (context, index) {
-            if (index == 0) {
-              return Text(
-                '${program.book.title} · ${program.status.label}',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppColors.inkMuted,
-                ),
-              );
-            }
-            if (index == items.length + 1) {
-              return hasMore
-                  ? OutlinedButton(
-                      onPressed: () => setState(() => _limit += _pageSize),
-                      child: const Text('Muat lebih banyak'),
-                    )
-                  : const SizedBox.shrink();
-            }
-            final journal = items[index - 1];
-            return JournalListTile(
-              journal: journal,
-              onTap: () =>
-                  context.push(Routes.studentJournal(program.id, journal.date)),
-            );
-          },
-        );
-      },
     );
   }
 }

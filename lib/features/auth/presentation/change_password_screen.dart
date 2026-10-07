@@ -45,10 +45,10 @@ class _ChangePasswordScreenState extends ConsumerState<ChangePasswordScreen> {
         currentPassword: widget.forced ? null : _current.text,
         newPassword: _next.text,
       );
-      if (!mounted) return;
-      showSnack(context, 'Password berhasil diganti.');
       // Forced flow: the router leaves this screen once the flag clears.
-      if (!widget.forced) Navigator.of(context).maybePop();
+      if (!mounted || widget.forced) return;
+      showSnack(context, 'Password berhasil diganti.');
+      Navigator.of(context).maybePop();
     } catch (error) {
       if (!mounted) return;
       final mapped = mapError(error);

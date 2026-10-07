@@ -16,6 +16,7 @@ const e2eClass = 'XII IPA 1';
 const e2eTeacher = 'sari';
 const e2eStudent = '1001';
 const e2eBook = 'Laskar Pelangi';
+const e2eCommentText = 'Ringkasanmu jelas, lanjutkan membaca ya.';
 const e2eJournalText =
     'Ikal mulai menyadari bahwa pendidikan adalah jalan mengubah hidupnya.';
 
@@ -78,6 +79,8 @@ Future<void> waitForGone(
 
 /// Scrolls [finder] into view first: the on-screen keyboard can cover it.
 Future<void> tapVisible(WidgetTester tester, Finder finder) async {
+  // A SnackBar floats above the bottom of the screen for a few seconds.
+  await waitForGone(tester, find.byType(SnackBar));
   // A focused field keeps scrolling its caret back into view.
   FocusManager.instance.primaryFocus?.unfocus();
   await tester.pump();

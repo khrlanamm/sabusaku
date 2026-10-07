@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
+import 'package:sabusaku/core/widgets/journal_view.dart';
+
 import 'support.dart';
 
 const _wrongCredentials = 'Kode sekolah, username, atau password salah.';
@@ -173,5 +175,45 @@ void main() {
           .onPressed,
       isNull,
     );
+  });
+
+  testWidgets('guru: sees the class, opens the journal, comments', (
+    tester,
+  ) async {
+    await startApp(tester);
+    await signIn(tester, username: e2eTeacher, password: teacherPassword);
+    await setNewPassword(tester);
+
+    // Dashboard built from the summary documents of the assigned class.
+    await waitFor(tester, find.text('Status siswa'));
+    await waitFor(tester, find.text('Buku aktif'));
+
+    // Student list → detail → active book → journal.
+    await tester.tap(navTab('Siswa'));
+    await waitFor(tester, find.text('Raka Pratama'));
+    expect(find.text('Aktif'), findsWidgets);
+    await tester.tap(find.text('Raka Pratama'));
+    await waitFor(tester, find.byKey(const Key('student-active-book')));
+    expect(find.textContaining('Halaman 40 dari 100'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('student-active-book')));
+    await waitFor(tester, find.textContaining('Hal. 1–40'));
+    await tester.tap(find.textContaining('Hal. 1–40'));
+    await waitFor(tester, find.text(e2eJournalText));
+
+    // Comment on it.
+    await tester.enterText(
+      find.byKey(const Key('comment-input')),
+      e2eCommentText,
+    );
+    // Hides the keyboard first: it moves the composer while it animates.
+    await tapVisible(tester, find.byKey(const Key('comment-send')));
+    await waitFor(
+      tester,
+      find.descendant(
+        of: find.byType(CommentTile),
+        matching: find.text(e2eCommentText),
+      ),
+    );
+    expect(find.text('Bu Sari'), findsOneWidget);
   });
 }
