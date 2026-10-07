@@ -15,6 +15,9 @@ const e2eNewPassword = 'baru12345';
 const e2eClass = 'XII IPA 1';
 const e2eTeacher = 'sari';
 const e2eStudent = '1001';
+const e2eBook = 'Laskar Pelangi';
+const e2eJournalText =
+    'Ikal mulai menyadari bahwa pendidikan adalah jalan mengubah hidupnya.';
 
 /// Initial passwords captured when the admin creates the accounts; later
 /// tests sign in with them.
@@ -75,6 +78,9 @@ Future<void> waitForGone(
 
 /// Scrolls [finder] into view first: the on-screen keyboard can cover it.
 Future<void> tapVisible(WidgetTester tester, Finder finder) async {
+  // A focused field keeps scrolling its caret back into view.
+  FocusManager.instance.primaryFocus?.unfocus();
+  await tester.pump();
   await tester.ensureVisible(finder);
   await tester.pump(const Duration(milliseconds: 300));
   await tester.tap(finder);

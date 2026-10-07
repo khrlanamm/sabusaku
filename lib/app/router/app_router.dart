@@ -18,6 +18,12 @@ import '../../features/auth/domain/session.dart';
 import '../../features/auth/presentation/account_section.dart';
 import '../../features/auth/presentation/change_password_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
+import '../../features/student/presentation/book_screen.dart';
+import '../../features/student/presentation/journal_detail_screen.dart';
+import '../../features/student/presentation/journal_form_screen.dart';
+import '../../features/student/presentation/journal_history_screen.dart';
+import '../../features/student/presentation/student_home_screen.dart';
+import '../../features/student/presentation/student_profile_screen.dart';
 import 'routes.dart';
 
 part 'app_router.g.dart';
@@ -93,11 +99,29 @@ GoRouter appRouter(Ref ref) {
         builder: (_, _, shell) =>
             RoleShell(navigationShell: shell, tabs: _studentTabs),
         branches: [
-          tab(Routes.studentHome, const _Placeholder('Beranda')),
-          tab(Routes.studentBook, const _Placeholder('Buku Saya')),
-          tab(Routes.studentJournals, const _Placeholder('Jurnal')),
-          tab(Routes.studentProfile, const _Placeholder('Profil')),
+          tab(Routes.studentHome, const StudentHomeScreen()),
+          tab(Routes.studentBook, const BookScreen()),
+          tab(Routes.studentJournals, const JournalHistoryTab()),
+          tab(Routes.studentProfile, const StudentProfileScreen()),
         ],
+      ),
+      GoRoute(
+        path: Routes.studentWriteJournal,
+        builder: (_, state) =>
+            JournalFormScreen(initialDate: state.uri.queryParameters['date']),
+      ),
+      GoRoute(
+        path: '/siswa/jurnal/:programId/:date',
+        builder: (_, state) => StudentJournalDetailScreen(
+          programId: state.pathParameters['programId']!,
+          date: state.pathParameters['date']!,
+        ),
+      ),
+      GoRoute(
+        path: '/siswa/profil/buku/:programId',
+        builder: (_, state) => ProgramJournalsScreen(
+          programId: state.pathParameters['programId']!,
+        ),
       ),
 
       // ---------- Guru ----------

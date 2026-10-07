@@ -121,4 +121,57 @@ void main() {
     await tapVisible(tester, find.byKey(const Key('add-user-submit')));
     await waitFor(tester, find.text('Username sudah dipakai.'));
   });
+
+  testWidgets('siswa: first login, starts a book, writes a journal', (
+    tester,
+  ) async {
+    await startApp(tester);
+    await signIn(tester, username: e2eStudent, password: studentPassword);
+    await setNewPassword(tester);
+
+    // No book yet: the home offers to start one.
+    await waitFor(tester, find.byKey(const Key('home-start-book')));
+    await tester.tap(find.byKey(const Key('home-start-book')));
+    await waitFor(tester, find.byKey(const Key('book-title')));
+    await tester.enterText(find.byKey(const Key('book-title')), e2eBook);
+    await tester.enterText(
+      find.byKey(const Key('book-author')),
+      'Andrea Hirata',
+    );
+    await tester.enterText(find.byKey(const Key('book-pages')), '100');
+    await tapVisible(tester, find.byKey(const Key('book-start')));
+    await waitFor(tester, find.byKey(const Key('book-stop')));
+    expect(find.text('Halaman 0 dari 100'), findsOneWidget);
+
+    // Write today's journal from the home screen.
+    await tester.tap(navTab('Beranda'));
+    await waitFor(tester, find.byKey(const Key('home-write-journal')));
+    await waitForGone(tester, find.byType(SnackBar));
+    await tester.tap(find.byKey(const Key('home-write-journal')));
+    await waitFor(tester, find.byKey(const Key('journal-save')));
+    await tester.enterText(find.byKey(const Key('journal-page-end')), '40');
+    await tapVisible(tester, find.byKey(const Key('journal-duration-15to30')));
+    await tester.enterText(
+      find.byKey(const Key('journal-key-information')),
+      e2eJournalText,
+    );
+    await tapVisible(tester, find.byKey(const Key('journal-save')));
+
+    // Saved locally at once; the server-computed numbers follow.
+    await waitFor(tester, find.text('Jurnal hari ini sudah diisi'));
+    await waitFor(tester, find.textContaining('Halaman 40 dari 100'));
+    await waitFor(tester, find.text('1 hari'));
+
+    // The journal is in the history, and the book cannot be finished yet.
+    await tester.tap(navTab('Jurnal'));
+    await waitFor(tester, find.textContaining('Hal. 1–40'));
+    await tester.tap(navTab('Buku'));
+    await waitFor(tester, find.byKey(const Key('book-complete')));
+    expect(
+      tester
+          .widget<FilledButton>(find.byKey(const Key('book-complete')))
+          .onPressed,
+      isNull,
+    );
+  });
 }
