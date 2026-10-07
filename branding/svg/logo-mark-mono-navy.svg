@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="Sabu Saku">
+<title>Sabu Saku</title>
+
+<path d="M72 388 C142 374 212 382 256 414 C300 382 370 374 440 388 L440 410 C370 396 300 404 256 436 C212 404 142 396 72 410 Z" fill="#17365D"/>
+<path d="M250 218 C210 188 150 180 84 196 L84 372 C150 358 210 366 250 396 Z" fill="#17365D"/>
+<path d="M262 218 C302 188 362 180 428 196 L428 372 C362 358 302 366 262 396 Z" fill="#17365D"/>
+<path d="M256 232 L256 154" fill="none" stroke="#17365D" stroke-width="12" stroke-linecap="round"/>
+<path d="M256 192 C228 194 204 176 198 148 C230 144 256 162 256 192 Z" fill="#17365D"/>
+<path d="M256 154 C258 114 288 86 332 82 C334 124 304 156 256 154 Z" fill="#17365D"/>
+</svg>
