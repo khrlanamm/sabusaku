@@ -6,6 +6,7 @@ enum AppErrorCode {
   sessionExpired,
   permissionDenied,
   invalidCredentials,
+  accountDisabled,
   wrongPassword,
   weakPassword,
   tooManyRequests,
@@ -39,6 +40,7 @@ const _defaultMessages = <AppErrorCode, String>{
   AppErrorCode.permissionDenied: 'Akses ditolak.',
   AppErrorCode.invalidCredentials:
       'Kode sekolah, username, atau password salah.',
+  AppErrorCode.accountDisabled: 'Akun dinonaktifkan. Hubungi admin sekolah.',
   AppErrorCode.wrongPassword: 'Password saat ini salah.',
   AppErrorCode.weakPassword: 'Password minimal 8 karakter.',
   AppErrorCode.tooManyRequests:
@@ -57,11 +59,11 @@ AppException mapError(Object error) {
     return AppException(switch (error.code) {
       'network-request-failed' => AppErrorCode.network,
       'too-many-requests' => AppErrorCode.tooManyRequests,
-      'weak-password' || 'password-does-not-meet-requirements' =>
-        AppErrorCode.weakPassword,
+      'weak-password' ||
+      'password-does-not-meet-requirements' => AppErrorCode.weakPassword,
+      'user-disabled' => AppErrorCode.accountDisabled,
       'user-token-expired' ||
-      'requires-recent-login' ||
-      'user-disabled' => AppErrorCode.sessionExpired,
+      'requires-recent-login' => AppErrorCode.sessionExpired,
       // Kept uniform so the screen never reveals which accounts exist.
       'invalid-credential' ||
       'wrong-password' ||

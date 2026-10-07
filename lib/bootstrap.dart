@@ -7,9 +7,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app/app.dart';
 import 'core/firebase/firebase_providers.dart';
+import 'core/storage/prefs.dart';
 import 'firebase_options.dart';
 
 /// `--dart-define=USE_EMULATORS=true` points the app at the local Firebase
@@ -22,15 +24,19 @@ const _emulatorHost = String.fromEnvironment(
   defaultValue: '10.0.2.2',
 );
 
+bool _firebaseReady = false;
+
+/// Safe to call more than once (integration tests start the app repeatedly).
 Future<void> initFirebase() async {
+  if (_firebaseReady) return;
+  _firebaseReady = true;
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   if (useEmulators) {
     await FirebaseAuth.instance.useAuthEmulator(_emulatorHost, 9099);
     FirebaseFirestore.instance.useFirestoreEmulator(_emulatorHost, 8080);
-    FirebaseFunctions.instanceFor(
-      region: firebaseRegion,
-    ).useFunctionsEmulator(_emulatorHost, 5001);
+    FirebaseFunctions.instanceFor(region: firebaseRegion)
+        .useFunctionsEmulator(_emulatorHost, 5001);
   }
 
   final crashlytics = FirebaseCrashlytics.instance;
@@ -48,5 +54,11 @@ Future<void> bootstrap() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initFirebase();
   await initializeDateFormatting('id_ID');
-  runApp(const ProviderScope(child: SabuSakuApp()));
+  final prefs = await SharedPreferences.getInstance();
+  runApp(
+    ProviderScope(
+      overrides: [sharedPreferencesProvider.overrideWithValue(prefs)],
+      child: const SabuSakuApp(),
+    ),
+  );
 }

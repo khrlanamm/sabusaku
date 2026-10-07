@@ -9,3 +9,10 @@ export const REGION = "asia-southeast2";
  * the domain must be one nobody can ever own.
  */
 export const EMAIL_DOMAIN = "sabusaku.invalid";
+
+/**
+ * Applied to every callable. App Check enforcement stays off until the Play
+ * App Signing certificate is registered, otherwise Play Integrity would reject
+ * every build (docs/03 §4).
+ */
+export const CALLABLE_OPTIONS = {enforceAppCheck: false} as const;

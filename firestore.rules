@@ -1,10 +1,305 @@
 rules_version = '2';
 
+// =====================================================================
+// Sabu Saku — Firestore Security Rules
+//
+// Custom claims (set by Cloud Functions):
+//   role     : 'admin' | 'guru' | 'siswa'
+//   schoolId : school code, equal to the schools/{schoolId} document ID
+//   classIds : string[] — teachers only
+//
+// Deny by default. Clients never write derived numbers (progress, streak,
+// status); only Cloud Functions do, through the Admin SDK, which bypasses
+// these rules. Every case in docs/03 §6 is covered by functions/test/rules.
+// =====================================================================
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Deny everything until feature rules are defined.
-    match /{document=**} {
-      allow read, write: if false;
+
+    // ---------- Identity and roles ----------
+    function signedIn() { return request.auth != null; }
+    function tokenSchool() { return request.auth.token.get('schoolId', ''); }
+    function role() { return request.auth.token.get('role', ''); }
+    function inSchool(s) { return signedIn() && tokenSchool() == s; }
+    function isAdmin(s) { return inSchool(s) && role() == 'admin'; }
+    function isTeacher(s) { return inSchool(s) && role() == 'guru'; }
+    function isStudent(s) { return inSchool(s) && role() == 'siswa'; }
+    function teachesClass(classId) { return classId in request.auth.token.get('classIds', []); }
+
+    // ---------- Time (WIB = UTC+7, no DST) ----------
+    // Dates are compared as whole-day numbers so the device clock is never
+    // trusted: "today" always comes from request.time.
+    function dayNumber(ts) { return int(ts.toMillis() / 86400000); }
+    function wibToday() { return dayNumber(request.time + duration.value(7, 'h')); }
+    function isDateId(id) { return id is string && id.matches('^[0-9]{4}-[0-9]{2}-[0-9]{2}$'); }
+    function dayOfId(id) {
+      return dayNumber(timestamp.date(int(id[0:4]), int(id[5:7]), int(id[8:10])));
+    }
+    // 0 = today, 1 = yesterday, negative = future
+    function daysAgo(id) { return wibToday() - dayOfId(id); }
+
+    // ---------- Shared validation ----------
+    function validStr(v, minLen, maxLen) {
+      return v is string && v.size() >= minLen && v.size() <= maxLen;
+    }
+    function optStr(d, k, maxLen) {
+      return !(k in d) || d[k] == null || (d[k] is string && d[k].size() <= maxLen);
+    }
+
+    // ---------- Paths ----------
+    function programPath(s, p) { return /databases/$(database)/documents/schools/$(s)/programs/$(p); }
+    function activePath(s, uid) { return /databases/$(database)/documents/schools/$(s)/activePrograms/$(uid); }
+    function userPath(s, uid) { return /databases/$(database)/documents/schools/$(s)/users/$(uid); }
+
+    // =================================================================
+    match /schools/{schoolId} {
+
+      function validSettings(st) {
+        return st is map
+          && st.keys().hasOnly(['holidays', 'neutralWeekdays', 'activeMaxDays', 'attentionMaxDays'])
+          && st.holidays is list && st.holidays.size() <= 400
+          && st.neutralWeekdays is list && st.neutralWeekdays.size() <= 6
+          && st.neutralWeekdays.toSet().hasOnly([0, 1, 2, 3, 4, 5, 6])
+          && st.activeMaxDays is int && st.activeMaxDays >= 1 && st.activeMaxDays <= 14
+          && st.attentionMaxDays is int && st.attentionMaxDays >= st.activeMaxDays && st.attentionMaxDays <= 30;
+      }
+
+      allow get: if inSchool(schoolId);
+      allow list: if false;
+      allow create, delete: if false;
+      allow update: if isAdmin(schoolId)
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['settings'])
+        && validSettings(request.resource.data.settings);
+
+      // ---------- users ----------
+      match /users/{uid} {
+        allow get: if isAdmin(schoolId) || (inSchool(schoolId) && request.auth.uid == uid);
+        allow list: if isAdmin(schoolId);
+        allow create, delete: if false; // Cloud Functions only
+
+        allow update:
+          // a user marks their initial password as changed
+          if (inSchool(schoolId) && request.auth.uid == uid
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['mustChangePassword'])
+              && request.resource.data.mustChangePassword == false)
+          // an admin renames a user
+          || (isAdmin(schoolId)
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'updatedAt'])
+              && validStr(request.resource.data.name, 2, 80)
+              && request.resource.data.updatedAt == request.time);
+
+        match /devices/{tokenHash} {
+          allow read, delete: if inSchool(schoolId) && request.auth.uid == uid;
+          allow create, update: if inSchool(schoolId) && request.auth.uid == uid
+            && request.resource.data.keys().hasOnly(['token', 'platform', 'updatedAt'])
+            && validStr(request.resource.data.token, 20, 4096)
+            && request.resource.data.platform == 'android'
+            && request.resource.data.updatedAt == request.time;
+        }
+      }
+
+      // ---------- classes ----------
+      match /classes/{classId} {
+        function validClass(d) {
+          return validStr(d.name, 2, 40)
+            && d.grade in [10, 11, 12]
+            && validStr(d.academicYear, 4, 12)
+            && d.isArchived is bool;
+        }
+
+        allow read: if inSchool(schoolId);
+        allow delete: if false; // archive, never delete
+        allow create: if isAdmin(schoolId)
+          && request.resource.data.keys().hasOnly(['name', 'grade', 'academicYear', 'teacherIds', 'isArchived'])
+          && validClass(request.resource.data)
+          && request.resource.data.teacherIds == []
+          && request.resource.data.isArchived == false;
+        // teacherIds mirrors users.classIds and is written by Cloud Functions
+        allow update: if isAdmin(schoolId)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'grade', 'academicYear', 'isArchived'])
+          && validClass(request.resource.data);
+      }
+
+      // ---------- studentStats (server-written summary) ----------
+      match /studentStats/{studentId} {
+        allow write: if false;
+        // The student is matched by document ID so a get on a not-yet-created
+        // summary is allowed instead of failing on a null resource.
+        allow get: if isAdmin(schoolId)
+          || (isStudent(schoolId) && studentId == request.auth.uid)
+          || (isTeacher(schoolId) && teachesClass(resource.data.classId));
+        allow list: if isAdmin(schoolId)
+          || (isTeacher(schoolId) && teachesClass(resource.data.classId));
+      }
+
+      // ---------- activePrograms (BR-1 lock: one active book per student) ----------
+      match /activePrograms/{studentId} {
+        allow read: if isStudent(schoolId) && studentId == request.auth.uid;
+        allow update: if false;
+        // created in the same batch as its program
+        allow create: if isStudent(schoolId) && studentId == request.auth.uid
+          && request.resource.data.keys().hasOnly(['programId'])
+          && request.resource.data.programId is string
+          && existsAfter(programPath(schoolId, request.resource.data.programId))
+          && getAfter(programPath(schoolId, request.resource.data.programId)).data.status == 'active'
+          && getAfter(programPath(schoolId, request.resource.data.programId)).data.studentId == request.auth.uid;
+        // deleted in the same batch that completes or stops the program
+        allow delete: if isStudent(schoolId) && studentId == request.auth.uid
+          && getAfter(programPath(schoolId, resource.data.programId)).data.status != 'active';
+      }
+
+      // ---------- programs ----------
+      match /programs/{programId} {
+
+        function canReadProgram(d) {
+          return (isStudent(schoolId) && d.studentId == request.auth.uid)
+              || (isTeacher(schoolId) && teachesClass(d.classId));
+        }
+
+        function validProgramCreate() {
+          let d = request.resource.data;
+          let me = get(userPath(schoolId, request.auth.uid)).data;
+          return d.keys().hasOnly(['studentId', 'classId', 'book', 'month', 'startDate', 'targetDate',
+                                   'extended', 'status', 'finalReflection', 'completedAt', 'stoppedAt',
+                                   'currentPage', 'journalCount', 'lastJournalDate', 'streakCurrent',
+                                   'streakBest', 'createdAt', 'updatedAt'])
+            && d.studentId == request.auth.uid
+            && d.classId == me.classId
+            && d.status == 'active' && d.extended == false
+            && d.get('finalReflection', null) == null
+            && d.get('completedAt', null) == null && d.get('stoppedAt', null) == null
+            // derived fields start empty; only Cloud Functions change them
+            && d.currentPage == 0 && d.journalCount == 0
+            && d.lastJournalDate == null && d.streakCurrent == 0 && d.streakBest == 0
+            && d.book.keys().hasOnly(['title', 'author', 'totalPages', 'isbn'])
+            && validStr(d.book.title, 2, 120)
+            && validStr(d.book.author, 2, 80)
+            && d.book.totalPages is int && d.book.totalPages >= 10 && d.book.totalPages <= 2000
+            && optStr(d.book, 'isbn', 20)
+            && isDateId(d.startDate) && daysAgo(d.startDate) == 0
+            && d.month == d.startDate[0:7]
+            && isDateId(d.targetDate) && d.targetDate >= d.startDate
+            && dayOfId(d.targetDate) - dayOfId(d.startDate) <= 31
+            && d.createdAt == request.time && d.updatedAt == request.time
+            // the BR-1 lock must be created in the same batch
+            && existsAfter(activePath(schoolId, request.auth.uid))
+            && getAfter(activePath(schoolId, request.auth.uid)).data.programId == programId;
+        }
+
+        function validProgramUpdate() {
+          let before = resource.data;
+          let after = request.resource.data;
+          let changed = after.diff(before).affectedKeys();
+          return before.status == 'active'
+            && (
+              // extend the target (once, at most 31 days)
+              ( changed.hasOnly(['targetDate', 'extended', 'updatedAt'])
+                && before.extended == false && after.extended == true
+                && isDateId(after.targetDate) && after.targetDate > before.targetDate
+                && dayOfId(after.targetDate) - dayOfId(before.targetDate) <= 31
+                && after.updatedAt == request.time )
+              ||
+              // mark finished (only at 100% progress)
+              ( changed.hasOnly(['status', 'finalReflection', 'completedAt', 'updatedAt'])
+                && after.status == 'completed'
+                && before.currentPage == before.book.totalPages
+                && optStr(after, 'finalReflection', 1000)
+                && after.completedAt == request.time && after.updatedAt == request.time
+                && !existsAfter(activePath(schoolId, request.auth.uid)) )
+              ||
+              // stop
+              ( changed.hasOnly(['status', 'stoppedAt', 'updatedAt'])
+                && after.status == 'stopped'
+                && after.stoppedAt == request.time && after.updatedAt == request.time
+                && !existsAfter(activePath(schoolId, request.auth.uid)) )
+            );
+        }
+
+        allow get, list: if canReadProgram(resource.data);
+        allow create: if isStudent(schoolId) && validProgramCreate();
+        allow update: if isStudent(schoolId) && resource.data.studentId == request.auth.uid && validProgramUpdate();
+        allow delete: if false;
+
+        // ---------- journals ----------
+        match /journals/{date} {
+
+          function prog() { return get(programPath(schoolId, programId)).data; }
+
+          function canReadJournal() {
+            return (isStudent(schoolId) && prog().studentId == request.auth.uid)
+                || (isTeacher(schoolId) && teachesClass(prog().classId));
+          }
+
+          function ownsActiveProgram() {
+            return isStudent(schoolId)
+              && prog().studentId == request.auth.uid
+              && prog().status == 'active';
+          }
+
+          function validJournalContent(d) {
+            return d.pageStart is int && d.pageStart >= 1
+              && d.pageEnd is int && d.pageEnd >= d.pageStart && d.pageEnd <= prog().book.totalPages
+              && d.durationRange in ['lt15', '15to30', '30to60', 'gt60']
+              && validStr(d.keyInformation, 30, 1000)
+              && optStr(d, 'reflection', 1000)
+              && optStr(d, 'question', 1000);
+          }
+
+          allow get, list: if canReadJournal();
+
+          // BR-2 (one per day) comes from ID = date; BR-3 allows today back to 2 days ago
+          allow create: if ownsActiveProgram()
+            && isDateId(date) && daysAgo(date) >= 0 && daysAgo(date) <= 2
+            && date >= prog().startDate
+            && request.resource.data.keys().hasOnly(['studentId', 'date', 'pageStart', 'pageEnd', 'durationRange',
+                                                     'keyInformation', 'reflection', 'question',
+                                                     'hasUnreadTeacherComment', 'createdAt', 'updatedAt'])
+            && request.resource.data.studentId == request.auth.uid
+            && request.resource.data.date == date
+            && request.resource.data.hasUnreadTeacherComment == false
+            && request.resource.data.createdAt == request.time
+            && request.resource.data.updatedAt == request.time
+            && validJournalContent(request.resource.data);
+
+          allow update: if
+              // BR-4: content may change until the end of the day after the journal date
+              ( ownsActiveProgram()
+                && daysAgo(date) <= 1
+                && request.resource.data.diff(resource.data).affectedKeys()
+                     .hasOnly(['pageStart', 'pageEnd', 'durationRange', 'keyInformation', 'reflection', 'question', 'updatedAt'])
+                && request.resource.data.updatedAt == request.time
+                && validJournalContent(request.resource.data) )
+              ||
+              // the student marks teacher comments as read (any time, any program status)
+              ( isStudent(schoolId) && prog().studentId == request.auth.uid
+                && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['hasUnreadTeacherComment'])
+                && request.resource.data.hasUnreadTeacherComment == false );
+
+          allow delete: if ownsActiveProgram() && daysAgo(date) <= 1;
+
+          // ---------- comments ----------
+          match /comments/{commentId} {
+            allow get, list: if canReadJournal();
+
+            allow create: if isTeacher(schoolId) && teachesClass(prog().classId)
+              && exists(/databases/$(database)/documents/schools/$(schoolId)/programs/$(programId)/journals/$(date))
+              && request.resource.data.keys().hasOnly(['teacherId', 'teacherName', 'text', 'createdAt', 'updatedAt'])
+              && request.resource.data.teacherId == request.auth.uid
+              // the displayed name must be the teacher's real profile name
+              && request.resource.data.teacherName == get(userPath(schoolId, request.auth.uid)).data.name
+              && validStr(request.resource.data.text, 1, 1000)
+              && request.resource.data.createdAt == request.time
+              && request.resource.data.updatedAt == request.time;
+
+            allow update: if isTeacher(schoolId) && resource.data.teacherId == request.auth.uid
+              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['text', 'updatedAt'])
+              && validStr(request.resource.data.text, 1, 1000)
+              && request.resource.data.updatedAt == request.time;
+
+            allow delete: if isTeacher(schoolId) && resource.data.teacherId == request.auth.uid;
+          }
+        }
+      }
     }
   }
 }
