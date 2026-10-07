@@ -26,6 +26,8 @@ functions/
   test/           domain (unit), rules, integration (emulator)
 firestore.rules   aturan keamanan; setiap kasus di docs/03 §6 diuji otomatis
 integration_test/ alur ujung ke ujung di perangkat Android
+hosting/          situs sabusaku.web.app: kebijakan privasi dan cara hapus data
+store/            teks dan grafik listing Google Play
 ```
 
 ## Prasyarat
@@ -83,6 +85,7 @@ Dijalankan dari `functions/`. Tanpa `--emulator`, skrip bekerja di **produksi** 
 
 ```sh
 firebase deploy --only firestore,functions --project sabusaku
+firebase deploy --only hosting --project sabusaku            # halaman privasi dan hapus data
 ```
 
 ## Rilis Android
@@ -92,5 +95,13 @@ flutter build appbundle --release
 ```
 
 Build release ditandatangani dengan upload keystore bila `secret/key.properties` ada. Folder `secret/` (service account, keystore, kredensial demo) tidak masuk git: simpan cadangannya sendiri.
+
+Teks listing dan isian Play Console tercatat di `store/listing.md`. Grafik listing dibuat ulang dengan:
+
+```sh
+tool/store-screenshots.sh phone      # layar asli dari sekolah demo di produksi
+tool/store-screenshots.sh tablet
+python3 store/make_assets.py         # hasil di store/out/
+```
 
 App Check sudah terpasang tetapi **belum diaktifkan**. Sebelum Play Integrity tertaut, permintaan token gagal lambat dan menunda login pertama sekitar 20 detik. Setelah AAB pertama diunggah ke Google Play: tautkan Play Integrity ke project, daftarkan SHA-256 Play App Signing di Firebase, build dengan `--dart-define=APP_CHECK=true`, lalu nyalakan enforcement di Firebase Console.
