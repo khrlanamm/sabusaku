@@ -10,8 +10,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 /// Must match functions/tools/seed-e2e.ts.
 const e2eSchool = 'e2e';
-const e2eInitialPassword = 'awal1234';
-const e2eNewPassword = 'baru12345';
+
+/// Sign-in secrets of the run. tool/e2e.sh generates them and passes the
+/// initial one to the seed script as well, so none is written in the repo.
+const e2eInitialPassword = String.fromEnvironment('E2E_INITIAL');
+const e2eNewPassword = String.fromEnvironment('E2E_NEW');
 const e2eClass = 'XII IPA 1';
 const e2eTeacher = 'sari';
 const e2eStudent = '1001';

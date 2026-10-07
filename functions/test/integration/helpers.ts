@@ -2,6 +2,8 @@
 // emulators (started by `firebase emulators:exec`, which also points the
 // Admin SDK at them through environment variables).
 
+import {randomUUID} from "node:crypto";
+
 import {deleteApp, FirebaseApp, initializeApp} from "firebase/app";
 import {connectAuthEmulator, getAuth, signInWithEmailAndPassword} from "firebase/auth";
 import {connectFirestoreEmulator, Firestore, getFirestore} from "firebase/firestore";
@@ -17,7 +19,8 @@ const PROJECT = process.env.GCLOUD_PROJECT ?? "demo-sabusaku";
 const AUTH_HOST = process.env.FIREBASE_AUTH_EMULATOR_HOST ?? "127.0.0.1:9099";
 const FIRESTORE_HOST = process.env.FIRESTORE_EMULATOR_HOST ?? "127.0.0.1:8080";
 
-export const PASSWORD = "sandi-uji-123";
+/** Sign-in secret shared by every account of a test run; new each run. */
+export const PASSWORD = `uji-${randomUUID()}`;
 
 export async function clearEmulators(): Promise<void> {
   await fetch(

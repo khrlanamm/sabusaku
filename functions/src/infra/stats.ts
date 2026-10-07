@@ -3,7 +3,7 @@ import {FieldValue} from "firebase-admin/firestore";
 import {computeStatus, computeStreak, isOverdue, percentOf} from "../domain/activity";
 import {monthOf, wibToday} from "../domain/dates";
 import {DEFAULT_SETTINGS, SchoolSettings, StudentStatus} from "../domain/types";
-import {classesCol, programsCol, schoolRef, statsCol, usersCol} from "./firebase";
+import {classesCol, db, programsCol, schoolRef, statsCol, usersCol} from "./firebase";
 
 export interface StudentProfile {
   uid: string;
@@ -69,6 +69,15 @@ export function withTimestamp(stats: StudentStatsData) {
   return {...stats, updatedAt: FieldValue.serverTimestamp()};
 }
 
+function isActiveStudent(user: FirebaseFirestore.DocumentSnapshot): boolean {
+  return user.exists && user.get("role") === "siswa" && user.get("status") === "active";
+}
+
+/** gRPC NOT_FOUND: the document was deleted between the read and the write. */
+function ignoreNotFound(error: unknown): void {
+  if ((error as {code?: number}).code !== 5) throw error;
+}
+
 export async function loadSettings(schoolId: string): Promise<SchoolSettings> {
   const school = await schoolRef(schoolId).get();
   return {...DEFAULT_SETTINGS, ...(school.get("settings") as Partial<SchoolSettings> | undefined)};
@@ -94,8 +103,9 @@ export async function refreshStudentStats(
   const today = options.today ?? wibToday();
   const statsRef = statsCol(schoolId).doc(studentId);
 
-  const user = await usersCol(schoolId).doc(studentId).get();
-  if (!user.exists || user.get("role") !== "siswa" || user.get("status") !== "active") {
+  const userRef = usersCol(schoolId).doc(studentId);
+  const user = await userRef.get();
+  if (!isActiveStudent(user)) {
     await statsRef.delete();
     return;
   }
@@ -138,7 +148,8 @@ export async function refreshStudentStats(
     // A streak can die without any write, so it is recomputed against today.
     streakCurrent = computeStreak(datesByProgram.get(active.id) ?? [], today, settings).current;
     if (active.get("streakCurrent") !== streakCurrent) {
-      await active.ref.update({streakCurrent});
+      // The program may have been erased since it was read.
+      await active.ref.update({streakCurrent}).catch(ignoreNotFound);
     }
     const totalPages = active.get("book.totalPages") as number;
     const currentPage = (active.get("currentPage") as number | undefined) ?? 0;
@@ -171,28 +182,37 @@ export async function refreshStudentStats(
   const sum = (field: string) =>
     programs.reduce((total, program) => total + ((program.get(field) as number) ?? 0), 0);
 
-  await statsRef.set(
-    withTimestamp({
-      studentId,
-      name: user.get("name") as string,
-      nis: (user.get("nis") as string | null) ?? null,
-      classId,
-      className: classDoc?.exists ? (classDoc.get("name") as string) : null,
-      status,
-      daysSinceLastJournal,
-      activeProgram,
-      streakCurrent,
-      streakBest: programs.reduce(
-        (best, program) => Math.max(best, (program.get("streakBest") as number) ?? 0),
-        0,
-      ),
-      lastJournalDate: recentDates[0] ?? null,
-      journalCountMonth: allDates.filter((date) => monthOf(date) === monthOf(today)).length,
-      journalCountTotal: sum("journalCount"),
-      booksCompleted: programs.filter((program) => program.get("status") === "completed").length,
-      recentDates,
-    }),
-  );
+  const summary = withTimestamp({
+    studentId,
+    name: user.get("name") as string,
+    nis: (user.get("nis") as string | null) ?? null,
+    classId,
+    className: classDoc?.exists ? (classDoc.get("name") as string) : null,
+    status,
+    daysSinceLastJournal,
+    activeProgram,
+    streakCurrent,
+    streakBest: programs.reduce(
+      (best, program) => Math.max(best, (program.get("streakBest") as number) ?? 0),
+      0,
+    ),
+    lastJournalDate: recentDates[0] ?? null,
+    journalCountMonth: allDates.filter((date) => monthOf(date) === monthOf(today)).length,
+    journalCountTotal: sum("journalCount"),
+    booksCompleted: programs.filter((program) => program.get("status") === "completed").length,
+    recentDates,
+  });
+
+  // The student can be erased or deactivated while this refresh is running
+  // (the reads above take a moment). Re-checking the profile in the same
+  // transaction as the write means a summary can never outlive its student.
+  await db.runTransaction(async (transaction) => {
+    if (isActiveStudent(await transaction.get(userRef))) {
+      transaction.set(statsRef, summary);
+    } else {
+      transaction.delete(statsRef);
+    }
+  });
 }
 
 const REFRESH_CONCURRENCY = 10;

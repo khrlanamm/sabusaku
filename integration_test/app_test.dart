@@ -1,10 +1,10 @@
 // End-to-end flows against the Firebase Emulator Suite. The tests run in
 // order and build on each other, like a school being set up for real.
 //
-//   (cd functions && npm run emulators)                      # terminal 1
-//   (cd functions && npx tsx tools/seed-e2e.ts --emulator)   # reset + seed
-//   flutter test integration_test/app_test.dart -d <android-device> \
-//       --dart-define=USE_EMULATORS=true
+//   tool/e2e.sh [device-id]
+//
+// The script starts the emulators, seeds them and passes this run's sign-in
+// secrets to both the seed and this test.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -15,9 +15,15 @@ import 'package:sabusaku/core/widgets/journal_view.dart';
 import 'support.dart';
 
 const _wrongCredentials = 'Kode sekolah, username, atau password salah.';
+const _wrongInput = 'bukan-yang-benar';
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
+
+  setUpAll(() {
+    expect(e2eInitialPassword, isNotEmpty, reason: 'Run through tool/e2e.sh');
+    expect(e2eNewPassword, isNotEmpty, reason: 'Run through tool/e2e.sh');
+  });
 
   testWidgets('admin: wrong password, first login, forced password change', (
     tester,
@@ -25,7 +31,7 @@ void main() {
     await startApp(tester);
 
     // Wrong password: uniform message, still on the login screen.
-    await signIn(tester, username: 'admin', password: 'salah-password');
+    await signIn(tester, username: 'admin', password: _wrongInput);
     await waitFor(tester, find.text(_wrongCredentials));
 
     // An unknown school code gives the very same message.

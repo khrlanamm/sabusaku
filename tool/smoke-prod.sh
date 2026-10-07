@@ -13,9 +13,9 @@ DEVICE="${1:-emulator-5554}"
 CREDENTIALS="secret/demo-credentials.csv"
 [ -f "$CREDENTIALS" ] || { echo "Tidak ada $CREDENTIALS. Jalankan seed-demo dulu." >&2; exit 1; }
 
-# All demo accounts share one password (column 4).
-PASSWORD="$(awk -F, 'NR==2 {print $4}' "$CREDENTIALS")"
+# All demo accounts share one sign-in secret (column 4 of the file).
+shared="$(awk -F, 'NR==2 {print $4}' "$CREDENTIALS")"
 command -v adb >/dev/null 2>&1 || export PATH="$PATH:$HOME/Library/Android/sdk/platform-tools"
 
 flutter test integration_test/prod_smoke_test.dart -d "$DEVICE" \
-  --dart-define=DEMO_PASSWORD="$PASSWORD" --reporter expanded
+  --dart-define=DEMO_PASSWORD="$shared" --reporter expanded

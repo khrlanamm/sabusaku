@@ -115,17 +115,18 @@ void main() {
   });
 
   test('credentialsToCsv writes one line per account', () {
+    const sample = 'contoh2345';
     final csv = credentialsToCsv(const [
       Credential(
         name: 'Pratama, Raka',
         username: '1001',
-        password: 'abcd2345ef',
+        password: sample,
         role: UserRole.siswa,
         className: 'XII IPA 1',
       ),
     ]);
     final lines = csv.trim().split(RegExp(r'\r?\n'));
     expect(lines[0], 'nama,username,password,peran,kelas');
-    expect(lines[1], '"Pratama, Raka",1001,abcd2345ef,siswa,XII IPA 1');
+    expect(lines[1], '"Pratama, Raka",1001,$sample,siswa,XII IPA 1');
   });
 }

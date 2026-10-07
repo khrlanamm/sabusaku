@@ -46,6 +46,7 @@ void main() {
   });
 
   testWidgets('a failed sign-in shows the uniform message', (tester) async {
+    const typed = 'bukan-yang-benar';
     when(
       () => auth.signIn(
         schoolCode: any(named: 'schoolCode'),
@@ -56,7 +57,7 @@ void main() {
 
     await pump(tester);
     await tester.enterText(find.byKey(const Key('login-username')), '1001');
-    await tester.enterText(find.byKey(const Key('login-password')), 'salah123');
+    await tester.enterText(find.byKey(const Key('login-password')), typed);
     await tester.tap(find.byKey(const Key('login-submit')));
     await tester.pump();
 
@@ -65,11 +66,7 @@ void main() {
       findsOneWidget,
     );
     verify(
-      () => auth.signIn(
-        schoolCode: 'sman1',
-        username: '1001',
-        password: 'salah123',
-      ),
+      () => auth.signIn(schoolCode: 'sman1', username: '1001', password: typed),
     ).called(1);
   });
 }

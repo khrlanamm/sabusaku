@@ -1,17 +1,17 @@
 // Resets the local emulators and seeds the school used by the Flutter
 // integration tests (integration_test/). Emulator only.
 //
-//   npx tsx tools/seed-e2e.ts --emulator
+//   npx tsx tools/seed-e2e.ts --emulator --initial <min 8 chars>
 //
-// Every account gets the same known initial password so the tests can sign in.
+// Every account gets `--initial` as its first sign-in secret, so the tests,
+// which receive the same value from tool/e2e.sh, can sign in.
 
-import {run, useEmulator} from "./_env";
+import {requireArg, run, useEmulator} from "./_env";
 
 import {auth} from "../src/infra/firebase";
 import {createSchool} from "../src/infra/schools";
 
 export const E2E_SCHOOL = "e2e";
-export const E2E_PASSWORD = "awal1234";
 
 async function clearEmulators(): Promise<void> {
   const project = process.env.GCLOUD_PROJECT;
@@ -28,13 +28,16 @@ async function clearEmulators(): Promise<void> {
 run(async () => {
   if (!useEmulator) throw new Error("seed-e2e hanya untuk emulator. Tambahkan --emulator.");
 
+  const initial = requireArg("initial");
+  if (initial.length < 8) throw new Error("--initial minimal 8 karakter.");
+
   await clearEmulators();
 
   const admin = await createSchool(E2E_SCHOOL, "SMA Uji Coba", {
     username: "admin",
     name: "Admin Uji",
   });
-  await auth.updateUser(admin.uid, {password: E2E_PASSWORD});
+  await auth.updateUser(admin.uid, {password: initial});
 
-  console.log(`Seed e2e selesai: sekolah "${E2E_SCHOOL}", password awal "${E2E_PASSWORD}".`);
+  console.log(`Seed e2e selesai: sekolah "${E2E_SCHOOL}".`);
 });
