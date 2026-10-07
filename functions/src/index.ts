@@ -13,6 +13,7 @@ export {setUserActive} from "./callables/setUserActive";
 
 export {dailyRefresh} from "./scheduled/dailyRefresh";
 
+export {onCommentCreated} from "./triggers/onCommentCreated";
 export {onJournalWritten} from "./triggers/onJournalWritten";
 export {onProgramWritten} from "./triggers/onProgramWritten";
 export {onClassUpdated, onSchoolUpdated} from "./triggers/onSchoolChanges";

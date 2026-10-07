@@ -5,15 +5,13 @@ import 'package:go_router/go_router.dart';
 import '../../../app/router/routes.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/widgets/dialogs.dart';
+import '../../notifications/notification_service.dart';
 import '../data/auth_repository.dart';
 import '../data/school_repository.dart';
 
 /// Who is signed in, plus "Ubah password" and "Keluar". Shared by every role.
 class AccountSection extends ConsumerWidget {
-  const AccountSection({super.key, this.onBeforeSignOut});
-
-  /// Runs before signing out, e.g. to remove this device's FCM token.
-  final Future<void> Function()? onBeforeSignOut;
+  const AccountSection({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -98,7 +96,10 @@ class AccountSection extends ConsumerWidget {
                     destructive: true,
                   );
                   if (!confirmed) return;
-                  await onBeforeSignOut?.call();
+                  // So this account's notifications stop reaching the phone.
+                  await ref
+                      .read(notificationServiceProvider)
+                      .unregisterDevice();
                   await ref.read(authRepositoryProvider).signOut();
                 },
               ),

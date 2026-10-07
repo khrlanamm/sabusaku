@@ -16,6 +16,7 @@ import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/stat_card.dart';
 import '../../../core/widgets/states.dart';
 import '../../auth/data/auth_repository.dart';
+import '../../notifications/notification_prompt.dart';
 import '../data/journal_outbox.dart';
 import '../data/student_repository.dart';
 import 'outbox_notice.dart';
@@ -45,6 +46,7 @@ class StudentHomeScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
+            const NotificationPermissionPrompt(),
             const OutboxNotice(),
             AsyncView<Program?>(
               value: program,

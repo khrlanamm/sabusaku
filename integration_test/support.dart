@@ -142,3 +142,19 @@ Future<String> readCredentialAndClose(WidgetTester tester) async {
   await tester.pump(const Duration(milliseconds: 500));
   return password;
 }
+
+/// The student home explains notifications once before Android asks for the
+/// permission. Declines it when it shows; does nothing when it does not
+/// (permission already decided on this device).
+Future<void> dismissNotificationPrompt(WidgetTester tester) async {
+  final later = find.byKey(const Key('notification-later'));
+  final end = DateTime.now().add(const Duration(seconds: 6));
+  while (DateTime.now().isBefore(end)) {
+    await tester.pump(const Duration(milliseconds: 200));
+    if (later.evaluate().isNotEmpty) {
+      await tester.tap(later);
+      await tester.pump(const Duration(milliseconds: 400));
+      return;
+    }
+  }
+}

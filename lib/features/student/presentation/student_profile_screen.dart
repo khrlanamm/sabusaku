@@ -9,6 +9,7 @@ import '../../../core/time/date_format.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/stat_card.dart';
 import '../../auth/presentation/account_section.dart';
+import '../../notifications/notification_prompt.dart';
 import '../data/student_repository.dart';
 
 /// Statistics, past books and account actions (PRD §4: Profil merges the
@@ -28,6 +29,8 @@ class StudentProfileScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         children: [
           const AccountSection(),
+          const SizedBox(height: 12),
+          const NotificationSettingTile(),
           const SizedBox(height: 20),
           Text('Statistik membaca', style: theme.textTheme.titleMedium),
           const SizedBox(height: 10),

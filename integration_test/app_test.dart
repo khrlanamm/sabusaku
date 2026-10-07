@@ -133,6 +133,7 @@ void main() {
 
     // No book yet: the home offers to start one.
     await waitFor(tester, find.byKey(const Key('home-start-book')));
+    await dismissNotificationPrompt(tester);
     await tester.tap(find.byKey(const Key('home-start-book')));
     await waitFor(tester, find.byKey(const Key('book-title')));
     await tester.enterText(find.byKey(const Key('book-title')), e2eBook);
@@ -215,5 +216,32 @@ void main() {
       ),
     );
     expect(find.text('Bu Sari'), findsOneWidget);
+  });
+
+  testWidgets('siswa: sees the new teacher comment and reads it', (
+    tester,
+  ) async {
+    await startApp(tester);
+    await signIn(tester, username: e2eStudent, password: e2eNewPassword);
+    await waitFor(tester, find.text('Jurnal hari ini sudah diisi'));
+    await dismissNotificationPrompt(tester);
+
+    // The server flagged the journal when the teacher commented.
+    await waitFor(tester, find.byKey(const Key('home-new-comments')));
+    await tester.tap(find.textContaining('Jurnal ').last);
+    await waitFor(
+      tester,
+      find.descendant(
+        of: find.byType(CommentTile),
+        matching: find.text(e2eCommentText),
+      ),
+    );
+    expect(find.text('Bu Sari'), findsOneWidget);
+
+    // Opening the journal marks the comment as read.
+    // `pageBack` looks for the English tooltip; the app runs in Indonesian.
+    await tester.tap(find.byType(BackButton));
+    await waitFor(tester, find.text('Jurnal hari ini sudah diisi'));
+    await waitForGone(tester, find.byKey(const Key('home-new-comments')));
   });
 }
