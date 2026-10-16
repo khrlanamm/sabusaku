@@ -25,16 +25,20 @@
     <li><strong>Data dari akun Google</strong>, bila Anda masuk dengan Google: nama, alamat email, dan foto profil Google. Kami tidak mendapat akses ke Gmail, kontak, atau data Google lainnya.</li>
     <li><strong>Foto profil</strong> (opsional). Foto yang Anda pilih sendiri di aplikasi, atau foto akun Google Anda. Bisa diganti atau dihapus kapan saja di menu Profil.</li>
     <li><strong>Jurnal membaca</strong> (siswa). Judul, penulis, dan jumlah halaman buku yang dibaca, halaman yang dibaca tiap hari, lama membaca, dan catatan yang ditulis siswa: informasi penting, hal yang menarik, pertanyaan, dan ulasan akhir buku.</li>
+    <li><strong>Foto cover buku</strong> (opsional, siswa). Foto sampul buku yang siswa ambil dengan kamera atau pilih dari galeri saat mengisi data bukunya sendiri. Foto dipotong dan diputar di HP, dikompres, lalu disimpan di Cloud Storage.</li>
+    <li><strong>Usulan buku</strong> (siswa). Bila siswa mengisi buku yang belum ada di katalog, atau mengubah data buku katalog untuk bukunya sendiri, data buku itu (judul, penulis, jumlah halaman, ISBN, dan foto cover bila ada) dikirim sebagai usulan kepada penanggung jawab. Usulan mencatat nama sekolah asal, bukan nama siswa.</li>
+    <li><strong>Riwayat katalog buku</strong> (penanggung jawab). Setiap perubahan pada katalog buku bersama (menambah, mengubah, menghapus, memulihkan, mengganti cover, menerapkan usulan) dicatat bersama nama penanggung jawab, nama sekolahnya, dan waktunya.</li>
     <li><strong>Komentar penanggung jawab</strong> pada jurnal siswa.</li>
-    <li><strong>Ringkasan aktivitas.</strong> Progres buku, jumlah jurnal, streak, dan status keaktifan. Dihitung otomatis dari jurnal.</li>
+    <li><strong>Ringkasan aktivitas.</strong> Progres buku, jumlah jurnal, streak, dan status keaktifan. Dihitung otomatis dari jurnal. Jumlah siswa yang membaca tiap buku katalog juga dihitung, tanpa nama.</li>
     <li><strong>Token notifikasi.</strong> Kode dari perangkat supaya kami bisa memberi tahu siswa saat penanggung jawab mengomentari jurnalnya.</li>
     <li><strong>Data teknis.</strong> Laporan saat aplikasi berhenti mendadak dan statistik penggunaan tanpa nama, email, atau isi jurnal. Dipakai untuk memperbaiki aplikasi.</li>
   </ul>
-  <p>Sabu Saku tidak mengumpulkan lokasi, kontak, atau ID iklan, dan tidak mengakses foto di HP selain foto profil yang Anda pilih sendiri. Tidak ada iklan di dalam aplikasi.</p>
+  <p>Sabu Saku tidak mengumpulkan lokasi, kontak, atau ID iklan, dan tidak mengakses foto di HP selain foto profil dan foto cover buku yang Anda ambil atau pilih sendiri. Tidak ada iklan di dalam aplikasi.</p>
 
   <h2>Untuk apa data dipakai</h2>
   <ul>
     <li>Menjalankan fitur aplikasi: masuk, jurnal, progres, streak, dashboard penanggung jawab, dan komentar.</li>
+    <li>Menjalankan katalog buku bersama: pencarian buku, rekomendasi sekolah, buku populer, dan peninjauan usulan siswa oleh penanggung jawab.</li>
     <li>Mengirim email verifikasi alamat email dan email reset password saat Anda memintanya.</li>
     <li>Mengirim notifikasi komentar penanggung jawab kepada siswa.</li>
     <li>Menjaga aplikasi tetap berjalan baik dan memperbaiki galat.</li>
@@ -45,11 +49,13 @@
   <ul>
     <li><strong>Siswa</strong> melihat profil, buku, jurnal, dan komentar miliknya sendiri.</li>
     <li><strong>Penanggung jawab</strong> di sekolah yang sama melihat nama, email, kelas, ekstrakurikuler, foto profil, ringkasan, buku, dan jurnal semua siswa sekolah itu. Penanggung jawab bisa mengubah nama, kelas, dan ekstrakurikuler siswa serta mengeluarkan siswa dari sekolah.</li>
-    <li><strong>Sekolah lain</strong> tidak bisa melihat data sekolah Anda. Data tiap sekolah dipisahkan.</li>
+    <li><strong>Foto cover</strong> yang diunggah siswa untuk bukunya sendiri hanya bisa dibuka pengguna di sekolah yang sama.</li>
+    <li><strong>Sekolah lain</strong> tidak bisa melihat data sekolah Anda. Data tiap sekolah dipisahkan, kecuali katalog buku bersama di bawah ini.</li>
+    <li><strong>Katalog buku bersama.</strong> Pengguna dari semua sekolah melihat data buku katalog, cover-nya, jumlah pembacanya (angka tanpa nama), dan riwayat perubahannya, termasuk nama penanggung jawab dan sekolah yang mengubah. Usulan dari siswa dilihat penanggung jawab semua sekolah, tanpa nama siswa. Bila penanggung jawab menerima usulan, data buku dan foto cover-nya disalin ke katalog dan bisa dilihat semua pengguna.</li>
   </ul>
 
   <h2>Tempat data disimpan</h2>
-  <p>Data disimpan di layanan Google Firebase (Authentication, Cloud Firestore, Cloud Storage untuk foto profil, Cloud Functions, Cloud Messaging, Crashlytics, dan Analytics). Basis data dan pemrosesannya berada di pusat data wilayah Jakarta. Layanan itu tunduk pada <a href="https://policies.google.com/privacy">kebijakan privasi Google</a>. Data dikirim lewat sambungan terenkripsi.</p>
+  <p>Data disimpan di layanan Google Firebase (Authentication, Cloud Firestore, Cloud Storage untuk foto profil dan foto cover buku, Cloud Functions, Cloud Messaging, Crashlytics, dan Analytics). Basis data dan pemrosesannya berada di pusat data wilayah Jakarta. Layanan itu tunduk pada <a href="https://policies.google.com/privacy">kebijakan privasi Google</a>. Data dikirim lewat sambungan terenkripsi.</p>
 
   <h2>Berapa lama data disimpan</h2>
   <p>Data disimpan selama akun ada dan sekolah masih memakai Sabu Saku. Anda bisa menghapus akun sendiri kapan saja dari aplikasi. Penanggung jawab dapat menghapus data seorang siswa di sekolahnya, misalnya saat siswa lulus atau pindah. Caranya dijelaskan di halaman <a href="/hapus-data">cara menghapus akun dan data</a>.</p>
