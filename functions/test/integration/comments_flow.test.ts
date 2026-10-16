@@ -6,14 +6,12 @@ import {afterAll, beforeAll, describe, expect, it} from "vitest";
 
 import {programsCol, usersCol} from "../../src/infra/firebase";
 import {
-  addAccount,
-  addClass,
+  addJoined,
   addSchool,
   clearEmulators,
   Client,
   closeClients,
   eventually,
-  signIn,
   wibDate,
 } from "./helpers";
 
@@ -31,18 +29,17 @@ const commentsPath = `schools/${SCHOOL}/programs/buku1/journals/${DATE}/comments
 beforeAll(async () => {
   await clearEmulators();
   await addSchool(SCHOOL);
-  await addClass(SCHOOL, "k1", "XII IPA 1");
-  await addAccount(SCHOOL, {role: "guru", name: "Bu Sari", username: "sari", classIds: ["k1"]});
-  studentUid = await addAccount(SCHOOL, {
+  teacher = await addJoined(SCHOOL, {email: "sari@sekolah.test", role: "guru", name: "Bu Sari"});
+  student = await addJoined(SCHOOL, {
+    email: "raka@sekolah.test",
     role: "siswa",
     name: "Raka Pratama",
-    username: "1001",
-    classId: "k1",
-    className: "XII IPA 1",
+    classId: "XII-A1",
   });
+  studentUid = student.uid;
   await programRef().set({
     studentId: studentUid,
-    classId: "k1",
+    classId: "XII-A1",
     book: {title: "Laskar Pelangi", author: "Andrea Hirata", totalPages: 100},
     startDate: wibDate(-5),
     targetDate: wibDate(20),
@@ -66,8 +63,6 @@ beforeAll(async () => {
   // Let onJournalWritten settle so its update does not race the assertions.
   await eventually(async () => (await programRef().get()).get("currentPage") === 30);
 
-  teacher = await signIn(SCHOOL, "sari");
-  student = await signIn(SCHOOL, "1001");
 });
 
 afterAll(closeClients);

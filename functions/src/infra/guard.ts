@@ -8,13 +8,12 @@ export interface Caller {
   uid: string;
   role: Role;
   schoolId: string;
-  /** Teachers only. */
-  classIds: string[];
 }
 
 /**
  * Authorises a callable from the ID token claims, then confirms the account is
- * still active: a disabled user's token stays valid for up to an hour.
+ * still in the school: claims of a removed user stay in their token for up to
+ * an hour.
  */
 export async function requireCaller(
   request: CallableRequest,
@@ -22,7 +21,7 @@ export async function requireCaller(
 ): Promise<Caller> {
   if (!request.auth) throw new HttpsError("unauthenticated", "Silakan masuk kembali.");
 
-  const {role, schoolId, classIds} = request.auth.token as Record<string, unknown>;
+  const {role, schoolId} = request.auth.token as Record<string, unknown>;
   if (
     typeof role !== "string" ||
     typeof schoolId !== "string" ||
@@ -36,12 +35,7 @@ export async function requireCaller(
     throw new HttpsError("permission-denied", "Akun tidak aktif.");
   }
 
-  return {
-    uid: request.auth.uid,
-    role: role as Role,
-    schoolId,
-    classIds: Array.isArray(classIds) ? (classIds as string[]) : [],
-  };
+  return {uid: request.auth.uid, role: role as Role, schoolId};
 }
 
 export function parseInput<T>(schema: ZodType<T>, data: unknown): T {
@@ -50,11 +44,4 @@ export function parseInput<T>(schema: ZodType<T>, data: unknown): T {
     throw new HttpsError("invalid-argument", "Data yang dikirim tidak valid.");
   }
   return result.data;
-}
-
-/** The target user of an admin action; must belong to the caller's school. */
-export async function loadUser(schoolId: string, uid: string) {
-  const snapshot = await usersCol(schoolId).doc(uid).get();
-  if (!snapshot.exists) throw new HttpsError("not-found", "Pengguna tidak ditemukan.");
-  return snapshot;
 }

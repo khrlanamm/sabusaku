@@ -11,7 +11,7 @@
     "test": "vitest run test/domain --passWithNoTests",
     "test:rules": "vitest run test/rules",
     "test:integration": "vitest run test/integration",
-    "test:all": "firebase emulators:exec --project demo-sabusaku --only firestore \"npm run test:rules\" && npm run build && firebase emulators:exec --project demo-sabusaku --only auth,firestore,functions \"npm run test:integration\"",
+    "test:all": "firebase emulators:exec --project demo-sabusaku --only firestore,storage \"npm run test:rules\" && npm run build && firebase emulators:exec --project demo-sabusaku --only auth,firestore,functions \"npm run test:integration\"",
     "emulators": "npm run build && firebase emulators:start --project sabusaku",
     "deploy": "firebase deploy --only functions",
     "logs": "firebase functions:log"

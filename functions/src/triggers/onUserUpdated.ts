@@ -3,12 +3,15 @@ import {onDocumentUpdated} from "firebase-functions/v2/firestore";
 import {db, programsCol} from "../infra/firebase";
 import {refreshStudentStats} from "../infra/stats";
 
+/** Profile fields copied into the student's summary. */
+const SUMMARY_FIELDS = ["name", "email", "classId", "extracurriculars", "photoUrl", "status"];
+
 /**
  * Carries profile changes of a student to the data derived from it
  * (docs/04 §2.4):
- *   - a class move re-labels the student's programs, which is what moves
- *     teacher access to their journals (PRD BR-14);
- *   - a rename, class move or (de)activation rebuilds the summary.
+ *   - a class change re-labels the student's programs;
+ *   - any change to a field shown on teacher lists, or a removal from the
+ *     school, rebuilds (or drops) the summary.
  */
 export const onUserUpdated = onDocumentUpdated(
   "schools/{schoolId}/users/{uid}",
@@ -28,12 +31,9 @@ export const onUserUpdated = onDocumentUpdated(
       await batch.commit();
     }
 
-    if (
-      classChanged ||
-      before.get("name") !== after.get("name") ||
-      before.get("status") !== after.get("status")
-    ) {
-      await refreshStudentStats(schoolId, uid);
-    }
+    const changed = SUMMARY_FIELDS.some(
+      (field) => JSON.stringify(before.get(field) ?? null) !== JSON.stringify(after.get(field) ?? null),
+    );
+    if (changed) await refreshStudentStats(schoolId, uid);
   },
 );

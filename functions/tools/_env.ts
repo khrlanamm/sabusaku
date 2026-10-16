@@ -11,10 +11,17 @@ const argv = process.argv.slice(2);
 
 export const useEmulator = argv.includes("--emulator");
 
+// Lets the Admin SDK find the default Storage bucket (profile photos).
+process.env.FIREBASE_CONFIG ??= JSON.stringify({
+  projectId: "sabusaku",
+  storageBucket: "sabusaku.firebasestorage.app",
+});
+
 if (useEmulator) {
   process.env.GCLOUD_PROJECT ??= "sabusaku";
   process.env.FIRESTORE_EMULATOR_HOST ??= "127.0.0.1:8080";
   process.env.FIREBASE_AUTH_EMULATOR_HOST ??= "127.0.0.1:9099";
+  process.env.FIREBASE_STORAGE_EMULATOR_HOST ??= "127.0.0.1:9199";
 } else if (!process.env.GOOGLE_APPLICATION_CREDENTIALS) {
   const dir = resolve(__dirname, "../../secret");
   const key = existsSync(dir)
@@ -44,6 +51,14 @@ export function requireArg(name: string): string {
 }
 
 export const secretDir = resolve(__dirname, "../../secret");
+
+/** Comma-separated list argument, trimmed, empty items dropped. */
+export function listArg(name: string): string[] {
+  return (arg(name) ?? "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
 
 export function target(): string {
   return useEmulator ? "EMULATOR" : "PRODUKSI";

@@ -2,47 +2,42 @@ import {HttpsError, onCall} from "firebase-functions/v2/https";
 import {z} from "zod";
 
 import {CALLABLE_OPTIONS} from "../config";
+import {normalizeEmail} from "../domain/labels";
 import {audit} from "../infra/audit";
-import {activeProgramsCol, auth, db, programsCol, statsCol} from "../infra/firebase";
-import {loadUser, parseInput, requireCaller} from "../infra/guard";
+import {membersCol} from "../infra/firebase";
+import {parseInput, requireCaller} from "../infra/guard";
+import {eraseStudentData, revokeSchoolAccess} from "../infra/members";
 
-const inputSchema = z.object({uid: z.string().min(1)});
+const inputSchema = z.object({email: z.string().min(3).max(320)});
 
 /**
- * Permanently removes a student: sign-in account, profile, summary, and every
- * program with its journals and comments (docs/03 §5). Used when a student
- * graduates or the school asks for deletion. Irreversible.
+ * Permanently deletes everything a student has in the caller's school
+ * (docs/03 §5): roster entry, profile, summary, and every program with its
+ * journals and comments. Irreversible. The student's sign-in account belongs
+ * to them and is kept; it just no longer has a school.
  */
 export const eraseStudent = onCall(
   {...CALLABLE_OPTIONS, timeoutSeconds: 300},
   async (request): Promise<{programs: number}> => {
-    const caller = await requireCaller(request, ["admin"]);
-    const {uid} = parseInput(inputSchema, request.data);
+    const caller = await requireCaller(request, ["guru"]);
+    const email = normalizeEmail(parseInput(inputSchema, request.data).email);
 
-    const student = await loadUser(caller.schoolId, uid);
-    if (student.get("role") !== "siswa") {
-      throw new HttpsError("failed-precondition", "Hanya data siswa yang bisa dihapus.");
+    const memberRef = membersCol().doc(email);
+    const member = await memberRef.get();
+    if (!member.exists || member.get("schoolId") !== caller.schoolId) {
+      throw new HttpsError("not-found", "Siswa tidak ditemukan.");
+    }
+    if (member.get("role") !== "siswa") {
+      throw new HttpsError("permission-denied", "Hanya data siswa yang bisa dihapus.");
     }
 
-    // Lock the account first so the student cannot write while data is removed.
-    await auth.updateUser(uid, {disabled: true});
-    await auth.revokeRefreshTokens(uid);
+    const uid = (member.get("uid") as string | null) ?? null;
+    // Lock the student out first so nothing is written while data is removed.
+    if (uid) await revokeSchoolAccess(uid);
+    await memberRef.delete();
+    const programs = uid ? await eraseStudentData(caller.schoolId, uid) : 0;
 
-    // The profile goes first: triggers fired by the deletes below then find no
-    // student and do not rebuild the summary.
-    await db.recursiveDelete(student.ref);
-    await activeProgramsCol(caller.schoolId).doc(uid).delete();
-    await statsCol(caller.schoolId).doc(uid).delete();
-
-    const programs = await programsCol(caller.schoolId).where("studentId", "==", uid).get();
-    for (const program of programs.docs) await db.recursiveDelete(program.ref);
-
-    await auth.deleteUser(uid);
-    await audit(caller.schoolId, caller.uid, "eraseStudent", {
-      target: uid,
-      programs: programs.size,
-    });
-
-    return {programs: programs.size};
+    await audit(caller.schoolId, caller.uid, "eraseStudent", {target: uid, programs});
+    return {programs};
   },
 );

@@ -1,7 +1,6 @@
 import {onDocumentUpdated} from "firebase-functions/v2/firestore";
 import {logger} from "firebase-functions/v2";
 
-import {db, statsCol} from "../infra/firebase";
 import {refreshSchool} from "../infra/stats";
 
 /**
@@ -21,25 +20,5 @@ export const onSchoolUpdated = onDocumentUpdated(
       schoolId: event.params.schoolId,
       students,
     });
-  },
-);
-
-/** Keeps the class name shown on student summaries current after a rename. */
-export const onClassUpdated = onDocumentUpdated(
-  "schools/{schoolId}/classes/{classId}",
-  async (event) => {
-    const name = event.data?.after.get("name") as string | undefined;
-    if (!name || event.data?.before.get("name") === name) return;
-
-    const {schoolId, classId} = event.params;
-    const stats = await statsCol(schoolId).where("classId", "==", classId).select().get();
-    // Firestore batches hold at most 500 writes.
-    for (let start = 0; start < stats.size; start += 400) {
-      const batch = db.batch();
-      for (const doc of stats.docs.slice(start, start + 400)) {
-        batch.update(doc.ref, {className: name});
-      }
-      await batch.commit();
-    }
   },
 );

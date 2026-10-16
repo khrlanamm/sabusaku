@@ -2,7 +2,8 @@
 //
 //   npx tsx tools/set-school-status.ts --code sman1 --status suspended [--emulator]
 //
-// Suspending disables every account of the school and revokes their sessions.
+// Suspending disables every account that joined the school and revokes their
+// sessions; reactivating enables them again.
 
 import {requireArg, run, target} from "./_env";
 

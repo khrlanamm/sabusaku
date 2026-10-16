@@ -3,10 +3,13 @@ rules_version = '2';
 // =====================================================================
 // Sabu Saku — Firestore Security Rules
 //
-// Custom claims (set by Cloud Functions):
-//   role     : 'admin' | 'guru' | 'siswa'
+// Custom claims (set by the claimAccount Cloud Function):
+//   role     : 'guru' (penanggung jawab) | 'siswa'
 //   schoolId : school code, equal to the schools/{schoolId} document ID
-//   classIds : string[] — teachers only
+//
+// Every teacher of a school sees and manages every student of that school.
+// Schools and teachers are created by the developer through scripts; the
+// roster of students lives in the top-level `members/{email}` collection.
 //
 // Deny by default. Clients never write derived numbers (progress, streak,
 // status); only Cloud Functions do, through the Admin SDK, which bypasses
@@ -21,10 +24,8 @@ service cloud.firestore {
     function tokenSchool() { return request.auth.token.get('schoolId', ''); }
     function role() { return request.auth.token.get('role', ''); }
     function inSchool(s) { return signedIn() && tokenSchool() == s; }
-    function isAdmin(s) { return inSchool(s) && role() == 'admin'; }
     function isTeacher(s) { return inSchool(s) && role() == 'guru'; }
     function isStudent(s) { return inSchool(s) && role() == 'siswa'; }
-    function teachesClass(classId) { return classId in request.auth.token.get('classIds', []); }
 
     // ---------- Time (WIB = UTC+7, no DST) ----------
     // Dates are compared as whole-day numbers so the device clock is never
@@ -46,12 +47,58 @@ service cloud.firestore {
       return !(k in d) || d[k] == null || (d[k] is string && d[k].size() <= maxLen);
     }
 
+    // ---------- Labels ----------
+    // Rules cannot loop, so a list of labels is joined and matched at once.
+    // Class labels: XII-A1, X-G, X-G2 (functions/src/domain/labels.ts).
+    function validClassList(v) {
+      return v is list && v.size() <= 200 && v.toSet().size() == v.size()
+        && (v.size() == 0
+            || v.join(',').matches('^(X|XI|XII)-[A-Z]{1,2}[0-9]{0,2}(,(X|XI|XII)-[A-Z]{1,2}[0-9]{0,2})*$'));
+    }
+    // Extracurricular labels: 2–40 characters each, no '|'.
+    function validExtracurricularList(v) {
+      return v is list && v.size() <= 50 && v.toSet().size() == v.size()
+        && (v.size() == 0 || v.join('|').matches('^[^|]{2,40}([|][^|]{2,40})*$'));
+    }
+    function schoolLabels(s) { return get(/databases/$(database)/documents/schools/$(s)).data; }
+    // A student's class: a label the school lists.
+    function knownClass(s, v) { return v is string && v in schoolLabels(s).get('classes', []); }
+    // A person's extracurriculars: at most 10, all listed by the school.
+    function knownExtracurriculars(s, v) {
+      return v is list && v.size() <= 10 && v.toSet().size() == v.size()
+        && v.hasOnly(schoolLabels(s).get('extracurriculars', []));
+    }
+    // Profile photos: Firebase Storage download URLs or Google account photos.
+    function validPhotoUrl(v) {
+      return v == null || (v is string && v.size() <= 2048
+        && v.matches('^https://(firebasestorage[.]googleapis[.]com|lh[0-9][.]googleusercontent[.]com)/.*$'));
+    }
+
     // ---------- Paths ----------
     function programPath(s, p) { return /databases/$(database)/documents/schools/$(s)/programs/$(p); }
     function activePath(s, uid) { return /databases/$(database)/documents/schools/$(s)/activePrograms/$(uid); }
     function userPath(s, uid) { return /databases/$(database)/documents/schools/$(s)/users/$(uid); }
 
     // =================================================================
+    // ---------- members (roster; written by Cloud Functions) ----------
+    match /members/{email} {
+      // Teachers see the roster of their own school (query: schoolId == theirs).
+      allow get, list: if isTeacher(resource.data.schoolId);
+      allow create, delete: if false;
+      // Before the student first signs in, a teacher may fix the details.
+      allow update: if isTeacher(resource.data.schoolId)
+        && resource.data.role == 'siswa'
+        && resource.data.uid == null
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['name', 'classId', 'extracurriculars', 'updatedAt'])
+        && (request.resource.data.name == ''
+            || validStr(request.resource.data.name, 2, 80))
+        && (request.resource.data.classId == null
+            || knownClass(resource.data.schoolId, request.resource.data.classId))
+        && knownExtracurriculars(resource.data.schoolId, request.resource.data.extracurriculars)
+        && request.resource.data.updatedAt == request.time;
+    }
+
     match /schools/{schoolId} {
 
       function validSettings(st) {
@@ -67,26 +114,45 @@ service cloud.firestore {
       allow get: if inSchool(schoolId);
       allow list: if false;
       allow create, delete: if false;
-      allow update: if isAdmin(schoolId)
-        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['settings'])
-        && validSettings(request.resource.data.settings);
+      // Teachers change the settings and the class and extracurricular labels.
+      allow update: if isTeacher(schoolId)
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['settings', 'classes', 'extracurriculars'])
+        && validSettings(request.resource.data.settings)
+        && validClassList(request.resource.data.get('classes', []))
+        && validExtracurricularList(request.resource.data.get('extracurriculars', []));
 
       // ---------- users ----------
       match /users/{uid} {
-        allow get: if isAdmin(schoolId) || (inSchool(schoolId) && request.auth.uid == uid);
-        allow list: if isAdmin(schoolId);
+        // name, class and extracurriculars a user or teacher may write
+        function validProfileChange() {
+          let before = resource.data;
+          let after = request.resource.data;
+          return (after.name == before.name || validStr(after.name, 2, 80))
+            && (after.get('classId', null) == before.get('classId', null)
+                || (before.role == 'siswa' && knownClass(schoolId, after.classId)))
+            && (after.get('extracurriculars', []) == before.get('extracurriculars', [])
+                || knownExtracurriculars(schoolId, after.extracurriculars))
+            && after.updatedAt == request.time;
+        }
+
+        allow get: if isTeacher(schoolId) || (inSchool(schoolId) && request.auth.uid == uid);
+        allow list: if isTeacher(schoolId);
         allow create, delete: if false; // Cloud Functions only
 
-        allow update:
-          // a user marks their initial password as changed
-          if (inSchool(schoolId) && request.auth.uid == uid
-              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['mustChangePassword'])
-              && request.resource.data.mustChangePassword == false)
-          // an admin renames a user
-          || (isAdmin(schoolId)
-              && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'updatedAt'])
-              && validStr(request.resource.data.name, 2, 80)
-              && request.resource.data.updatedAt == request.time);
+        // Users complete and edit their own profile; a student may change
+        // class and extracurriculars at any time. A teacher edits a student.
+        allow update: if
+          (inSchool(schoolId) && request.auth.uid == uid
+            && resource.data.status == 'active'
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['name', 'classId', 'extracurriculars', 'photoUrl', 'updatedAt'])
+            && validProfileChange()
+            && validPhotoUrl(request.resource.data.get('photoUrl', null)))
+          || (isTeacher(schoolId) && resource.data.role == 'siswa'
+            && request.resource.data.diff(resource.data).affectedKeys()
+                 .hasOnly(['name', 'classId', 'extracurriculars', 'updatedAt'])
+            && validProfileChange());
 
         match /devices/{tokenHash} {
           allow read, delete: if inSchool(schoolId) && request.auth.uid == uid;
@@ -98,38 +164,14 @@ service cloud.firestore {
         }
       }
 
-      // ---------- classes ----------
-      match /classes/{classId} {
-        function validClass(d) {
-          return validStr(d.name, 2, 40)
-            && d.grade in [10, 11, 12]
-            && validStr(d.academicYear, 4, 12)
-            && d.isArchived is bool;
-        }
-
-        allow read: if inSchool(schoolId);
-        allow delete: if false; // archive, never delete
-        allow create: if isAdmin(schoolId)
-          && request.resource.data.keys().hasOnly(['name', 'grade', 'academicYear', 'teacherIds', 'isArchived'])
-          && validClass(request.resource.data)
-          && request.resource.data.teacherIds == []
-          && request.resource.data.isArchived == false;
-        // teacherIds mirrors users.classIds and is written by Cloud Functions
-        allow update: if isAdmin(schoolId)
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['name', 'grade', 'academicYear', 'isArchived'])
-          && validClass(request.resource.data);
-      }
-
       // ---------- studentStats (server-written summary) ----------
       match /studentStats/{studentId} {
         allow write: if false;
         // The student is matched by document ID so a get on a not-yet-created
         // summary is allowed instead of failing on a null resource.
-        allow get: if isAdmin(schoolId)
-          || (isStudent(schoolId) && studentId == request.auth.uid)
-          || (isTeacher(schoolId) && teachesClass(resource.data.classId));
-        allow list: if isAdmin(schoolId)
-          || (isTeacher(schoolId) && teachesClass(resource.data.classId));
+        allow get: if isTeacher(schoolId)
+          || (isStudent(schoolId) && studentId == request.auth.uid);
+        allow list: if isTeacher(schoolId);
       }
 
       // ---------- activePrograms (BR-1 lock: one active book per student) ----------
@@ -153,7 +195,7 @@ service cloud.firestore {
 
         function canReadProgram(d) {
           return (isStudent(schoolId) && d.studentId == request.auth.uid)
-              || (isTeacher(schoolId) && teachesClass(d.classId));
+              || isTeacher(schoolId);
         }
 
         function validProgramCreate() {
@@ -164,6 +206,7 @@ service cloud.firestore {
                                    'currentPage', 'journalCount', 'lastJournalDate', 'streakCurrent',
                                    'streakBest', 'createdAt', 'updatedAt'])
             && d.studentId == request.auth.uid
+            && me.status == 'active'
             && d.classId == me.classId
             && d.status == 'active' && d.extended == false
             && d.get('finalReflection', null) == null
@@ -227,7 +270,7 @@ service cloud.firestore {
 
           function canReadJournal() {
             return (isStudent(schoolId) && prog().studentId == request.auth.uid)
-                || (isTeacher(schoolId) && teachesClass(prog().classId));
+                || isTeacher(schoolId);
           }
 
           function ownsActiveProgram() {
@@ -281,7 +324,7 @@ service cloud.firestore {
           match /comments/{commentId} {
             allow get, list: if canReadJournal();
 
-            allow create: if isTeacher(schoolId) && teachesClass(prog().classId)
+            allow create: if isTeacher(schoolId)
               && exists(/databases/$(database)/documents/schools/$(schoolId)/programs/$(programId)/journals/$(date))
               && request.resource.data.keys().hasOnly(['teacherId', 'teacherName', 'text', 'createdAt', 'updatedAt'])
               && request.resource.data.teacherId == request.auth.uid

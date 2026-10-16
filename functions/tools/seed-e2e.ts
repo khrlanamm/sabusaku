@@ -3,12 +3,26 @@
 //
 //   npx tsx tools/seed-e2e.ts --emulator --initial <min 8 chars>
 //
-// Every account gets `--initial` as its first sign-in secret, so the tests,
-// which receive the same value from tool/e2e.sh, can sign in.
+// Accounts that sign in with a password get `--initial`, which the tests
+// receive from tool/e2e.sh as well. Keep these values in sync with
+// integration_test/support.dart:
+//
+//   school   e2e "SMA Uji Coba"; classes XII-A1, XII-A2; default ekskul
+//   guru     guru@e2e.test       "Sari Wulandari"  password, joined
+//   siswa    siswa@e2e.test      "Raka Pratama"    password, joined, XII-A1, Masis-KIR
+//   siswa    baru@e2e.test       (no name, class)  password, not joined yet
+//            → the app joins it and sends it to "Lengkapi akun"
+//   siswa    google@e2e.test     "Gita Lestari"    Google only (no password),
+//            XII-A2; sign in with the emulator's fake Google ID token
+//            {"sub":"google-e2e","email":"google@e2e.test","email_verified":true}
+//   siswa    daftar@e2e.test     roster only, no account (for "Daftar")
+//   outsider luar@e2e.test       password, on no roster
+//            → "Harap Menghubungi Administrator Sekolah"
 
 import {requireArg, run, useEmulator} from "./_env";
 
 import {auth} from "../src/infra/firebase";
+import {addMember, claimMembership} from "../src/infra/members";
 import {createSchool} from "../src/infra/schools";
 
 export const E2E_SCHOOL = "e2e";
@@ -32,12 +46,48 @@ run(async () => {
   if (initial.length < 8) throw new Error("--initial minimal 8 karakter.");
 
   await clearEmulators();
+  await createSchool(E2E_SCHOOL, "SMA Uji Coba", ["XII-A1", "XII-A2"]);
 
-  const admin = await createSchool(E2E_SCHOOL, "SMA Uji Coba", {
-    username: "admin",
-    name: "Admin Uji",
-  });
-  await auth.updateUser(admin.uid, {password: initial});
+  const roster = [
+    {email: "guru@e2e.test", role: "guru", name: "Sari Wulandari", classId: null, extracurriculars: ["Masis-KIR"]},
+    {email: "siswa@e2e.test", role: "siswa", name: "Raka Pratama", classId: "XII-A1", extracurriculars: ["Masis-KIR"]},
+    {email: "baru@e2e.test", role: "siswa", name: "", classId: null, extracurriculars: []},
+    {email: "google@e2e.test", role: "siswa", name: "Gita Lestari", classId: "XII-A2", extracurriculars: []},
+    {email: "daftar@e2e.test", role: "siswa", name: "Dewi Anggraini", classId: "XII-A1", extracurriculars: []},
+  ] as const;
+  for (const row of roster) {
+    const result = await addMember(E2E_SCHOOL, {...row, extracurriculars: [...row.extracurriculars]}, row.role, "developer");
+    if (!result.ok) throw new Error(`${row.email}: ${result.reason}`);
+  }
+
+  const withPassword = async (email: string, displayName?: string) =>
+    (await auth.createUser({email, password: initial, emailVerified: true, displayName})).uid;
+
+  // Already joined: sign straight into their shell.
+  for (const email of ["guru@e2e.test", "siswa@e2e.test"]) {
+    await claimMembership(await withPassword(email), email, null);
+  }
+  // Joined by the app at first sign-in.
+  await withPassword("baru@e2e.test");
+  await withPassword("luar@e2e.test", "Orang Luar");
+
+  const imported = await auth.importUsers([
+    {
+      uid: "google-e2e-uid",
+      email: "google@e2e.test",
+      emailVerified: true,
+      displayName: "Gita Lestari",
+      providerData: [
+        {
+          providerId: "google.com",
+          uid: "google-e2e",
+          email: "google@e2e.test",
+          displayName: "Gita Lestari",
+        },
+      ],
+    },
+  ]);
+  if (imported.failureCount > 0) throw new Error("Gagal membuat akun Google uji.");
 
   console.log(`Seed e2e selesai: sekolah "${E2E_SCHOOL}".`);
 });

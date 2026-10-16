@@ -14,7 +14,7 @@ import {dirname, join} from "node:path";
 import {DocumentData, Timestamp} from "firebase-admin/firestore";
 
 import {wibToday} from "../src/domain/dates";
-import {classesCol, programsCol, schoolRef, statsCol, usersCol} from "../src/infra/firebase";
+import {membersCol, programsCol, schoolRef, statsCol, usersCol} from "../src/infra/firebase";
 
 /** Timestamps become ISO strings so the file is plain JSON. */
 function plain(value: unknown): unknown {
@@ -36,9 +36,9 @@ run(async () => {
   const school = await schoolRef(code).get();
   if (!school.exists) throw new Error(`Sekolah "${code}" tidak ditemukan.`);
 
-  const [users, classes, stats, programs] = await Promise.all([
+  const [users, members, stats, programs] = await Promise.all([
     usersCol(code).get(),
-    classesCol(code).get(),
+    membersCol().where("schoolId", "==", code).get(),
     statsCol(code).get(),
     programsCol(code).get(),
   ]);
@@ -61,7 +61,7 @@ run(async () => {
     school: withId(school as never),
     // Device tokens are credentials for push delivery, not school data.
     users: users.docs.map(withId),
-    classes: classes.docs.map(withId),
+    members: members.docs.map(withId),
     studentStats: stats.docs.map(withId),
     programs: programData,
   };
@@ -71,6 +71,6 @@ run(async () => {
   writeFileSync(file, JSON.stringify(output, null, 2));
 
   console.log(`Ekspor sekolah "${code}" dari ${target()}:`);
-  console.log(`  ${users.size} pengguna, ${classes.size} kelas, ${programs.size} buku, ${journalCount} jurnal`);
+  console.log(`  ${users.size} pengguna, ${members.size} anggota daftar, ${programs.size} buku, ${journalCount} jurnal`);
   console.log(`  Berkas: ${file}`);
 });

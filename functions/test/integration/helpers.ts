@@ -5,14 +5,21 @@
 import {randomUUID} from "node:crypto";
 
 import {deleteApp, FirebaseApp, initializeApp} from "firebase/app";
-import {connectAuthEmulator, getAuth, signInWithEmailAndPassword} from "firebase/auth";
+import {
+  connectAuthEmulator,
+  getAuth,
+  GoogleAuthProvider,
+  signInWithCredential,
+  signInWithEmailAndPassword,
+  User,
+} from "firebase/auth";
 import {connectFirestoreEmulator, Firestore, getFirestore} from "firebase/firestore";
 import {connectFunctionsEmulator, getFunctions, httpsCallable} from "firebase/functions";
 
 import {REGION} from "../../src/config";
-import {pseudoEmail} from "../../src/domain/identity";
-import {auth, classesCol} from "../../src/infra/firebase";
-import {createAccount, NewAccount} from "../../src/infra/accounts";
+import {Role} from "../../src/domain/types";
+import {auth} from "../../src/infra/firebase";
+import {addMember, addSchoolClasses, cleanMember, loadSchoolLabels} from "../../src/infra/members";
 import {createSchool} from "../../src/infra/schools";
 
 const PROJECT = process.env.GCLOUD_PROJECT ?? "demo-sabusaku";
@@ -32,48 +39,46 @@ export async function clearEmulators(): Promise<void> {
   });
 }
 
-/** Creates an account through the same code path as production. */
-export async function addAccount(schoolId: string, input: NewAccount): Promise<string> {
-  const account = await createAccount(schoolId, input);
-  await auth.updateUser(account.uid, {password: PASSWORD});
-  return account.uid;
+export async function addSchool(schoolId: string, classes: string[] = ["XII-A1", "XII-A2"]) {
+  await createSchool(schoolId, `Sekolah ${schoolId}`, classes);
 }
 
-export async function addSchool(schoolId: string): Promise<string> {
-  const admin = await createSchool(schoolId, `Sekolah ${schoolId}`, {
-    username: "admin",
-    name: "Admin Uji",
-  });
-  await auth.updateUser(admin.uid, {password: PASSWORD});
-  return admin.uid;
+export interface Person {
+  email: string;
+  role: Role;
+  name?: string;
+  classId?: string | null;
+  extracurriculars?: string[];
 }
 
-export async function addClass(schoolId: string, id: string, name: string): Promise<void> {
-  await classesCol(schoolId).doc(id).set({
-    name,
-    grade: 12,
-    academicYear: "2026/2027",
-    teacherIds: [],
-    isArchived: false,
-  });
+/** Puts someone on a school roster, the way the developer tools do. */
+export async function addToRoster(schoolId: string, person: Person): Promise<void> {
+  const cleaned = cleanMember(person, await loadSchoolLabels(schoolId));
+  if (!cleaned.ok) throw new Error(cleaned.reason);
+  if (cleaned.newClass) await addSchoolClasses(schoolId, [cleaned.newClass]);
+  const result = await addMember(schoolId, cleaned, person.role, "developer");
+  if (!result.ok) throw new Error(result.reason);
+}
+
+/** An email/password account; verified unless stated otherwise. */
+export async function addPasswordAccount(email: string, verified = true): Promise<string> {
+  return (await auth.createUser({email, password: PASSWORD, emailVerified: verified})).uid;
 }
 
 export interface Client {
   uid: string;
+  user: User;
   db: Firestore;
-  call<T = unknown>(name: string, data: unknown): Promise<T>;
+  call<T = unknown>(name: string, data?: unknown): Promise<T>;
+  /** Calls claimAccount and refreshes the token, like the app after sign-in. */
+  join(): Promise<{role: string; schoolId: string}>;
   close(): Promise<void>;
 }
 
 let clientCount = 0;
 const openApps: FirebaseApp[] = [];
 
-/** A signed-in client SDK instance, like one phone running the app. */
-export async function signIn(
-  schoolId: string,
-  username: string,
-  password = PASSWORD,
-): Promise<Client> {
+function newApp() {
   const app = initializeApp({projectId: PROJECT, apiKey: "fake-api-key"}, `client-${clientCount++}`);
   openApps.push(app);
   const clientAuth = getAuth(app);
@@ -83,19 +88,66 @@ export async function signIn(
   connectFirestoreEmulator(db, host, Number(port));
   const functions = getFunctions(app, REGION);
   connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+  return {app, clientAuth, db, functions};
+}
 
-  const credential = await signInWithEmailAndPassword(
-    clientAuth,
-    pseudoEmail(schoolId, username),
-    password,
-  );
+function clientOf(
+  parts: ReturnType<typeof newApp>,
+  user: User,
+): Client {
+  const call = async <T>(name: string, data?: unknown) =>
+    (await httpsCallable(parts.functions, name)(data ?? {})).data as T;
   return {
-    uid: credential.user.uid,
-    db,
-    call: async <T>(name: string, data: unknown) =>
-      (await httpsCallable(functions, name)(data)).data as T,
-    close: () => deleteApp(app),
+    uid: user.uid,
+    user,
+    db: parts.db,
+    call,
+    join: async () => {
+      const result = await call<{role: string; schoolId: string}>("claimAccount");
+      await user.getIdToken(true);
+      return result;
+    },
+    close: () => deleteApp(parts.app),
   };
+}
+
+/** A client signed in with email and password, like one phone running the app. */
+export async function signIn(email: string, password = PASSWORD): Promise<Client> {
+  const parts = newApp();
+  const credential = await signInWithEmailAndPassword(parts.clientAuth, email, password);
+  return clientOf(parts, credential.user);
+}
+
+/**
+ * A client signed in with Google. The Auth emulator accepts an unsigned JSON
+ * ID token; `sub` identifies the Google account.
+ */
+export async function signInWithGoogle(
+  email: string,
+  options: {sub?: string; picture?: string; name?: string} = {},
+): Promise<Client> {
+  const parts = newApp();
+  const idToken = JSON.stringify({
+    sub: options.sub ?? `google-${email}`,
+    email,
+    email_verified: true,
+    name: options.name ?? email.split("@")[0],
+    ...(options.picture ? {picture: options.picture} : {}),
+  });
+  const credential = await signInWithCredential(
+    parts.clientAuth,
+    GoogleAuthProvider.credential(idToken),
+  );
+  return clientOf(parts, credential.user);
+}
+
+/** Roster entry + verified password account + joined: a ready user. */
+export async function addJoined(schoolId: string, person: Person): Promise<Client> {
+  await addToRoster(schoolId, person);
+  await addPasswordAccount(person.email);
+  const client = await signIn(person.email);
+  await client.join();
+  return client;
 }
 
 export async function closeClients(): Promise<void> {

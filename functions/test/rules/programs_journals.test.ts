@@ -267,20 +267,20 @@ describe("journals: edit dan hapus", () => {
 });
 
 describe("journals: akses baca", () => {
-  it("guru kelasnya membaca; guru kelas lain dan admin tidak", async () => {
+  it("semua guru sekolah membaca; guru sekolah lain dan siswa lain tidak", async () => {
     await seedProgram();
     const today = wibDate();
     await seedJournal(today);
 
     await assertSucceeds(getDoc(doc(a.teacher1, journalPath(today))));
     await assertSucceeds(getDocs(collection(a.teacher1, `${programPath}/journals`)));
+    await assertSucceeds(getDoc(doc(a.teacher2, journalPath(today))));
     await assertSucceeds(getDoc(doc(a.student, journalPath(today))));
 
     // #2 (journals part) and #3
-    await assertFails(getDoc(doc(a.teacher2, journalPath(today))));
-    await assertFails(getDocs(collection(a.teacher2, `${programPath}/journals`)));
-    await assertFails(getDoc(doc(a.admin, journalPath(today))));
-    await assertFails(getDocs(collection(a.admin, `${programPath}/journals`)));
+    await assertFails(getDoc(doc(a.otherTeacher, journalPath(today))));
+    await assertFails(getDocs(collection(a.otherTeacher, `${programPath}/journals`)));
+    await assertFails(getDoc(doc(a.classmate, journalPath(today))));
     // teachers never write journals
     await assertFails(updateDoc(doc(a.teacher1, journalPath(today)), {pageEnd: 99}));
   });
@@ -419,10 +419,10 @@ describe("programs", () => {
   it("program tidak bisa dihapus klien", async () => {
     await seedProgram();
     await assertFails(deleteDoc(doc(a.student, programPath)));
-    await assertFails(deleteDoc(doc(a.admin, programPath)));
+    await assertFails(deleteDoc(doc(a.teacher1, programPath)));
   });
 
-  it("siswa membaca programnya; guru per kelas; admin tidak", async () => {
+  it("siswa membaca programnya; semua guru sekolah; guru sekolah lain tidak", async () => {
     await seedProgram();
     const programs = (db: Db) => collection(db, `${school}/programs`);
 
@@ -431,12 +431,12 @@ describe("programs", () => {
     await assertFails(getDoc(doc(a.classmate, programPath)));
     await assertFails(getDocs(programs(a.student))); // unfiltered list
 
-    const ofStudentInClass = (db: Db, classId: string) =>
-      query(programs(db), where("studentId", "==", "siswa1"), where("classId", "==", classId));
-    await assertSucceeds(getDocs(ofStudentInClass(a.teacher1, CLASS_1)));
-    await assertFails(getDocs(ofStudentInClass(a.teacher2, CLASS_1)));
-    await assertFails(getDoc(doc(a.teacher2, programPath)));
-    await assertFails(getDoc(doc(a.admin, programPath)));
+    const ofStudent = (db: Db) => query(programs(db), where("studentId", "==", "siswa1"));
+    await assertSucceeds(getDocs(ofStudent(a.teacher1)));
+    await assertSucceeds(getDocs(ofStudent(a.teacher2)));
+    await assertSucceeds(getDoc(doc(a.teacher2, programPath)));
+    await assertFails(getDocs(ofStudent(a.otherTeacher)));
+    await assertFails(getDoc(doc(a.otherTeacher, programPath)));
   });
 });
 
@@ -472,17 +472,16 @@ describe("studentStats", () => {
   });
 
   // #2 (studentStats part)
-  it("guru membaca per kelas yang ditugaskan saja", async () => {
-    await assertSucceeds(getDocs(query(stats(a.teacher1), where("classId", "==", CLASS_1))));
-    await assertSucceeds(getDoc(doc(a.teacher1, `${school}/studentStats/siswa1`)));
-    await assertFails(getDocs(query(stats(a.teacher1), where("classId", "==", CLASS_2))));
-    await assertFails(getDoc(doc(a.teacher1, `${school}/studentStats/siswa3`)));
-    await assertFails(getDocs(stats(a.teacher1))); // must filter by class
+  it("semua guru sekolah membaca semua ringkasan; guru sekolah lain tidak", async () => {
+    await assertSucceeds(getDocs(stats(a.teacher1)));
+    await assertSucceeds(getDocs(query(stats(a.teacher2), where("classId", "==", CLASS_2))));
+    await assertSucceeds(getDoc(doc(a.teacher1, `${school}/studentStats/siswa3`)));
+    await assertFails(getDocs(stats(a.otherTeacher)));
+    await assertFails(getDoc(doc(a.otherTeacher, `${school}/studentStats/siswa1`)));
   });
 
-  it("admin membaca semua; tidak ada klien yang menulis", async () => {
-    await assertSucceeds(getDocs(stats(a.admin)));
-    for (const db of [a.admin, a.teacher1, a.student]) {
+  it("tidak ada klien yang menulis ringkasan", async () => {
+    for (const db of [a.teacher1, a.student]) {
       await assertFails(
         setDoc(doc(db, `${school}/studentStats/siswa1`), {status: "aktif", streakCurrent: 99}),
       );

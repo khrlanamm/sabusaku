@@ -3,14 +3,16 @@ import {FieldValue} from "firebase-admin/firestore";
 import {computeStatus, computeStreak, isOverdue, percentOf} from "../domain/activity";
 import {monthOf, wibToday} from "../domain/dates";
 import {DEFAULT_SETTINGS, SchoolSettings, StudentStatus} from "../domain/types";
-import {classesCol, db, programsCol, schoolRef, statsCol, usersCol} from "./firebase";
+import {db, programsCol, schoolRef, statsCol, usersCol} from "./firebase";
 
 export interface StudentProfile {
   uid: string;
   name: string;
-  nis: string | null;
+  email: string;
+  photoUrl: string | null;
+  /** Class label, e.g. `XII-A1`. */
   classId: string | null;
-  className: string | null;
+  extracurriculars: string[];
 }
 
 export interface ActiveProgramSummary {
@@ -29,9 +31,10 @@ export interface ActiveProgramSummary {
 export interface StudentStatsData {
   studentId: string;
   name: string;
-  nis: string | null;
+  email: string;
+  photoUrl: string | null;
   classId: string | null;
-  className: string | null;
+  extracurriculars: string[];
   status: StudentStatus;
   daysSinceLastJournal: number;
   activeProgram: ActiveProgramSummary | null;
@@ -49,9 +52,10 @@ export function emptyStats(profile: StudentProfile): StudentStatsData {
   return {
     studentId: profile.uid,
     name: profile.name,
-    nis: profile.nis,
+    email: profile.email,
+    photoUrl: profile.photoUrl,
     classId: profile.classId,
-    className: profile.className,
+    extracurriculars: profile.extracurriculars,
     status: "belum_mulai",
     daysSinceLastJournal: 0,
     activeProgram: null,
@@ -92,7 +96,7 @@ interface RefreshOptions {
 /**
  * Rebuilds a student's whole summary from the profile, programs and journal
  * dates, and overwrites the document so no field can go stale (docs/04 §5).
- * A student who is gone or deactivated has no summary, which removes them
+ * A student who is gone or removed from the school has no summary, which removes them
  * from teacher dashboards.
  */
 export async function refreshStudentStats(
@@ -110,10 +114,8 @@ export async function refreshStudentStats(
     return;
   }
 
-  const classId = (user.get("classId") as string | null) ?? null;
-  const [settings, classDoc, programsSnapshot] = await Promise.all([
+  const [settings, programsSnapshot] = await Promise.all([
     options.settings ?? loadSettings(schoolId),
-    classId ? classesCol(schoolId).doc(classId).get() : null,
     programsCol(schoolId).where("studentId", "==", studentId).get(),
   ]);
   const programs = programsSnapshot.docs;
@@ -184,10 +186,11 @@ export async function refreshStudentStats(
 
   const summary = withTimestamp({
     studentId,
-    name: user.get("name") as string,
-    nis: (user.get("nis") as string | null) ?? null,
-    classId,
-    className: classDoc?.exists ? (classDoc.get("name") as string) : null,
+    name: (user.get("name") as string | undefined) ?? "",
+    email: (user.get("email") as string | undefined) ?? "",
+    photoUrl: (user.get("photoUrl") as string | null | undefined) ?? null,
+    classId: (user.get("classId") as string | null | undefined) ?? null,
+    extracurriculars: (user.get("extracurriculars") as string[] | undefined) ?? [],
     status,
     daysSinceLastJournal,
     activeProgram,

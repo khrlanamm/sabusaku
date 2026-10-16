@@ -1,5 +1,6 @@
-// docs/04 §8: createUsers → sign in → start a book → write journals →
-// studentStats is filled by the triggers, through the real security rules.
+// docs/04 §8: roster → sign in → claimAccount → start a book → write
+// journals → studentStats is filled by the triggers, through the real
+// security rules.
 
 import {
   deleteDoc,
@@ -11,15 +12,15 @@ import {
 } from "firebase/firestore";
 import {afterAll, beforeAll, describe, expect, it} from "vitest";
 
-import {programsCol, schoolRef, statsCol, usersCol} from "../../src/infra/firebase";
+import {auth, membersCol, programsCol, schoolRef, statsCol} from "../../src/infra/firebase";
 import {refreshAllSchools} from "../../src/scheduled/dailyRefresh";
 import {
-  addAccount,
-  addClass,
+  addJoined,
   addSchool,
   clearEmulators,
   Client,
   closeClients,
+  codeOf,
   eventually,
   signIn,
   wibDate,
@@ -29,7 +30,9 @@ const SCHOOL = "sman1";
 const PROGRAM = "buku1";
 const TEXT = "Tokoh utama mulai menyadari pentingnya pendidikan.";
 
-let admin: Client;
+const STUDENT_EMAIL = "raka@sekolah.test";
+
+let teacher: Client;
 let student: Client;
 let studentUid: string;
 
@@ -61,17 +64,15 @@ beforeAll(async () => {
   // No neutral days, so the expected counts do not depend on the weekday the
   // suite happens to run on.
   await schoolRef(SCHOOL).update({"settings.neutralWeekdays": []});
-  await addClass(SCHOOL, "k1", "XII IPA 1");
-  await addClass(SCHOOL, "k2", "XII IPA 2");
-  studentUid = await addAccount(SCHOOL, {
+  teacher = await addJoined(SCHOOL, {email: "sari@sekolah.test", role: "guru", name: "Bu Sari"});
+  student = await addJoined(SCHOOL, {
+    email: STUDENT_EMAIL,
     role: "siswa",
     name: "Raka Pratama",
-    username: "1001",
-    classId: "k1",
-    className: "XII IPA 1",
+    classId: "XII-A1",
+    extracurriculars: ["Masis-KIR"],
   });
-  admin = await signIn(SCHOOL, "admin");
-  student = await signIn(SCHOOL, "1001");
+  studentUid = student.uid;
 });
 
 afterAll(closeClients);
@@ -81,7 +82,10 @@ describe("alur membaca", () => {
     expect(await stats()).toMatchObject({
       status: "belum_mulai",
       activeProgram: null,
-      className: "XII IPA 1",
+      name: "Raka Pratama",
+      email: STUDENT_EMAIL,
+      classId: "XII-A1",
+      extracurriculars: ["Masis-KIR"],
     });
   });
 
@@ -90,7 +94,7 @@ describe("alur membaca", () => {
     const batch = writeBatch(student.db);
     batch.set(doc(student.db, `${school}/programs/${PROGRAM}`), {
       studentId: studentUid,
-      classId: "k1",
+      classId: "XII-A1",
       book: {title: "Laskar Pelangi", author: "Andrea Hirata", totalPages: 100},
       month: today.slice(0, 7),
       startDate: today,
@@ -193,28 +197,46 @@ describe("alur membaca", () => {
 });
 
 describe("perubahan profil dan pengaturan", () => {
-  it("pindah kelas mengikutkan program dan ringkasan", async () => {
-    await admin.call("moveStudentClass", {uid: studentUid, classId: "k2"});
-    const data = await statsWhere((s) => s.classId === "k2");
-    expect(data.className).toBe("XII IPA 2");
+  it("siswa pindah kelas sendiri; program dan ringkasan ikut", async () => {
+    await updateDoc(doc(student.db, `${school}/users/${studentUid}`), {
+      classId: "XII-A2",
+      updatedAt: serverTimestamp(),
+    });
+    await statsWhere((s) => s.classId === "XII-A2");
     await eventually(
-      async () => (await programsCol(SCHOOL).doc(PROGRAM).get()).get("classId") === "k2",
+      async () => (await programsCol(SCHOOL).doc(PROGRAM).get()).get("classId") === "XII-A2",
     );
   });
 
-  it("mengganti nama siswa dan nama kelas memperbarui ringkasan", async () => {
-    await usersCol(SCHOOL).doc(studentUid).update({name: "Raka P."});
+  it("guru mengganti nama dan siswa mengganti ekskul; ringkasan ikut", async () => {
+    await updateDoc(doc(teacher.db, `${school}/users/${studentUid}`), {
+      name: "Raka P.",
+      updatedAt: serverTimestamp(),
+    });
     await statsWhere((s) => s.name === "Raka P.");
-    await schoolRef(SCHOOL).collection("classes").doc("k2").update({name: "XII IPA 2B"});
-    await statsWhere((s) => s.className === "XII IPA 2B");
+    await updateDoc(doc(student.db, `${school}/users/${studentUid}`), {
+      extracurriculars: ["Masis-KIR", "PMR"],
+      updatedAt: serverTimestamp(),
+    });
+    await statsWhere((s) => s.extracurriculars?.length === 2);
   });
 
-  it("akun nonaktif hilang dari ringkasan dan kembali saat diaktifkan", async () => {
-    await admin.call("setUserActive", {uid: studentUid, active: false});
+  it("siswa dikeluarkan: hilang dari ringkasan, akun tetap; kembali saat ditambah lagi", async () => {
+    await teacher.call("removeStudent", {email: STUDENT_EMAIL});
     await eventually(async () => !(await statsCol(SCHOOL).doc(studentUid).get()).exists);
-    await admin.call("setUserActive", {uid: studentUid, active: true});
+    expect((await membersCol().doc(STUDENT_EMAIL).get()).exists).toBe(false);
+    expect((await auth.getUser(studentUid)).customClaims ?? {}).not.toHaveProperty("schoolId");
+
+    // The account still signs in, but belongs to no school.
+    const again = await signIn(STUDENT_EMAIL);
+    expect(await codeOf(again.join())).toBe("not-found");
+
+    await teacher.call("addStudents", {students: [{email: STUDENT_EMAIL}]});
+    await again.join();
     const data = await statsWhere((s) => s.studentId === studentUid);
-    expect(data.booksCompleted).toBe(1);
+    // The profile and the history come back.
+    expect(data).toMatchObject({booksCompleted: 1, name: "Raka P.", classId: "XII-A2"});
+    student = again;
   });
 
   it("refresh harian menghitung ulang status seiring waktu berjalan", async () => {
@@ -222,7 +244,7 @@ describe("perubahan profil dan pengaturan", () => {
     const start = wibDate(-12);
     await programsCol(SCHOOL).doc("buku2").set({
       studentId: studentUid,
-      classId: "k2",
+      classId: "XII-A2",
       book: {title: "Bumi", author: "Tere Liye", totalPages: 440},
       month: start.slice(0, 7),
       startDate: start,
@@ -250,8 +272,8 @@ describe("perubahan profil dan pengaturan", () => {
       activeProgram: {overdue: true},
     });
 
-    // Looser thresholds apply as soon as the admin saves them.
-    await updateDoc(doc(admin.db, school), {
+    // Looser thresholds apply as soon as a teacher saves them.
+    await updateDoc(doc(teacher.db, school), {
       settings: {neutralWeekdays: [], holidays: [], activeMaxDays: 14, attentionMaxDays: 30},
     });
     await statsWhere((s) => s.status === "aktif");

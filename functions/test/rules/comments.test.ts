@@ -69,9 +69,9 @@ beforeEach(async () => {
 
 describe("comments", () => {
   // #16
-  it("guru kelasnya membuat komentar; guru kelas lain dan siswa tidak", async () => {
+  it("semua guru sekolah membuat komentar; guru sekolah lain dan siswa tidak", async () => {
     await assertSucceeds(addDoc(collection(a.teacher1, commentsPath), comment()));
-    await assertFails(
+    await assertSucceeds(
       addDoc(
         collection(a.teacher2, commentsPath),
         comment({teacherId: "guru2", teacherName: "Guru Dua"}),
@@ -81,7 +81,7 @@ describe("comments", () => {
       addDoc(collection(a.student, commentsPath), comment({teacherId: "siswa1"})),
     );
     await assertFails(
-      addDoc(collection(a.admin, commentsPath), comment({teacherId: "admin1"})),
+      addDoc(collection(a.otherTeacher, commentsPath), comment({teacherId: "guru9"})),
     );
   });
 
@@ -107,10 +107,8 @@ describe("comments", () => {
     await assertFails(updateDoc(mine, {teacherName: "Nama Lain", updatedAt: serverTimestamp()}));
     await assertFails(updateDoc(mine, {text: "", updatedAt: serverTimestamp()}));
 
-    // A second teacher of the same class may read but not touch it.
-    const coTeacher = env
-      .authenticatedContext("guru3", {role: "guru", schoolId: SCHOOL, classIds: [CLASS_1]})
-      .firestore() as unknown as Db;
+    // Another teacher of the school may read but not touch it.
+    const coTeacher = a.teacher2;
     await assertSucceeds(getDoc(doc(coTeacher, `${commentsPath}/milik-guru1`)));
     await assertFails(
       updateDoc(doc(coTeacher, `${commentsPath}/milik-guru1`), {
@@ -134,8 +132,8 @@ describe("comments", () => {
   });
 
   // #2 and #3
-  it("guru kelas lain, siswa lain, dan admin tidak membaca komentar", async () => {
-    for (const db of [a.teacher2, a.classmate, a.admin, a.outsider]) {
+  it("guru sekolah lain dan siswa lain tidak membaca komentar", async () => {
+    for (const db of [a.otherTeacher, a.classmate, a.outsider]) {
       await assertFails(getDocs(collection(db, commentsPath)));
       await assertFails(getDoc(doc(db, `${commentsPath}/milik-guru1`)));
     }

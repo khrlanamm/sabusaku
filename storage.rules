@@ -1,8 +1,22 @@
 rules_version = '2';
 
+// Profile photos only: schools/{schoolId}/avatars/{uid}.jpg. The app keeps
+// the download URL in users/{uid}.photoUrl. Everything else is closed.
 service firebase.storage {
   match /b/{bucket}/o {
-    // Deny everything until feature rules are defined.
+    match /schools/{schoolId}/avatars/{file} {
+      function inSchool() {
+        return request.auth != null && request.auth.token.get('schoolId', '') == schoolId;
+      }
+      function isOwnPhoto() { return inSchool() && file == request.auth.uid + '.jpg'; }
+
+      allow read: if inSchool();
+      allow create, update: if isOwnPhoto()
+        && request.resource.size < 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if isOwnPhoto();
+    }
+
     match /{allPaths=**} {
       allow read, write: if false;
     }

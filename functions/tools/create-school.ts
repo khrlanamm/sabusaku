@@ -1,34 +1,33 @@
-// Registers a school and its first admin.
+// Registers a school. Teachers (penanggung jawab) are added afterwards with
+// tools/add-guru.ts and students with tools/import-students.ts or in the app.
 //
-//   npx tsx tools/create-school.ts --code sman1 --name "SMA Negeri 1 Contoh"
-//       [--admin admin] [--admin-name "Admin Sekolah"] [--emulator]
+//   npx tsx tools/create-school.ts --code sman1sukodadi --name "SMA Negeri 1 Sukodadi"
+//       [--classes "XII-A1,XII-A2,X-G"] [--emulator]
 //
-// The initial password is printed once and is not stored anywhere.
+// The school starts with the default extracurriculars (Masis-KIR, Paskibra,
+// Pala, PMR); teachers can add more in the app.
 
-import {arg, requireArg, run, target} from "./_env";
+import {listArg, requireArg, run, target} from "./_env";
 
-import {isValidSchoolId, isValidUsername, normalizeUsername} from "../src/domain/identity";
+import {DEFAULT_EXTRACURRICULARS} from "../src/domain/labels";
 import {createSchool} from "../src/infra/schools";
+
+const SCHOOL_ID_RE = /^[a-z0-9]{3,30}$/;
 
 run(async () => {
   const code = requireArg("code").toLowerCase();
   const name = requireArg("name");
-  const adminUsername = normalizeUsername(arg("admin") ?? "admin");
-  const adminName = arg("admin-name") ?? "Admin Sekolah";
-
-  if (!isValidSchoolId(code)) {
-    throw new Error("Kode sekolah harus 3–20 karakter, huruf kecil dan angka saja.");
-  }
-  if (!isValidUsername(adminUsername)) {
-    throw new Error("Username admin tidak valid (3–30 karakter: a-z, 0-9, titik, garis bawah, tanda hubung).");
+  if (!SCHOOL_ID_RE.test(code)) {
+    throw new Error("Kode sekolah harus 3–30 karakter, huruf kecil dan angka saja.");
   }
 
-  const account = await createSchool(code, name, {username: adminUsername, name: adminName});
+  const classes = listArg("classes");
+  await createSchool(code, name, classes);
 
   console.log(`Sekolah dibuat di ${target()}.`);
-  console.log(`  Kode sekolah : ${code}`);
-  console.log(`  Nama         : ${name}`);
-  console.log(`  Admin        : ${account.username}`);
-  console.log(`  Password awal: ${account.password}`);
-  console.log("Password ini hanya tampil sekali dan wajib diganti saat login pertama.");
+  console.log(`  Kode  : ${code}`);
+  console.log(`  Nama  : ${name}`);
+  console.log(`  Kelas : ${classes.length} label`);
+  console.log(`  Ekskul: ${DEFAULT_EXTRACURRICULARS.join(", ")}`);
+  console.log("Tambahkan penanggung jawab dengan tools/add-guru.ts.");
 });
