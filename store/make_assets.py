@@ -6,8 +6,8 @@ because Play rejects images with an alpha channel.
 
     python3 -I store/make_assets.py
 
-Input:  store/raw/phone/*.png    1080x2424, from tool/store-screenshots.sh phone
-        store/raw/tablet/*.png   1600x2560, from tool/store-screenshots.sh tablet
+Input:  store/raw/phone/*.png    1080x2424, captured on a phone (v1 came from the removed tool/store-screenshots.sh)
+        store/raw/tablet/*.png   1600x2560, captured on a 10-inch tablet
 Output: store/out/               feature graphic, phone and tablet screenshots
 """
 

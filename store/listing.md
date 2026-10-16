@@ -58,9 +58,9 @@ Rilis pertama Sabu Saku: jurnal membaca harian untuk siswa, dashboard dan koment
 
 ## Graphics
 
-Raw screens came from `tool/store-screenshots.sh phone|tablet` (production,
-demo school, v1.0.0) into `raw/`. The demo school is gone since 16 Oct 2026, and
-the current screens still show the v1 admin role and school-code login. Retake
+Raw screens in `raw/` came from v1.0.0 with the demo school (its capture
+script, `tool/store-screenshots.sh`, was removed with the demo school on
+16 Oct 2026). They still show the v1 admin role and school-code login. Retake
 them from a real school account before the next listing update. `make_assets.py` builds the listing images in `out/`:
 
 - `icon-512.png` (512x512)

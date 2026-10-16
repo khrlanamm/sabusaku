@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,24 +12,36 @@ import 'package:sabusaku/core/storage/prefs.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// Must match functions/tools/seed-e2e.ts.
-const e2eSchool = 'e2e';
+const e2eClass = 'XII-A1';
+const e2eTeacherEmail = 'guru@e2e.test';
+const e2eTeacherName = 'Sari Wulandari';
+const e2eStudentEmail = 'siswa@e2e.test';
+const e2eStudentName = 'Raka Pratama';
+const e2eNewStudentEmail = 'baru@e2e.test';
+const e2eGoogleEmail = 'google@e2e.test';
+const e2eGoogleName = 'Gita Lestari';
+const e2eRegisterEmail = 'daftar@e2e.test';
+const e2eRegisterName = 'Dewi Anggraini';
+const e2eOutsiderEmail = 'luar@e2e.test';
+
+/// The Auth emulator accepts an unsigned JSON ID token for Google.
+const e2eGoogleIdToken =
+    '{"sub":"google-e2e","email":"google@e2e.test","email_verified":true}';
 
 /// Sign-in secrets of the run. tool/e2e.sh generates them and passes the
 /// initial one to the seed script as well, so none is written in the repo.
 const e2eInitialPassword = String.fromEnvironment('E2E_INITIAL');
 const e2eNewPassword = String.fromEnvironment('E2E_NEW');
-const e2eClass = 'XII IPA 1';
-const e2eTeacher = 'sari';
-const e2eStudent = '1001';
 const e2eBook = 'Laskar Pelangi';
 const e2eCommentText = 'Ringkasanmu jelas, lanjutkan membaca ya.';
 const e2eJournalText =
     'Ikal mulai menyadari bahwa pendidikan adalah jalan mengubah hidupnya.';
 
-/// Initial passwords captured when the admin creates the accounts; later
-/// tests sign in with them.
-String teacherPassword = '';
-String studentPassword = '';
+/// Where the device reaches the emulators (see lib/bootstrap.dart).
+const _emulatorHost = String.fromEnvironment(
+  'EMULATOR_HOST',
+  defaultValue: '10.0.2.2',
+);
 
 /// A destination of the bottom navigation bar.
 Finder navTab(String label) =>
@@ -101,55 +116,74 @@ Future<void> tapVisible(WidgetTester tester, Finder finder) async {
 
 Future<void> signIn(
   WidgetTester tester, {
-  required String username,
+  required String email,
   required String password,
-  String school = e2eSchool,
 }) async {
   await waitFor(tester, find.byKey(const Key('login-submit')));
-  await tester.enterText(find.byKey(const Key('login-school')), school);
-  await tester.enterText(find.byKey(const Key('login-username')), username);
+  await tester.enterText(find.byKey(const Key('login-email')), email);
   await tester.enterText(find.byKey(const Key('login-password')), password);
   await tapVisible(tester, find.byKey(const Key('login-submit')));
 }
 
-/// Completes the forced password change shown at first sign-in.
-Future<void> setNewPassword(WidgetTester tester) async {
-  await waitFor(tester, find.text('Buat password baru'));
-  await tester.enterText(find.byKey(const Key('password-new')), e2eNewPassword);
-  await tester.enterText(
-    find.byKey(const Key('password-confirm')),
-    e2eNewPassword,
-  );
-  await tapVisible(tester, find.byKey(const Key('password-submit')));
-}
+/// Signs in the Google-only account directly: the Google account picker is
+/// a system screen the test cannot drive.
+Future<void> signInWithFakeGoogle() =>
+    FirebaseAuth.instance.signInWithCredential(
+      GoogleAuthProvider.credential(idToken: e2eGoogleIdToken),
+    );
 
 Future<void> signOut(WidgetTester tester) async {
   await FirebaseAuth.instance.signOut();
   await waitFor(tester, find.byKey(const Key('login-submit')));
 }
 
-/// Admin › Pengguna › + › "Tambah satu pengguna".
-Future<void> openAddUser(WidgetTester tester) async {
-  await waitFor(tester, find.byKey(const Key('users-add')));
-  // A floating SnackBar from the previous action can sit on top of the FAB.
-  await waitForGone(tester, find.byType(SnackBar));
-  await tester.tap(find.byKey(const Key('users-add')));
-  await waitFor(tester, find.byKey(const Key('users-add-manual')));
-  await tester.tap(find.byKey(const Key('users-add-manual')));
-  await waitFor(tester, find.byKey(const Key('add-user-submit')));
+/// Fills both fields of a new password and its confirmation.
+Future<void> enterNewPassword(WidgetTester tester, String password) async {
+  await tester.enterText(find.byKey(const Key('password-new')), password);
+  await tester.enterText(find.byKey(const Key('password-confirm')), password);
 }
 
-/// Reads the password from the one-time credential dialog and dismisses it.
-Future<String> readCredentialAndClose(WidgetTester tester) async {
-  final field = find.descendant(
-    of: find.byKey(const Key('credential-password')),
-    matching: find.byType(SelectableText),
-  );
-  await waitFor(tester, field);
-  final password = tester.widget<SelectableText>(field).data!;
-  await tester.tap(find.byKey(const Key('credential-close')));
+/// Picks [label] in the class dropdown.
+Future<void> pickClass(WidgetTester tester, String label) async {
+  await tapVisible(tester, find.byKey(const Key('field-class')));
+  await waitFor(tester, find.text(label).last);
+  await tester.tap(find.text(label).last);
   await tester.pump(const Duration(milliseconds: 500));
-  return password;
+}
+
+/// Opens the verification link the Auth emulator "sent" to [email], as the
+/// student would from their inbox.
+Future<void> verifyEmailOnEmulator(String email) async {
+  final client = HttpClient();
+  try {
+    final codes = await _getJson(
+      client,
+      Uri.parse(
+        'http://$_emulatorHost:9099/emulator/v1/projects/sabusaku/oobCodes',
+      ),
+    );
+    final link =
+        (codes['oobCodes'] as List).cast<Map<String, dynamic>>().lastWhere(
+              (code) =>
+                  code['email'] == email &&
+                  code['requestType'] == 'VERIFY_EMAIL',
+            )['oobLink']
+            as String;
+    // The link points at localhost; the device reaches the host elsewhere.
+    final uri = Uri.parse(link).replace(host: _emulatorHost);
+    final request = await client.getUrl(uri);
+    final response = await request.close();
+    await response.drain<void>();
+  } finally {
+    client.close();
+  }
+}
+
+Future<Map<String, dynamic>> _getJson(HttpClient client, Uri uri) async {
+  final request = await client.getUrl(uri);
+  final response = await request.close();
+  final body = await response.transform(utf8.decoder).join();
+  return jsonDecode(body) as Map<String, dynamic>;
 }
 
 /// The student home explains notifications once before Android asks for the
