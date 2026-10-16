@@ -44,6 +44,12 @@ PRIVASI
 Sabu Saku dipakai lewat sekolah. Ingin sekolahmu ikut? Daftar di sabusaku.web.app/daftar-sekolah
 ```
 
+## Release notes of 1.2.0 (500 characters max)
+
+```text
+Katalog buku bersama: lebih dari 1.000 buku Indonesia lengkap dengan cover. Siswa cukup mencari judul saat memulai buku, bisa menjelajah rekomendasi sekolah dan buku populer, serta mengusulkan buku baru dengan foto cover. Penanggung jawab mengelola katalog, meninjau usulan siswa, dan memberi rekomendasi. Tampilan terang dan gelap.
+```
+
 ## Release notes of 1.1.0 (500 characters max)
 
 ```text
