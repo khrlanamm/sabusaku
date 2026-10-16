@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/colors.dart';
+import '../../app/theme/palette.dart';
 
 class StreakBadge extends StatelessWidget {
   const StreakBadge({super.key, required this.days});
@@ -10,14 +10,15 @@ class StreakBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final active = days > 0;
-    final text = active ? AppColors.attentionText : AppColors.neutralText;
+    final palette = context.palette;
+    final text = active ? palette.attentionText : palette.neutralText;
     return Semantics(
       label: 'Streak $days hari',
       excludeSemantics: true,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: active ? AppColors.attentionTint : AppColors.neutralTint,
+          color: active ? palette.attentionTint : palette.neutralTint,
           borderRadius: BorderRadius.circular(999),
         ),
         child: Row(
@@ -26,7 +27,7 @@ class StreakBadge extends StatelessWidget {
             Icon(
               Icons.local_fire_department,
               size: 16,
-              color: active ? const Color(0xFFD98200) : AppColors.neutralText,
+              color: active ? palette.streak : palette.neutralText,
             ),
             const SizedBox(width: 4),
             Text(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/theme/colors.dart';
+import '../../../app/theme/palette.dart';
 import '../../../core/time/date_format.dart';
 import '../data/journal_outbox.dart';
 
@@ -78,22 +78,22 @@ class _FailedCard extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.fromLTRB(14, 12, 6, 6),
       decoration: BoxDecoration(
-        color: AppColors.inactiveTint,
+        color: context.palette.inactiveTint,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.inactiveText),
+        border: Border.all(color: context.palette.inactiveText),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.error, color: AppColors.inactiveText, size: 20),
+              Icon(Icons.error, color: context.palette.inactiveText, size: 20),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   isDelete ? 'Jurnal gagal dihapus' : 'Jurnal belum terkirim',
                   style: theme.textTheme.titleSmall?.copyWith(
-                    color: AppColors.inactiveText,
+                    color: context.palette.inactiveText,
                   ),
                 ),
               ),
@@ -105,7 +105,7 @@ class _FailedCard extends ConsumerWidget {
             child: Text(
               '${formatDateLong(entry.date)}\n${entry.reason ?? ''}',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.inactiveText,
+                color: context.palette.inactiveText,
               ),
             ),
           ),

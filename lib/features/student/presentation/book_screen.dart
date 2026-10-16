@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/theme/colors.dart';
 import '../../../core/models/program.dart';
 import '../../../core/time/date_format.dart';
 import '../../../core/time/wib_clock.dart';
@@ -91,7 +90,7 @@ class _StartBookFormState extends ConsumerState<_StartBookForm> {
               'Pilih buku apa saja. Target selesai: '
               '${formatDateLong(target)}.',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppColors.inkMuted,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 16),
@@ -143,7 +142,7 @@ class _StartBookFormState extends ConsumerState<_StartBookForm> {
               'Memulai buku butuh koneksi internet.',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.inkMuted,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ],
@@ -236,7 +235,7 @@ class _ActiveBook extends ConsumerWidget {
                   Text(
                     program.book.author,
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.inkMuted,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   if (overdue)
@@ -304,7 +303,7 @@ class _ActiveBook extends ConsumerWidget {
               'Tersedia setelah jurnalmu mencapai halaman terakhir.',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.inkMuted,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),
@@ -319,7 +318,9 @@ class _ActiveBook extends ConsumerWidget {
         const SizedBox(height: 4),
         TextButton.icon(
           key: const Key('book-stop'),
-          style: TextButton.styleFrom(foregroundColor: AppColors.error),
+          style: TextButton.styleFrom(
+            foregroundColor: Theme.of(context).colorScheme.error,
+          ),
           onPressed: () => _stop(context, ref),
           icon: const Icon(Icons.stop_circle_outlined),
           label: const Text('Hentikan buku'),
@@ -348,7 +349,7 @@ class _Fact extends StatelessWidget {
             child: Text(
               label,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppColors.inkMuted,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ),

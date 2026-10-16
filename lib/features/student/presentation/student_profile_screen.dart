@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/router/routes.dart';
-import '../../../app/theme/colors.dart';
+import '../../../app/theme/palette.dart';
 import '../../../core/models/program.dart';
 import '../../../core/time/date_format.dart';
 import '../../../core/widgets/dialogs.dart';
@@ -31,15 +31,13 @@ class StudentProfileScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const AccountSection(),
+          const AccountHeader(),
           const SizedBox(height: 12),
           const StudentLabelsCard(),
-          const SizedBox(height: 12),
-          const NotificationSettingTile(),
           const SizedBox(height: 20),
           Text('Statistik membaca', style: theme.textTheme.titleMedium),
           const SizedBox(height: 10),
-          Row(
+          StatCardRow(
             children: [
               Expanded(
                 child: StatCard(
@@ -54,7 +52,7 @@ class StudentProfileScreen extends ConsumerWidget {
                   label: 'Buku selesai',
                   value: '${stats?.booksCompleted ?? 0}',
                   icon: Icons.menu_book,
-                  color: AppColors.green,
+                  color: context.palette.success,
                 ),
               ),
               const SizedBox(width: 10),
@@ -63,7 +61,7 @@ class StudentProfileScreen extends ConsumerWidget {
                   label: 'Streak terbaik',
                   value: '${stats?.streakBest ?? 0}',
                   icon: Icons.local_fire_department,
-                  color: const Color(0xFFD98200),
+                  color: context.palette.streak,
                 ),
               ),
             ],
@@ -85,6 +83,8 @@ class StudentProfileScreen extends ConsumerWidget {
                 onTap: () =>
                     context.push(Routes.studentProgramJournals(program.id)),
               ),
+          const SizedBox(height: 20),
+          const AccountSettings(extraSettings: [NotificationSettingTile()]),
         ],
       ),
     );
@@ -225,9 +225,18 @@ class ProgramHistoryTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final (color, tint) = switch (program.status) {
-      ProgramStatus.active => (AppColors.blue, AppColors.sky),
-      ProgramStatus.completed => (AppColors.activeText, AppColors.activeTint),
-      ProgramStatus.stopped => (AppColors.neutralText, AppColors.neutralTint),
+      ProgramStatus.active => (
+        Theme.of(context).colorScheme.primary,
+        context.palette.infoTint,
+      ),
+      ProgramStatus.completed => (
+        context.palette.activeText,
+        context.palette.activeTint,
+      ),
+      ProgramStatus.stopped => (
+        context.palette.neutralText,
+        context.palette.neutralTint,
+      ),
     };
     return Card(
       margin: const EdgeInsets.only(bottom: 10),
@@ -254,7 +263,7 @@ class ProgramHistoryTile extends StatelessWidget {
                       '${formatMonth(program.startDate)} · '
                       '${program.journalCount} jurnal · ${program.percent}%',
                       style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.inkMuted,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),
                     const SizedBox(height: 6),

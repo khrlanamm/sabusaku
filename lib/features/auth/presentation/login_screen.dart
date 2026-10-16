@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../app/router/routes.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/widgets/brand.dart';
+import '../../../core/widgets/theme_controls.dart';
 import '../../../core/widgets/dialogs.dart';
 import '../data/auth_repository.dart';
 import '../domain/session.dart';
@@ -135,7 +136,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
+      appBar: AppBar(
+        toolbarHeight: 48,
+        actions: const [ThemeToggleButton(), SizedBox(width: 4)],
+      ),
       body: SafeArea(
+        top: false,
         child: Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),

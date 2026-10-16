@@ -19,7 +19,7 @@ class TeacherProfileScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          const AccountSection(),
+          const AccountHeader(),
           const SizedBox(height: 20),
           Text('Ekskul yang dibina', style: theme.textTheme.titleMedium),
           const SizedBox(height: 8),
@@ -42,6 +42,8 @@ class TeacherProfileScreen extends ConsumerWidget {
                   ),
               ],
             ),
+          const SizedBox(height: 20),
+          const AccountSettings(),
         ],
       ),
     );

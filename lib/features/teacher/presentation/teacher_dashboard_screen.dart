@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/router/routes.dart';
-import '../../../app/theme/colors.dart';
+import '../../../app/theme/palette.dart';
 import '../../../core/models/student_stats.dart';
 import '../../../core/models/student_status.dart';
 import '../../../core/widgets/stat_card.dart';
@@ -153,7 +153,7 @@ class _Summary extends StatelessWidget {
   Widget build(BuildContext context) {
     final activeBooks = students.where((s) => s.activeProgram != null).length;
     final journals = students.fold(0, (sum, s) => sum + s.journalCountMonth);
-    return Row(
+    return StatCardRow(
       children: [
         Expanded(
           child: StatCard(
@@ -168,7 +168,7 @@ class _Summary extends StatelessWidget {
             label: 'Buku aktif',
             value: '$activeBooks',
             icon: Icons.menu_book,
-            color: AppColors.green,
+            color: context.palette.success,
           ),
         ),
         const SizedBox(width: 10),
@@ -177,7 +177,7 @@ class _Summary extends StatelessWidget {
             label: 'Jurnal bulan ini',
             value: '$journals',
             icon: Icons.edit_note,
-            color: AppColors.navy,
+            color: context.palette.heading,
           ),
         ),
       ],
@@ -275,7 +275,7 @@ class _NeedsAttention extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Row(
                 children: [
-                  const Icon(Icons.check_circle, color: AppColors.green),
+                  Icon(Icons.check_circle, color: context.palette.success),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(

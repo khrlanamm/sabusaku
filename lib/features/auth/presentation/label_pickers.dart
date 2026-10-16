@@ -30,10 +30,15 @@ class ClassLabelField extends ConsumerWidget {
       ..sort(compareClassLabels);
     final empty = labels.isEmpty;
 
+    final theme = Theme.of(context);
     return DropdownButtonFormField<String>(
       key: const Key('field-class'),
       initialValue: value,
       isExpanded: true,
+      // Same text style as the text fields next to it, not a title.
+      style: theme.textTheme.bodyLarge,
+      dropdownColor: theme.colorScheme.surfaceContainerHigh,
+      borderRadius: BorderRadius.circular(14),
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: const Icon(Icons.class_outlined),

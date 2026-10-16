@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/router/routes.dart';
-import '../../../app/theme/colors.dart';
 import '../../../core/data/reading_repository.dart';
 import '../../../core/models/journal.dart';
 import '../../../core/time/wib_clock.dart';
@@ -116,8 +115,9 @@ class _StudentJournalDetailScreenState
                   padding: const EdgeInsets.only(bottom: 4),
                   child: Text(
                     program.book.title,
-                    style: Theme.of(context).textTheme.bodySmall
-                        ?.copyWith(color: AppColors.inkMuted),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
               JournalContentView(journal: data),
@@ -150,7 +150,7 @@ class _Comments extends ConsumerWidget {
           AsyncData(:final value) when value.isEmpty => Text(
             'Belum ada komentar.',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: AppColors.inkMuted,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           AsyncData(:final value) => Column(
@@ -161,7 +161,7 @@ class _Comments extends ConsumerWidget {
           AsyncError() => Text(
             'Komentar belum bisa dimuat.',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: AppColors.inkMuted,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           _ => const SkeletonList(items: 1, itemHeight: 64),

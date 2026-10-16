@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/colors.dart';
+import '../../app/theme/palette.dart';
 import '../models/student_status.dart';
 
 /// Status is always shown with an icon and text, never colour alone.
@@ -13,33 +13,37 @@ class StatusChip extends StatelessWidget {
   final int? count;
 
   static ({Color text, Color tint, IconData icon}) styleOf(
+    BuildContext context,
     StudentStatus status,
-  ) => switch (status) {
-    StudentStatus.aktif => (
-      text: AppColors.activeText,
-      tint: AppColors.activeTint,
-      icon: Icons.check_circle,
-    ),
-    StudentStatus.perluPerhatian => (
-      text: AppColors.attentionText,
-      tint: AppColors.attentionTint,
-      icon: Icons.error,
-    ),
-    StudentStatus.tidakAktif => (
-      text: AppColors.inactiveText,
-      tint: AppColors.inactiveTint,
-      icon: Icons.cancel,
-    ),
-    StudentStatus.belumMulai => (
-      text: AppColors.neutralText,
-      tint: AppColors.neutralTint,
-      icon: Icons.menu_book,
-    ),
-  };
+  ) {
+    final palette = context.palette;
+    return switch (status) {
+      StudentStatus.aktif => (
+        text: palette.activeText,
+        tint: palette.activeTint,
+        icon: Icons.check_circle,
+      ),
+      StudentStatus.perluPerhatian => (
+        text: palette.attentionText,
+        tint: palette.attentionTint,
+        icon: Icons.error,
+      ),
+      StudentStatus.tidakAktif => (
+        text: palette.inactiveText,
+        tint: palette.inactiveTint,
+        icon: Icons.cancel,
+      ),
+      StudentStatus.belumMulai => (
+        text: palette.neutralText,
+        tint: palette.neutralTint,
+        icon: Icons.menu_book,
+      ),
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
-    final style = styleOf(status);
+    final style = styleOf(context, status);
     final label = count == null ? status.label : '${status.label} · $count';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),

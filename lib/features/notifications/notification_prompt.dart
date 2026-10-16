@@ -109,24 +109,22 @@ class _NotificationSettingTileState
   @override
   Widget build(BuildContext context) {
     final granted = _granted;
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: ListTile(
-        leading: Icon(
-          granted == true
-              ? Icons.notifications_active_outlined
-              : Icons.notifications_off_outlined,
-        ),
-        title: const Text('Notifikasi komentar guru'),
-        subtitle: Text(switch (granted) {
-          true => 'Aktif',
-          false => 'Belum aktif',
-          null => 'Memeriksa…',
-        }),
-        trailing: granted == false
-            ? TextButton(onPressed: _enable, child: const Text('Aktifkan'))
-            : null,
+    // A row of the "Pengaturan" card (AccountSettings).
+    return ListTile(
+      leading: Icon(
+        granted == true
+            ? Icons.notifications_active_outlined
+            : Icons.notifications_off_outlined,
       ),
+      title: const Text('Notifikasi komentar guru'),
+      subtitle: Text(switch (granted) {
+        true => 'Aktif',
+        false => 'Belum aktif',
+        null => 'Memeriksa…',
+      }),
+      trailing: granted == false
+          ? TextButton(onPressed: _enable, child: const Text('Aktifkan'))
+          : null,
     );
   }
 }

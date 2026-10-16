@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../app/theme/colors.dart';
+import '../../app/theme/palette.dart';
 import '../errors/app_exception.dart';
 
 class EmptyState extends StatelessWidget {
@@ -29,11 +29,11 @@ class EmptyState extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.all(18),
-              decoration: const BoxDecoration(
-                color: AppColors.sky,
+              decoration: BoxDecoration(
+                color: context.palette.infoTint,
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, size: 36, color: AppColors.blue),
+              child: Icon(icon, size: 36, color: context.palette.info),
             ),
             const SizedBox(height: 16),
             Text(
@@ -47,7 +47,7 @@ class EmptyState extends StatelessWidget {
                 message!,
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: AppColors.inkMuted,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
@@ -102,7 +102,7 @@ class SkeletonList extends StatelessWidget {
         itemBuilder: (_, _) => Container(
           height: itemHeight,
           decoration: BoxDecoration(
-            color: AppColors.neutralTint,
+            color: context.palette.skeleton,
             borderRadius: BorderRadius.circular(18),
           ),
         ),

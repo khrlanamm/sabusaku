@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/colors.dart';
 import '../errors/app_exception.dart';
 
 /// Returns true when the user confirms.
@@ -24,7 +23,10 @@ Future<bool> showConfirmDialog(
         ),
         FilledButton(
           style: destructive
-              ? FilledButton.styleFrom(backgroundColor: AppColors.error)
+              ? FilledButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                  foregroundColor: Theme.of(context).colorScheme.onError,
+                )
               : null,
           onPressed: () => Navigator.of(context).pop(true),
           child: Text(confirmLabel),

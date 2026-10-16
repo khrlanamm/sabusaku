@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/router/routes.dart';
-import '../../../app/theme/colors.dart';
 import '../../../core/data/reading_repository.dart';
 import '../../../core/models/journal.dart';
 import '../../../core/models/program.dart';
@@ -263,7 +262,7 @@ class _JournalFormState extends ConsumerState<_JournalForm> {
                   ? widget.program.book.title
                   : '${widget.program.book.title} · mengubah jurnal',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.inkMuted,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 16),
@@ -329,7 +328,7 @@ class _JournalFormState extends ConsumerState<_JournalForm> {
                 child: Text(
                   'Pilih durasi membaca',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppColors.error,
+                    color: Theme.of(context).colorScheme.error,
                   ),
                 ),
               ),
@@ -390,7 +389,7 @@ class _JournalFormState extends ConsumerState<_JournalForm> {
               'Bisa disimpan tanpa sinyal. Jurnal dikirim saat online.',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.inkMuted,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ],

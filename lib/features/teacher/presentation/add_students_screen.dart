@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/theme/colors.dart';
+import '../../../app/theme/palette.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/models/member.dart';
 import '../../../core/utils/labels.dart';
@@ -206,12 +206,8 @@ class _AddStudentsScreenState extends ConsumerState<AddStudentsScreen> {
                             onChanged: (value) =>
                                 setState(() => row.classId = value),
                           ),
+                          // The chips carry their own "Ekstrakurikuler" title.
                           const SizedBox(height: 12),
-                          Text(
-                            'Ekstrakurikuler (opsional)',
-                            style: theme.textTheme.labelLarge,
-                          ),
-                          const SizedBox(height: 6),
                           ExtracurricularChips(
                             value: row.extracurriculars,
                             onChanged: (value) =>
@@ -276,7 +272,7 @@ class _Results extends StatelessWidget {
           size: 56,
           color: added == 0
               ? Theme.of(context).colorScheme.error
-              : AppColors.green,
+              : context.palette.success,
         ),
         const SizedBox(height: 8),
         Text(
@@ -301,7 +297,7 @@ class _Results extends StatelessWidget {
               leading: Icon(
                 result.ok ? Icons.check_circle : Icons.error,
                 color: result.ok
-                    ? AppColors.green
+                    ? context.palette.success
                     : Theme.of(context).colorScheme.error,
               ),
               title: Text(result.email),

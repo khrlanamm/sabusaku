@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 
-import '../../app/theme/colors.dart';
+import '../../app/theme/palette.dart';
 
 class AppProgressBar extends StatelessWidget {
   const AppProgressBar({
     super.key,
     required this.percent,
-    this.color = AppColors.blue,
+    this.color,
     this.height = 8,
   });
 
   /// 0–100.
   final int percent;
-  final Color color;
+
+  /// The primary colour when null.
+  final Color? color;
   final double height;
 
   @override
@@ -26,8 +28,8 @@ class AppProgressBar extends StatelessWidget {
         child: LinearProgressIndicator(
           value: value,
           minHeight: height,
-          color: color,
-          backgroundColor: AppColors.sky,
+          color: color ?? Theme.of(context).colorScheme.primary,
+          backgroundColor: context.palette.track,
         ),
       ),
     );

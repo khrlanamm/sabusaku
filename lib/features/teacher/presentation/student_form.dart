@@ -93,8 +93,6 @@ class _StudentEditorState extends State<_StudentEditor> {
               onChanged: (value) => setState(() => _classId = value),
             ),
             const SizedBox(height: 14),
-            Text('Ekstrakurikuler', style: theme.textTheme.titleSmall),
-            const SizedBox(height: 6),
             ExtracurricularChips(
               value: _extracurriculars,
               onChanged: (value) => setState(() => _extracurriculars = value),

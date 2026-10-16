@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../app/theme/colors.dart';
 import '../data/reading_repository.dart';
 import '../models/journal.dart';
 import '../models/program.dart';
@@ -60,7 +59,7 @@ class _JournalListState extends ConsumerState<JournalList> {
               return Text(
                 '${program.book.title} · ${program.status.label}',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppColors.inkMuted,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               );
             }

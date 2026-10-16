@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/router/routes.dart';
-import '../../../app/theme/colors.dart';
+import '../../../app/theme/palette.dart';
 import '../../../core/data/reading_repository.dart';
 import '../../../core/models/journal.dart';
 import '../../../core/models/program.dart';
@@ -42,7 +42,7 @@ class StudentHomeScreen extends ConsumerWidget {
             Text(
               formatDateLong(today),
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppColors.inkMuted,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 16),
@@ -80,7 +80,11 @@ class _NoBookCard extends StatelessWidget {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            const Icon(Icons.menu_book, size: 44, color: AppColors.blue),
+            Icon(
+              Icons.menu_book,
+              size: 44,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             const SizedBox(height: 10),
             Text(
               'Belum ada buku bulan ini',
@@ -91,7 +95,7 @@ class _NoBookCard extends StatelessWidget {
               'Pilih satu buku untuk dibaca, lalu catat bacaanmu setiap hari.',
               textAlign: TextAlign.center,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppColors.inkMuted,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
             const SizedBox(height: 16),
@@ -141,7 +145,7 @@ class _BookCard extends ConsumerWidget {
                       Text(
                         'Buku bulan ini',
                         style: theme.textTheme.labelMedium?.copyWith(
-                          color: AppColors.blue,
+                          color: Theme.of(context).colorScheme.primary,
                         ),
                       ),
                       Text(
@@ -155,7 +159,7 @@ class _BookCard extends ConsumerWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodySmall?.copyWith(
-                          color: AppColors.inkMuted,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -180,13 +184,13 @@ class _BookCard extends ConsumerWidget {
             if (written)
               Row(
                 children: [
-                  const Icon(Icons.check_circle, color: AppColors.green),
+                  Icon(Icons.check_circle, color: context.palette.success),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Jurnal hari ini sudah diisi',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: AppColors.activeText,
+                        color: context.palette.activeText,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -220,18 +224,18 @@ class OverdueLabel extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: AppColors.attentionTint,
+        color: context.palette.attentionTint,
         borderRadius: BorderRadius.circular(999),
       ),
-      child: const Row(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.schedule, size: 14, color: AppColors.attentionText),
+          Icon(Icons.schedule, size: 14, color: context.palette.attentionText),
           SizedBox(width: 4),
           Text(
             'Terlambat',
             style: TextStyle(
-              color: AppColors.attentionText,
+              color: context.palette.attentionText,
               fontWeight: FontWeight.w600,
               fontSize: 12,
             ),
@@ -258,7 +262,7 @@ class _StatsRow extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Row(
+        StatCardRow(
           children: [
             Expanded(
               child: StatCard(
@@ -273,7 +277,7 @@ class _StatsRow extends ConsumerWidget {
                 label: 'Streak',
                 value: '${stats?.streakCurrent ?? 0} hari',
                 icon: Icons.local_fire_department,
-                color: const Color(0xFFD98200),
+                color: context.palette.streak,
               ),
             ),
           ],
@@ -283,16 +287,16 @@ class _StatsRow extends ConsumerWidget {
             padding: const EdgeInsets.only(top: 10),
             child: Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.cloud_upload_outlined,
                   size: 18,
-                  color: AppColors.attentionText,
+                  color: context.palette.attentionText,
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: Text(
                     '$pending jurnal menunggu sinyal untuk dikirim.',
-                    style: const TextStyle(color: AppColors.attentionText),
+                    style: TextStyle(color: context.palette.attentionText),
                   ),
                 ),
               ],
@@ -319,7 +323,11 @@ class _NewComments extends ConsumerWidget {
       children: [
         Row(
           children: [
-            const Icon(Icons.chat_bubble, size: 18, color: AppColors.blue),
+            Icon(
+              Icons.chat_bubble,
+              size: 18,
+              color: Theme.of(context).colorScheme.primary,
+            ),
             const SizedBox(width: 8),
             Text(
               'Komentar baru dari guru',

@@ -4,7 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/theme/colors.dart';
+import '../../../app/theme/palette.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/models/school.dart';
 import '../../../core/utils/csv_import.dart';
@@ -287,8 +287,8 @@ class _Preview extends StatelessWidget {
                       '$valid siap diimpor · ${preview.invalidCount} bermasalah',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: preview.invalidCount > 0
-                            ? AppColors.attentionText
-                            : AppColors.activeText,
+                            ? context.palette.attentionText
+                            : context.palette.activeText,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -367,7 +367,7 @@ class _PreviewRow extends StatelessWidget {
                 row.isValid ? Icons.check_circle : Icons.error,
                 size: 18,
                 color: row.isValid
-                    ? AppColors.green
+                    ? context.palette.success
                     : Theme.of(context).colorScheme.error,
               ),
               const SizedBox(width: 8),
@@ -475,7 +475,7 @@ class _Results extends StatelessWidget {
           size: 56,
           color: added == 0
               ? Theme.of(context).colorScheme.error
-              : AppColors.green,
+              : context.palette.success,
         ),
         const SizedBox(height: 8),
         Text(

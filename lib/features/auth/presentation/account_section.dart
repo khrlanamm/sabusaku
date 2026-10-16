@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/router/routes.dart';
 import '../../../core/widgets/dialogs.dart';
+import '../../../core/widgets/theme_controls.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../../notifications/notification_service.dart';
 import '../data/auth_repository.dart';
@@ -11,10 +12,21 @@ import '../data/school_repository.dart';
 import '../domain/app_user.dart';
 import 'photo_actions.dart';
 
-/// Who is signed in, with photo, name, password, sign-out and account
-/// deletion. Shared by every role.
-class AccountSection extends ConsumerWidget {
+/// [AccountHeader] followed by [AccountSettings].
+class AccountSection extends StatelessWidget {
   const AccountSection({super.key});
+
+  @override
+  Widget build(BuildContext context) => const Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [AccountHeader(), SizedBox(height: 16), AccountSettings()],
+  );
+}
+
+/// Who is signed in: photo, name, email, role and school. Shared by every
+/// role; the profile screens put [AccountSettings] further down.
+class AccountHeader extends ConsumerWidget {
+  const AccountHeader({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -27,66 +39,106 @@ class AccountSection extends ConsumerWidget {
       color: scheme.onSurfaceVariant,
     );
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Row(
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
               children: [
-                Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    UserAvatar(
-                      photoUrl: profile.photoUrl,
-                      name: profile.name,
-                      radius: 32,
-                    ),
-                    Positioned(
-                      right: -6,
-                      bottom: -6,
-                      child: IconButton.filledTonal(
-                        key: const Key('account-photo'),
-                        tooltip: 'Ganti foto',
-                        iconSize: 16,
-                        visualDensity: VisualDensity.compact,
-                        icon: const Icon(Icons.photo_camera_outlined),
-                        onPressed: () =>
-                            showPhotoActions(context, ref, session),
-                      ),
-                    ),
-                  ],
+                UserAvatar(
+                  photoUrl: profile.photoUrl,
+                  name: profile.name,
+                  radius: 32,
                 ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(profile.name, style: theme.textTheme.titleMedium),
-                      const SizedBox(height: 2),
-                      Text(profile.email, style: muted),
-                      Text(
-                        [
-                          session.role.label,
-                          if (school != null) school.name,
-                        ].join(' · '),
-                        style: muted,
-                      ),
-                      if (session.role == UserRole.guru &&
-                          profile.extracurriculars.isNotEmpty)
-                        Text(
-                          'Pembina ${profile.extracurriculars.join(', ')}',
-                          style: muted,
-                        ),
-                    ],
+                Positioned(
+                  right: -6,
+                  bottom: -6,
+                  child: IconButton.filledTonal(
+                    key: const Key('account-photo'),
+                    tooltip: 'Ganti foto',
+                    iconSize: 16,
+                    visualDensity: VisualDensity.compact,
+                    // A ring in the card colour keeps the button apart from
+                    // the avatar behind it.
+                    style: IconButton.styleFrom(
+                      backgroundColor: scheme.secondaryContainer,
+                      foregroundColor: scheme.onSecondaryContainer,
+                      side: BorderSide(color: scheme.surface, width: 2),
+                    ),
+                    icon: const Icon(Icons.photo_camera_outlined),
+                    onPressed: () => showPhotoActions(context, ref, session),
                   ),
                 ),
               ],
             ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(profile.name, style: theme.textTheme.titleMedium),
+                  const SizedBox(height: 2),
+                  Text(profile.email, style: muted),
+                  Text(
+                    [
+                      session.role.label,
+                      if (school != null) school.name,
+                    ].join(' · '),
+                    style: muted,
+                  ),
+                  if (session.role == UserRole.guru &&
+                      profile.extracurriculars.isNotEmpty)
+                    Text(
+                      'Pembina ${profile.extracurriculars.join(', ')}',
+                      style: muted,
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// "Pengaturan" (theme plus [extraSettings]) and "Akun" (name, password,
+/// sign-out, account deletion). Shared by every role.
+class AccountSettings extends ConsumerWidget {
+  const AccountSettings({super.key, this.extraSettings = const []});
+
+  /// More rows for the "Pengaturan" card, e.g. notifications.
+  final List<Widget> extraSettings;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final session = ref.watch(currentSessionProvider);
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
+          child: Text('Pengaturan', style: theme.textTheme.titleSmall),
+        ),
+        Card(
+          clipBehavior: Clip.antiAlias,
+          child: Column(
+            children: [
+              const ThemeSettingTile(),
+              for (final tile in extraSettings) ...[const Divider(), tile],
+            ],
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(4, 0, 4, 8),
+          child: Text('Akun', style: theme.textTheme.titleSmall),
+        ),
         Card(
           clipBehavior: Clip.antiAlias,
           child: Column(

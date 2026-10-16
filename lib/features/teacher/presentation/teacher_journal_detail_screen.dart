@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/theme/colors.dart';
 import '../../../core/data/reading_repository.dart';
 import '../../../core/models/journal.dart';
 import '../../../core/widgets/dialogs.dart';
@@ -124,7 +123,9 @@ class _TeacherJournalDetailScreenState
                         child: Text(
                           program.book.title,
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: AppColors.inkMuted,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurfaceVariant,
                           ),
                         ),
                       ),
@@ -137,7 +138,7 @@ class _TeacherJournalDetailScreenState
                         'Belum ada komentar. Tulis tanggapan untuk siswa di '
                         'bawah.',
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: AppColors.inkMuted,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                       AsyncData(:final value) => Column(
@@ -176,9 +177,13 @@ class _TeacherJournalDetailScreenState
                 top: false,
                 child: Container(
                   padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
-                  decoration: const BoxDecoration(
-                    color: AppColors.surface,
-                    border: Border(top: BorderSide(color: AppColors.outline)),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    border: Border(
+                      top: BorderSide(
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                      ),
+                    ),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.end,

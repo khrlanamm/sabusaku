@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Theme applied to the Android Window while the process is starting when the OS's Dark Mode setting is on -->
-    <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
+    <!-- Theme applied to the Android Window while the process is starting in both light and dark system mode: the in-app theme setting decides the colours -->
+    <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <!-- Show a splash screen on the activity. Automatically removed when
              the Flutter engine draws its first frame -->
         <item name="android:windowBackground">@drawable/launch_background</item>
@@ -16,7 +16,10 @@
          running.
 
          This Theme is only used starting with V2 of Flutter's Android embedding. -->
-    <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar">
+    <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
         <item name="android:windowBackground">?android:colorBackground</item>
+        <!-- The app picks light or dark itself (Profil > Pengaturan > Tema);
+             the system must never darken it on its own. -->
+        <item name="android:forceDarkAllowed">false</item>
     </style>
 </resources>

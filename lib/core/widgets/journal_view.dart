@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import '../../app/theme/colors.dart';
+import '../../app/theme/palette.dart';
 import '../models/journal.dart';
 import '../time/date_format.dart';
 
@@ -31,11 +31,11 @@ class JournalContentView extends StatelessWidget {
             ),
             _Pill(icon: Icons.schedule, label: journal.durationRange.label),
             if (journal.pendingSync)
-              const _Pill(
+              _Pill(
                 icon: Icons.cloud_upload_outlined,
                 label: 'Menunggu sinkron',
-                color: AppColors.attentionText,
-                tint: AppColors.attentionTint,
+                color: context.palette.attentionText,
+                tint: context.palette.attentionTint,
               ),
           ],
         ),
@@ -66,7 +66,9 @@ class _Section extends StatelessWidget {
         children: [
           Text(
             title,
-            style: theme.textTheme.labelLarge?.copyWith(color: AppColors.blue),
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: theme.colorScheme.primary,
+            ),
           ),
           const SizedBox(height: 4),
           SelectableText(
@@ -80,20 +82,19 @@ class _Section extends StatelessWidget {
 }
 
 class _Pill extends StatelessWidget {
-  const _Pill({
-    required this.icon,
-    required this.label,
-    this.color = AppColors.navy,
-    this.tint = AppColors.sky,
-  });
+  const _Pill({required this.icon, required this.label, this.color, this.tint});
 
   final IconData icon;
   final String label;
-  final Color color;
-  final Color tint;
+
+  /// Heading colour on the info tint when null.
+  final Color? color;
+  final Color? tint;
 
   @override
   Widget build(BuildContext context) {
+    final color = this.color ?? context.palette.heading;
+    final tint = this.tint ?? context.palette.infoTint;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
@@ -155,12 +156,12 @@ class JournalListTile extends StatelessWidget {
                     ),
                   ),
                   if (journal.pendingSync)
-                    const Tooltip(
+                    Tooltip(
                       message: 'Menunggu sinkron',
                       child: Icon(
                         Icons.cloud_upload_outlined,
                         size: 18,
-                        color: AppColors.attentionText,
+                        color: context.palette.attentionText,
                       ),
                     ),
                   if (showUnreadBadge && journal.hasUnreadTeacherComment)
@@ -175,7 +176,7 @@ class JournalListTile extends StatelessWidget {
                 'Hal. ${journal.pageStart}–${journal.pageEnd} · '
                 '${journal.durationRange.label}',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppColors.inkMuted,
+                  color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
               const SizedBox(height: 6),
@@ -198,21 +199,22 @@ class _CommentBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: AppColors.blue,
+        color: scheme.primary,
         borderRadius: BorderRadius.circular(999),
       ),
-      child: const Row(
+      child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.chat_bubble, size: 12, color: Colors.white),
-          SizedBox(width: 4),
+          Icon(Icons.chat_bubble, size: 12, color: scheme.onPrimary),
+          const SizedBox(width: 4),
           Text(
             'Komentar baru',
             style: TextStyle(
-              color: Colors.white,
+              color: scheme.onPrimary,
               fontSize: 11.5,
               fontWeight: FontWeight.w600,
             ),
@@ -241,7 +243,7 @@ class CommentTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.fromLTRB(14, 10, 6, 12),
       decoration: BoxDecoration(
-        color: AppColors.sky,
+        color: context.palette.infoTint,
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(
@@ -249,13 +251,13 @@ class CommentTile extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Icon(Icons.person, size: 18, color: AppColors.blue),
+              Icon(Icons.person, size: 18, color: context.palette.info),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(
                   comment.teacherName,
                   style: theme.textTheme.labelLarge?.copyWith(
-                    color: AppColors.navy,
+                    color: context.palette.heading,
                   ),
                 ),
               ),
@@ -276,7 +278,7 @@ class CommentTile extends StatelessWidget {
                 Text(
                   comment.edited ? '$time · diubah' : time,
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppColors.inkMuted,
+                    color: theme.colorScheme.onSurfaceVariant,
                   ),
                 ),
               ],

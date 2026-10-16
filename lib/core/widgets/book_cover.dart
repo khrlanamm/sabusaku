@@ -36,6 +36,11 @@ class BookCover extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = _palette[paletteIndexOf(title)];
+    final theme = Theme.of(context);
+    // The navy cover would melt into dark surfaces without an edge.
+    final edge = theme.brightness == Brightness.dark
+        ? Border.all(color: theme.colorScheme.outline)
+        : null;
     return Semantics(
       label: 'Sampul buku $title',
       excludeSemantics: true,
@@ -49,6 +54,7 @@ class BookCover extends StatelessWidget {
             colors: colors,
           ),
           borderRadius: BorderRadius.circular(width * 0.14),
+          border: edge,
         ),
         alignment: Alignment.center,
         child: Text(

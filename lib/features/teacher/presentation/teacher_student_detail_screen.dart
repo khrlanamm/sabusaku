@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/router/routes.dart';
-import '../../../app/theme/colors.dart';
+import '../../../app/theme/palette.dart';
 import '../../../core/data/reading_repository.dart';
 import '../../../core/models/program.dart';
 import '../../../core/models/student_stats.dart';
@@ -247,14 +247,14 @@ class _Body extends ConsumerWidget {
             ),
           ),
         const SizedBox(height: 12),
-        Row(
+        StatCardRow(
           children: [
             Expanded(
               child: StatCard(
                 label: 'Streak',
                 value: '${stats.streakCurrent}',
                 icon: Icons.local_fire_department,
-                color: const Color(0xFFD98200),
+                color: context.palette.streak,
               ),
             ),
             const SizedBox(width: 10),
@@ -271,7 +271,7 @@ class _Body extends ConsumerWidget {
                 label: 'Buku selesai',
                 value: '${stats.booksCompleted}',
                 icon: Icons.menu_book,
-                color: AppColors.green,
+                color: context.palette.success,
               ),
             ),
           ],
