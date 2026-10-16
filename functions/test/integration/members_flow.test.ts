@@ -1,11 +1,14 @@
 // Roster and sign-in: claimAccount, addStudents, removeStudent, eraseStudent
-// and deleteMyAccount against the Auth, Firestore and Functions emulators.
+// and deleteMyAccount against the Auth, Firestore, Functions and Storage
+// emulators.
 
+import {getStorage} from "firebase-admin/storage";
 import {doc, serverTimestamp, updateDoc} from "firebase/firestore";
 import {afterAll, beforeAll, describe, expect, it} from "vitest";
 
 import {
   auth,
+  bookSuggestionsCol,
   membersCol,
   programsCol,
   schoolRef,
@@ -250,6 +253,39 @@ describe("akun pindah dan hapus akun sendiri", () => {
     expect((await usersCol(A).doc(student.uid).get()).exists).toBe(false);
     expect((await programsCol(A).doc("buku-pamit").get()).exists).toBe(false);
     expect((await membersCol().doc("pamit@sekolah.test").get()).exists).toBe(false);
+  });
+
+  it("hapus akun ikut menghapus foto cover unggahan siswa dan rujukannya di saran", async () => {
+    const bucket = getStorage().bucket(process.env.STORAGE_BUCKET ?? "demo-sabusaku.appspot.com");
+    const student = await addJoined(A, {email: "cover@sekolah.test", role: "siswa", name: "Cover", classId: "XII-A1"});
+    const path = `schools/${A}/programCovers/${student.uid}/1700000000.jpg`;
+    await bucket.file(path).save(Buffer.from([0xff, 0xd8, 0xff, 0xe0, 1, 2]), {contentType: "image/jpeg"});
+    const cover = {coverUrl: "https://example.test/cover.jpg", coverPath: path};
+    const coverOnly = await bookSuggestionsCol().add({kind: "edit", bookId: "bk-a", status: "pending", proposed: cover});
+    const newBook = await bookSuggestionsCol().add({
+      kind: "new",
+      bookId: null,
+      status: "pending",
+      proposed: {title: "Buku Baru", ...cover},
+    });
+    const rejected = await bookSuggestionsCol().add({kind: "edit", bookId: "bk-a", status: "rejected", proposed: cover});
+    const otherPath = `schools/${A}/programCovers/orang-lain/1700000000.jpg`;
+    const other = await bookSuggestionsCol().add({
+      kind: "edit",
+      bookId: "bk-a",
+      status: "pending",
+      proposed: {...cover, coverPath: otherPath},
+    });
+
+    await student.call("deleteMyAccount");
+
+    expect((await bucket.file(path).exists())[0]).toBe(false);
+    // Nothing left to propose once the cover is gone.
+    expect((await coverOnly.get()).exists).toBe(false);
+    // The book data stays; it names no student.
+    expect((await newBook.get()).get("proposed")).toEqual({title: "Buku Baru"});
+    expect((await rejected.get()).get("proposed")).toEqual({});
+    expect((await other.get()).get("proposed.coverPath")).toBe(otherPath);
   });
 
   it("pengguna tanpa sekolah juga bisa menghapus akunnya", async () => {

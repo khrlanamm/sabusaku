@@ -7,6 +7,7 @@ import {
   normalizeEmail,
 } from "../domain/labels";
 import {MAX_CLASSES, MAX_MEMBER_EXTRACURRICULARS, Role} from "../domain/types";
+import {forgetStudentCovers} from "./books";
 import {
   activeProgramsCol,
   auth,
@@ -296,5 +297,6 @@ export async function eraseStudentData(schoolId: string, uid: string): Promise<n
   const programs = await programsCol(schoolId).where("studentId", "==", uid).get();
   for (const program of programs.docs) await db.recursiveDelete(program.ref);
   await deleteAvatar(schoolId, uid);
+  await forgetStudentCovers(schoolId, uid);
   return programs.size;
 }

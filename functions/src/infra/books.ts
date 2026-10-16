@@ -485,6 +485,40 @@ export function programCoverPath(url: unknown, schoolId: string, studentId: stri
 }
 
 /**
+ * Forgets the cover photos a student uploaded for their own programs, when
+ * their data is erased or their account deleted: the files go, and so does
+ * every suggestion's pointer to them. A suggestion that proposed nothing but
+ * that cover and is still pending goes too; others keep their book data,
+ * which names no student. Covers already copied into the catalog stay: they
+ * belong to the book now.
+ */
+export async function forgetStudentCovers(schoolId: string, studentId: string): Promise<void> {
+  const folder = `schools/${schoolId}/programCovers/${studentId}/`;
+  try {
+    await getStorage().bucket().deleteFiles({prefix: folder});
+  } catch {
+    // Storage is optional for this cleanup, as with avatars.
+  }
+  const suggestions = await bookSuggestionsCol()
+    .where("proposed.coverPath", ">=", folder)
+    .where("proposed.coverPath", "<", `${folder}\uf8ff`)
+    .get();
+  for (const suggestion of suggestions.docs) {
+    const rest = Object.keys((suggestion.get("proposed") as Record<string, unknown>) ?? {}).filter(
+      (field) => field !== "coverUrl" && field !== "coverPath",
+    );
+    if (suggestion.get("status") === "pending" && rest.length === 0) {
+      await suggestion.ref.delete();
+    } else {
+      await suggestion.ref.update({
+        "proposed.coverUrl": FieldValue.delete(),
+        "proposed.coverPath": FieldValue.delete(),
+      });
+    }
+  }
+}
+
+/**
  * Copies a cover file into the catalog's own folder and returns its download
  * URL. A catalog book never points at a student's file: the student may
  * delete it, and only members of their school can read it.
