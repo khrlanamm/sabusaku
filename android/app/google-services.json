@@ -12,7 +12,36 @@
           "package_name": "com.sabu.saku"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "577458550553-4rjb2566uuijqpjr4ko9dknopqsv299j.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sabu.saku",
+            "certificate_hash": "690d8f9d54a6356d8e87cb01a82f03197490371d"
+          }
+        },
+        {
+          "client_id": "577458550553-jgoeau669rgmmkeflmof7v3cechjp9r7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sabu.saku",
+            "certificate_hash": "3fda542a52d8fbf02702ee92419d2fd65c5d46e9"
+          }
+        },
+        {
+          "client_id": "577458550553-ot3uaodcgrou2mebnjnujdo8vgqp3se2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sabu.saku",
+            "certificate_hash": "a93853cf307ad9134c4e348f847a40fd56e5e389"
+          }
+        },
+        {
+          "client_id": "577458550553-860anldlrfl60mlfuovok1fqas437d02.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBXvLeNvgAWAV56ViZjU-QblrHWsZ-NVvw"
@@ -20,7 +49,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "577458550553-860anldlrfl60mlfuovok1fqas437d02.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
