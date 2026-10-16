@@ -1,12 +1,25 @@
 """Builds the Play Store listing images from raw app screenshots.
 
-Each image is an HTML page (headline, device mockup, brand colours and
-Poppins from assets/fonts) rendered to PNG with headless Chrome, then
-flattened to 24-bit PNG because Play rejects images with an alpha channel.
+Each image is an HTML page (tagline, app screen, brand colours and Poppins
+from assets/fonts) rendered to PNG with headless Chrome, then flattened to
+24-bit PNG because Play rejects images with an alpha channel.
 Needs Google Chrome in /Applications and ImageMagick (`magick`).
 
     python3 -I store/make_assets.py            # render store/out from store/raw
     python3 -I store/make_assets.py --import   # refresh store/raw first, then render
+
+The phone and tablet screenshots follow Play's preview asset guidance
+(support.google.com/googleplay/android-developer/answer/9866151): the app
+screen is shown as it is, without a device frame, and the tagline (audience
+pill, one-line headline and one short sub line) stays in a band at the top
+that takes at most 20% of the image height. Before rendering, each page is
+loaded once more to measure that band (from the top edge down to the top of
+the app screen) and the width of the headline and sub line; the build
+fails if the band is taller than 20% or a line does not fit on one line.
+There are no floating badges over the screens. The texts avoid
+"terbaik/#1/baru/gratis/diskon" claims and calls to action, and describe
+only what the app does. The feature graphic is a separate asset type and
+keeps its tilted phone mockups.
 
 Raw screenshots come from tool/screenshots.sh, which signs in to production
 as real accounts and writes Flutter-surface captures (no Android status bar)
@@ -31,12 +44,16 @@ Output: store/out/feature-graphic.png        1024x500
         store/out/icon-512.png               512x512, copy of branding/png/playstore-icon-512.png
 """
 
+import html as htmllib
+import json
 import pathlib
+import re
 import shutil
 import subprocess
 import sys
 import tempfile
 import time
+from typing import NamedTuple
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SOURCE = ROOT / "build" / "screenshots"
@@ -46,15 +63,28 @@ FONTS = ROOT / "assets" / "fonts"
 BRAND = ROOT / "branding"
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
+# Play: taglines must not take up more than 20% of the image.
+MAX_TAGLINE = 0.20
+
 # Palette of the logo (branding/README.md).
 NAVY, NAVY_DEEP, BLUE = "#17365D", "#0F2747", "#2563EB"
-GREEN, GREEN_LIGHT, AMBER = "#2FA866", "#5CD08A", "#F5B942"
+GREEN, GREEN_LIGHT = "#2FA866", "#5CD08A"
 
 # The captures start with the empty band where the status bar would be.
-# Part of it is cropped so the screen title sits close to the top of the
-# mockup, as on a real device.
-PHONE = {"dir": "phone", "width": 1080, "height": 2424, "crop_top": 120}
+# Most of it is cropped so the screen title sits close to the top edge of
+# the screen, as on a real device. On the phone screens with a bottom
+# navigation bar, the bar starts at raw row 2183; `nav_top` skips three
+# rows of its blank top padding so that the content the bar covers does
+# not bleed into its edge when the screen is scaled down.
+PHONE = {"dir": "phone", "width": 1080, "height": 2424, "crop_top": 120, "nav_top": 2186}
 TABLET = {"dir": "tablet", "width": 2560, "height": 1600, "crop_top": 40}
+
+# The phone screen on a 1080x1920 screenshot: 814x1568 px, which holds
+# 2080 raw rows, as much as an 18:9 phone (1080x2160) shows below its
+# status bar. Longer screens are cut at the bottom like on such a phone:
+# a screen with a navigation bar keeps the bar and loses the end of the
+# content above it.
+PHONE_FRAME = {"top": 296, "width": 814, "height": 1568, "radius": 44}
 
 # Boxes (x0, y0, x1, y1) in raw pixels painted with the screen background
 # when a raw is imported.
@@ -63,75 +93,56 @@ RETOUCH = {
     ("phone", "siswa-isi-jurnal"): [(178, 440, 198, 457)],
 }
 
-# Material icons, 24x24 paths.
-ICONS = {
-    "flame": "M19.48 12.35c-1.57-4.08-7.16-4.3-5.81-10.23.1-.44-.37-.78-.75-.55C9.29 3.71 6.68 8 8.87 13.62c.18.46-.36.89-.75.59-1.81-1.37-2-3.34-1.84-4.75.06-.52-.62-.77-.91-.34C4.69 10.16 4 11.84 4 14.37c.38 5.6 5.11 7.32 6.81 7.54 2.43.31 5.06-.14 6.95-1.87 2.08-1.93 2.84-5.01 1.72-7.69zm-9.28 5.03c1.44-.35 2.18-1.39 2.38-2.31.33-1.43-.96-2.83-.09-5.09.33 1.87 3.27 3.04 3.27 5.08.08 2.53-2.66 4.7-5.56 2.32z",
-    "chat": "M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z",
-    "check": "M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z",
-    "bell": "M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z",
-    "people": "M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z",
-    "search": "M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z",
-    "book": "M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 4h5v8l-2.5-1.5L6 12V4z",
-    "star": "M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z",
-    "moon": "M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z",
-    "pencil": "M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z",
-    "plus": "M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z",
-    "mail": "M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z",
-}
 
-# Each shot: raw file, audience tag, headline (<em> marks the accent words),
-# sub line, and floating chips as (icon, colour, text, CSS position).
-# Chip texts repeat what the screen itself shows; nothing is invented. The
-# sub line may describe the feature around the screen.
+
+class Shot(NamedTuple):
+    """One screenshot: raw file, audience tag, headline (<em> marks the
+    accent words) and sub line, each kept to one line. The headline and
+    sub line describe what the screen shows or the feature around it;
+    nothing is invented. `top` is the first raw row shown (0: the crop_top
+    of the device); on the phone it is chosen so that the bottom of the
+    frame cuts between two rows of the UI, not through text, and never
+    through what the headline is about. `nav` keeps the navigation bar."""
+    raw: str
+    tag: str
+    title: str
+    sub: str
+    top: int = 0
+    nav: bool = False
+
+
 PHONE_SHOTS = [
-    ("siswa-beranda-komentar", "Untuk siswa", "Satu bulan,<br><em>satu buku</em>",
-     "Jurnal membaca harian, dipantau gurumu.",
-     [("check", GREEN, "Jurnal hari ini sudah diisi", "right:44px;top:1470px"),
-      ("chat", BLUE, "Komentar baru dari guru", "left:44px;top:1630px")]),
-    ("siswa-cari-buku", "Untuk siswa", "Cari bukumu,<br><em>langsung ketemu</em>",
-     "Judul, penulis, dan cover terisi dari katalog.",
-     [("search", BLUE, "Cari atau isi sendiri", "right:44px;top:1385px")]),
-    ("siswa-jelajahi", "Untuk siswa", "Temukan<br><em>bacaan berikutnya</em>",
-     "Rekomendasi sekolah dan buku populer.",
-     [("flame", AMBER, "Populer di sekolahmu", "right:44px;top:990px"),
-      ("book", GREEN, "1.198 buku bercover", "right:44px;top:1240px")]),
-    ("siswa-isi-jurnal", "Untuk siswa", "Catat bacaanmu<br><em>setiap hari</em>",
-     "Tetap bisa disimpan saat tanpa sinyal.",
-     [("book", BLUE, "Halaman 1 sampai 48", "right:44px;top:1085px")]),
-    ("siswa-jurnal-komentar", "Untuk siswa", "Tanggapan langsung<br><em>dari guru</em>",
-     "Notifikasi masuk saat jurnalmu dikomentari.",
-     [("chat", BLUE, "\u201cRingkasanmu runtut, Alan.\u201d", "right:44px;top:1775px")]),
-    ("guru-dashboard-gelap", "Untuk penanggung jawab", "Pantau sekolahmu<br><em>sekali lihat</em>",
-     "Status tiap siswa, dalam tema terang atau gelap.",
-     [("people", BLUE, "Saring per ekstrakurikuler", "right:44px;top:1250px")]),
-    ("guru-detail-buku", "Untuk penanggung jawab", "Rawat katalog<br><em>bersama</em>",
-     "Setiap perubahan buku tercatat di riwayat.",
-     [("star", AMBER, "Rekomendasi untuk siswa", "right:44px;top:840px")]),
-    ("guru-tambah-siswa", "Untuk penanggung jawab", "Tambah siswa<br><em>cukup dengan email</em>",
-     "Satu per satu, atau impor dari CSV.",
-     [("mail", BLUE, "Hanya email yang wajib", "right:44px;top:1345px")]),
+    Shot("siswa-beranda-komentar", "Untuk siswa", "Satu bulan, <em>satu buku</em>",
+         "Jurnal membaca harian, dipantau gurumu.", top=152, nav=True),
+    Shot("siswa-cari-buku", "Untuk siswa", "Cari bukumu <em>di katalog</em>",
+         "Judul, penulis, dan cover langsung terisi.", top=100, nav=True),
+    Shot("siswa-jelajahi", "Untuk siswa", "Temukan <em>bacaan berikutnya</em>",
+         "Lihat yang populer di sekolahmu dan seluruh katalog.", top=146),
+    Shot("siswa-isi-jurnal", "Untuk siswa", "Catat bacaanmu <em>setiap hari</em>",
+         "Tetap bisa disimpan saat tanpa sinyal.", top=144),
+    Shot("siswa-jurnal-komentar", "Untuk siswa", "Tanggapan <em>dari gurumu</em>",
+         "Notifikasi masuk saat jurnalmu dikomentari.", top=135),
+    Shot("guru-dashboard-gelap", "Untuk penanggung jawab", "Pantau siswa <em>sekali lihat</em>",
+         "Status tiap siswa, dalam tema terang atau gelap.", top=136, nav=True),
+    Shot("guru-detail-buku", "Untuk penanggung jawab", "Rawat katalog <em>bersama</em>",
+         "Setiap perubahan buku tercatat di riwayat.", top=150),
+    Shot("guru-tambah-siswa", "Untuk penanggung jawab", "Tambah siswa <em>cukup email</em>",
+         "Satu per satu, atau impor dari CSV.", top=135),
 ]
+# Tablet screens are shown whole, navigation bar included.
 TABLET_SHOTS = [
-    ("siswa-beranda", "Untuk siswa", "Satu bulan, <em>satu buku</em>",
-     "Jurnal membaca harian untuk siswa, dipantau penanggung jawab di sekolah.",
-     [("check", GREEN, "Jurnal hari ini sudah diisi", "right:80px;top:800px"),
-      ("book", BLUE, "Halaman 48 dari 534", "left:80px;top:880px")]),
-    ("siswa-jelajahi", "Untuk siswa", "Jelajahi <em>katalog bersama</em>",
-     "Rekomendasi sekolah dan buku yang ramai dibaca temanmu.",
-     [("flame", AMBER, "Populer di sekolahmu", "right:80px;top:540px"),
-      ("book", GREEN, "1.198 buku bercover", "right:220px;top:800px")]),
-    ("siswa-detail-buku", "Untuk siswa", "Kenali bukunya <em>sebelum mulai</em>",
-     "Cover, sinopsis, penerbit, dan berapa temanmu yang membacanya.",
-     [("book", BLUE, "Lengkap dengan sinopsis", "right:80px;top:470px")]),
-    ("guru-dashboard-gelap", "Untuk penanggung jawab", "Pantau sekolah <em>sekali lihat</em>",
-     "Per sekolah atau per ekstrakurikuler, dalam tema terang atau gelap.",
-     [("people", BLUE, "Saring per ekstrakurikuler", "right:80px;top:440px")]),
-    ("guru-katalog", "Untuk penanggung jawab", "Katalog bersama, <em>rapi terjaga</em>",
-     "Tambah dan ubah buku, tinjau saran siswa, beri rekomendasi.",
-     [("book", GREEN, "1.198 buku di katalog", "right:80px;top:600px")]),
-    ("guru-jurnal-komentar", "Untuk penanggung jawab", "Baca jurnal, <em>beri komentar</em>",
-     "Siswa langsung mendapat notifikasi saat jurnalnya dikomentari.",
-     [("chat", BLUE, "\u201cRingkasanmu runtut, Alan.\u201d", "right:80px;top:910px")]),
+    Shot("siswa-beranda", "Untuk siswa", "Satu bulan, <em>satu buku</em>",
+         "Jurnal membaca harian untuk siswa, dipantau penanggung jawab di sekolah."),
+    Shot("siswa-jelajahi", "Untuk siswa", "Jelajahi <em>katalog bersama</em>",
+         "Lihat yang populer di sekolahmu, atau telusuri per kategori."),
+    Shot("siswa-detail-buku", "Untuk siswa", "Kenali bukunya <em>sebelum mulai</em>",
+         "Cover, sinopsis, penerbit, dan berapa temanmu yang membacanya."),
+    Shot("guru-dashboard-gelap", "Untuk penanggung jawab", "Pantau sekolah <em>sekali lihat</em>",
+         "Per sekolah atau per ekstrakurikuler, dalam tema terang atau gelap."),
+    Shot("guru-katalog", "Untuk penanggung jawab", "Katalog bersama, <em>rapi terjaga</em>",
+         "Tambah dan ubah buku, tinjau saran siswa, beri rekomendasi."),
+    Shot("guru-jurnal-komentar", "Untuk penanggung jawab", "Baca jurnal, <em>beri komentar</em>",
+         "Siswa langsung mendapat notifikasi saat jurnalnya dikomentari."),
 ]
 
 # The phone mockups on the feature graphic.
@@ -163,9 +174,9 @@ body {{ position: relative; font-family: Poppins, sans-serif; }}
 .light {{
   color: {NAVY};
   background:
-    radial-gradient(60% 42% at 100% 0%, rgba(37, 99, 235, .20), transparent 70%),
-    radial-gradient(55% 40% at 0% 100%, rgba(47, 168, 102, .20), transparent 70%),
-    linear-gradient(180deg, #F8FBFF 0%, #E4EEFF 100%);
+    radial-gradient(60% 42% at 100% 0%, rgba(37, 99, 235, .24), transparent 70%),
+    radial-gradient(55% 40% at 0% 100%, rgba(47, 168, 102, .22), transparent 70%),
+    linear-gradient(180deg, #EEF4FF 0%, #D6E4FF 100%);
 }}
 .orb {{ position: absolute; border-radius: 50%; }}
 .dark .orb {{ background: rgba(255, 255, 255, .055); }}
@@ -174,7 +185,7 @@ body {{ position: relative; font-family: Poppins, sans-serif; }}
 .tag {{
   display: inline-flex; align-items: center; gap: 12px;
   padding: 10px 26px; border-radius: 999px;
-  font-weight: 600; font-size: 25px; letter-spacing: 3px; text-transform: uppercase;
+  font-weight: 600; font-size: 25px; line-height: 1.2; letter-spacing: 3px; text-transform: uppercase;
 }}
 .tag i {{ width: 12px; height: 12px; border-radius: 50%; background: {GREEN_LIGHT}; }}
 .dark .tag {{ color: #CFE0FF; background: rgba(255, 255, 255, .11); border: 1.5px solid rgba(255, 255, 255, .20); }}
@@ -188,21 +199,52 @@ h1 em {{ font-style: normal; }}
 .dark .sub {{ color: rgba(255, 255, 255, .84); }}
 .light .sub {{ color: #47597A; }}
 
+/* The device mockups of the feature graphic. */
 .device {{ background: #0A1930; }}
 .dark .device {{ box-shadow: 0 50px 100px rgba(4, 12, 30, .55), inset 0 0 0 2px rgba(255, 255, 255, .12); }}
-.light .device {{ box-shadow: 0 50px 100px rgba(23, 54, 93, .30), inset 0 0 0 2px rgba(255, 255, 255, .10); }}
 .screen {{ overflow: hidden; background: #F6F8FC; }}
 .screen img {{ display: block; }}
 
-.chip {{
-  position: absolute; display: flex; align-items: center; gap: 16px;
-  padding: 16px 30px 16px 18px; border-radius: 26px;
-  background: #fff; color: {NAVY}; font-weight: 600; font-size: 29px; white-space: nowrap;
-  box-shadow: 0 22px 50px rgba(4, 12, 30, .30);
-}}
-.chip .ic {{ width: 58px; height: 58px; border-radius: 18px; display: grid; place-items: center; }}
-.chip svg {{ width: 34px; height: 34px; }}
+/* The app screen of the phone and tablet screenshots: no device frame,
+   just the screen with rounded corners and a soft shadow. */
+.copy {{ position: absolute; left: 0; right: 0; text-align: center; }}
+.shot {{ position: absolute; overflow: hidden; background: #F6F8FC; }}
+.shot img {{ display: block; }}
+.shot .bar {{ position: absolute; left: 0; right: 0; bottom: 0; overflow: hidden; }}
+.dark .shot {{ box-shadow: 0 36px 80px rgba(4, 12, 30, .50), 0 0 0 2px rgba(255, 255, 255, .10); }}
+.light .shot {{ box-shadow: 0 30px 70px rgba(23, 54, 93, .26), 0 0 0 2px rgba(23, 54, 93, .10); }}
 """
+
+# Runs in the page and leaves its measurements in <html data-measure>,
+# which `measure` reads back from Chrome's --dump-dom output.
+MEASURE_JS = """
+<script>
+document.fonts.ready.then(() => {
+  const box = el => el.getBoundingClientRect();
+  // Width of a line of text if it were not allowed to wrap.
+  const natural = sel => {
+    const el = document.querySelector(sel);
+    el.style.whiteSpace = 'nowrap';
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const width = range.getBoundingClientRect().width;
+    el.style.whiteSpace = '';
+    return width;
+  };
+  const copy = document.querySelector('.copy');
+  const style = getComputedStyle(copy);
+  const parts = [...copy.children].map(box);
+  document.documentElement.dataset.measure = JSON.stringify({
+    height: box(document.body).height,
+    textTop: Math.min(...parts.map(p => p.top)),
+    textBottom: Math.max(...parts.map(p => p.bottom)),
+    screenTop: box(document.querySelector('.shot')).top,
+    room: copy.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
+    h1: natural('h1'),
+    sub: natural('.sub'),
+  });
+});
+</script>"""
 
 
 def orbs(width, height):
@@ -214,7 +256,7 @@ def orbs(width, height):
 
 def device(raw, source, width, bezel, radius):
     """A device mockup whose screen is `width` px wide, showing `raw`
-    without the top `crop_top` px."""
+    without the top `crop_top` px. Used on the feature graphic only."""
     scale = width / source["width"]
     crop = source["crop_top"] * scale
     height = (source["height"] - source["crop_top"]) * scale
@@ -227,44 +269,67 @@ def device(raw, source, width, bezel, radius):
 </div>"""
 
 
-def chip(icon, colour, text, position):
-    tint = colour + "26"  # the icon colour at 15% as the badge background
-    tilt = -3 if position.startswith("left") else 3
+def screen(shot, source, left, top, width, height, radius):
+    """The app screen itself at (left, top), `width` x `height` px: the raw
+    scaled to `width` from row `shot.top` down, cut at `height`. With
+    `shot.nav` the navigation bar stays at the bottom and the content above
+    it is cut instead."""
+    scale = width / source["width"]
+    first = shot.top or source["crop_top"]
+    image = (RAW / source["dir"] / f"{shot.raw}.png").as_uri()
+    layers = f'<img src="{image}" style="width:{width}px;margin-top:-{first * scale:.2f}px">'
+    end, limit = first + height / scale, source["height"]
+    if shot.nav:
+        bar = source["nav_top"]
+        layers += (f'<div class="bar" style="height:{(source["height"] - bar) * scale:.2f}px">'
+                   f'<img src="{image}" style="width:{width}px;margin-top:-{bar * scale:.2f}px"></div>')
+        end, limit = end - (source["height"] - bar), bar
+    if end > limit + 0.5:
+        raise SystemExit(f"{shot.raw}: the frame reaches below the screenshot; lower `top`")
     return f"""
-<div class="chip" style="{position};transform:rotate({tilt}deg)">
-  <span class="ic" style="background:{tint}"><svg viewBox="0 0 24 24"><path fill="{colour}" d="{ICONS[icon]}"/></svg></span>
-  {text}
+<div class="shot" style="left:{left}px;top:{top}px;width:{width}px;height:{height}px;border-radius:{radius}px">
+  {layers}
 </div>"""
 
 
+def copy_block(shot):
+    return (f'<div class="copy"><span class="tag"><i></i>{shot.tag}</span>'
+            f'<h1>{shot.title}</h1><p class="sub">{shot.sub}</p></div>')
+
+
 def phone_page(shot, dark):
-    """1080x1920: headline on top, the phone below it, cut by the bottom edge."""
-    raw, tag, title, sub, chips = shot
+    """1080x1920: the tagline band on top, the app screen below it."""
+    frame = PHONE_FRAME
     return f"""<!doctype html><meta charset="utf-8"><style>{BASE_CSS}
 body {{ width: 1080px; height: 1920px; }}
-.copy {{ position: absolute; left: 0; right: 0; top: 104px; padding: 0 70px; text-align: center; }}
-.sub {{ margin-left: auto; margin-right: auto; max-width: 880px; }}
-.stage {{ position: absolute; left: 0; right: 0; top: 548px; display: flex; justify-content: center; }}
+.copy {{ top: 58px; padding: 0 60px; }}
+.tag {{ font-size: 22px; padding: 8px 22px; letter-spacing: 2.6px; gap: 11px; }}
+.tag i {{ width: 11px; height: 11px; }}
+h1 {{ margin-top: 18px; font-size: 60px; line-height: 1.12; letter-spacing: -1.2px; }}
+.sub {{ margin-top: 8px; font-size: 30px; line-height: 1.35; }}
 </style><body class="{"dark" if dark else "light"}">{orbs(1080, 1920)}
-<div class="copy"><span class="tag"><i></i>{tag}</span><h1>{title}</h1><p class="sub">{sub}</p></div>
-<div class="stage">{device(raw, PHONE, 640, 15, 66)}</div>
-{"".join(chip(*c) for c in chips)}"""
+{copy_block(shot)}
+{screen(shot, PHONE, (1080 - frame["width"]) // 2, frame["top"], frame["width"], frame["height"], frame["radius"])}
+{MEASURE_JS}"""
 
 
 def tablet_page(shot, dark):
-    """1920x1200 landscape: one-line headline on top, the tablet below it."""
-    raw, tag, title, sub, chips = shot
+    """1920x1200 landscape: the tagline band on top, the whole app screen
+    below it."""
+    top, bottom = 212, 40
+    height = 1200 - top - bottom
+    width = round(height * TABLET["width"] / (TABLET["height"] - TABLET["crop_top"]))
     return f"""<!doctype html><meta charset="utf-8"><style>{BASE_CSS}
 body {{ width: 1920px; height: 1200px; }}
-.copy {{ position: absolute; left: 0; right: 0; top: 54px; padding: 0 120px; text-align: center; }}
-.tag {{ font-size: 22px; padding: 9px 24px; }}
-h1 {{ margin-top: 18px; font-size: 68px; letter-spacing: -1.4px; }}
-.sub {{ margin-top: 10px; font-size: 29px; }}
-.stage {{ position: absolute; left: 0; right: 0; top: 300px; display: flex; justify-content: center; }}
+.copy {{ top: 36px; padding: 0 120px; }}
+.tag {{ font-size: 18px; padding: 6px 18px; letter-spacing: 2.4px; gap: 10px; }}
+.tag i {{ width: 10px; height: 10px; }}
+h1 {{ margin-top: 12px; font-size: 52px; line-height: 1.12; letter-spacing: -1.1px; }}
+.sub {{ margin-top: 4px; font-size: 25px; line-height: 1.35; }}
 </style><body class="{"dark" if dark else "light"}">{orbs(1920, 1200)}
-<div class="copy"><span class="tag"><i></i>{tag}</span><h1>{title}</h1><p class="sub">{sub}</p></div>
-<div class="stage">{device(raw, TABLET, 1340, 16, 40)}</div>
-{"".join(chip(*c) for c in chips)}"""
+{copy_block(shot)}
+{screen(shot, TABLET, (1920 - width) // 2, top, width, height, 32)}
+{MEASURE_JS}"""
 
 
 def feature_graphic_page():
@@ -290,6 +355,62 @@ body {{ width: 1024px; height: 500px; }}
 <div class="phone" style="left:790px;top:38px;transform:rotate(6deg)">{device(front, PHONE, 226, 7, 30)}</div>"""
 
 
+def run_chrome(page, work, width, height, args, done, stdout=subprocess.DEVNULL):
+    """Opens `page` in headless Chrome with `args` and returns once `done()`
+    holds. Headless Chrome sometimes does its job and then fails to exit,
+    so this waits for the result rather than for the process."""
+    process = subprocess.Popen(
+        [CHROME, "--headless=new", "--disable-gpu", "--hide-scrollbars",
+         "--allow-file-access-from-files", f"--user-data-dir={work}/profile",
+         f"--window-size={width},{height}", "--virtual-time-budget=4000",
+         *args, page.as_uri()],
+        stdout=stdout, stderr=subprocess.DEVNULL)
+    deadline = time.monotonic() + 40
+    while time.monotonic() < deadline and process.poll() is None:
+        if done():
+            time.sleep(1.5)  # let Chrome finish writing
+            break
+        time.sleep(0.3)
+    if process.poll() is None:
+        process.kill()
+    process.wait()
+
+
+def measure(html, name, width, height):
+    """Loads the page in Chrome, prints how much of the height the tagline
+    band takes and returns what breaks the rules: a band taller than
+    MAX_TAGLINE or a headline or sub line that does not fit on one line.
+    The band runs from the top edge to the top of the app screen, so it
+    includes the margins around the text."""
+    with tempfile.TemporaryDirectory() as work:
+        page = pathlib.Path(work) / "page.html"
+        page.write_text(html, encoding="utf-8")
+        dump = pathlib.Path(work) / "dom.html"
+        with dump.open("w") as stdout:
+            run_chrome(page, work, width, height, ["--dump-dom"],
+                       lambda: "</html>" in dump.read_text(errors="replace"), stdout)
+        found = re.search(r'data-measure="([^"]*)"', dump.read_text(errors="replace"))
+    if not found:
+        raise SystemExit(f"{name}: Chrome did not report the measurements")
+    m = json.loads(htmllib.unescape(found.group(1)))
+    band = m["screenTop"] / m["height"]
+    text = (m["textBottom"] - m["textTop"]) / m["height"]
+    print(f"{name}: tagline band {m['screenTop']:.0f} of {m['height']:.0f} px = {band:.1%} "
+          f"(text itself {text:.1%}); headline {m['h1']:.0f}, sub line {m['sub']:.0f} "
+          f"of {m['room']:.0f} px")
+    errors = []
+    if band > MAX_TAGLINE:
+        errors.append(f"{name}: the tagline band takes {band:.1%} of the height, "
+                      f"more than {MAX_TAGLINE:.0%}")
+    if m["textBottom"] > m["screenTop"]:
+        errors.append(f"{name}: the tagline runs into the app screen")
+    for line in ("h1", "sub"):
+        if m[line] > m["room"]:
+            errors.append(f"{name}: the {'headline' if line == 'h1' else 'sub line'} "
+                          f"does not fit on one line; shorten it")
+    return errors
+
+
 def render(html, name, width, height, scale=1.0):
     OUT.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory() as work:
@@ -297,23 +418,9 @@ def render(html, name, width, height, scale=1.0):
         page.write_text(html, encoding="utf-8")
         target = OUT / f"{name}.png"
         target.unlink(missing_ok=True)
-        chrome = subprocess.Popen(
-            [CHROME, "--headless=new", "--disable-gpu", "--hide-scrollbars",
-             "--allow-file-access-from-files", f"--user-data-dir={work}/profile",
-             f"--force-device-scale-factor={scale}", f"--window-size={width},{height}",
-             "--virtual-time-budget=4000", f"--screenshot={target}", page.as_uri()],
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        # Headless Chrome writes the screenshot and then sometimes fails to
-        # exit, so wait for the file rather than for the process.
-        deadline = time.monotonic() + 40
-        while time.monotonic() < deadline and chrome.poll() is None:
-            if target.exists() and target.stat().st_size > 0:
-                time.sleep(1.5)  # let Chrome finish writing
-                break
-            time.sleep(0.3)
-        if chrome.poll() is None:
-            chrome.kill()
-        chrome.wait()
+        run_chrome(page, work, width, height,
+                   [f"--force-device-scale-factor={scale}", f"--screenshot={target}"],
+                   lambda: target.exists() and target.stat().st_size > 0)
         if not target.exists():
             raise SystemExit(f"Chrome did not render {name}")
         # Play accepts JPEG or 24-bit PNG only: drop the alpha channel.
@@ -323,9 +430,9 @@ def render(html, name, width, height, scale=1.0):
 
 def used_raws():
     """(dir, name) of every raw screenshot the listing images use."""
-    used = {("phone", shot[0]) for shot in PHONE_SHOTS}
+    used = {("phone", shot.raw) for shot in PHONE_SHOTS}
     used |= {("phone", name) for name in FEATURE_PHONES}
-    used |= {("tablet", shot[0]) for shot in TABLET_SHOTS}
+    used |= {("tablet", shot.raw) for shot in TABLET_SHOTS}
     return used
 
 
@@ -361,11 +468,21 @@ def import_raws():
 def main():
     if "--import" in sys.argv[1:]:
         import_raws()
+    # Measure every page first, so a tagline that breaks the rule stops
+    # the build before any image in store/out is replaced.
+    phones = [(f"phone-{i}", phone_page(shot, i % 2 == 1))
+              for i, shot in enumerate(PHONE_SHOTS, start=1)]
+    tablets = [(i, tablet_page(shot, i % 2 == 1))
+               for i, shot in enumerate(TABLET_SHOTS, start=1)]
+    errors = [error for name, html in phones for error in measure(html, name, 1080, 1920)]
+    errors += [error for index, html in tablets
+               for error in measure(html, f"tablet-{index}", 1920, 1200)]
+    if errors:
+        raise SystemExit("\n".join(errors))
     render(feature_graphic_page(), "feature-graphic", 1024, 500)
-    for index, shot in enumerate(PHONE_SHOTS, start=1):
-        render(phone_page(shot, index % 2 == 1), f"phone-{index}", 1080, 1920)
-    for index, shot in enumerate(TABLET_SHOTS, start=1):
-        html = tablet_page(shot, index % 2 == 1)
+    for name, html in phones:
+        render(html, name, 1080, 1920)
+    for index, html in tablets:
         # Same page at two sizes: 1920x1200 for 7 inch, 2560x1600 for 10 inch.
         render(html, f"tablet7-{index}", 1920, 1200)
         render(html, f"tablet10-{index}", 1920, 1200, scale=4 / 3)
