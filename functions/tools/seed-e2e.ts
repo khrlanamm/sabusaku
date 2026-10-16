@@ -19,11 +19,14 @@
 //   siswa    daftar@e2e.test     roster only, no account (for "Daftar")
 //   outsider luar@e2e.test       password, on no roster
 //            → "Harap Menghubungi Administrator Sekolah"
+//   catalog  Laskar Pelangi (529 hal.), Bumi Manusia (535 hal.)
 
 import {requireArg, run, useEmulator} from "./_env";
 
 import {auth} from "../src/infra/firebase";
 import {addMember, claimMembership} from "../src/infra/members";
+import {saveBook} from "../src/infra/books";
+import {rebuildCatalog} from "../src/infra/catalog";
 import {createSchool} from "../src/infra/schools";
 
 export const E2E_SCHOOL = "e2e";
@@ -74,6 +77,17 @@ run(async () => {
 
   // google@e2e.test has no account yet: like a real student, the first
   // Google sign-in creates it, and the app then asks for a password.
+
+  // A small catalog for the search and suggestion flows.
+  const importer = {name: "Impor awal", kind: "import" as const};
+  const catalog = [
+    {title: "Laskar Pelangi", authors: ["Andrea Hirata"], publisher: "Bentang Pustaka",
+      publishedYear: 2005, isbn13: "9789793062792", pageCount: 529, categories: ["Novel"]},
+    {title: "Bumi Manusia", authors: ["Pramoedya Ananta Toer"], publisher: "Lentera Dipantara",
+      publishedYear: 2005, isbn13: "9789799731234", pageCount: 535, categories: ["Sastra Klasik"]},
+  ];
+  for (const fields of catalog) await saveBook({fields, actor: importer, historyType: "created"});
+  await rebuildCatalog();
 
   console.log(`Seed e2e selesai: sekolah "${E2E_SCHOOL}".`);
 });

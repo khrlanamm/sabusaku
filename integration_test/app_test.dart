@@ -69,6 +69,20 @@ void main() {
     await waitFor(tester, find.byKey(const Key('home-start-book')));
     await dismissNotificationPrompt(tester);
     expect(navTab('Beranda'), findsOneWidget);
+
+    // A book that is not in the catalog: entered by hand, sent as a suggestion.
+    await tester.tap(find.byKey(const Key('home-start-book')));
+    await waitFor(tester, find.byKey(const Key('book-manual')));
+    await tapVisible(tester, find.byKey(const Key('book-manual')));
+    await tester.enterText(find.byKey(const Key('book-title')), e2eNewBook);
+    await tester.enterText(
+      find.byKey(const Key('book-author')),
+      'Ahmad Tohari',
+    );
+    await tester.enterText(find.byKey(const Key('book-pages')), '300');
+    await waitFor(tester, find.byKey(const Key('book-new-note')));
+    await tapVisible(tester, find.byKey(const Key('book-start')));
+    await waitFor(tester, find.byKey(const Key('book-stop')));
   });
 
   testWidgets('Google-only siswa adds a password, then signs in with it', (
@@ -121,13 +135,15 @@ void main() {
     await waitFor(tester, find.byKey(const Key('home-start-book')));
     await dismissNotificationPrompt(tester);
     await tester.tap(find.byKey(const Key('home-start-book')));
-    await waitFor(tester, find.byKey(const Key('book-title')));
-    await tester.enterText(find.byKey(const Key('book-title')), e2eBook);
-    await tester.enterText(
-      find.byKey(const Key('book-author')),
-      'Andrea Hirata',
-    );
+    // Found in the catalog; the page count differs from this copy.
+    await waitFor(tester, find.byKey(const Key('book-search')));
+    await tester.enterText(find.byKey(const Key('book-search')), 'laskar');
+    await waitFor(tester, find.byKey(const Key('book-search-result-0')));
+    await tapVisible(tester, find.byKey(const Key('book-search-result-0')));
+    await waitFor(tester, find.byKey(const Key('book-clear-pick')));
+    expect(find.text('Andrea Hirata'), findsWidgets);
     await tester.enterText(find.byKey(const Key('book-pages')), '100');
+    await waitFor(tester, find.byKey(const Key('book-edited-note')));
     await tapVisible(tester, find.byKey(const Key('book-start')));
     await waitFor(tester, find.byKey(const Key('book-stop')));
     expect(find.text('Halaman 0 dari 100'), findsOneWidget);
@@ -215,6 +231,48 @@ void main() {
     await tester.tap(find.text('Keluarkan'));
     await waitFor(tester, find.byKey(const Key('students-add')));
     await waitForGone(tester, find.text(e2eGoogleName));
+  });
+
+  testWidgets('guru applies an edit and adds a suggested book to the catalog', (
+    tester,
+  ) async {
+    await startApp(tester);
+    await signIn(tester, email: e2eTeacherEmail, password: e2eInitialPassword);
+    await waitFor(tester, navTab('Buku'));
+    await tester.tap(navTab('Buku'));
+    await waitFor(tester, find.byKey(const Key('books-suggestions')));
+    await tester.tap(find.byKey(const Key('books-suggestions')));
+
+    // The page count a student entered for Laskar Pelangi.
+    await waitFor(tester, find.text(e2eBook));
+    await tester.tap(find.text(e2eBook).first);
+    await waitFor(tester, find.byKey(const Key('suggestion-apply')));
+    await tapVisible(tester, find.byKey(const Key('suggestion-apply')));
+    await waitFor(tester, find.text('Saran diterapkan ke katalog.'));
+    await tester.tap(find.byType(BackButton));
+
+    // A book no catalog had: added with a category.
+    await waitFor(tester, find.text(e2eNewBook));
+    await tester.tap(find.text(e2eNewBook).first);
+    await waitFor(tester, find.byKey(const Key('suggestion-create')));
+    await tapVisible(tester, find.byKey(const Key('suggestion-create')));
+    // The save button sits at the end of a lazy list; tapVisible scrolls.
+    await waitFor(tester, find.byKey(const Key('editor-title')));
+    await tapVisible(tester, find.byKey(const Key('editor-category-Novel')));
+    await tapVisible(tester, find.byKey(const Key('editor-save')));
+    await waitFor(tester, find.byKey(const Key('book-edit-button')));
+
+    // Its history records the creation; the catalog search now finds it.
+    await waitFor(tester, find.textContaining('Ditambahkan'));
+    await tester.tap(find.byType(BackButton).first);
+    await tester.pump(const Duration(milliseconds: 500));
+    while (find.byType(BackButton).evaluate().isNotEmpty) {
+      await tester.tap(find.byType(BackButton).first);
+      await tester.pump(const Duration(milliseconds: 500));
+    }
+    await waitFor(tester, find.byKey(const Key('books-search')));
+    await tester.enterText(find.byKey(const Key('books-search')), 'ronggeng');
+    await waitFor(tester, find.text(e2eNewBook));
   });
 
   testWidgets('removed siswa is told to contact the school', (tester) async {

@@ -33,6 +33,7 @@ const e2eGoogleIdToken =
 const e2eInitialPassword = String.fromEnvironment('E2E_INITIAL');
 const e2eNewPassword = String.fromEnvironment('E2E_NEW');
 const e2eBook = 'Laskar Pelangi';
+const e2eNewBook = 'Ronggeng Dukuh Paruk';
 const e2eCommentText = 'Ringkasanmu jelas, lanjutkan membaca ya.';
 const e2eJournalText =
     'Ikal mulai menyadari bahwa pendidikan adalah jalan mengubah hidupnya.';
