@@ -3,8 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'app_user.freezed.dart';
 
 enum UserRole {
-  admin('admin', 'Admin sekolah'),
-  guru('guru', 'Guru'),
+  guru('guru', 'Penanggung jawab'),
   siswa('siswa', 'Siswa');
 
   const UserRole(this.wire, this.label);
@@ -29,28 +28,37 @@ abstract class AppUser with _$AppUser {
   const factory AppUser({
     required String uid,
     required UserRole role,
-    required String name,
-    required String username,
-    String? nis,
 
-    /// Students: their single class.
+    /// Empty until the user completes their profile.
+    @Default('') String name,
+    @Default('') String email,
+
+    /// Students: their class label, e.g. `XII-A1`. Null until chosen.
     String? classId,
 
-    /// Teachers: assigned classes.
-    @Default(<String>[]) List<String> classIds,
+    /// Extracurricular labels, e.g. `Masis-KIR`. Teachers: the ones they
+    /// supervise.
+    @Default(<String>[]) List<String> extracurriculars,
+    String? photoUrl,
+
+    /// False once a teacher removed the student from the school.
     @Default(true) bool active,
-    @Default(false) bool mustChangePassword,
   }) = _AppUser;
 
   factory AppUser.fromMap(String uid, Map<String, dynamic> data) => AppUser(
     uid: uid,
     role: UserRole.fromWire(data['role']) ?? UserRole.siswa,
     name: data['name'] as String? ?? '',
-    username: data['username'] as String? ?? '',
-    nis: data['nis'] as String?,
+    email: data['email'] as String? ?? '',
     classId: data['classId'] as String?,
-    classIds: List<String>.from(data['classIds'] as List? ?? const []),
-    active: data['status'] != 'disabled',
-    mustChangePassword: data['mustChangePassword'] == true,
+    extracurriculars: List<String>.from(
+      data['extracurriculars'] as List? ?? const [],
+    ),
+    photoUrl: data['photoUrl'] as String?,
+    active: data['status'] != 'removed',
   );
+
+  /// Name and, for a student, class are required before using the app.
+  bool get profileComplete =>
+      name.trim().length >= 2 && (role != UserRole.siswa || classId != null);
 }

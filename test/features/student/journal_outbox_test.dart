@@ -21,7 +21,8 @@ const _session = Session(
     uid: 'siswa1',
     role: UserRole.siswa,
     name: 'Raka',
-    username: '1001',
+    email: 'raka@example.com',
+    classId: 'XII-A1',
   ),
 );
 

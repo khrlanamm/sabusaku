@@ -38,9 +38,9 @@ const _defaultMessages = <AppErrorCode, String>{
       'Tidak ada sinyal. Periksa koneksi internet lalu coba lagi.',
   AppErrorCode.sessionExpired: 'Sesi berakhir. Silakan masuk kembali.',
   AppErrorCode.permissionDenied: 'Akses ditolak.',
-  AppErrorCode.invalidCredentials:
-      'Kode sekolah, username, atau password salah.',
-  AppErrorCode.accountDisabled: 'Akun dinonaktifkan. Hubungi admin sekolah.',
+  AppErrorCode.invalidCredentials: 'Email atau password salah.',
+  AppErrorCode.accountDisabled:
+      'Akun dinonaktifkan. Hubungi penanggung jawab sekolah.',
   AppErrorCode.wrongPassword: 'Password saat ini salah.',
   AppErrorCode.weakPassword: 'Password minimal 8 karakter.',
   AppErrorCode.tooManyRequests:
@@ -56,21 +56,36 @@ AppException mapError(Object error) {
   if (error is AppException) return error;
 
   if (error is FirebaseAuthException) {
-    return AppException(switch (error.code) {
-      'network-request-failed' => AppErrorCode.network,
-      'too-many-requests' => AppErrorCode.tooManyRequests,
-      'weak-password' ||
-      'password-does-not-meet-requirements' => AppErrorCode.weakPassword,
-      'user-disabled' => AppErrorCode.accountDisabled,
-      'user-token-expired' ||
-      'requires-recent-login' => AppErrorCode.sessionExpired,
-      // Kept uniform so the screen never reveals which accounts exist.
-      'invalid-credential' ||
-      'wrong-password' ||
-      'user-not-found' ||
-      'invalid-email' => AppErrorCode.invalidCredentials,
-      _ => AppErrorCode.unknown,
-    }, cause: error);
+    final message = switch (error.code) {
+      'email-already-in-use' =>
+        'Email ini sudah punya akun. Silakan masuk, atau pakai Lupa password.',
+      'credential-already-in-use' =>
+        'Akun Google ini sudah terhubung ke akun lain.',
+      'provider-already-linked' => 'Akun ini sudah punya password.',
+      _ => null,
+    };
+    return AppException(
+      switch (error.code) {
+        'network-request-failed' => AppErrorCode.network,
+        'too-many-requests' => AppErrorCode.tooManyRequests,
+        'weak-password' ||
+        'password-does-not-meet-requirements' => AppErrorCode.weakPassword,
+        'user-disabled' => AppErrorCode.accountDisabled,
+        'user-token-expired' ||
+        'requires-recent-login' => AppErrorCode.sessionExpired,
+        'email-already-in-use' ||
+        'credential-already-in-use' ||
+        'provider-already-linked' => AppErrorCode.alreadyExists,
+        // Kept uniform so the screen never reveals which accounts exist.
+        'invalid-credential' ||
+        'wrong-password' ||
+        'user-not-found' ||
+        'invalid-email' => AppErrorCode.invalidCredentials,
+        _ => AppErrorCode.unknown,
+      },
+      message: message,
+      cause: error,
+    );
   }
 
   if (error is FirebaseFunctionsException) {

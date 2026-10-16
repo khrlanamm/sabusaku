@@ -3,15 +3,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/router/routes.dart';
-import '../../../core/data/class_repository.dart';
+import '../../../core/models/member.dart';
 import '../../../core/models/student_stats.dart';
 import '../../../core/models/student_status.dart';
+import '../../../core/utils/labels.dart';
 import '../../../core/widgets/states.dart';
-import '../../auth/data/auth_repository.dart';
+import '../../auth/data/school_repository.dart';
 import '../data/teacher_repository.dart';
 import 'student_tile.dart';
 
-/// Students of the assigned classes, filtered by class, status and name.
+/// Every student of the school, filtered by class, extracurricular, status
+/// and name, plus the students who have not signed in yet.
 class TeacherStudentsScreen extends ConsumerStatefulWidget {
   const TeacherStudentsScreen({super.key});
 
@@ -23,132 +25,278 @@ class TeacherStudentsScreen extends ConsumerStatefulWidget {
 class _TeacherStudentsScreenState extends ConsumerState<TeacherStudentsScreen> {
   String _query = '';
 
+  bool _matchesQuery(String name, String email) =>
+      _query.isEmpty ||
+      name.toLowerCase().contains(_query) ||
+      email.contains(_query);
+
+  Future<void> _showAddMenu() async {
+    final route = await showModalBottomSheet<String>(
+      context: context,
+      useSafeArea: true,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              key: const Key('students-add-manual'),
+              leading: const Icon(Icons.person_add_alt_1_outlined),
+              title: const Text('Tambah siswa'),
+              subtitle: const Text('Isi email satu per satu'),
+              onTap: () => Navigator.of(context).pop(Routes.teacherAddStudents),
+            ),
+            ListTile(
+              key: const Key('students-add-import'),
+              leading: const Icon(Icons.upload_file_outlined),
+              title: const Text('Impor CSV'),
+              subtitle: const Text('Banyak siswa sekaligus dari berkas'),
+              onTap: () =>
+                  Navigator.of(context).pop(Routes.teacherImportStudents),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (route != null && mounted) context.push(route);
+  }
+
   @override
   Widget build(BuildContext context) {
-    final classIds = ref.watch(currentSessionProvider).classIds;
-    final classNames = ref.watch(classNamesProvider);
+    final school = ref.watch(schoolProvider).value;
     final students = ref.watch(teacherStudentsProvider);
+    final pending = ref.watch(pendingStudentsProvider).value ?? const [];
     final filter = ref.watch(studentListFilterProvider);
     final filterNotifier = ref.read(studentListFilterProvider.notifier);
-    // A class the teacher was unassigned from can no longer be a filter.
-    final classFilter = classIds.contains(filter.classId)
-        ? filter.classId
-        : null;
+
+    final classes = {
+      ...?school?.classes,
+      for (final stats in students.value ?? const <StudentStats>[])
+        if (stats.classId != null) stats.classId!,
+    }.toList()..sort(compareClassLabels);
+    final extracurriculars = school?.extracurriculars ?? const <String>[];
 
     return Scaffold(
       appBar: AppBar(title: const Text('Siswa')),
-      body: classIds.isEmpty
-          ? const EmptyState(
-              icon: Icons.class_outlined,
-              title: 'Belum ada kelas',
-              message: 'Kamu belum ditugaskan ke kelas mana pun.',
-            )
-          : Column(
+      floatingActionButton: FloatingActionButton.extended(
+        key: const Key('students-add'),
+        onPressed: _showAddMenu,
+        icon: const Icon(Icons.person_add_alt_1),
+        label: const Text('Tambah'),
+      ),
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+            child: TextField(
+              decoration: const InputDecoration(
+                hintText: 'Cari nama atau email',
+                prefixIcon: Icon(Icons.search),
+                isDense: true,
+              ),
+              onChanged: (value) =>
+                  setState(() => _query = value.trim().toLowerCase()),
+            ),
+          ),
+          SizedBox(
+            height: 48,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
-                  child: TextField(
-                    decoration: const InputDecoration(
-                      hintText: 'Cari nama siswa',
-                      prefixIcon: Icon(Icons.search),
-                      isDense: true,
-                    ),
-                    onChanged: (value) =>
-                        setState(() => _query = value.trim().toLowerCase()),
-                  ),
+                _MenuChip(
+                  key: const Key('students-class-filter'),
+                  allLabel: 'Semua kelas',
+                  value: filter.classId,
+                  options: classes,
+                  onChanged: filterNotifier.setClass,
                 ),
-                _ChipRow(
-                  children: [
-                    ChoiceChip(
-                      label: const Text('Semua kelas'),
-                      selected: classFilter == null,
-                      onSelected: (_) => filterNotifier.setClass(null),
-                    ),
-                    for (final id in classIds)
-                      ChoiceChip(
-                        label: Text(classNames[id] ?? 'Kelas'),
-                        selected: classFilter == id,
-                        onSelected: (_) => filterNotifier.setClass(id),
-                      ),
-                  ],
-                ),
-                _ChipRow(
-                  children: [
-                    ChoiceChip(
-                      label: const Text('Semua status'),
-                      selected: filter.status == null,
-                      onSelected: (_) => filterNotifier.setStatus(null),
-                    ),
-                    for (final status in StudentStatus.values)
-                      ChoiceChip(
-                        key: Key('students-status-${status.wire}'),
-                        label: Text(status.label),
-                        selected: filter.status == status,
-                        onSelected: (_) => filterNotifier.setStatus(status),
-                      ),
-                  ],
-                ),
-                Expanded(
-                  child: AsyncView<List<StudentStats>>(
-                    value: students,
-                    onRetry: () => ref.invalidate(teacherStudentsProvider),
-                    data: (all) {
-                      final visible = [
-                        for (final stats in all)
-                          if ((classFilter == null ||
-                                  stats.classId == classFilter) &&
-                              (filter.status == null ||
-                                  stats.status == filter.status) &&
-                              (_query.isEmpty ||
-                                  stats.name.toLowerCase().contains(_query)))
-                            stats,
-                      ];
-                      if (visible.isEmpty) {
-                        return EmptyState(
-                          icon: Icons.groups_outlined,
-                          title: all.isEmpty
-                              ? 'Belum ada siswa'
-                              : 'Tidak ada yang cocok',
-                          message: all.isEmpty
-                              ? 'Siswa ditambahkan oleh admin sekolah.'
-                              : 'Ubah pencarian atau filter.',
-                        );
-                      }
-                      return ListView.separated(
-                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                        itemCount: visible.length,
-                        separatorBuilder: (_, _) => const SizedBox(height: 10),
-                        itemBuilder: (context, index) => StudentTile(
-                          stats: visible[index],
-                          onTap: () => context.push(
-                            Routes.teacherStudent(visible[index].studentId),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                const SizedBox(width: 8),
+                _MenuChip(
+                  key: const Key('students-ekskul-filter'),
+                  allLabel: 'Semua ekskul',
+                  value: filter.extracurricular,
+                  options: extracurriculars,
+                  onChanged: filterNotifier.setExtracurricular,
                 ),
               ],
             ),
+          ),
+          SizedBox(
+            height: 48,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: StudentStatus.values.length + 1,
+              separatorBuilder: (_, _) => const SizedBox(width: 8),
+              itemBuilder: (_, index) => Center(
+                child: index == 0
+                    ? ChoiceChip(
+                        label: const Text('Semua status'),
+                        selected: filter.status == null,
+                        onSelected: (_) => filterNotifier.setStatus(null),
+                      )
+                    : ChoiceChip(
+                        key: Key(
+                          'students-status-${StudentStatus.values[index - 1].wire}',
+                        ),
+                        label: Text(StudentStatus.values[index - 1].label),
+                        selected:
+                            filter.status == StudentStatus.values[index - 1],
+                        onSelected: (_) => filterNotifier.setStatus(
+                          StudentStatus.values[index - 1],
+                        ),
+                      ),
+              ),
+            ),
+          ),
+          Expanded(
+            child: AsyncView<List<StudentStats>>(
+              value: students,
+              onRetry: () => ref.invalidate(teacherStudentsProvider),
+              data: (all) {
+                final visible = [
+                  for (final stats in all)
+                    if (matchesLabels(
+                          filter,
+                          classId: stats.classId,
+                          extracurriculars: stats.extracurriculars,
+                        ) &&
+                        (filter.status == null ||
+                            stats.status == filter.status) &&
+                        _matchesQuery(stats.name, stats.email))
+                      stats,
+                ];
+                // Pending students have no status yet; a status filter
+                // hides them.
+                final visiblePending = filter.status != null
+                    ? const <Member>[]
+                    : [
+                        for (final member in pending)
+                          if (matchesLabels(
+                                filter,
+                                classId: member.classId,
+                                extracurriculars: member.extracurriculars,
+                              ) &&
+                              _matchesQuery(member.name, member.email))
+                            member,
+                      ];
+
+                if (visible.isEmpty && visiblePending.isEmpty) {
+                  final nobody = all.isEmpty && pending.isEmpty;
+                  return EmptyState(
+                    icon: Icons.groups_outlined,
+                    title: nobody ? 'Belum ada siswa' : 'Tidak ada yang cocok',
+                    message: nobody
+                        ? 'Tambahkan siswa dengan email mereka lewat tombol '
+                              'Tambah.'
+                        : 'Ubah pencarian atau filter.',
+                  );
+                }
+                return ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+                  children: [
+                    if (visiblePending.isNotEmpty) ...[
+                      _PendingSection(members: visiblePending),
+                      const SizedBox(height: 12),
+                    ],
+                    for (final stats in visible)
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: StudentTile(
+                          stats: stats,
+                          onTap: () => context.push(
+                            Routes.teacherStudent(stats.studentId),
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
 
-class _ChipRow extends StatelessWidget {
-  const _ChipRow({required this.children});
+/// Students added by email who have not signed in yet.
+class _PendingSection extends StatelessWidget {
+  const _PendingSection({required this.members});
 
-  final List<Widget> children;
+  final List<Member> members;
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      height: 48,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: children.length,
-        separatorBuilder: (_, _) => const SizedBox(width: 8),
-        itemBuilder: (_, index) => Center(child: children[index]),
+    final theme = Theme.of(context);
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: ExpansionTile(
+        key: const Key('students-pending'),
+        leading: Icon(
+          Icons.hourglass_empty,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        title: Text('Belum masuk (${members.length})'),
+        subtitle: Text(
+          'Sudah didaftarkan, tetapi belum pernah masuk aplikasi.',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
+        ),
+        children: [
+          for (final member in members)
+            PendingMemberTile(
+              member: member,
+              onTap: () =>
+                  context.push(Routes.teacherPendingMember(member.email)),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A chip that opens a menu of [options]; "all" clears the filter.
+class _MenuChip extends StatelessWidget {
+  const _MenuChip({
+    super.key,
+    required this.allLabel,
+    required this.value,
+    required this.options,
+    required this.onChanged,
+  });
+
+  final String allLabel;
+  final String? value;
+  final List<String> options;
+  final ValueChanged<String?> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: PopupMenuButton<String>(
+        tooltip: allLabel,
+        initialValue: value ?? '',
+        onSelected: (selected) => onChanged(selected.isEmpty ? null : selected),
+        itemBuilder: (_) => [
+          PopupMenuItem(value: '', child: Text(allLabel)),
+          for (final option in options)
+            PopupMenuItem(value: option, child: Text(option)),
+        ],
+        child: Chip(
+          avatar: Icon(
+            Icons.filter_list,
+            size: 18,
+            color: value == null
+                ? Theme.of(context).colorScheme.onSurfaceVariant
+                : Theme.of(context).colorScheme.primary,
+          ),
+          label: Text(value ?? allLabel),
+          backgroundColor: value == null
+              ? null
+              : Theme.of(context).colorScheme.secondaryContainer,
+        ),
       ),
     );
   }

@@ -4,24 +4,24 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../core/widgets/brand.dart';
 import '../../core/widgets/role_shell.dart';
-import '../../features/admin/presentation/add_user_screen.dart';
-import '../../features/admin/presentation/admin_home_screen.dart';
-import '../../features/admin/presentation/admin_settings_screen.dart';
-import '../../features/admin/presentation/class_detail_screen.dart';
-import '../../features/admin/presentation/classes_screen.dart';
-import '../../features/admin/presentation/import_csv_screen.dart';
-import '../../features/admin/presentation/user_detail_screen.dart';
-import '../../features/admin/presentation/users_screen.dart';
 import '../../features/auth/data/auth_repository.dart';
 import '../../features/auth/domain/session.dart';
 import '../../features/auth/presentation/change_password_screen.dart';
+import '../../features/auth/presentation/complete_profile_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
+import '../../features/auth/presentation/register_screen.dart';
+import '../../features/auth/presentation/verify_email_screen.dart';
 import '../../features/student/presentation/book_screen.dart';
 import '../../features/student/presentation/journal_detail_screen.dart';
 import '../../features/student/presentation/journal_form_screen.dart';
 import '../../features/student/presentation/journal_history_screen.dart';
 import '../../features/student/presentation/student_home_screen.dart';
 import '../../features/student/presentation/student_profile_screen.dart';
+import '../../features/teacher/presentation/add_students_screen.dart';
+import '../../features/teacher/presentation/import_students_screen.dart';
+import '../../features/teacher/presentation/pending_member_screen.dart';
+import '../../features/teacher/presentation/school_screen.dart';
+import '../../features/teacher/presentation/school_settings_screen.dart';
 import '../../features/teacher/presentation/teacher_dashboard_screen.dart';
 import '../../features/teacher/presentation/teacher_journal_detail_screen.dart';
 import '../../features/teacher/presentation/teacher_profile_screen.dart';
@@ -53,18 +53,8 @@ const _teacherTabs = <ShellTab>[
     selectedIcon: Icons.dashboard,
   ),
   (label: 'Siswa', icon: Icons.groups_outlined, selectedIcon: Icons.groups),
+  (label: 'Sekolah', icon: Icons.school_outlined, selectedIcon: Icons.school),
   (label: 'Profil', icon: Icons.person_outline, selectedIcon: Icons.person),
-];
-
-const _adminTabs = <ShellTab>[
-  (label: 'Beranda', icon: Icons.home_outlined, selectedIcon: Icons.home),
-  (label: 'Kelas', icon: Icons.class_outlined, selectedIcon: Icons.class_),
-  (label: 'Pengguna', icon: Icons.groups_outlined, selectedIcon: Icons.groups),
-  (
-    label: 'Pengaturan',
-    icon: Icons.settings_outlined,
-    selectedIcon: Icons.settings,
-  ),
 ];
 
 @Riverpod(keepAlive: true)
@@ -88,13 +78,18 @@ GoRouter appRouter(Ref ref) {
     routes: [
       GoRoute(path: Routes.splash, builder: (_, _) => const BrandSplash()),
       GoRoute(path: Routes.login, builder: (_, _) => const LoginScreen()),
+      GoRoute(path: Routes.register, builder: (_, _) => const RegisterScreen()),
       GoRoute(
-        path: Routes.forceChangePassword,
-        builder: (_, _) => const ChangePasswordScreen(forced: true),
+        path: Routes.verifyEmail,
+        builder: (_, _) => const VerifyEmailScreen(),
+      ),
+      GoRoute(
+        path: Routes.completeProfile,
+        builder: (_, _) => const CompleteProfileScreen(),
       ),
       GoRoute(
         path: Routes.changePassword,
-        builder: (_, _) => const ChangePasswordScreen(forced: false),
+        builder: (_, _) => const ChangePasswordScreen(),
       ),
 
       // ---------- Siswa ----------
@@ -134,8 +129,28 @@ GoRouter appRouter(Ref ref) {
         branches: [
           tab(Routes.teacherDashboard, const TeacherDashboardScreen()),
           tab(Routes.teacherStudents, const TeacherStudentsScreen()),
+          tab(Routes.teacherSchool, const SchoolScreen()),
           tab(Routes.teacherProfile, const TeacherProfileScreen()),
         ],
+      ),
+      // Before '/guru/siswa/:studentId', which would match them too.
+      GoRoute(
+        path: Routes.teacherAddStudents,
+        builder: (_, _) => const AddStudentsScreen(),
+      ),
+      GoRoute(
+        path: Routes.teacherImportStudents,
+        builder: (_, _) => const ImportStudentsScreen(),
+      ),
+      GoRoute(
+        path: Routes.teacherSettings,
+        builder: (_, _) => const SchoolSettingsScreen(),
+      ),
+      GoRoute(
+        path: '/guru/anggota/:email',
+        builder: (_, state) => PendingMemberScreen(
+          email: Uri.decodeComponent(state.pathParameters['email']!),
+        ),
       ),
       GoRoute(
         path: '/guru/siswa/:studentId',
@@ -156,36 +171,6 @@ GoRouter appRouter(Ref ref) {
           programId: state.pathParameters['programId']!,
           date: state.pathParameters['date']!,
         ),
-      ),
-
-      // ---------- Admin ----------
-      StatefulShellRoute.indexedStack(
-        builder: (_, _, shell) =>
-            RoleShell(navigationShell: shell, tabs: _adminTabs),
-        branches: [
-          tab(Routes.adminHome, const AdminHomeScreen()),
-          tab(Routes.adminClasses, const ClassesScreen()),
-          tab(Routes.adminUsers, const UsersScreen()),
-          tab(Routes.adminSettings, const AdminSettingsScreen()),
-        ],
-      ),
-      GoRoute(
-        path: '/admin/kelas/:classId',
-        builder: (_, state) =>
-            ClassDetailScreen(classId: state.pathParameters['classId']!),
-      ),
-      GoRoute(
-        path: Routes.adminAddUser,
-        builder: (_, _) => const AddUserScreen(),
-      ),
-      GoRoute(
-        path: Routes.adminImport,
-        builder: (_, _) => const ImportCsvScreen(),
-      ),
-      GoRoute(
-        path: '/admin/pengguna/detail/:uid',
-        builder: (_, state) =>
-            UserDetailScreen(uid: state.pathParameters['uid']!),
       ),
     ],
   );

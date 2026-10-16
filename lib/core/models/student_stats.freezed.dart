@@ -306,7 +306,8 @@ as bool,
 /// @nodoc
 mixin _$StudentStats {
 
- String get studentId; String get name; String? get nis; String? get classId; String? get className; StudentStatus get status; int get daysSinceLastJournal; ActiveProgramSummary? get activeProgram; int get streakCurrent; int get streakBest; String? get lastJournalDate; int get journalCountMonth; int get journalCountTotal; int get booksCompleted;/// The five most recent journal dates, newest first.
+ String get studentId; String get name; String get email; String? get photoUrl;/// Class label, e.g. `XII-A1`.
+ String? get classId; List<String> get extracurriculars; StudentStatus get status; int get daysSinceLastJournal; ActiveProgramSummary? get activeProgram; int get streakCurrent; int get streakBest; String? get lastJournalDate; int get journalCountMonth; int get journalCountTotal; int get booksCompleted;/// The five most recent journal dates, newest first.
  List<String> get recentDates;
 /// Create a copy of StudentStats
 /// with the given fields replaced by the non-null parameter values.
@@ -319,20 +320,20 @@ $StudentStatsCopyWith<StudentStats> get copyWith => _$StudentStatsCopyWithImpl<S
 @override
 bool operator ==(Object other) {
   final _this = this as StudentStats;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is StudentStats&&(identical(other.studentId, _this.studentId) || other.studentId == _this.studentId)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.nis, _this.nis) || other.nis == _this.nis)&&(identical(other.classId, _this.classId) || other.classId == _this.classId)&&(identical(other.className, _this.className) || other.className == _this.className)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.daysSinceLastJournal, _this.daysSinceLastJournal) || other.daysSinceLastJournal == _this.daysSinceLastJournal)&&(identical(other.activeProgram, _this.activeProgram) || other.activeProgram == _this.activeProgram)&&(identical(other.streakCurrent, _this.streakCurrent) || other.streakCurrent == _this.streakCurrent)&&(identical(other.streakBest, _this.streakBest) || other.streakBest == _this.streakBest)&&(identical(other.lastJournalDate, _this.lastJournalDate) || other.lastJournalDate == _this.lastJournalDate)&&(identical(other.journalCountMonth, _this.journalCountMonth) || other.journalCountMonth == _this.journalCountMonth)&&(identical(other.journalCountTotal, _this.journalCountTotal) || other.journalCountTotal == _this.journalCountTotal)&&(identical(other.booksCompleted, _this.booksCompleted) || other.booksCompleted == _this.booksCompleted)&&const DeepCollectionEquality().equals(other.recentDates, _this.recentDates));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is StudentStats&&(identical(other.studentId, _this.studentId) || other.studentId == _this.studentId)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.email, _this.email) || other.email == _this.email)&&(identical(other.photoUrl, _this.photoUrl) || other.photoUrl == _this.photoUrl)&&(identical(other.classId, _this.classId) || other.classId == _this.classId)&&const DeepCollectionEquality().equals(other.extracurriculars, _this.extracurriculars)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.daysSinceLastJournal, _this.daysSinceLastJournal) || other.daysSinceLastJournal == _this.daysSinceLastJournal)&&(identical(other.activeProgram, _this.activeProgram) || other.activeProgram == _this.activeProgram)&&(identical(other.streakCurrent, _this.streakCurrent) || other.streakCurrent == _this.streakCurrent)&&(identical(other.streakBest, _this.streakBest) || other.streakBest == _this.streakBest)&&(identical(other.lastJournalDate, _this.lastJournalDate) || other.lastJournalDate == _this.lastJournalDate)&&(identical(other.journalCountMonth, _this.journalCountMonth) || other.journalCountMonth == _this.journalCountMonth)&&(identical(other.journalCountTotal, _this.journalCountTotal) || other.journalCountTotal == _this.journalCountTotal)&&(identical(other.booksCompleted, _this.booksCompleted) || other.booksCompleted == _this.booksCompleted)&&const DeepCollectionEquality().equals(other.recentDates, _this.recentDates));
 }
 
 
 @override
 int get hashCode {
   final _this = this as StudentStats;
-  return Object.hash(runtimeType,_this.studentId,_this.name,_this.nis,_this.classId,_this.className,_this.status,_this.daysSinceLastJournal,_this.activeProgram,_this.streakCurrent,_this.streakBest,_this.lastJournalDate,_this.journalCountMonth,_this.journalCountTotal,_this.booksCompleted,const DeepCollectionEquality().hash(_this.recentDates));
+  return Object.hash(runtimeType,_this.studentId,_this.name,_this.email,_this.photoUrl,_this.classId,const DeepCollectionEquality().hash(_this.extracurriculars),_this.status,_this.daysSinceLastJournal,_this.activeProgram,_this.streakCurrent,_this.streakBest,_this.lastJournalDate,_this.journalCountMonth,_this.journalCountTotal,_this.booksCompleted,const DeepCollectionEquality().hash(_this.recentDates));
 }
 
 @override
 String toString() {
   final _this = this as StudentStats;
-  return 'StudentStats(studentId: ${_this.studentId}, name: ${_this.name}, nis: ${_this.nis}, classId: ${_this.classId}, className: ${_this.className}, status: ${_this.status}, daysSinceLastJournal: ${_this.daysSinceLastJournal}, activeProgram: ${_this.activeProgram}, streakCurrent: ${_this.streakCurrent}, streakBest: ${_this.streakBest}, lastJournalDate: ${_this.lastJournalDate}, journalCountMonth: ${_this.journalCountMonth}, journalCountTotal: ${_this.journalCountTotal}, booksCompleted: ${_this.booksCompleted}, recentDates: ${_this.recentDates})';
+  return 'StudentStats(studentId: ${_this.studentId}, name: ${_this.name}, email: ${_this.email}, photoUrl: ${_this.photoUrl}, classId: ${_this.classId}, extracurriculars: ${_this.extracurriculars}, status: ${_this.status}, daysSinceLastJournal: ${_this.daysSinceLastJournal}, activeProgram: ${_this.activeProgram}, streakCurrent: ${_this.streakCurrent}, streakBest: ${_this.streakBest}, lastJournalDate: ${_this.lastJournalDate}, journalCountMonth: ${_this.journalCountMonth}, journalCountTotal: ${_this.journalCountTotal}, booksCompleted: ${_this.booksCompleted}, recentDates: ${_this.recentDates})';
 }
 
 
@@ -343,7 +344,7 @@ abstract mixin class $StudentStatsCopyWith<$Res>  {
   factory $StudentStatsCopyWith(StudentStats value, $Res Function(StudentStats) _then) = _$StudentStatsCopyWithImpl;
 @useResult
 $Res call({
- String studentId, String name, String? nis, String? classId, String? className, StudentStatus status, int daysSinceLastJournal, ActiveProgramSummary? activeProgram, int streakCurrent, int streakBest, String? lastJournalDate, int journalCountMonth, int journalCountTotal, int booksCompleted, List<String> recentDates
+ String studentId, String name, String email, String? photoUrl, String? classId, List<String> extracurriculars, StudentStatus status, int daysSinceLastJournal, ActiveProgramSummary? activeProgram, int streakCurrent, int streakBest, String? lastJournalDate, int journalCountMonth, int journalCountTotal, int booksCompleted, List<String> recentDates
 });
 
 
@@ -360,14 +361,15 @@ class _$StudentStatsCopyWithImpl<$Res>
 
 /// Create a copy of StudentStats
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? studentId = null,Object? name = null,Object? nis = freezed,Object? classId = freezed,Object? className = freezed,Object? status = null,Object? daysSinceLastJournal = null,Object? activeProgram = freezed,Object? streakCurrent = null,Object? streakBest = null,Object? lastJournalDate = freezed,Object? journalCountMonth = null,Object? journalCountTotal = null,Object? booksCompleted = null,Object? recentDates = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? studentId = null,Object? name = null,Object? email = null,Object? photoUrl = freezed,Object? classId = freezed,Object? extracurriculars = null,Object? status = null,Object? daysSinceLastJournal = null,Object? activeProgram = freezed,Object? streakCurrent = null,Object? streakBest = null,Object? lastJournalDate = freezed,Object? journalCountMonth = null,Object? journalCountTotal = null,Object? booksCompleted = null,Object? recentDates = null,}) {
   return _then(StudentStats(
 studentId: null == studentId ? _self.studentId : studentId // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,nis: freezed == nis ? _self.nis : nis // ignore: cast_nullable_to_non_nullable
+as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String,photoUrl: freezed == photoUrl ? _self.photoUrl : photoUrl // ignore: cast_nullable_to_non_nullable
 as String?,classId: freezed == classId ? _self.classId : classId // ignore: cast_nullable_to_non_nullable
-as String?,className: freezed == className ? _self.className : className // ignore: cast_nullable_to_non_nullable
-as String?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as String?,extracurriculars: null == extracurriculars ? _self.extracurriculars : extracurriculars // ignore: cast_nullable_to_non_nullable
+as List<String>,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as StudentStatus,daysSinceLastJournal: null == daysSinceLastJournal ? _self.daysSinceLastJournal : daysSinceLastJournal // ignore: cast_nullable_to_non_nullable
 as int,activeProgram: freezed == activeProgram ? _self.activeProgram : activeProgram // ignore: cast_nullable_to_non_nullable
 as ActiveProgramSummary?,streakCurrent: null == streakCurrent ? _self.streakCurrent : streakCurrent // ignore: cast_nullable_to_non_nullable
@@ -474,10 +476,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String studentId,  String name,  String? nis,  String? classId,  String? className,  StudentStatus status,  int daysSinceLastJournal,  ActiveProgramSummary? activeProgram,  int streakCurrent,  int streakBest,  String? lastJournalDate,  int journalCountMonth,  int journalCountTotal,  int booksCompleted,  List<String> recentDates)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String studentId,  String name,  String email,  String? photoUrl,  String? classId,  List<String> extracurriculars,  StudentStatus status,  int daysSinceLastJournal,  ActiveProgramSummary? activeProgram,  int streakCurrent,  int streakBest,  String? lastJournalDate,  int journalCountMonth,  int journalCountTotal,  int booksCompleted,  List<String> recentDates)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _StudentStats() when $default != null:
-return $default(_that.studentId,_that.name,_that.nis,_that.classId,_that.className,_that.status,_that.daysSinceLastJournal,_that.activeProgram,_that.streakCurrent,_that.streakBest,_that.lastJournalDate,_that.journalCountMonth,_that.journalCountTotal,_that.booksCompleted,_that.recentDates);case _:
+return $default(_that.studentId,_that.name,_that.email,_that.photoUrl,_that.classId,_that.extracurriculars,_that.status,_that.daysSinceLastJournal,_that.activeProgram,_that.streakCurrent,_that.streakBest,_that.lastJournalDate,_that.journalCountMonth,_that.journalCountTotal,_that.booksCompleted,_that.recentDates);case _:
   return orElse();
 
 }
@@ -495,10 +497,10 @@ return $default(_that.studentId,_that.name,_that.nis,_that.classId,_that.classNa
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String studentId,  String name,  String? nis,  String? classId,  String? className,  StudentStatus status,  int daysSinceLastJournal,  ActiveProgramSummary? activeProgram,  int streakCurrent,  int streakBest,  String? lastJournalDate,  int journalCountMonth,  int journalCountTotal,  int booksCompleted,  List<String> recentDates)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String studentId,  String name,  String email,  String? photoUrl,  String? classId,  List<String> extracurriculars,  StudentStatus status,  int daysSinceLastJournal,  ActiveProgramSummary? activeProgram,  int streakCurrent,  int streakBest,  String? lastJournalDate,  int journalCountMonth,  int journalCountTotal,  int booksCompleted,  List<String> recentDates)  $default,) {final _that = this;
 switch (_that) {
 case _StudentStats():
-return $default(_that.studentId,_that.name,_that.nis,_that.classId,_that.className,_that.status,_that.daysSinceLastJournal,_that.activeProgram,_that.streakCurrent,_that.streakBest,_that.lastJournalDate,_that.journalCountMonth,_that.journalCountTotal,_that.booksCompleted,_that.recentDates);case _:
+return $default(_that.studentId,_that.name,_that.email,_that.photoUrl,_that.classId,_that.extracurriculars,_that.status,_that.daysSinceLastJournal,_that.activeProgram,_that.streakCurrent,_that.streakBest,_that.lastJournalDate,_that.journalCountMonth,_that.journalCountTotal,_that.booksCompleted,_that.recentDates);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -515,10 +517,10 @@ return $default(_that.studentId,_that.name,_that.nis,_that.classId,_that.classNa
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String studentId,  String name,  String? nis,  String? classId,  String? className,  StudentStatus status,  int daysSinceLastJournal,  ActiveProgramSummary? activeProgram,  int streakCurrent,  int streakBest,  String? lastJournalDate,  int journalCountMonth,  int journalCountTotal,  int booksCompleted,  List<String> recentDates)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String studentId,  String name,  String email,  String? photoUrl,  String? classId,  List<String> extracurriculars,  StudentStatus status,  int daysSinceLastJournal,  ActiveProgramSummary? activeProgram,  int streakCurrent,  int streakBest,  String? lastJournalDate,  int journalCountMonth,  int journalCountTotal,  int booksCompleted,  List<String> recentDates)?  $default,) {final _that = this;
 switch (_that) {
 case _StudentStats() when $default != null:
-return $default(_that.studentId,_that.name,_that.nis,_that.classId,_that.className,_that.status,_that.daysSinceLastJournal,_that.activeProgram,_that.streakCurrent,_that.streakBest,_that.lastJournalDate,_that.journalCountMonth,_that.journalCountTotal,_that.booksCompleted,_that.recentDates);case _:
+return $default(_that.studentId,_that.name,_that.email,_that.photoUrl,_that.classId,_that.extracurriculars,_that.status,_that.daysSinceLastJournal,_that.activeProgram,_that.streakCurrent,_that.streakBest,_that.lastJournalDate,_that.journalCountMonth,_that.journalCountTotal,_that.booksCompleted,_that.recentDates);case _:
   return null;
 
 }
@@ -530,14 +532,22 @@ return $default(_that.studentId,_that.name,_that.nis,_that.classId,_that.classNa
 
 
 class _StudentStats implements StudentStats {
-  const _StudentStats({required this.studentId, required this.name, this.nis, this.classId, this.className, this.status = StudentStatus.belumMulai, this.daysSinceLastJournal = 0, this.activeProgram, this.streakCurrent = 0, this.streakBest = 0, this.lastJournalDate, this.journalCountMonth = 0, this.journalCountTotal = 0, this.booksCompleted = 0,  List<String> recentDates = const <String>[]}): _recentDates = recentDates;
+  const _StudentStats({required this.studentId, required this.name, this.email = '', this.photoUrl, this.classId,  List<String> extracurriculars = const <String>[], this.status = StudentStatus.belumMulai, this.daysSinceLastJournal = 0, this.activeProgram, this.streakCurrent = 0, this.streakBest = 0, this.lastJournalDate, this.journalCountMonth = 0, this.journalCountTotal = 0, this.booksCompleted = 0,  List<String> recentDates = const <String>[]}): _extracurriculars = extracurriculars,_recentDates = recentDates;
   
 
 @override final  String studentId;
 @override final  String name;
-@override final  String? nis;
+@override@JsonKey() final  String email;
+@override final  String? photoUrl;
+/// Class label, e.g. `XII-A1`.
 @override final  String? classId;
-@override final  String? className;
+ final  List<String> _extracurriculars;
+@override@JsonKey() List<String> get extracurriculars {
+  if (_extracurriculars is EqualUnmodifiableListView) return _extracurriculars;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_extracurriculars);
+}
+
 @override@JsonKey() final  StudentStatus status;
 @override@JsonKey() final  int daysSinceLastJournal;
 @override final  ActiveProgramSummary? activeProgram;
@@ -567,18 +577,18 @@ _$StudentStatsCopyWith<_StudentStats> get copyWith => __$StudentStatsCopyWithImp
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _StudentStats&&(identical(other.studentId, studentId) || other.studentId == studentId)&&(identical(other.name, name) || other.name == name)&&(identical(other.nis, nis) || other.nis == nis)&&(identical(other.classId, classId) || other.classId == classId)&&(identical(other.className, className) || other.className == className)&&(identical(other.status, status) || other.status == status)&&(identical(other.daysSinceLastJournal, daysSinceLastJournal) || other.daysSinceLastJournal == daysSinceLastJournal)&&(identical(other.activeProgram, activeProgram) || other.activeProgram == activeProgram)&&(identical(other.streakCurrent, streakCurrent) || other.streakCurrent == streakCurrent)&&(identical(other.streakBest, streakBest) || other.streakBest == streakBest)&&(identical(other.lastJournalDate, lastJournalDate) || other.lastJournalDate == lastJournalDate)&&(identical(other.journalCountMonth, journalCountMonth) || other.journalCountMonth == journalCountMonth)&&(identical(other.journalCountTotal, journalCountTotal) || other.journalCountTotal == journalCountTotal)&&(identical(other.booksCompleted, booksCompleted) || other.booksCompleted == booksCompleted)&&const DeepCollectionEquality().equals(other.recentDates, _recentDates));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _StudentStats&&(identical(other.studentId, studentId) || other.studentId == studentId)&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email)&&(identical(other.photoUrl, photoUrl) || other.photoUrl == photoUrl)&&(identical(other.classId, classId) || other.classId == classId)&&const DeepCollectionEquality().equals(other.extracurriculars, _extracurriculars)&&(identical(other.status, status) || other.status == status)&&(identical(other.daysSinceLastJournal, daysSinceLastJournal) || other.daysSinceLastJournal == daysSinceLastJournal)&&(identical(other.activeProgram, activeProgram) || other.activeProgram == activeProgram)&&(identical(other.streakCurrent, streakCurrent) || other.streakCurrent == streakCurrent)&&(identical(other.streakBest, streakBest) || other.streakBest == streakBest)&&(identical(other.lastJournalDate, lastJournalDate) || other.lastJournalDate == lastJournalDate)&&(identical(other.journalCountMonth, journalCountMonth) || other.journalCountMonth == journalCountMonth)&&(identical(other.journalCountTotal, journalCountTotal) || other.journalCountTotal == journalCountTotal)&&(identical(other.booksCompleted, booksCompleted) || other.booksCompleted == booksCompleted)&&const DeepCollectionEquality().equals(other.recentDates, _recentDates));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,studentId,name,nis,classId,className,status,daysSinceLastJournal,activeProgram,streakCurrent,streakBest,lastJournalDate,journalCountMonth,journalCountTotal,booksCompleted,const DeepCollectionEquality().hash(_recentDates));
+    return Object.hash(runtimeType,studentId,name,email,photoUrl,classId,const DeepCollectionEquality().hash(_extracurriculars),status,daysSinceLastJournal,activeProgram,streakCurrent,streakBest,lastJournalDate,journalCountMonth,journalCountTotal,booksCompleted,const DeepCollectionEquality().hash(_recentDates));
 }
 
 @override
 String toString() {
-    return 'StudentStats(studentId: $studentId, name: $name, nis: $nis, classId: $classId, className: $className, status: $status, daysSinceLastJournal: $daysSinceLastJournal, activeProgram: $activeProgram, streakCurrent: $streakCurrent, streakBest: $streakBest, lastJournalDate: $lastJournalDate, journalCountMonth: $journalCountMonth, journalCountTotal: $journalCountTotal, booksCompleted: $booksCompleted, recentDates: $recentDates)';
+    return 'StudentStats(studentId: $studentId, name: $name, email: $email, photoUrl: $photoUrl, classId: $classId, extracurriculars: $extracurriculars, status: $status, daysSinceLastJournal: $daysSinceLastJournal, activeProgram: $activeProgram, streakCurrent: $streakCurrent, streakBest: $streakBest, lastJournalDate: $lastJournalDate, journalCountMonth: $journalCountMonth, journalCountTotal: $journalCountTotal, booksCompleted: $booksCompleted, recentDates: $recentDates)';
 }
 
 
@@ -589,7 +599,7 @@ abstract mixin class _$StudentStatsCopyWith<$Res> implements $StudentStatsCopyWi
   factory _$StudentStatsCopyWith(_StudentStats value, $Res Function(_StudentStats) _then) = __$StudentStatsCopyWithImpl;
 @override @useResult
 $Res call({
- String studentId, String name, String? nis, String? classId, String? className, StudentStatus status, int daysSinceLastJournal, ActiveProgramSummary? activeProgram, int streakCurrent, int streakBest, String? lastJournalDate, int journalCountMonth, int journalCountTotal, int booksCompleted, List<String> recentDates
+ String studentId, String name, String email, String? photoUrl, String? classId, List<String> extracurriculars, StudentStatus status, int daysSinceLastJournal, ActiveProgramSummary? activeProgram, int streakCurrent, int streakBest, String? lastJournalDate, int journalCountMonth, int journalCountTotal, int booksCompleted, List<String> recentDates
 });
 
 
@@ -606,14 +616,15 @@ class __$StudentStatsCopyWithImpl<$Res>
 
 /// Create a copy of StudentStats
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? studentId = null,Object? name = null,Object? nis = freezed,Object? classId = freezed,Object? className = freezed,Object? status = null,Object? daysSinceLastJournal = null,Object? activeProgram = freezed,Object? streakCurrent = null,Object? streakBest = null,Object? lastJournalDate = freezed,Object? journalCountMonth = null,Object? journalCountTotal = null,Object? booksCompleted = null,Object? recentDates = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? studentId = null,Object? name = null,Object? email = null,Object? photoUrl = freezed,Object? classId = freezed,Object? extracurriculars = null,Object? status = null,Object? daysSinceLastJournal = null,Object? activeProgram = freezed,Object? streakCurrent = null,Object? streakBest = null,Object? lastJournalDate = freezed,Object? journalCountMonth = null,Object? journalCountTotal = null,Object? booksCompleted = null,Object? recentDates = null,}) {
   return _then(_StudentStats(
 studentId: null == studentId ? _self.studentId : studentId // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,nis: freezed == nis ? _self.nis : nis // ignore: cast_nullable_to_non_nullable
+as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String,photoUrl: freezed == photoUrl ? _self.photoUrl : photoUrl // ignore: cast_nullable_to_non_nullable
 as String?,classId: freezed == classId ? _self.classId : classId // ignore: cast_nullable_to_non_nullable
-as String?,className: freezed == className ? _self.className : className // ignore: cast_nullable_to_non_nullable
-as String?,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as String?,extracurriculars: null == extracurriculars ? _self._extracurriculars : extracurriculars // ignore: cast_nullable_to_non_nullable
+as List<String>,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as StudentStatus,daysSinceLastJournal: null == daysSinceLastJournal ? _self.daysSinceLastJournal : daysSinceLastJournal // ignore: cast_nullable_to_non_nullable
 as int,activeProgram: freezed == activeProgram ? _self.activeProgram : activeProgram // ignore: cast_nullable_to_non_nullable
 as ActiveProgramSummary?,streakCurrent: null == streakCurrent ? _self.streakCurrent : streakCurrent // ignore: cast_nullable_to_non_nullable

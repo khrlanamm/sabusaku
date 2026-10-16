@@ -43,9 +43,12 @@ abstract class StudentStats with _$StudentStats {
   const factory StudentStats({
     required String studentId,
     required String name,
-    String? nis,
+    @Default('') String email,
+    String? photoUrl,
+
+    /// Class label, e.g. `XII-A1`.
     String? classId,
-    String? className,
+    @Default(<String>[]) List<String> extracurriculars,
     @Default(StudentStatus.belumMulai) StudentStatus status,
     @Default(0) int daysSinceLastJournal,
     ActiveProgramSummary? activeProgram,
@@ -65,9 +68,12 @@ abstract class StudentStats with _$StudentStats {
     return StudentStats(
       studentId: id,
       name: data['name'] as String? ?? '',
-      nis: data['nis'] as String?,
+      email: data['email'] as String? ?? '',
+      photoUrl: data['photoUrl'] as String?,
       classId: data['classId'] as String?,
-      className: data['className'] as String?,
+      extracurriculars: List<String>.from(
+        data['extracurriculars'] as List? ?? const [],
+      ),
       status: StudentStatus.fromWire(data['status'] as String?),
       daysSinceLastJournal: data['daysSinceLastJournal'] as int? ?? 0,
       activeProgram: active is Map

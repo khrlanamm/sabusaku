@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-import '../../../app/theme/colors.dart';
+import '../../../app/router/routes.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/widgets/brand.dart';
+import '../../../core/widgets/dialogs.dart';
 import '../data/auth_repository.dart';
+import '../domain/session.dart';
+import 'auth_widgets.dart';
+
+/// Explains the app and how a school can join (hosting/daftar-sekolah.html).
+final schoolSignupUrl = Uri.parse('https://sabusaku.web.app/daftar-sekolah');
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -16,25 +24,38 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
-  late final TextEditingController _school;
-  final _username = TextEditingController();
+  final _email = TextEditingController();
   final _password = TextEditingController();
   bool _obscure = true;
   bool _busy = false;
+  bool _showingNotRegistered = false;
   String? _error;
 
   @override
   void initState() {
     super.initState();
-    _school = TextEditingController(
-      text: ref.read(authRepositoryProvider).rememberedSchoolCode ?? '',
-    );
+    ref.listenManual(authStateProvider, (_, next) {
+      if (!mounted) return;
+      if (next.hasError) {
+        setState(() {
+          _busy = false;
+          _error = mapError(next.error!).userMessage;
+        });
+        return;
+      }
+      final state = next.value;
+      if (state is AuthNotRegistered) {
+        setState(() => _busy = false);
+        _showNotRegistered(state.email);
+      } else if (state is AuthSignedOut) {
+        setState(() => _busy = false);
+      }
+    }, fireImmediately: true);
   }
 
   @override
   void dispose() {
-    _school.dispose();
-    _username.dispose();
+    _email.dispose();
     _password.dispose();
     super.dispose();
   }
@@ -48,11 +69,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     try {
       await ref
           .read(authRepositoryProvider)
-          .signIn(
-            schoolCode: _school.text,
-            username: _username.text,
-            password: _password.text,
-          );
+          .signInWithEmail(email: _email.text, password: _password.text);
+      // Offers to save the email and password (Android Autofill).
+      TextInput.finishAutofillContext();
       // The router redirects once the session resolves.
     } catch (error) {
       if (!mounted) return;
@@ -63,30 +82,54 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
-  void _showForgotPassword() {
-    showDialog<void>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Lupa password?'),
-        content: const Text(
-          'Password tidak bisa direset lewat email.\n\n'
-          'Siswa: minta guru atau admin sekolah mereset password.\n'
-          'Guru: minta admin sekolah mereset password.\n\n'
-          'Kamu akan menerima password sementara yang wajib diganti saat '
-          'masuk.',
-        ),
-        actions: [
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Mengerti'),
-          ),
-        ],
-      ),
-    );
+  Future<void> _signInWithGoogle() async {
+    if (_busy) return;
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      final signedIn = await ref
+          .read(authRepositoryProvider)
+          .signInWithGoogle();
+      if (!signedIn && mounted) setState(() => _busy = false);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _busy = false;
+        _error = mapError(error).userMessage;
+      });
+    }
   }
 
-  String? _required(String? value) =>
-      (value == null || value.trim().isEmpty) ? 'Wajib diisi' : null;
+  Future<void> _showNotRegistered(String email) async {
+    if (_showingNotRegistered) return;
+    _showingNotRegistered = true;
+    // After the frame that put this screen in place.
+    await Future<void>.delayed(Duration.zero);
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => NotRegisteredDialog(email: email),
+    );
+    _showingNotRegistered = false;
+    await ref.read(authRepositoryProvider).signOut();
+  }
+
+  Future<void> _showForgotPassword() async {
+    final sent = await showDialog<bool>(
+      context: context,
+      builder: (context) => _ForgotPasswordDialog(initialEmail: _email.text),
+    );
+    if (sent == true && mounted) {
+      showSnack(
+        context,
+        'Jika email terdaftar, tautan untuk membuat password baru sudah '
+        'dikirim. Periksa juga folder Spam.',
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -116,42 +159,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         'Satu Bulan Satu Buku',
                         textAlign: TextAlign.center,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: AppColors.blue,
+                          color: theme.colorScheme.primary,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                       const SizedBox(height: 28),
-                      TextFormField(
-                        key: const Key('login-school'),
-                        controller: _school,
-                        decoration: const InputDecoration(
-                          labelText: 'Kode sekolah',
-                          prefixIcon: Icon(Icons.school_outlined),
-                        ),
-                        textInputAction: TextInputAction.next,
-                        autocorrect: false,
-                        enableSuggestions: false,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.deny(RegExp(r'\s')),
-                        ],
-                        validator: _required,
-                      ),
-                      const SizedBox(height: 14),
-                      TextFormField(
-                        key: const Key('login-username'),
-                        controller: _username,
-                        decoration: const InputDecoration(
-                          labelText: 'Username / NIS',
-                          prefixIcon: Icon(Icons.person_outline),
-                        ),
-                        textInputAction: TextInputAction.next,
-                        autocorrect: false,
-                        enableSuggestions: false,
-                        autofillHints: const [AutofillHints.username],
-                        inputFormatters: [
-                          FilteringTextInputFormatter.deny(RegExp(r'\s')),
-                        ],
-                        validator: _required,
+                      EmailField(
+                        key: const Key('login-email'),
+                        controller: _email,
                       ),
                       const SizedBox(height: 14),
                       TextFormField(
@@ -161,15 +176,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         decoration: InputDecoration(
                           labelText: 'Password',
                           prefixIcon: const Icon(Icons.lock_outline),
-                          suffixIcon: IconButton(
-                            tooltip: _obscure
-                                ? 'Tampilkan password'
-                                : 'Sembunyikan password',
-                            icon: Icon(
-                              _obscure
-                                  ? Icons.visibility_outlined
-                                  : Icons.visibility_off_outlined,
-                            ),
+                          suffixIcon: ObscureToggle(
+                            obscure: _obscure,
                             onPressed: () =>
                                 setState(() => _obscure = !_obscure),
                           ),
@@ -181,27 +189,52 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ? 'Wajib diisi'
                             : null,
                       ),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          key: const Key('login-forgot'),
+                          onPressed: _busy ? null : _showForgotPassword,
+                          child: const Text('Lupa password?'),
+                        ),
+                      ),
                       if (_error != null) ...[
+                        ErrorBanner(message: _error!),
                         const SizedBox(height: 14),
-                        _ErrorBanner(message: _error!),
                       ],
-                      const SizedBox(height: 20),
                       FilledButton(
                         key: const Key('login-submit'),
                         onPressed: _busy ? null : _submit,
                         child: _busy
-                            ? const SizedBox.square(
-                                dimension: 20,
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 2.5,
-                                ),
-                              )
+                            ? const ButtonProgress()
                             : const Text('Masuk'),
                       ),
-                      const SizedBox(height: 4),
-                      TextButton(
-                        onPressed: _showForgotPassword,
-                        child: const Text('Lupa password?'),
+                      const SizedBox(height: 16),
+                      const OrDivider(),
+                      const SizedBox(height: 16),
+                      OutlinedButton.icon(
+                        key: const Key('login-google'),
+                        onPressed: _busy ? null : _signInWithGoogle,
+                        icon: const GoogleMark(),
+                        label: const Text('Masuk dengan Google'),
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              'Belum punya akun?',
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          ),
+                          TextButton(
+                            key: const Key('login-register'),
+                            onPressed: _busy
+                                ? null
+                                : () => context.push(Routes.register),
+                            child: const Text('Daftar'),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -215,34 +248,145 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 }
 
-class _ErrorBanner extends StatelessWidget {
-  const _ErrorBanner({required this.message});
+/// "Harap Menghubungi Administrator Sekolah": the email belongs to no school.
+class NotRegisteredDialog extends StatelessWidget {
+  const NotRegisteredDialog({super.key, required this.email});
 
-  final String message;
+  final String email;
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      liveRegion: true,
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: AppColors.inactiveTint,
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.error_outline, color: AppColors.inactiveText),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Text(
-                message,
-                style: const TextStyle(color: AppColors.inactiveText),
-              ),
+    final theme = Theme.of(context);
+    return AlertDialog(
+      key: const Key('dialog-not-registered'),
+      icon: Icon(Icons.school_outlined, color: theme.colorScheme.primary),
+      title: const Text('Harap Menghubungi Administrator Sekolah'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text.rich(
+            TextSpan(
+              children: [
+                const TextSpan(text: 'Email '),
+                TextSpan(
+                  text: email,
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+                const TextSpan(
+                  text:
+                      ' belum terdaftar di sekolah mana pun. Minta '
+                      'penanggung jawab Sabu Saku di sekolahmu untuk '
+                      'menambahkan email ini.',
+                ),
+              ],
             ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Ingin mendaftarkan sekolah Anda?',
+            style: theme.textTheme.bodyMedium,
+          ),
+          TextButton(
+            key: const Key('link-school-signup'),
+            style: TextButton.styleFrom(padding: EdgeInsets.zero),
+            onPressed: () => launchUrl(
+              schoolSignupUrl,
+              mode: LaunchMode.externalApplication,
+            ),
+            child: const Text('Pelajari di sini'),
+          ),
+        ],
+      ),
+      actions: [
+        FilledButton(
+          key: const Key('dialog-not-registered-close'),
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Tutup'),
+        ),
+      ],
+    );
+  }
+}
+
+class _ForgotPasswordDialog extends ConsumerStatefulWidget {
+  const _ForgotPasswordDialog({required this.initialEmail});
+
+  final String initialEmail;
+
+  @override
+  ConsumerState<_ForgotPasswordDialog> createState() =>
+      _ForgotPasswordDialogState();
+}
+
+class _ForgotPasswordDialogState extends ConsumerState<_ForgotPasswordDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late final _email = TextEditingController(text: widget.initialEmail.trim());
+  bool _busy = false;
+  String? _error;
+
+  @override
+  void dispose() {
+    _email.dispose();
+    super.dispose();
+  }
+
+  Future<void> _send() async {
+    if (_busy || !_formKey.currentState!.validate()) return;
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await ref.read(authRepositoryProvider).sendPasswordReset(_email.text);
+      if (mounted) Navigator.of(context).pop(true);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _busy = false;
+        _error = mapError(error).userMessage;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Lupa password?'),
+      content: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'Masukkan email akunmu. Kami kirim tautan untuk membuat '
+              'password baru.\n\nAkun Google tanpa password? Pakai "Masuk '
+              'dengan Google" saja.',
+            ),
+            const SizedBox(height: 14),
+            EmailField(controller: _email, autofocus: true),
+            if (_error != null) ...[
+              const SizedBox(height: 10),
+              Text(
+                _error!,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+            ],
           ],
         ),
       ),
+      actions: [
+        TextButton(
+          onPressed: _busy ? null : () => Navigator.of(context).pop(false),
+          child: const Text('Batal'),
+        ),
+        FilledButton(
+          key: const Key('forgot-send'),
+          onPressed: _busy ? null : _send,
+          child: _busy ? const ButtonProgress() : const Text('Kirim'),
+        ),
+      ],
     );
   }
 }

@@ -54,7 +54,7 @@ final class TeacherRepositoryProvider
   }
 }
 
-String _$teacherRepositoryHash() => r'fd7d359a82c2b020b63be842b833ba3d793457cd';
+String _$teacherRepositoryHash() => r'714ae3c6138771186d64d82630ee559552c08105';
 
 @ProviderFor(teacherStudents)
 final teacherStudentsProvider = TeacherStudentsProvider._();
@@ -97,14 +97,159 @@ final class TeacherStudentsProvider
 
 String _$teacherStudentsHash() => r'94ff3c91d0ab0ea73f6e4bca5cc57f170ad66dac';
 
-/// One student's summary. Readable only while the student is in one of the
-/// teacher's classes.
+@ProviderFor(pendingStudents)
+final pendingStudentsProvider = PendingStudentsProvider._();
+
+final class PendingStudentsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Member>>,
+          List<Member>,
+          Stream<List<Member>>
+        >
+    with $FutureModifier<List<Member>>, $StreamProvider<List<Member>> {
+  PendingStudentsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'pendingStudentsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$pendingStudentsHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<List<Member>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<Member>> create(Ref ref) {
+    return pendingStudents(ref);
+  }
+}
+
+String _$pendingStudentsHash() => r'fcf6eaa4ca666393edfa1841e8d2d8d7df00f54e';
+
+@ProviderFor(member)
+final memberProvider = MemberFamily._();
+
+final class MemberProvider
+    extends $FunctionalProvider<AsyncValue<Member?>, Member?, Stream<Member?>>
+    with $FutureModifier<Member?>, $StreamProvider<Member?> {
+  MemberProvider._({
+    required MemberFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'memberProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$memberHash();
+
+  @override
+  String toString() {
+    return r'memberProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $StreamProviderElement<Member?> $createElement($ProviderPointer pointer) =>
+      $StreamProviderElement(pointer);
+
+  @override
+  Stream<Member?> create(Ref ref) {
+    final argument = this.argument as String;
+    return member(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is MemberProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$memberHash() => r'212402888ac83950d68f593647faa57911c2a348';
+
+final class MemberFamily extends $Family
+    with $FunctionalFamilyOverride<Stream<Member?>, String> {
+  MemberFamily._()
+    : super(
+        retry: null,
+        name: r'memberProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  MemberProvider call(String email) =>
+      MemberProvider._(argument: email, from: this);
+
+  @override
+  String toString() => r'memberProvider';
+}
+
+@ProviderFor(schoolTeachers)
+final schoolTeachersProvider = SchoolTeachersProvider._();
+
+final class SchoolTeachersProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<AppUser>>,
+          List<AppUser>,
+          Stream<List<AppUser>>
+        >
+    with $FutureModifier<List<AppUser>>, $StreamProvider<List<AppUser>> {
+  SchoolTeachersProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'schoolTeachersProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$schoolTeachersHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<List<AppUser>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<AppUser>> create(Ref ref) {
+    return schoolTeachers(ref);
+  }
+}
+
+String _$schoolTeachersHash() => r'c545ae39747274ec9a700b196fdd01386f4e2232';
+
+/// One student's summary. Gone once the student is removed from the school.
 
 @ProviderFor(studentStats)
 final studentStatsProvider = StudentStatsFamily._();
 
-/// One student's summary. Readable only while the student is in one of the
-/// teacher's classes.
+/// One student's summary. Gone once the student is removed from the school.
 
 final class StudentStatsProvider
     extends
@@ -114,8 +259,7 @@ final class StudentStatsProvider
           Stream<StudentStats?>
         >
     with $FutureModifier<StudentStats?>, $StreamProvider<StudentStats?> {
-  /// One student's summary. Readable only while the student is in one of the
-  /// teacher's classes.
+  /// One student's summary. Gone once the student is removed from the school.
   StudentStatsProvider._({
     required StudentStatsFamily super.from,
     required String super.argument,
@@ -162,8 +306,7 @@ final class StudentStatsProvider
 
 String _$studentStatsHash() => r'9499b99f44aea660a24fc84549c3c7740278bf5c';
 
-/// One student's summary. Readable only while the student is in one of the
-/// teacher's classes.
+/// One student's summary. Gone once the student is removed from the school.
 
 final class StudentStatsFamily extends $Family
     with $FunctionalFamilyOverride<Stream<StudentStats?>, String> {
@@ -176,8 +319,7 @@ final class StudentStatsFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// One student's summary. Readable only while the student is in one of the
-  /// teacher's classes.
+  /// One student's summary. Gone once the student is removed from the school.
 
   StudentStatsProvider call(String studentId) =>
       StudentStatsProvider._(argument: studentId, from: this);
@@ -186,14 +328,12 @@ final class StudentStatsFamily extends $Family
   String toString() => r'studentStatsProvider';
 }
 
-/// A student's books. The class filter is what lets the rules allow the
-/// query (docs/03 §3).
+/// A student's books, newest first.
 
 @ProviderFor(studentPrograms)
 final studentProgramsProvider = StudentProgramsFamily._();
 
-/// A student's books. The class filter is what lets the rules allow the
-/// query (docs/03 §3).
+/// A student's books, newest first.
 
 final class StudentProgramsProvider
     extends
@@ -203,11 +343,10 @@ final class StudentProgramsProvider
           Stream<List<Program>>
         >
     with $FutureModifier<List<Program>>, $StreamProvider<List<Program>> {
-  /// A student's books. The class filter is what lets the rules allow the
-  /// query (docs/03 §3).
+  /// A student's books, newest first.
   StudentProgramsProvider._({
     required StudentProgramsFamily super.from,
-    required (String, String) super.argument,
+    required String super.argument,
   }) : super(
          retry: null,
          name: r'studentProgramsProvider',
@@ -223,7 +362,7 @@ final class StudentProgramsProvider
   String toString() {
     return r'studentProgramsProvider'
         ''
-        '$argument';
+        '($argument)';
   }
 
   @$internal
@@ -234,8 +373,8 @@ final class StudentProgramsProvider
 
   @override
   Stream<List<Program>> create(Ref ref) {
-    final argument = this.argument as (String, String);
-    return studentPrograms(ref, argument.$1, argument.$2);
+    final argument = this.argument as String;
+    return studentPrograms(ref, argument);
   }
 
   @override
@@ -249,13 +388,12 @@ final class StudentProgramsProvider
   }
 }
 
-String _$studentProgramsHash() => r'14be253aec73236b1fe9b93356ad5194c8407417';
+String _$studentProgramsHash() => r'eb2c91aa178fbd9a3ad85bf6ad692661cf7de54d';
 
-/// A student's books. The class filter is what lets the rules allow the
-/// query (docs/03 §3).
+/// A student's books, newest first.
 
 final class StudentProgramsFamily extends $Family
-    with $FunctionalFamilyOverride<Stream<List<Program>>, (String, String)> {
+    with $FunctionalFamilyOverride<Stream<List<Program>>, String> {
   StudentProgramsFamily._()
     : super(
         retry: null,
@@ -265,28 +403,27 @@ final class StudentProgramsFamily extends $Family
         isAutoDispose: true,
       );
 
-  /// A student's books. The class filter is what lets the rules allow the
-  /// query (docs/03 §3).
+  /// A student's books, newest first.
 
-  StudentProgramsProvider call(String studentId, String classId) =>
-      StudentProgramsProvider._(argument: (studentId, classId), from: this);
+  StudentProgramsProvider call(String studentId) =>
+      StudentProgramsProvider._(argument: studentId, from: this);
 
   @override
   String toString() => r'studentProgramsProvider';
 }
 
 /// Filter of the student list. Shared so the dashboard can open the list
-/// already filtered by a status.
+/// already filtered.
 
 @ProviderFor(StudentListFilter)
 final studentListFilterProvider = StudentListFilterProvider._();
 
 /// Filter of the student list. Shared so the dashboard can open the list
-/// already filtered by a status.
+/// already filtered.
 final class StudentListFilterProvider
     extends $NotifierProvider<StudentListFilter, StudentFilter> {
   /// Filter of the student list. Shared so the dashboard can open the list
-  /// already filtered by a status.
+  /// already filtered.
   StudentListFilterProvider._()
     : super(
         from: null,
@@ -314,10 +451,10 @@ final class StudentListFilterProvider
   }
 }
 
-String _$studentListFilterHash() => r'817cf805ff2f54de9efed7eb2a86ef7467cf8ed0';
+String _$studentListFilterHash() => r'8cbcb93fbb0c0d97a0e1b8110356e4556d807e5e';
 
 /// Filter of the student list. Shared so the dashboard can open the list
-/// already filtered by a status.
+/// already filtered.
 
 abstract class _$StudentListFilter extends $Notifier<StudentFilter> {
   StudentFilter build();

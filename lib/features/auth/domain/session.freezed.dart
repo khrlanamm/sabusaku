@@ -15,8 +15,11 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Session {
 
- String get uid; UserRole get role; String get schoolId;/// Teachers only: classes from the `classIds` claim.
- List<String> get classIds; AppUser get profile;
+ String get uid; UserRole get role; String get schoolId; AppUser get profile;/// The account can sign in with email and password. Google-only
+/// accounts must add a password first.
+ bool get hasPassword;/// The account is linked to Google (offers "Pakai foto Google").
+ bool get hasGoogle;/// The photo of the linked Google account, if any.
+ String? get googlePhotoUrl;
 /// Create a copy of Session
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,20 +31,20 @@ $SessionCopyWith<Session> get copyWith => _$SessionCopyWithImpl<Session>(this as
 @override
 bool operator ==(Object other) {
   final _this = this as Session;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Session&&(identical(other.uid, _this.uid) || other.uid == _this.uid)&&(identical(other.role, _this.role) || other.role == _this.role)&&(identical(other.schoolId, _this.schoolId) || other.schoolId == _this.schoolId)&&const DeepCollectionEquality().equals(other.classIds, _this.classIds)&&(identical(other.profile, _this.profile) || other.profile == _this.profile));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Session&&(identical(other.uid, _this.uid) || other.uid == _this.uid)&&(identical(other.role, _this.role) || other.role == _this.role)&&(identical(other.schoolId, _this.schoolId) || other.schoolId == _this.schoolId)&&(identical(other.profile, _this.profile) || other.profile == _this.profile)&&(identical(other.hasPassword, _this.hasPassword) || other.hasPassword == _this.hasPassword)&&(identical(other.hasGoogle, _this.hasGoogle) || other.hasGoogle == _this.hasGoogle)&&(identical(other.googlePhotoUrl, _this.googlePhotoUrl) || other.googlePhotoUrl == _this.googlePhotoUrl));
 }
 
 
 @override
 int get hashCode {
   final _this = this as Session;
-  return Object.hash(runtimeType,_this.uid,_this.role,_this.schoolId,const DeepCollectionEquality().hash(_this.classIds),_this.profile);
+  return Object.hash(runtimeType,_this.uid,_this.role,_this.schoolId,_this.profile,_this.hasPassword,_this.hasGoogle,_this.googlePhotoUrl);
 }
 
 @override
 String toString() {
   final _this = this as Session;
-  return 'Session(uid: ${_this.uid}, role: ${_this.role}, schoolId: ${_this.schoolId}, classIds: ${_this.classIds}, profile: ${_this.profile})';
+  return 'Session(uid: ${_this.uid}, role: ${_this.role}, schoolId: ${_this.schoolId}, profile: ${_this.profile}, hasPassword: ${_this.hasPassword}, hasGoogle: ${_this.hasGoogle}, googlePhotoUrl: ${_this.googlePhotoUrl})';
 }
 
 
@@ -52,7 +55,7 @@ abstract mixin class $SessionCopyWith<$Res>  {
   factory $SessionCopyWith(Session value, $Res Function(Session) _then) = _$SessionCopyWithImpl;
 @useResult
 $Res call({
- String uid, UserRole role, String schoolId, List<String> classIds, AppUser profile
+ String uid, UserRole role, String schoolId, AppUser profile, bool hasPassword, bool hasGoogle, String? googlePhotoUrl
 });
 
 
@@ -69,14 +72,16 @@ class _$SessionCopyWithImpl<$Res>
 
 /// Create a copy of Session
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? uid = null,Object? role = null,Object? schoolId = null,Object? classIds = null,Object? profile = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? uid = null,Object? role = null,Object? schoolId = null,Object? profile = null,Object? hasPassword = null,Object? hasGoogle = null,Object? googlePhotoUrl = freezed,}) {
   return _then(Session(
 uid: null == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
 as UserRole,schoolId: null == schoolId ? _self.schoolId : schoolId // ignore: cast_nullable_to_non_nullable
-as String,classIds: null == classIds ? _self.classIds : classIds // ignore: cast_nullable_to_non_nullable
-as List<String>,profile: null == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
-as AppUser,
+as String,profile: null == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
+as AppUser,hasPassword: null == hasPassword ? _self.hasPassword : hasPassword // ignore: cast_nullable_to_non_nullable
+as bool,hasGoogle: null == hasGoogle ? _self.hasGoogle : hasGoogle // ignore: cast_nullable_to_non_nullable
+as bool,googlePhotoUrl: freezed == googlePhotoUrl ? _self.googlePhotoUrl : googlePhotoUrl // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 /// Create a copy of Session
@@ -170,10 +175,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uid,  UserRole role,  String schoolId,  List<String> classIds,  AppUser profile)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uid,  UserRole role,  String schoolId,  AppUser profile,  bool hasPassword,  bool hasGoogle,  String? googlePhotoUrl)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Session() when $default != null:
-return $default(_that.uid,_that.role,_that.schoolId,_that.classIds,_that.profile);case _:
+return $default(_that.uid,_that.role,_that.schoolId,_that.profile,_that.hasPassword,_that.hasGoogle,_that.googlePhotoUrl);case _:
   return orElse();
 
 }
@@ -191,10 +196,10 @@ return $default(_that.uid,_that.role,_that.schoolId,_that.classIds,_that.profile
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uid,  UserRole role,  String schoolId,  List<String> classIds,  AppUser profile)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uid,  UserRole role,  String schoolId,  AppUser profile,  bool hasPassword,  bool hasGoogle,  String? googlePhotoUrl)  $default,) {final _that = this;
 switch (_that) {
 case _Session():
-return $default(_that.uid,_that.role,_that.schoolId,_that.classIds,_that.profile);case _:
+return $default(_that.uid,_that.role,_that.schoolId,_that.profile,_that.hasPassword,_that.hasGoogle,_that.googlePhotoUrl);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -211,10 +216,10 @@ return $default(_that.uid,_that.role,_that.schoolId,_that.classIds,_that.profile
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uid,  UserRole role,  String schoolId,  List<String> classIds,  AppUser profile)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uid,  UserRole role,  String schoolId,  AppUser profile,  bool hasPassword,  bool hasGoogle,  String? googlePhotoUrl)?  $default,) {final _that = this;
 switch (_that) {
 case _Session() when $default != null:
-return $default(_that.uid,_that.role,_that.schoolId,_that.classIds,_that.profile);case _:
+return $default(_that.uid,_that.role,_that.schoolId,_that.profile,_that.hasPassword,_that.hasGoogle,_that.googlePhotoUrl);case _:
   return null;
 
 }
@@ -226,22 +231,20 @@ return $default(_that.uid,_that.role,_that.schoolId,_that.classIds,_that.profile
 
 
 class _Session extends Session {
-  const _Session({required this.uid, required this.role, required this.schoolId,  List<String> classIds = const <String>[], required this.profile}): _classIds = classIds,super._();
+  const _Session({required this.uid, required this.role, required this.schoolId, required this.profile, this.hasPassword = true, this.hasGoogle = false, this.googlePhotoUrl}): super._();
   
 
 @override final  String uid;
 @override final  UserRole role;
 @override final  String schoolId;
-/// Teachers only: classes from the `classIds` claim.
- final  List<String> _classIds;
-/// Teachers only: classes from the `classIds` claim.
-@override@JsonKey() List<String> get classIds {
-  if (_classIds is EqualUnmodifiableListView) return _classIds;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_classIds);
-}
-
 @override final  AppUser profile;
+/// The account can sign in with email and password. Google-only
+/// accounts must add a password first.
+@override@JsonKey() final  bool hasPassword;
+/// The account is linked to Google (offers "Pakai foto Google").
+@override@JsonKey() final  bool hasGoogle;
+/// The photo of the linked Google account, if any.
+@override final  String? googlePhotoUrl;
 
 /// Create a copy of Session
 /// with the given fields replaced by the non-null parameter values.
@@ -253,18 +256,18 @@ _$SessionCopyWith<_Session> get copyWith => __$SessionCopyWithImpl<_Session>(thi
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Session&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.role, role) || other.role == role)&&(identical(other.schoolId, schoolId) || other.schoolId == schoolId)&&const DeepCollectionEquality().equals(other.classIds, _classIds)&&(identical(other.profile, profile) || other.profile == profile));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Session&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.role, role) || other.role == role)&&(identical(other.schoolId, schoolId) || other.schoolId == schoolId)&&(identical(other.profile, profile) || other.profile == profile)&&(identical(other.hasPassword, hasPassword) || other.hasPassword == hasPassword)&&(identical(other.hasGoogle, hasGoogle) || other.hasGoogle == hasGoogle)&&(identical(other.googlePhotoUrl, googlePhotoUrl) || other.googlePhotoUrl == googlePhotoUrl));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,uid,role,schoolId,const DeepCollectionEquality().hash(_classIds),profile);
+    return Object.hash(runtimeType,uid,role,schoolId,profile,hasPassword,hasGoogle,googlePhotoUrl);
 }
 
 @override
 String toString() {
-    return 'Session(uid: $uid, role: $role, schoolId: $schoolId, classIds: $classIds, profile: $profile)';
+    return 'Session(uid: $uid, role: $role, schoolId: $schoolId, profile: $profile, hasPassword: $hasPassword, hasGoogle: $hasGoogle, googlePhotoUrl: $googlePhotoUrl)';
 }
 
 
@@ -275,7 +278,7 @@ abstract mixin class _$SessionCopyWith<$Res> implements $SessionCopyWith<$Res> {
   factory _$SessionCopyWith(_Session value, $Res Function(_Session) _then) = __$SessionCopyWithImpl;
 @override @useResult
 $Res call({
- String uid, UserRole role, String schoolId, List<String> classIds, AppUser profile
+ String uid, UserRole role, String schoolId, AppUser profile, bool hasPassword, bool hasGoogle, String? googlePhotoUrl
 });
 
 
@@ -292,14 +295,16 @@ class __$SessionCopyWithImpl<$Res>
 
 /// Create a copy of Session
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? uid = null,Object? role = null,Object? schoolId = null,Object? classIds = null,Object? profile = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? uid = null,Object? role = null,Object? schoolId = null,Object? profile = null,Object? hasPassword = null,Object? hasGoogle = null,Object? googlePhotoUrl = freezed,}) {
   return _then(_Session(
 uid: null == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
 as UserRole,schoolId: null == schoolId ? _self.schoolId : schoolId // ignore: cast_nullable_to_non_nullable
-as String,classIds: null == classIds ? _self._classIds : classIds // ignore: cast_nullable_to_non_nullable
-as List<String>,profile: null == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
-as AppUser,
+as String,profile: null == profile ? _self.profile : profile // ignore: cast_nullable_to_non_nullable
+as AppUser,hasPassword: null == hasPassword ? _self.hasPassword : hasPassword // ignore: cast_nullable_to_non_nullable
+as bool,hasGoogle: null == hasGoogle ? _self.hasGoogle : hasGoogle // ignore: cast_nullable_to_non_nullable
+as bool,googlePhotoUrl: freezed == googlePhotoUrl ? _self.googlePhotoUrl : googlePhotoUrl // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

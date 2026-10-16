@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/theme/colors.dart';
 import '../../../core/models/school.dart';
 import '../../../core/time/date_format.dart';
 import '../../../core/time/date_id.dart';
@@ -9,8 +8,7 @@ import '../../../core/time/wib_clock.dart';
 import '../../../core/widgets/dialogs.dart';
 import '../../../core/widgets/states.dart';
 import '../../auth/data/school_repository.dart';
-import '../../auth/presentation/account_section.dart';
-import '../data/admin_repository.dart';
+import '../data/teacher_repository.dart';
 
 const _weekdayNames = [
   'Minggu',
@@ -22,21 +20,20 @@ const _weekdayNames = [
   'Sabtu',
 ];
 
-/// School settings that drive streaks and status (PRD BR-11, BR-13), plus the
-/// admin's own account actions.
-class AdminSettingsScreen extends ConsumerWidget {
-  const AdminSettingsScreen({super.key});
+/// School settings that drive streaks and status (PRD BR-11, BR-13).
+class SchoolSettingsScreen extends ConsumerWidget {
+  const SchoolSettingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final school = ref.watch(schoolProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Pengaturan')),
+      appBar: AppBar(title: const Text('Pengaturan status')),
       body: AsyncView<School>(
         value: school,
         onRetry: () => ref.invalidate(schoolProvider),
         data: (data) => _SettingsForm(
-          // Rebuild the form when another admin device changes the settings.
+          // Rebuild the form when another teacher changes the settings.
           key: ValueKey(data.settings),
           school: data,
         ),
@@ -89,7 +86,7 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
 
   Future<void> _save() async {
     final ok = await runWithProgress(context, () async {
-      await ref.read(adminRepositoryProvider).updateSettings(_draft);
+      await ref.read(teacherRepositoryProvider).updateSettings(_draft);
       return true;
     });
     if (ok == true && mounted) {
@@ -101,32 +98,12 @@ class _SettingsFormState extends ConsumerState<_SettingsForm> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final muted = theme.textTheme.bodySmall?.copyWith(
-      color: AppColors.inkMuted,
+      color: theme.colorScheme.onSurfaceVariant,
     );
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        const AccountSection(),
-        const SizedBox(height: 24),
-        Text('Data sekolah', style: theme.textTheme.titleMedium),
-        const SizedBox(height: 8),
-        Card(
-          child: Column(
-            children: [
-              ListTile(
-                title: const Text('Nama sekolah'),
-                subtitle: Text(widget.school.name),
-              ),
-              const Divider(),
-              ListTile(
-                title: const Text('Kode sekolah'),
-                subtitle: Text(widget.school.id),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 24),
         Text('Hari netral', style: theme.textTheme.titleMedium),
         Text(
           'Hari netral tidak memutus streak dan tidak dihitung dalam ambang '

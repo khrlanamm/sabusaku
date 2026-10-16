@@ -5,23 +5,23 @@ import 'package:go_router/go_router.dart';
 import '../../../app/router/routes.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/data/reading_repository.dart';
-import '../../../core/models/credential.dart';
 import '../../../core/models/program.dart';
 import '../../../core/models/student_stats.dart';
 import '../../../core/time/date_format.dart';
 import '../../../core/widgets/app_progress_bar.dart';
 import '../../../core/widgets/book_cover.dart';
-import '../../../core/widgets/credentials_dialog.dart';
 import '../../../core/widgets/dialogs.dart';
 import '../../../core/widgets/journal_list.dart';
 import '../../../core/widgets/stat_card.dart';
 import '../../../core/widgets/states.dart';
 import '../../../core/widgets/status_chip.dart';
-import '../../auth/domain/app_user.dart';
+import '../../../core/widgets/user_avatar.dart';
 import '../../student/presentation/student_home_screen.dart' show OverdueLabel;
 import '../../student/presentation/student_profile_screen.dart'
     show ProgramHistoryTile;
 import '../data/teacher_repository.dart';
+import 'student_form.dart';
+import 'student_tile.dart' show labelLine;
 
 class TeacherStudentDetailScreen extends ConsumerWidget {
   const TeacherStudentDetailScreen({super.key, required this.studentId});
@@ -40,8 +40,7 @@ class TeacherStudentDetailScreen extends ConsumerWidget {
             ? const EmptyState(
                 icon: Icons.person_off_outlined,
                 title: 'Siswa tidak ditemukan',
-                message:
-                    'Siswa ini mungkin sudah pindah kelas atau dinonaktifkan.',
+                message: 'Siswa ini mungkin sudah dikeluarkan dari sekolah.',
               )
             : _Body(stats: data),
       ),
@@ -54,43 +53,80 @@ class _Body extends ConsumerWidget {
 
   final StudentStats stats;
 
-  Future<void> _resetPassword(BuildContext context, WidgetRef ref) async {
-    final confirmed = await showConfirmDialog(
+  Future<void> _edit(BuildContext context, WidgetRef ref) async {
+    final edit = await showStudentEditor(
       context,
-      title: 'Reset password?',
-      message:
-          '${stats.name} akan keluar dari semua perangkat dan harus masuk '
-          'dengan password sementara.',
-      confirmLabel: 'Reset',
-    );
-    if (!confirmed || !context.mounted) return;
-    final password = await runWithProgress(
-      context,
-      () => ref
-          .read(teacherRepositoryProvider)
-          .resetStudentPassword(stats.studentId),
-    );
-    if (password == null || !context.mounted) return;
-    await showCredentialDialog(
-      context,
-      Credential(
+      title: 'Ubah data siswa',
+      initial: (
         name: stats.name,
-        username: stats.nis ?? '',
-        password: password,
-        role: UserRole.siswa,
-        className: stats.className ?? '',
+        classId: stats.classId,
+        extracurriculars: stats.extracurriculars,
       ),
     );
+    if (edit == null || !context.mounted) return;
+    final ok = await runWithProgress(context, () async {
+      await ref
+          .read(teacherRepositoryProvider)
+          .updateStudent(
+            stats.studentId,
+            name: edit.name,
+            classId: edit.classId,
+            extracurriculars: edit.extracurriculars,
+          );
+      return true;
+    });
+    if (ok == true && context.mounted) {
+      showSnack(context, 'Data siswa disimpan.');
+    }
+  }
+
+  Future<void> _remove(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showConfirmDialog(
+      context,
+      title: 'Keluarkan dari sekolah?',
+      message:
+          '${stats.name} tidak bisa lagi membuka Sabu Saku di sekolah ini. '
+          'Akunnya tetap ada. Jurnal dan riwayat bukunya disimpan dan muncul '
+          'kembali bila emailnya ditambahkan lagi.',
+      confirmLabel: 'Keluarkan',
+      destructive: true,
+    );
+    if (!confirmed || !context.mounted) return;
+    final ok = await runWithProgress(context, () async {
+      await ref.read(teacherRepositoryProvider).removeStudent(stats.email);
+      return true;
+    });
+    if (ok == true && context.mounted) {
+      showSnack(context, '${stats.name} dikeluarkan dari sekolah.');
+      context.pop();
+    }
+  }
+
+  Future<void> _erase(BuildContext context, WidgetRef ref) async {
+    final confirmed = await showTypedConfirmDialog(
+      context,
+      title: 'Hapus data permanen?',
+      message:
+          'Semua buku, jurnal, dan komentar ${stats.name} di sekolah ini '
+          'dihapus selamanya dan tidak bisa dikembalikan. Siswa juga '
+          'dikeluarkan dari sekolah. Akunnya sendiri tetap ada.',
+    );
+    if (!confirmed || !context.mounted) return;
+    final ok = await runWithProgress(context, () async {
+      await ref.read(teacherRepositoryProvider).eraseStudent(stats.email);
+      return true;
+    });
+    if (ok == true && context.mounted) {
+      showSnack(context, 'Data ${stats.name} dihapus.');
+      context.pop();
+    }
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final book = stats.activeProgram;
-    final classId = stats.classId;
-    final programs = classId == null
-        ? const AsyncData(<Program>[])
-        : ref.watch(studentProgramsProvider(stats.studentId, classId));
+    final programs = ref.watch(studentProgramsProvider(stats.studentId));
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -98,18 +134,23 @@ class _Body extends ConsumerWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            UserAvatar(photoUrl: stats.photoUrl, name: stats.name, radius: 28),
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(stats.name, style: theme.textTheme.titleLarge),
                   Text(
-                    [
-                      if (stats.className != null) stats.className!,
-                      if (stats.nis != null) 'NIS ${stats.nis}',
-                    ].join(' · '),
+                    labelLine(stats.classId, stats.extracurriculars),
                     style: theme.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.inkMuted,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    stats.email,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                 ],
@@ -117,6 +158,16 @@ class _Body extends ConsumerWidget {
             ),
             StatusChip(status: stats.status),
           ],
+        ),
+        const SizedBox(height: 8),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            key: const Key('student-edit'),
+            onPressed: () => _edit(context, ref),
+            icon: const Icon(Icons.edit_outlined),
+            label: const Text('Ubah nama, kelas, ekskul'),
+          ),
         ),
         const SizedBox(height: 16),
         if (book == null)
@@ -126,7 +177,7 @@ class _Body extends ConsumerWidget {
               child: Text(
                 'Belum ada buku yang sedang dibaca.',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: AppColors.inkMuted,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
@@ -153,14 +204,16 @@ class _Body extends ConsumerWidget {
                           Text(
                             'Buku aktif',
                             style: theme.textTheme.labelMedium?.copyWith(
-                              color: AppColors.blue,
+                              color: Theme.of(context).colorScheme.primary,
                             ),
                           ),
                           Text(book.title, style: theme.textTheme.titleSmall),
                           Text(
                             book.author,
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: AppColors.inkMuted,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -174,7 +227,9 @@ class _Body extends ConsumerWidget {
                           Text(
                             'Target ${formatDateShort(book.targetDate)}',
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: AppColors.inkMuted,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
                             ),
                           ),
                           if (book.overdue)
@@ -228,7 +283,7 @@ class _Body extends ConsumerWidget {
           Text(
             'Belum pernah menulis jurnal.',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: AppColors.inkMuted,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           )
         else ...[
@@ -243,13 +298,13 @@ class _Body extends ConsumerWidget {
                     vertical: 6,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.sky,
+                    color: Theme.of(context).colorScheme.secondaryContainer,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
                     formatDayMonth(date),
-                    style: const TextStyle(
-                      color: AppColors.navy,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSecondaryContainer,
                       fontWeight: FontWeight.w600,
                       fontSize: 12.5,
                     ),
@@ -266,7 +321,7 @@ class _Body extends ConsumerWidget {
                     : '${stats.daysSinceLastJournal} hari efektif sejak '
                           'jurnal terakhir.',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppColors.inkMuted,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ),
@@ -276,14 +331,16 @@ class _Body extends ConsumerWidget {
         const SizedBox(height: 4),
         Text(
           'Ketuk buku untuk melihat semua jurnalnya.',
-          style: theme.textTheme.bodySmall?.copyWith(color: AppColors.inkMuted),
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         const SizedBox(height: 10),
         switch (programs) {
           AsyncData(:final value) when value.isEmpty => Text(
             'Belum ada buku.',
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: AppColors.inkMuted,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
           AsyncData(:final value) => Column(
@@ -300,12 +357,22 @@ class _Body extends ConsumerWidget {
           AsyncError(:final error) => ErrorState(error: error),
           _ => const SkeletonList(items: 2, itemHeight: 72),
         },
-        const SizedBox(height: 12),
+        const SizedBox(height: 24),
         OutlinedButton.icon(
-          key: const Key('student-reset-password'),
-          onPressed: () => _resetPassword(context, ref),
-          icon: const Icon(Icons.lock_reset),
-          label: const Text('Reset password siswa'),
+          key: const Key('student-remove'),
+          onPressed: () => _remove(context, ref),
+          icon: const Icon(Icons.logout),
+          label: const Text('Keluarkan dari sekolah'),
+        ),
+        const SizedBox(height: 8),
+        TextButton.icon(
+          key: const Key('student-erase'),
+          style: TextButton.styleFrom(
+            foregroundColor: Theme.of(context).colorScheme.error,
+          ),
+          onPressed: () => _erase(context, ref),
+          icon: const Icon(Icons.delete_forever_outlined),
+          label: const Text('Hapus data permanen'),
         ),
       ],
     );
@@ -344,6 +411,80 @@ class TeacherProgramJournalsScreen extends ConsumerWidget {
                 ),
               ),
       ),
+    );
+  }
+}
+
+/// Confirmation for an irreversible action: the button only enables after
+/// typing HAPUS.
+Future<bool> showTypedConfirmDialog(
+  BuildContext context, {
+  required String title,
+  required String message,
+  String word = 'HAPUS',
+}) async {
+  final result = await showDialog<bool>(
+    context: context,
+    builder: (context) =>
+        _TypedConfirmDialog(title: title, message: message, word: word),
+  );
+  return result ?? false;
+}
+
+class _TypedConfirmDialog extends StatefulWidget {
+  const _TypedConfirmDialog({
+    required this.title,
+    required this.message,
+    required this.word,
+  });
+
+  final String title;
+  final String message;
+  final String word;
+
+  @override
+  State<_TypedConfirmDialog> createState() => _TypedConfirmDialogState();
+}
+
+class _TypedConfirmDialogState extends State<_TypedConfirmDialog> {
+  String _typed = '';
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.title),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(widget.message),
+          const SizedBox(height: 16),
+          TextField(
+            key: const Key('typed-confirm-field'),
+            autofocus: true,
+            decoration: InputDecoration(
+              labelText: 'Ketik ${widget.word} untuk melanjutkan',
+            ),
+            onChanged: (value) => setState(() => _typed = value.trim()),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(false),
+          child: const Text('Batal'),
+        ),
+        FilledButton(
+          key: const Key('typed-confirm-ok'),
+          style: FilledButton.styleFrom(
+            backgroundColor: Theme.of(context).colorScheme.error,
+          ),
+          onPressed: _typed == widget.word
+              ? () => Navigator.of(context).pop(true)
+              : null,
+          child: const Text('Hapus permanen'),
+        ),
+      ],
     );
   }
 }

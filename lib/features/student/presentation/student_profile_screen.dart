@@ -6,9 +6,12 @@ import '../../../app/router/routes.dart';
 import '../../../app/theme/colors.dart';
 import '../../../core/models/program.dart';
 import '../../../core/time/date_format.dart';
+import '../../../core/widgets/dialogs.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/stat_card.dart';
+import '../../auth/data/auth_repository.dart';
 import '../../auth/presentation/account_section.dart';
+import '../../auth/presentation/label_pickers.dart';
 import '../../notifications/notification_prompt.dart';
 import '../data/student_repository.dart';
 
@@ -29,6 +32,8 @@ class StudentProfileScreen extends ConsumerWidget {
         padding: const EdgeInsets.all(16),
         children: [
           const AccountSection(),
+          const SizedBox(height: 12),
+          const StudentLabelsCard(),
           const SizedBox(height: 12),
           const NotificationSettingTile(),
           const SizedBox(height: 20),
@@ -70,7 +75,7 @@ class StudentProfileScreen extends ConsumerWidget {
             Text(
               'Belum ada buku.',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppColors.inkMuted,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             )
           else
@@ -81,6 +86,125 @@ class StudentProfileScreen extends ConsumerWidget {
                     context.push(Routes.studentProgramJournals(program.id)),
               ),
         ],
+      ),
+    );
+  }
+}
+
+/// The student's class and extracurriculars. Students may change both any
+/// time (a class move also moves their journals to the new class label).
+class StudentLabelsCard extends ConsumerWidget {
+  const StudentLabelsCard({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final profile = ref.watch(currentSessionProvider.select((s) => s.profile));
+    final theme = Theme.of(context);
+    final muted = theme.textTheme.bodySmall?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+    );
+
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        key: const Key('profile-labels'),
+        leading: const Icon(Icons.class_outlined),
+        title: Text('Kelas ${profile.classId ?? '-'}'),
+        subtitle: Text(
+          profile.extracurriculars.isEmpty
+              ? 'Belum ikut ekstrakurikuler'
+              : 'Ekskul: ${profile.extracurriculars.join(', ')}',
+          style: muted,
+        ),
+        trailing: const Icon(Icons.edit_outlined),
+        onTap: () => showModalBottomSheet<void>(
+          context: context,
+          isScrollControlled: true,
+          showDragHandle: true,
+          builder: (_) => const _LabelsSheet(),
+        ),
+      ),
+    );
+  }
+}
+
+class _LabelsSheet extends ConsumerStatefulWidget {
+  const _LabelsSheet();
+
+  @override
+  ConsumerState<_LabelsSheet> createState() => _LabelsSheetState();
+}
+
+class _LabelsSheetState extends ConsumerState<_LabelsSheet> {
+  final _formKey = GlobalKey<FormState>();
+  late String? _classId;
+  late List<String> _extracurriculars;
+
+  @override
+  void initState() {
+    super.initState();
+    final profile = ref.read(currentSessionProvider).profile;
+    _classId = profile.classId;
+    _extracurriculars = [...profile.extracurriculars];
+  }
+
+  Future<void> _save() async {
+    if (!_formKey.currentState!.validate()) return;
+    final session = ref.read(currentSessionProvider);
+    final profile = session.profile;
+    final sameLabels =
+        _extracurriculars.length == profile.extracurriculars.length &&
+        _extracurriculars.every(profile.extracurriculars.contains);
+    final saved = await runWithProgress(context, () async {
+      await ref
+          .read(authRepositoryProvider)
+          .updateProfile(
+            session,
+            classId: _classId == profile.classId ? null : _classId,
+            extracurriculars: sameLabels ? null : _extracurriculars,
+          );
+      return true;
+    });
+    if (saved == true && mounted) Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        20,
+        0,
+        20,
+        20 + MediaQuery.viewInsetsOf(context).bottom,
+      ),
+      child: Form(
+        key: _formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Kelas dan ekstrakurikuler',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 16),
+            ClassLabelField(
+              value: _classId,
+              onChanged: (value) => setState(() => _classId = value),
+            ),
+            const SizedBox(height: 18),
+            ExtracurricularChips(
+              value: _extracurriculars,
+              onChanged: (value) => setState(() => _extracurriculars = value),
+            ),
+            const SizedBox(height: 20),
+            FilledButton(
+              key: const Key('labels-save'),
+              onPressed: _save,
+              child: const Text('Simpan'),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -4,9 +4,8 @@ import 'app_user.dart';
 
 part 'session.freezed.dart';
 
-/// The signed-in user. Role, school and classes come from the custom claims
-/// (the source of truth for authorisation); [profile] is the Firestore
-/// document.
+/// The signed-in user. Role and school come from the custom claims (the
+/// source of truth for authorisation); [profile] is the Firestore document.
 @freezed
 abstract class Session with _$Session {
   const Session._();
@@ -15,13 +14,21 @@ abstract class Session with _$Session {
     required String uid,
     required UserRole role,
     required String schoolId,
-
-    /// Teachers only: classes from the `classIds` claim.
-    @Default(<String>[]) List<String> classIds,
     required AppUser profile,
+
+    /// The account can sign in with email and password. Google-only
+    /// accounts must add a password first.
+    @Default(true) bool hasPassword,
+
+    /// The account is linked to Google (offers "Pakai foto Google").
+    @Default(false) bool hasGoogle,
+
+    /// The photo of the linked Google account, if any.
+    String? googlePhotoUrl,
   }) = _Session;
 
-  bool get mustChangePassword => profile.mustChangePassword;
+  /// Sent to "Lengkapi akun" before anything else.
+  bool get needsCompletion => !profile.profileComplete || !hasPassword;
 }
 
 sealed class AuthState {
@@ -35,6 +42,21 @@ class AuthLoading extends AuthState {
 
 class AuthSignedOut extends AuthState {
   const AuthSignedOut();
+}
+
+/// Signed up with email and password; the address is not verified yet.
+class AuthNeedsVerification extends AuthState {
+  const AuthNeedsVerification(this.email);
+
+  final String email;
+}
+
+/// Signed in, but the email belongs to no school. The login screen shows
+/// "Harap Menghubungi Administrator Sekolah" and then signs out.
+class AuthNotRegistered extends AuthState {
+  const AuthNotRegistered(this.email);
+
+  final String email;
 }
 
 class AuthSignedIn extends AuthState {

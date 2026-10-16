@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../app/theme/colors.dart';
-import '../../../core/data/class_repository.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/presentation/account_section.dart';
 
@@ -11,8 +9,9 @@ class TeacherProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final classIds = ref.watch(currentSessionProvider).classIds;
-    final classNames = ref.watch(classNamesProvider);
+    final extracurriculars = ref.watch(
+      currentSessionProvider.select((s) => s.profile.extracurriculars),
+    );
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -22,28 +21,26 @@ class TeacherProfileScreen extends ConsumerWidget {
         children: [
           const AccountSection(),
           const SizedBox(height: 20),
-          Text('Kelas yang dipantau', style: theme.textTheme.titleMedium),
+          Text('Ekskul yang dibina', style: theme.textTheme.titleMedium),
           const SizedBox(height: 8),
-          if (classIds.isEmpty)
+          if (extracurriculars.isEmpty)
             Text(
-              'Belum ada. Penugasan kelas diatur oleh admin sekolah.',
+              'Belum ada. Ekskul binaan diatur oleh pengembang Sabu Saku.',
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppColors.inkMuted,
+                color: theme.colorScheme.onSurfaceVariant,
               ),
             )
           else
-            Card(
-              child: Column(
-                children: [
-                  for (final (index, id) in classIds.indexed) ...[
-                    if (index > 0) const Divider(),
-                    ListTile(
-                      leading: const Icon(Icons.class_outlined),
-                      title: Text(classNames[id] ?? 'Kelas'),
-                    ),
-                  ],
-                ],
-              ),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final label in extracurriculars)
+                  Chip(
+                    avatar: const Icon(Icons.groups_2_outlined, size: 18),
+                    label: Text(label),
+                  ),
+              ],
             ),
         ],
       ),

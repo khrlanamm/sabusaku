@@ -65,7 +65,7 @@ final class JournalOutboxProvider
   }
 }
 
-String _$journalOutboxHash() => r'b2cd571ba2644f05ae41cfdf0c3316e57e22ec8e';
+String _$journalOutboxHash() => r'e77aafbc2fd5dce947d48d9b5692d745ec45d25f';
 
 /// Tracks journal writes until the server answers, so a journal written
 /// offline is never rejected silently (docs/03 §3, "Catatan perilaku offline").

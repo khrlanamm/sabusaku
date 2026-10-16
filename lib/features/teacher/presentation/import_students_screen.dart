@@ -5,32 +5,30 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/theme/colors.dart';
-import '../../../core/data/class_repository.dart';
 import '../../../core/errors/app_exception.dart';
-import '../../../core/models/credential.dart';
-import '../../../core/models/school_class.dart';
+import '../../../core/models/school.dart';
 import '../../../core/utils/csv_import.dart';
 import '../../../core/utils/share_file.dart';
-import '../../../core/widgets/credentials_dialog.dart';
 import '../../../core/widgets/dialogs.dart';
-import '../../auth/domain/app_user.dart';
-import '../data/admin_repository.dart';
+import '../../auth/data/school_repository.dart';
+import '../data/teacher_repository.dart';
 
-/// The callable accepts at most this many users per call.
+/// The callable accepts at most this many students per call.
 const _batchSize = 100;
 
 typedef _Failure = ({CsvImportRow row, String reason});
 
 /// Import flow: pick file → preview with per-line validation → send in
-/// batches → results with the initial passwords to share.
-class ImportCsvScreen extends ConsumerStatefulWidget {
-  const ImportCsvScreen({super.key});
+/// batches → results.
+class ImportStudentsScreen extends ConsumerStatefulWidget {
+  const ImportStudentsScreen({super.key});
 
   @override
-  ConsumerState<ImportCsvScreen> createState() => _ImportCsvScreenState();
+  ConsumerState<ImportStudentsScreen> createState() =>
+      _ImportStudentsScreenState();
 }
 
-class _ImportCsvScreenState extends ConsumerState<ImportCsvScreen> {
+class _ImportStudentsScreenState extends ConsumerState<ImportStudentsScreen> {
   CsvImportPreview? _preview;
   String? _fileName;
 
@@ -39,13 +37,11 @@ class _ImportCsvScreenState extends ConsumerState<ImportCsvScreen> {
   int _sent = 0;
 
   // After sending.
-  List<Credential>? _created;
+  int? _added;
   List<_Failure> _failures = const [];
 
-  List<SchoolClass> get _classes =>
-      ref.read(classesProvider).value ?? const <SchoolClass>[];
-
   Future<void> _pickFile() async {
+    final school = ref.read(schoolProvider).value;
     try {
       final file = await FilePicker.pickFile(
         type: FileType.custom,
@@ -53,15 +49,16 @@ class _ImportCsvScreenState extends ConsumerState<ImportCsvScreen> {
       );
       if (file == null) return;
       final bytes = await file.readAsBytes();
-      final preview = parseUserCsv(
+      final preview = parseStudentCsv(
         utf8.decode(bytes, allowMalformed: true),
-        _classes,
+        classes: school?.classes ?? const [],
+        extracurriculars: school?.extracurriculars ?? const [],
       );
       if (!mounted) return;
       setState(() {
         _preview = preview;
         _fileName = file.name;
-        _created = null;
+        _added = null;
         _failures = const [];
       });
     } catch (error) {
@@ -71,40 +68,25 @@ class _ImportCsvScreenState extends ConsumerState<ImportCsvScreen> {
 
   Future<void> _send() async {
     final rows = _preview!.validRows;
-    final classNames = ref.read(classNamesProvider);
-    final repository = ref.read(adminRepositoryProvider);
+    final repository = ref.read(teacherRepositoryProvider);
     setState(() {
       _sending = true;
       _sent = 0;
     });
 
-    final created = <Credential>[];
+    var added = 0;
     final failures = <_Failure>[];
     for (var start = 0; start < rows.length; start += _batchSize) {
       final batch = rows.skip(start).take(_batchSize).toList();
       try {
-        final results = await repository.createUsers([
-          for (final row in batch) row.user!,
+        final results = await repository.addStudents([
+          for (final row in batch) row.student!,
         ]);
         for (final (index, result) in results.indexed) {
-          final row = batch[index];
-          final user = row.user!;
           if (result.ok) {
-            created.add(
-              Credential(
-                name: user.name,
-                username: result.username,
-                password: result.password!,
-                role: user.role,
-                className: user.role == UserRole.siswa
-                    ? classNames[user.classId] ?? ''
-                    : user.classIds
-                          .map((id) => classNames[id] ?? '')
-                          .join(csvClassSeparator),
-              ),
-            );
+            added++;
           } else {
-            failures.add((row: row, reason: result.reason ?? 'Gagal'));
+            failures.add((row: batch[index], reason: result.reason ?? 'Gagal'));
           }
         }
       } catch (error) {
@@ -118,19 +100,20 @@ class _ImportCsvScreenState extends ConsumerState<ImportCsvScreen> {
 
     setState(() {
       _sending = false;
-      _created = created;
+      _added = added;
       _failures = failures;
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final school = ref.watch(schoolProvider).value;
     final Widget body;
     if (_sending) {
       body = _Progress(sent: _sent, total: _preview!.validRows.length);
-    } else if (_created != null) {
+    } else if (_added != null) {
       body = _Results(
-        created: _created!,
+        added: _added!,
         failures: _failures,
         onDone: () => Navigator.of(context).maybePop(),
       );
@@ -142,11 +125,10 @@ class _ImportCsvScreenState extends ConsumerState<ImportCsvScreen> {
         onSend: _send,
       );
     } else {
-      body = _Intro(onPick: _pickFile);
+      body = _Intro(school: school, onPick: _pickFile);
     }
 
     return PopScope(
-      // Leaving mid-import or before sharing would lose the passwords.
       canPop: !_sending,
       child: Scaffold(
         appBar: AppBar(title: const Text('Impor CSV')),
@@ -157,13 +139,15 @@ class _ImportCsvScreenState extends ConsumerState<ImportCsvScreen> {
 }
 
 class _Intro extends StatelessWidget {
-  const _Intro({required this.onPick});
+  const _Intro({required this.school, required this.onPick});
 
+  final School? school;
   final VoidCallback onPick;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final extracurriculars = school?.extracurriculars ?? const <String>[];
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -171,7 +155,7 @@ class _Intro extends StatelessWidget {
         const SizedBox(height: 8),
         const Text(
           'Berkas CSV dengan baris judul dan empat kolom:\n'
-          'peran, nama, username, kelas',
+          'email, nama, kelas, ekskul',
         ),
         const SizedBox(height: 12),
         Card(
@@ -184,22 +168,24 @@ class _Intro extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        const _Bullet('peran: siswa atau guru.'),
-        const _Bullet('username siswa adalah NIS.'),
+        const _Bullet('Hanya email yang wajib. Kolom lain boleh kosong.'),
         const _Bullet(
-          'kelas harus sama dengan nama kelas yang sudah dibuat. Buat kelas '
-          'lebih dulu di tab Kelas.',
+          'kelas ditulis seperti XII-A1 atau X-G2. Tulisan seperti "12 A1" '
+          'dirapikan otomatis. Kelas baru ditambahkan ke daftar kelas sekolah.',
         ),
-        const _Bullet(
-          'Guru boleh punya beberapa kelas dipisah tanda | atau dikosongkan.',
+        _Bullet(
+          extracurriculars.isEmpty
+              ? 'ekskul dikosongkan: sekolah belum punya daftar ekskul.'
+              : 'ekskul dipisah tanda ; atau |, dipilih dari: '
+                    '${extracurriculars.join(', ')}.',
         ),
         const _Bullet('Pemisah kolom boleh koma atau titik koma.'),
         const SizedBox(height: 20),
         OutlinedButton.icon(
           onPressed: () => shareCsv(
-            fileName: 'templat-impor-sabu-saku.csv',
+            fileName: 'templat-impor-siswa-sabu-saku.csv',
             content: csvImportTemplate,
-            subject: 'Templat impor Sabu Saku',
+            subject: 'Templat impor siswa Sabu Saku',
           ),
           icon: const Icon(Icons.download_outlined),
           label: const Text('Bagikan templat CSV'),
@@ -253,6 +239,7 @@ class _Preview extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final valid = preview.validRows.length;
+    final newClasses = preview.newClasses.toList()..sort();
 
     if (preview.fileError != null) {
       return Padding(
@@ -260,7 +247,11 @@ class _Preview extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: AppColors.error),
+            Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Theme.of(context).colorScheme.error,
+            ),
             const SizedBox(height: 12),
             Text(
               preview.fileError!,
@@ -301,6 +292,13 @@ class _Preview extends StatelessWidget {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
+                    if (newClasses.isNotEmpty)
+                      Text(
+                        'Kelas baru: ${newClasses.join(', ')}',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -327,8 +325,8 @@ class _Preview extends StatelessWidget {
               onPressed: valid == 0 ? null : onSend,
               child: Text(
                 preview.invalidCount == 0
-                    ? 'Impor $valid pengguna'
-                    : 'Impor $valid pengguna yang valid',
+                    ? 'Impor $valid siswa'
+                    : 'Impor $valid siswa yang valid',
               ),
             ),
           ),
@@ -346,13 +344,18 @@ class _PreviewRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final student = row.student;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: row.isValid ? AppColors.surface : AppColors.inactiveTint,
+        color: row.isValid
+            ? Theme.of(context).colorScheme.surface
+            : Theme.of(context).colorScheme.errorContainer,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: row.isValid ? AppColors.outline : AppColors.inactiveText,
+          color: row.isValid
+              ? Theme.of(context).colorScheme.outlineVariant
+              : Theme.of(context).colorScheme.error,
         ),
       ),
       child: Column(
@@ -363,37 +366,57 @@ class _PreviewRow extends StatelessWidget {
               Icon(
                 row.isValid ? Icons.check_circle : Icons.error,
                 size: 18,
-                color: row.isValid ? AppColors.green : AppColors.inactiveText,
+                color: row.isValid
+                    ? AppColors.green
+                    : Theme.of(context).colorScheme.error,
               ),
               const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  row.name.isEmpty ? '(tanpa nama)' : row.name,
+                  row.email.isEmpty ? '(tanpa email)' : row.email,
                   style: theme.textTheme.titleSmall,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               Text(
                 'Baris ${row.line}',
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppColors.inkMuted,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 2),
           Text(
-            '${row.roleText} · ${row.username} · ${row.classText}',
+            [
+              row.name.isEmpty ? '(nama kosong)' : row.name,
+              student?.classId ?? (row.classText.isEmpty ? '-' : row.classText),
+              if (student != null && student.extracurriculars.isNotEmpty)
+                student.extracurriculars.join(', ')
+              else if (row.extracurricularText.isNotEmpty)
+                row.extracurricularText,
+            ].join(' · '),
             style: theme.textTheme.bodySmall?.copyWith(
-              color: AppColors.inkMuted,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
+          if (row.isValid && row.newClass)
+            Padding(
+              padding: const EdgeInsets.only(top: 4),
+              child: Text(
+                'Kelas ${student!.classId} akan ditambahkan ke daftar kelas.',
+                style: theme.textTheme.bodySmall?.copyWith(
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ),
           for (final error in row.errors)
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(
                 error,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppColors.inactiveText,
+                  color: Theme.of(context).colorScheme.error,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -420,7 +443,7 @@ class _Progress extends StatelessWidget {
           children: [
             LinearProgressIndicator(value: total == 0 ? null : sent / total),
             const SizedBox(height: 16),
-            Text('Membuat akun… $sent dari $total'),
+            Text('Menambahkan siswa… $sent dari $total'),
             const SizedBox(height: 4),
             const Text('Jangan tutup aplikasi.'),
           ],
@@ -432,12 +455,12 @@ class _Progress extends StatelessWidget {
 
 class _Results extends StatelessWidget {
   const _Results({
-    required this.created,
+    required this.added,
     required this.failures,
     required this.onDone,
   });
 
-  final List<Credential> created;
+  final int added;
   final List<_Failure> failures;
   final VoidCallback onDone;
 
@@ -448,14 +471,16 @@ class _Results extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       children: [
         Icon(
-          created.isEmpty ? Icons.error_outline : Icons.check_circle,
+          added == 0 ? Icons.error_outline : Icons.check_circle,
           size: 56,
-          color: created.isEmpty ? AppColors.error : AppColors.green,
+          color: added == 0
+              ? Theme.of(context).colorScheme.error
+              : AppColors.green,
         ),
         const SizedBox(height: 8),
         Text(
-          '${created.length} akun dibuat',
-          key: const Key('import-result-created'),
+          '$added siswa ditambahkan',
+          key: const Key('import-result-added'),
           textAlign: TextAlign.center,
           style: theme.textTheme.titleLarge,
         ),
@@ -464,29 +489,24 @@ class _Results extends StatelessWidget {
             '${failures.length} gagal',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium?.copyWith(
-              color: AppColors.inactiveText,
+              color: Theme.of(context).colorScheme.error,
             ),
           ),
-        const SizedBox(height: 16),
-        if (created.isNotEmpty) ...[
+        if (added > 0) ...[
+          const SizedBox(height: 16),
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: AppColors.attentionTint,
+              color: Theme.of(context).colorScheme.secondaryContainer,
               borderRadius: BorderRadius.circular(14),
             ),
-            child: const Text(
-              'Password awal hanya tersedia sekarang. Bagikan atau simpan '
-              'berkas kredensial sebelum meninggalkan layar ini.',
-              style: TextStyle(color: AppColors.attentionText),
+            child: Text(
+              'Minta siswa membuka Sabu Saku dan masuk dengan email yang '
+              'didaftarkan, lewat "Masuk dengan Google" atau "Daftar".',
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSecondaryContainer,
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          FilledButton.icon(
-            key: const Key('import-share'),
-            onPressed: () => shareCredentials(created),
-            icon: const Icon(Icons.share_outlined),
-            label: const Text('Bagikan kredensial (CSV)'),
           ),
         ],
         if (failures.isNotEmpty) ...[
@@ -497,7 +517,7 @@ class _Results extends StatelessWidget {
             Card(
               margin: const EdgeInsets.only(bottom: 8),
               child: ListTile(
-                title: Text('${failure.row.name} (${failure.row.username})'),
+                title: Text(failure.row.email),
                 subtitle: Text('Baris ${failure.row.line}: ${failure.reason}'),
               ),
             ),
@@ -505,20 +525,7 @@ class _Results extends StatelessWidget {
         const SizedBox(height: 16),
         OutlinedButton(
           key: const Key('import-done'),
-          onPressed: () async {
-            if (created.isNotEmpty) {
-              final leave = await showConfirmDialog(
-                context,
-                title: 'Sudah menyimpan kredensial?',
-                message:
-                    'Password awal tidak bisa ditampilkan lagi setelah layar '
-                    'ini ditutup.',
-                confirmLabel: 'Sudah, tutup',
-              );
-              if (!leave) return;
-            }
-            onDone();
-          },
+          onPressed: onDone,
           child: const Text('Selesai'),
         ),
       ],

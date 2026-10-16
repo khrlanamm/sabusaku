@@ -6,7 +6,9 @@ import '../../features/auth/domain/session.dart';
 abstract final class Routes {
   static const splash = '/';
   static const login = '/login';
-  static const forceChangePassword = '/ganti-password';
+  static const register = '/daftar';
+  static const verifyEmail = '/verifikasi-email';
+  static const completeProfile = '/lengkapi-akun';
   static const changePassword = '/ubah-password';
 
   // Siswa
@@ -21,11 +23,17 @@ abstract final class Routes {
   static String studentProgramJournals(String programId) =>
       '/siswa/profil/buku/$programId';
 
-  // Guru
+  // Guru (penanggung jawab)
   static const teacherDashboard = '/guru/dashboard';
   static const teacherStudents = '/guru/siswa';
+  static const teacherSchool = '/guru/sekolah';
   static const teacherProfile = '/guru/profil';
+  static const teacherAddStudents = '/guru/siswa/tambah';
+  static const teacherImportStudents = '/guru/siswa/impor';
+  static const teacherSettings = '/guru/sekolah/pengaturan';
   static String teacherStudent(String studentId) => '/guru/siswa/$studentId';
+  static String teacherPendingMember(String email) =>
+      '/guru/anggota/${Uri.encodeComponent(email)}';
   static String teacherProgram(String studentId, String programId) =>
       '/guru/siswa/$studentId/buku/$programId';
   static String teacherJournal(
@@ -34,44 +42,36 @@ abstract final class Routes {
     String date,
   ) => '/guru/siswa/$studentId/buku/$programId/jurnal/$date';
 
-  // Admin
-  static const adminHome = '/admin/beranda';
-  static const adminClasses = '/admin/kelas';
-  static const adminUsers = '/admin/pengguna';
-  static const adminSettings = '/admin/pengaturan';
-  static String adminClass(String classId) => '/admin/kelas/$classId';
-  static const adminAddUser = '/admin/pengguna/tambah';
-  static const adminImport = '/admin/pengguna/impor';
-  static String adminUser(String uid) => '/admin/pengguna/detail/$uid';
-
   static String prefixOf(UserRole role) => switch (role) {
     UserRole.siswa => '/siswa',
     UserRole.guru => '/guru',
-    UserRole.admin => '/admin',
   };
 
   static String homeOf(UserRole role) => switch (role) {
     UserRole.siswa => studentHome,
     UserRole.guru => teacherDashboard,
-    UserRole.admin => adminHome,
   };
 }
 
 /// Where the user must go instead of [location], or null to stay.
 ///
-/// One gate for sign-in state, the forced password change and role
-/// separation (docs/05 §3).
+/// One gate for sign-in state, email verification, profile completion and
+/// role separation (docs/05 §3).
 String? redirectFor(AuthState auth, String location) {
   switch (auth) {
     case AuthLoading():
       return location == Routes.splash ? null : Routes.splash;
-    case AuthSignedOut():
-      return location == Routes.login ? null : Routes.login;
+    // The login screen shows the "not registered" dialog, then signs out.
+    case AuthSignedOut() || AuthNotRegistered():
+      if (location == Routes.login || location == Routes.register) return null;
+      return Routes.login;
+    case AuthNeedsVerification():
+      return location == Routes.verifyEmail ? null : Routes.verifyEmail;
     case AuthSignedIn(:final session):
-      if (session.mustChangePassword) {
-        return location == Routes.forceChangePassword
+      if (session.needsCompletion) {
+        return location == Routes.completeProfile
             ? null
-            : Routes.forceChangePassword;
+            : Routes.completeProfile;
       }
       if (location == Routes.changePassword) return null;
       if (location.startsWith('${Routes.prefixOf(session.role)}/')) return null;

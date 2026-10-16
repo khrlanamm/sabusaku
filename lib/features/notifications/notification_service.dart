@@ -205,7 +205,7 @@ class NotificationService {
   void _openPendingLink(Session session) {
     final link = _pendingLink;
     if (link == null) return;
-    if (session.role != UserRole.siswa || session.mustChangePassword) {
+    if (session.role != UserRole.siswa || session.needsCompletion) {
       // Not this account's notification, or not allowed in yet: drop it.
       if (session.role != UserRole.siswa) _pendingLink = null;
       return;

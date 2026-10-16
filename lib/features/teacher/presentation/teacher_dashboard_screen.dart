@@ -10,56 +10,136 @@ import '../../../core/widgets/stat_card.dart';
 import '../../../core/widgets/states.dart';
 import '../../../core/widgets/status_chip.dart';
 import '../../auth/data/auth_repository.dart';
+import '../../auth/data/school_repository.dart';
 import '../data/teacher_repository.dart';
 import 'student_tile.dart';
 
-/// Who is active, who needs attention, without opening students one by one.
+/// Who is active, who needs attention, without opening students one by one,
+/// for the whole school or one extracurricular.
 /// Built from the summary documents; nothing is recomputed here beyond
 /// counting (PRD §8.5).
-class TeacherDashboardScreen extends ConsumerWidget {
+class TeacherDashboardScreen extends ConsumerStatefulWidget {
   const TeacherDashboardScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TeacherDashboardScreen> createState() =>
+      _TeacherDashboardScreenState();
+}
+
+class _TeacherDashboardScreenState
+    extends ConsumerState<TeacherDashboardScreen> {
+  /// Narrows the whole dashboard to one extracurricular.
+  String? _extracurricular;
+
+  @override
+  Widget build(BuildContext context) {
     final session = ref.watch(currentSessionProvider);
+    final school = ref.watch(schoolProvider).value;
     final students = ref.watch(teacherStudentsProvider);
+    final pending = ref.watch(pendingStudentsProvider).value ?? const [];
     final theme = Theme.of(context);
+    final extracurriculars = school?.extracurriculars ?? const <String>[];
+    final scope = extracurriculars.contains(_extracurricular)
+        ? _extracurricular
+        : null;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Dashboard')),
-      body: session.classIds.isEmpty
-          ? const EmptyState(
-              icon: Icons.class_outlined,
-              title: 'Belum ada kelas',
-              message:
-                  'Kamu belum ditugaskan ke kelas mana pun. Hubungi admin '
-                  'sekolah.',
-            )
-          : AsyncView<List<StudentStats>>(
-              value: students,
-              onRetry: () => ref.invalidate(teacherStudentsProvider),
-              data: (all) => ListView(
-                padding: const EdgeInsets.all(16),
-                children: [
-                  Text(
-                    'Halo, ${session.profile.name}',
-                    style: theme.textTheme.titleLarge,
-                  ),
-                  Text(
-                    '${session.classIds.length} kelas dipantau',
-                    style: theme.textTheme.bodyMedium?.copyWith(
-                      color: AppColors.inkMuted,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  _Summary(students: all),
-                  const SizedBox(height: 20),
-                  _StatusBreakdown(students: all),
-                  const SizedBox(height: 20),
-                  _NeedsAttention(students: all),
-                ],
+      body: AsyncView<List<StudentStats>>(
+        value: students,
+        onRetry: () => ref.invalidate(teacherStudentsProvider),
+        data: (all) {
+          final inScope = [
+            for (final stats in all)
+              if (scope == null || stats.extracurriculars.contains(scope))
+                stats,
+          ];
+          final pendingInScope = pending
+              .where((m) => scope == null || m.extracurriculars.contains(scope))
+              .length;
+          return ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              Text(
+                'Halo, ${session.profile.name}',
+                style: theme.textTheme.titleLarge,
               ),
-            ),
+              if (school != null)
+                Text(
+                  school.name,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              if (extracurriculars.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                SizedBox(
+                  height: 40,
+                  child: ListView(
+                    scrollDirection: Axis.horizontal,
+                    children: [
+                      for (final label in [null, ...extracurriculars])
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: ChoiceChip(
+                            key: Key('dashboard-scope-${label ?? 'all'}'),
+                            label: Text(label ?? 'Semua siswa'),
+                            selected: scope == label,
+                            onSelected: (_) =>
+                                setState(() => _extracurricular = label),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ],
+              const SizedBox(height: 16),
+              _Summary(students: inScope),
+              if (pendingInScope > 0) ...[
+                const SizedBox(height: 12),
+                _PendingNotice(count: pendingInScope, extracurricular: scope),
+              ],
+              const SizedBox(height: 20),
+              _StatusBreakdown(students: inScope, extracurricular: scope),
+              const SizedBox(height: 20),
+              _NeedsAttention(students: inScope),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// How many added students have never signed in. Opens the student list.
+class _PendingNotice extends ConsumerWidget {
+  const _PendingNotice({required this.count, required this.extracurricular});
+
+  final int count;
+  final String? extracurricular;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        key: const Key('dashboard-pending'),
+        leading: Icon(
+          Icons.hourglass_empty,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        title: Text('$count siswa belum masuk aplikasi'),
+        subtitle: const Text(
+          'Ingatkan mereka masuk dengan email yang didaftarkan.',
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () {
+          ref.read(studentListFilterProvider.notifier)
+            ..reset()
+            ..setExtracurricular(extracurricular);
+          context.go(Routes.teacherStudents);
+        },
+      ),
     );
   }
 }
@@ -106,9 +186,10 @@ class _Summary extends StatelessWidget {
 }
 
 class _StatusBreakdown extends ConsumerWidget {
-  const _StatusBreakdown({required this.students});
+  const _StatusBreakdown({required this.students, this.extracurricular});
 
   final List<StudentStats> students;
+  final String? extracurricular;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -129,7 +210,8 @@ class _StatusBreakdown extends ConsumerWidget {
                   // Opens the student list filtered by this status.
                   onTap: () {
                     ref.read(studentListFilterProvider.notifier)
-                      ..setClass(null)
+                      ..reset()
+                      ..setExtracurricular(extracurricular)
                       ..setStatus(status);
                     context.go(Routes.teacherStudents);
                   },

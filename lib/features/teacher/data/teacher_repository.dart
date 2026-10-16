@@ -5,28 +5,47 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import '../../../core/data/reading_repository.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/firebase/firebase_providers.dart';
+import '../../../core/models/member.dart';
 import '../../../core/models/program.dart';
+import '../../../core/models/school.dart';
 import '../../../core/models/student_stats.dart';
 import '../../../core/models/student_status.dart';
-import '../../../core/utils/streams.dart';
 import '../../auth/data/auth_repository.dart';
+import '../../auth/domain/app_user.dart';
 import '../../auth/domain/session.dart';
 
 part 'teacher_repository.g.dart';
 
-/// What a teacher reads and writes: student summaries of the assigned
-/// classes, and comments on their journals.
+/// What a teacher (penanggung jawab) reads and writes: every student of the
+/// school, the students added but not signed in yet, the school's class and
+/// extracurricular labels and settings, and comments on journals.
+///
+/// Adding, removing and erasing students go through callables; edits the
+/// rules allow (names, labels, settings) are written directly.
 class TeacherRepository {
-  TeacherRepository(this._functions, this._reading, this._session);
+  TeacherRepository(
+    this._firestore,
+    this._functions,
+    this._reading,
+    this._session,
+  );
 
+  final FirebaseFirestore _firestore;
   final FirebaseFunctions _functions;
   final ReadingRepository _reading;
   final Session _session;
 
-  /// One class per query, as an equality filter, so the rules can prove the
-  /// teacher is assigned to it (docs/02 §3.8). Avoids `whereIn`.
-  Stream<List<StudentStats>> watchClassStats(String classId) => _reading.stats
-      .where('classId', isEqualTo: classId)
+  DocumentReference<Map<String, dynamic>> get _school =>
+      _firestore.doc('schools/${_session.schoolId}');
+  CollectionReference<Map<String, dynamic>> get _users =>
+      _school.collection('users');
+  CollectionReference<Map<String, dynamic>> get _members =>
+      _firestore.collection('members');
+
+  // ---------- Students ----------
+
+  /// Every signed-in student of the school, sorted by name.
+  Stream<List<StudentStats>> watchStudents() => _reading.stats
       .orderBy('name')
       .snapshots()
       .map(
@@ -36,16 +55,124 @@ class TeacherRepository {
         ],
       );
 
-  /// All students of the assigned classes, merged and sorted by name.
-  Stream<List<StudentStats>> watchStudents() =>
-      combineLatest([
-        for (final classId in _session.classIds) watchClassStats(classId),
-      ]).map(
-        (lists) => lists.expand((list) => list).toList()
-          ..sort(
-            (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
-          ),
+  /// Students added by a teacher who have not signed in yet.
+  Stream<List<Member>> watchPendingStudents() => _members
+      .where('schoolId', isEqualTo: _session.schoolId)
+      .where('role', isEqualTo: UserRole.siswa.wire)
+      .snapshots()
+      .map(
+        (snapshot) =>
+            [
+                for (final doc in snapshot.docs)
+                  Member.fromMap(doc.id, doc.data()),
+              ].where((member) => member.pending).toList()
+              ..sort((a, b) => _sortKey(a).compareTo(_sortKey(b))),
       );
+
+  static String _sortKey(Member member) =>
+      (member.name.isEmpty ? member.email : member.name).toLowerCase();
+
+  Stream<Member?> watchMember(String email) => _members
+      .doc(email)
+      .snapshots()
+      .map((doc) => doc.exists ? Member.fromMap(doc.id, doc.data()!) : null);
+
+  /// The school's penanggung jawab, sorted by name.
+  Stream<List<AppUser>> watchTeachers() => _users
+      .where('role', isEqualTo: UserRole.guru.wire)
+      .snapshots()
+      .map(
+        (snapshot) =>
+            [
+              for (final doc in snapshot.docs)
+                AppUser.fromMap(doc.id, doc.data()),
+            ].where((user) => user.active).toList()..sort(
+              (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
+            ),
+      );
+
+  /// At most 100 students per call; larger imports are split by the caller.
+  Future<List<AddStudentResult>> addStudents(List<NewStudent> students) async {
+    final data = await _call('addStudents', {
+      'students': [for (final student in students) student.toMap()],
+    });
+    return [
+      for (final row in data['results'] as List)
+        AddStudentResult.fromMap(Map<String, dynamic>.from(row as Map)),
+    ];
+  }
+
+  /// Takes the student out of the school. Their account stays; their
+  /// journals come back if they are added again.
+  Future<void> removeStudent(String email) =>
+      _call('removeStudent', {'email': email});
+
+  /// Permanently deletes the student's data in this school. Their account
+  /// stays. Returns the number of books removed.
+  Future<int> eraseStudent(String email) async =>
+      (await _call('eraseStudent', {'email': email}))['programs'] as int? ?? 0;
+
+  /// Edits a signed-in student's profile.
+  Future<void> updateStudent(
+    String uid, {
+    required String name,
+    required String? classId,
+    required List<String> extracurriculars,
+  }) => _guard(
+    () => _users.doc(uid).update({
+      'name': name,
+      'classId': classId,
+      'extracurriculars': extracurriculars,
+      'updatedAt': FieldValue.serverTimestamp(),
+    }),
+  );
+
+  /// Edits a student who has not signed in yet.
+  Future<void> updatePendingStudent(
+    String email, {
+    required String name,
+    required String? classId,
+    required List<String> extracurriculars,
+  }) => _guard(
+    () => _members.doc(email).update({
+      'name': name,
+      'classId': classId,
+      'extracurriculars': extracurriculars,
+      'updatedAt': FieldValue.serverTimestamp(),
+    }),
+  );
+
+  // ---------- School labels and settings ----------
+
+  Future<void> addClassLabel(String label) => _guard(
+    () => _school.update({
+      'classes': FieldValue.arrayUnion([label]),
+    }),
+  );
+
+  /// Students keep the label they have; it only leaves the choices.
+  Future<void> removeClassLabel(String label) => _guard(
+    () => _school.update({
+      'classes': FieldValue.arrayRemove([label]),
+    }),
+  );
+
+  Future<void> addExtracurricular(String label) => _guard(
+    () => _school.update({
+      'extracurriculars': FieldValue.arrayUnion([label]),
+    }),
+  );
+
+  Future<void> removeExtracurricular(String label) => _guard(
+    () => _school.update({
+      'extracurriculars': FieldValue.arrayRemove([label]),
+    }),
+  );
+
+  Future<void> updateSettings(SchoolSettings settings) =>
+      _guard(() => _school.update({'settings': settings.toMap()}));
+
+  // ---------- Comments ----------
 
   Future<void> addComment(String programId, String date, String text) => _guard(
     () => _reading.comments(programId, date).add({
@@ -73,13 +200,11 @@ class TeacherRepository {
   Future<void> deleteComment(String programId, String date, String commentId) =>
       _guard(() => _reading.comments(programId, date).doc(commentId).delete());
 
-  /// Temporary password for a student of an assigned class. Shown once.
-  Future<String> resetStudentPassword(String studentId) => _guard(() async {
-    final result = await _functions
-        .httpsCallable('resetPassword')
-        .call<Object?>({'uid': studentId});
-    return (result.data as Map)['password'] as String;
-  });
+  Future<Map<String, dynamic>> _call(String name, Map<String, dynamic> data) =>
+      _guard(() async {
+        final result = await _functions.httpsCallable(name).call<Object?>(data);
+        return Map<String, dynamic>.from(result.data as Map? ?? const {});
+      });
 
   Future<T> _guard<T>(Future<T> Function() action) async {
     try {
@@ -92,6 +217,7 @@ class TeacherRepository {
 
 @riverpod
 TeacherRepository teacherRepository(Ref ref) => TeacherRepository(
+  ref.watch(firestoreProvider),
   ref.watch(functionsProvider),
   ref.watch(readingRepositoryProvider),
   ref.watch(currentSessionProvider),
@@ -101,35 +227,68 @@ TeacherRepository teacherRepository(Ref ref) => TeacherRepository(
 Stream<List<StudentStats>> teacherStudents(Ref ref) =>
     ref.watch(teacherRepositoryProvider).watchStudents();
 
-/// One student's summary. Readable only while the student is in one of the
-/// teacher's classes.
+@riverpod
+Stream<List<Member>> pendingStudents(Ref ref) =>
+    ref.watch(teacherRepositoryProvider).watchPendingStudents();
+
+@riverpod
+Stream<Member?> member(Ref ref, String email) =>
+    ref.watch(teacherRepositoryProvider).watchMember(email);
+
+@riverpod
+Stream<List<AppUser>> schoolTeachers(Ref ref) =>
+    ref.watch(teacherRepositoryProvider).watchTeachers();
+
+/// One student's summary. Gone once the student is removed from the school.
 @riverpod
 Stream<StudentStats?> studentStats(Ref ref, String studentId) =>
     ref.watch(readingRepositoryProvider).watchStats(studentId);
 
-/// A student's books. The class filter is what lets the rules allow the
-/// query (docs/03 §3).
+/// A student's books, newest first.
 @riverpod
-Stream<List<Program>> studentPrograms(
-  Ref ref,
-  String studentId,
-  String classId,
-) => ref
-    .watch(readingRepositoryProvider)
-    .watchPrograms(studentId, classId: classId);
+Stream<List<Program>> studentPrograms(Ref ref, String studentId) =>
+    ref.watch(readingRepositoryProvider).watchPrograms(studentId);
 
-typedef StudentFilter = ({String? classId, StudentStatus? status});
+typedef StudentFilter = ({
+  String? classId,
+  String? extracurricular,
+  StudentStatus? status,
+});
 
 /// Filter of the student list. Shared so the dashboard can open the list
-/// already filtered by a status.
+/// already filtered.
 @riverpod
 class StudentListFilter extends _$StudentListFilter {
   @override
-  StudentFilter build() => (classId: null, status: null);
+  StudentFilter build() => (classId: null, extracurricular: null, status: null);
 
-  void setClass(String? classId) =>
-      state = (classId: classId, status: state.status);
+  void setClass(String? classId) => state = (
+    classId: classId,
+    extracurricular: state.extracurricular,
+    status: state.status,
+  );
 
-  void setStatus(StudentStatus? status) =>
-      state = (classId: state.classId, status: status);
+  void setExtracurricular(String? extracurricular) => state = (
+    classId: state.classId,
+    extracurricular: extracurricular,
+    status: state.status,
+  );
+
+  void setStatus(StudentStatus? status) => state = (
+    classId: state.classId,
+    extracurricular: state.extracurricular,
+    status: status,
+  );
+
+  void reset() => state = (classId: null, extracurricular: null, status: null);
 }
+
+/// Whether [filter] keeps a student with these labels.
+bool matchesLabels(
+  StudentFilter filter, {
+  required String? classId,
+  required List<String> extracurriculars,
+}) =>
+    (filter.classId == null || classId == filter.classId) &&
+    (filter.extracurricular == null ||
+        extracurriculars.contains(filter.extracurricular));

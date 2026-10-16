@@ -4,6 +4,7 @@ import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -40,6 +41,7 @@ Future<void> initFirebase() async {
     FirebaseFirestore.instance.useFirestoreEmulator(_emulatorHost, 8080);
     FirebaseFunctions.instanceFor(region: firebaseRegion)
         .useFunctionsEmulator(_emulatorHost, 5001);
+    await FirebaseStorage.instance.useStorageEmulator(_emulatorHost, 9199);
   }
 
   // App Check proves requests come from this app (docs/03 §4). It is off
