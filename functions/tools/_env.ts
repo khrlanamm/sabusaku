@@ -34,6 +34,9 @@ if (useEmulator) {
   process.env.GOOGLE_APPLICATION_CREDENTIALS = resolve(dir, key);
 }
 
+/** True when `--name` is present. */
+export const hasFlag = (name: string) => argv.includes(`--${name}`);
+
 /** Value of `--name value`, if present. */
 export function arg(name: string): string | undefined {
   const index = argv.indexOf(`--${name}`);

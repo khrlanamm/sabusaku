@@ -1,4 +1,5 @@
-// Permanently deletes a school: its roster and every document under it.
+// Permanently deletes a school: its roster, every document under it and the
+// reports filed in or about it.
 //
 //   npx tsx tools/delete-school.ts --code demo --confirm demo [--emulator]
 //
@@ -14,7 +15,7 @@ import {requireArg, run, target} from "./_env";
 
 import {UserRecord} from "firebase-admin/auth";
 
-import {auth, db, membersCol, schoolRef, usersCol} from "../src/infra/firebase";
+import {auth, db, membersCol, reportsCol, schoolRef, usersCol} from "../src/infra/firebase";
 import {revokeSchoolAccess} from "../src/infra/members";
 
 run(async () => {
@@ -57,11 +58,16 @@ run(async () => {
     }
   }
 
-  const batch = db.batch();
-  for (const member of members.docs) batch.delete(member.ref);
-  await batch.commit();
+  const reports = await reportsCol().where("schools", "array-contains", code).select().get();
+  // Batched writes allow at most 500 operations.
+  const refs = [...members.docs, ...reports.docs].map((doc) => doc.ref);
+  for (let start = 0; start < refs.length; start += 500) {
+    const batch = db.batch();
+    for (const ref of refs.slice(start, start + 500)) batch.delete(ref);
+    await batch.commit();
+  }
   await db.recursiveDelete(school.ref);
 
   console.log(`Sekolah "${code}" dihapus dari ${target()}.`);
-  console.log(`  ${members.size} anggota daftar, ${toDelete.length} akun lama dihapus, ${kept} akun dipertahankan.`);
+  console.log(`  ${members.size} anggota daftar, ${reports.size} laporan, ${toDelete.length} akun lama dihapus, ${kept} akun dipertahankan.`);
 });

@@ -29,6 +29,9 @@ service cloud.firestore {
     // Joined some school (the book catalog is shared by every school).
     function isMember() { return signedIn() && tokenSchool() != '' && role() in ['guru', 'siswa']; }
     function isAnyTeacher() { return isMember() && role() == 'guru'; }
+    // A teacher of one of the listed schools (a report concerns one or two).
+    // hasAny (not `in`) lets the rules accept an array-contains query.
+    function isTeacherOfAny(schools) { return isAnyTeacher() && schools.hasAny([tokenSchool()]); }
 
     // ---------- Time (WIB = UTC+7, no DST) ----------
     // Dates are compared as whole-day numbers so the device clock is never
@@ -115,6 +118,15 @@ service cloud.firestore {
     // school names, never student names.
     match /bookSuggestions/{suggestionId} {
       allow read: if isAnyTeacher();
+      allow write: if false;
+    }
+
+    // ---------- reports (content and users; Google Play UGC policy) ----------
+    // Filed and resolved only through Cloud Functions (reportContent,
+    // resolveReport). Teachers of the schools in `schools` review them
+    // (query: schools array-contains theirs); students never read them.
+    match /reports/{reportId} {
+      allow read: if isTeacherOfAny(resource.data.schools);
       allow write: if false;
     }
 

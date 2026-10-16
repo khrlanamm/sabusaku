@@ -4,12 +4,15 @@ import {REGION} from "./config";
 
 setGlobalOptions({region: REGION, maxInstances: 10});
 
+export {acceptTerms} from "./callables/acceptTerms";
 export {addStudents} from "./callables/addStudents";
 export {claimAccount} from "./callables/claimAccount";
 export {deleteBook} from "./callables/deleteBook";
 export {deleteMyAccount} from "./callables/deleteMyAccount";
 export {eraseStudent} from "./callables/eraseStudent";
 export {removeStudent} from "./callables/removeStudent";
+export {reportContent} from "./callables/reportContent";
+export {resolveReport} from "./callables/resolveReport";
 export {restoreBook} from "./callables/restoreBook";
 export {reviewSuggestion} from "./callables/reviewSuggestion";
 export {saveBook} from "./callables/saveBook";

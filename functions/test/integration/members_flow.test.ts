@@ -139,14 +139,14 @@ describe("addStudents", () => {
       "addStudents",
       {
         students: [
-          {email: " Alfin@Gmail.com ", name: "Alfin Kurniawan", classId: "12  A1", extracurriculars: ["masis-kir"]},
-          {email: "zafira@gmail.com", name: "Zafira", classId: "X-G2"},
+          {email: " Bima@Gmail.com ", name: "Bima Saputra", classId: "12  A1", extracurriculars: ["masis-kir"]},
+          {email: "zafira@gmail.com", name: "Salsabila", classId: "X-G2"},
           {email: "tanpa.data@gmail.com"},
           {email: "bukan-email"},
           {email: "salah.kelas@gmail.com", classId: "kelas dua belas"},
           {email: "ekskul@gmail.com", extracurriculars: ["Catur"]},
           {email: "milik.b@sekolah.test"},
-          {email: "alfin@gmail.com"},
+          {email: "bima@gmail.com"},
         ],
       },
     );
@@ -154,10 +154,10 @@ describe("addStudents", () => {
     expect(results[6].reason).toBe("Email sudah terdaftar.");
     expect(results[7].reason).toBe("Email kembar dalam daftar ini.");
 
-    expect((await membersCol().doc("alfin@gmail.com").get()).data()).toMatchObject({
+    expect((await membersCol().doc("bima@gmail.com").get()).data()).toMatchObject({
       schoolId: A,
       role: "siswa",
-      name: "Alfin Kurniawan",
+      name: "Bima Saputra",
       classId: "XII-A1",
       extracurriculars: ["Masis-KIR"],
       uid: null,
@@ -173,7 +173,7 @@ describe("addStudents", () => {
 
   it("menambah ulang siswa yang sama di sekolah yang sama tidak gagal", async () => {
     const {results} = await teacherA.call<{results: {ok: boolean}[]}>("addStudents", {
-      students: [{email: "alfin@gmail.com"}],
+      students: [{email: "bima@gmail.com"}],
     });
     expect(results[0].ok).toBe(true);
   });

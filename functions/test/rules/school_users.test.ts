@@ -2,6 +2,7 @@ import {assertFails, assertSucceeds, RulesTestEnvironment} from "@firebase/rules
 import {
   collection,
   deleteDoc,
+  deleteField,
   doc,
   getDoc,
   getDocs,
@@ -13,7 +14,17 @@ import {
 } from "firebase/firestore";
 import {afterAll, beforeAll, beforeEach, describe, it} from "vitest";
 
-import {actors, CLASS_2, createEnv, EKSKUL, OTHER_SCHOOL, SCHOOL, seedSchool} from "./helpers";
+import {
+  actors,
+  CLASS_2,
+  createEnv,
+  Db,
+  EKSKUL,
+  OTHER_SCHOOL,
+  SCHOOL,
+  seedSchool,
+  userDoc,
+} from "./helpers";
 
 let env: RulesTestEnvironment;
 let a: ReturnType<typeof actors>;
@@ -179,7 +190,7 @@ describe("users", () => {
 
   it("siswa yang dikeluarkan tidak bisa mengubah profilnya", async () => {
     await env.withSecurityRulesDisabled(async (context) => {
-      await updateDoc(doc(context.firestore(), `${school}/users/siswa1`), {status: "removed"});
+      await updateDoc(doc(context.firestore() as unknown as Db, `${school}/users/siswa1`), {status: "removed"});
     });
     await assertFails(updateDoc(doc(a.student, `${school}/users/siswa1`), {name: "Masih Bisa", ...now()}));
   });
@@ -196,6 +207,35 @@ describe("users", () => {
     await assertFails(updateDoc(target, {role: "guru", ...now()}));
     await assertFails(updateDoc(target, {status: "removed", ...now()}));
     await assertFails(updateDoc(doc(a.teacher1, `${school}/users/guru2`), {name: "Guru Lain", ...now()}));
+  });
+
+  // Accepting the terms of use goes through acceptTerms only.
+  it("klien tidak bisa menulis termsVersion atau termsAcceptedAt", async () => {
+    const me = doc(a.student, `${school}/users/siswa1`);
+    await assertFails(updateDoc(me, {termsVersion: 1, ...now()}));
+    await assertFails(updateDoc(me, {termsAcceptedAt: serverTimestamp(), ...now()}));
+    await assertFails(updateDoc(me, {name: "Siswa Satu", termsVersion: 1, termsAcceptedAt: serverTimestamp(), ...now()}));
+    await assertFails(setDoc(me, {termsVersion: 1, updatedAt: serverTimestamp()}, {merge: true}));
+    const teacherMe = doc(a.teacher1, `${school}/users/guru1`);
+    await assertFails(updateDoc(teacherMe, {termsVersion: 1, termsAcceptedAt: serverTimestamp(), ...now()}));
+    // A teacher cannot accept for a student either, nor create a profile that has accepted.
+    await assertFails(updateDoc(doc(a.teacher1, `${school}/users/siswa1`), {termsVersion: 1, ...now()}));
+    await assertFails(
+      setDoc(doc(a.student, `${school}/users/siswa3`), userDoc("siswa", "Siswa Tiga", {termsVersion: 1})),
+    );
+
+    // Once accepted, the fields can be neither raised nor removed; other edits still work.
+    await env.withSecurityRulesDisabled(async (context) => {
+      await updateDoc(doc(context.firestore() as unknown as Db, `${school}/users/siswa1`), {
+        termsVersion: 1,
+        termsAcceptedAt: serverTimestamp(),
+      });
+    });
+    await assertFails(updateDoc(me, {termsVersion: 2, ...now()}));
+    await assertFails(updateDoc(me, {termsVersion: deleteField(), ...now()}));
+    await assertFails(updateDoc(me, {termsAcceptedAt: deleteField(), ...now()}));
+    await assertSucceeds(updateDoc(me, {name: "Siswa Satu Lagi", ...now()}));
+    await assertSucceeds(updateDoc(doc(a.teacher1, `${school}/users/siswa1`), {name: "Siswa Satu", ...now()}));
   });
 
   it("klien tidak bisa membuat atau menghapus pengguna", async () => {

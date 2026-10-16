@@ -27,6 +27,9 @@ export const bookSuggestionsCol = () => db.collection("bookSuggestions");
 /** Per school: how many students read each catalog book. */
 export const bookStatsCol = (schoolId: string) => schoolRef(schoolId).collection("bookStats");
 
+/** Reports of content and users. Top level: a book report concerns every school. */
+export const reportsCol = () => db.collection("reports");
+
 /** Storage path of a profile photo uploaded from the app. */
 export const avatarPath = (schoolId: string, uid: string) => `schools/${schoolId}/avatars/${uid}.jpg`;
 

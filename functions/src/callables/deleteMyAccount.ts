@@ -5,12 +5,15 @@ import {normalizeEmail} from "../domain/labels";
 import {audit} from "../infra/audit";
 import {auth, db, deleteAvatar, membersCol, usersCol} from "../infra/firebase";
 import {eraseStudentData, revokeSchoolAccess} from "../infra/members";
+import {forgetReports} from "../infra/reports";
 
 /**
  * Deletes the caller's own account from inside the app (Google Play requires
  * this for apps where accounts are created in the app). A student's journals
  * are deleted with it; a teacher's profile and roster entry go too, while the
- * comments they wrote stay with the students' journals.
+ * comments they wrote stay with the students' journals. Either way the
+ * reports they filed go, and reports about them lose their copy of the
+ * content.
  */
 export const deleteMyAccount = onCall(
   {...CALLABLE_OPTIONS, timeoutSeconds: 300},
@@ -35,8 +38,12 @@ export const deleteMyAccount = onCall(
       } else {
         await db.recursiveDelete(profile.ref);
         await deleteAvatar(schoolId, uid);
+        await forgetReports(uid);
       }
       await audit(schoolId, uid, "deleteMyAccount", {role: profile.get("role") ?? null});
+    } else {
+      // Someone already removed from their school may still have reports.
+      await forgetReports(uid);
     }
 
     await auth.deleteUser(uid);
