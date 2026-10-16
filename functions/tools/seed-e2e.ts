@@ -12,8 +12,9 @@
 //   siswa    siswa@e2e.test      "Raka Pratama"    password, joined, XII-A1, Masis-KIR
 //   siswa    baru@e2e.test       (no name, class)  password, not joined yet
 //            → the app joins it and sends it to "Lengkapi akun"
-//   siswa    google@e2e.test     "Gita Lestari"    Google only (no password),
-//            XII-A2; sign in with the emulator's fake Google ID token
+//   siswa    google@e2e.test     "Gita Lestari"    roster only; the first sign-in
+//            with the emulator's fake Google ID token creates the account (no
+//            password), XII-A2:
 //            {"sub":"google-e2e","email":"google@e2e.test","email_verified":true}
 //   siswa    daftar@e2e.test     roster only, no account (for "Daftar")
 //   outsider luar@e2e.test       password, on no roster
@@ -71,23 +72,8 @@ run(async () => {
   await withPassword("baru@e2e.test");
   await withPassword("luar@e2e.test", "Orang Luar");
 
-  const imported = await auth.importUsers([
-    {
-      uid: "google-e2e-uid",
-      email: "google@e2e.test",
-      emailVerified: true,
-      displayName: "Gita Lestari",
-      providerData: [
-        {
-          providerId: "google.com",
-          uid: "google-e2e",
-          email: "google@e2e.test",
-          displayName: "Gita Lestari",
-        },
-      ],
-    },
-  ]);
-  if (imported.failureCount > 0) throw new Error("Gagal membuat akun Google uji.");
+  // google@e2e.test has no account yet: like a real student, the first
+  // Google sign-in creates it, and the app then asks for a password.
 
   console.log(`Seed e2e selesai: sekolah "${E2E_SCHOOL}".`);
 });

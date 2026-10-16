@@ -84,7 +84,15 @@ Future<void> waitFor(
     await tester.pump(const Duration(milliseconds: 200));
     if (finder.evaluate().isNotEmpty) return;
   }
-  fail('Timed out waiting for $finder');
+  // What the screen showed instead, to make the failure readable.
+  final texts = find
+      .byType(RichText)
+      .evaluate()
+      .map((element) => (element.widget as RichText).text.toPlainText())
+      .where((text) => text.trim().length > 1)
+      .toSet()
+      .join(' | ');
+  fail('Timed out waiting for $finder. On screen: $texts');
 }
 
 /// Pumps until [finder] no longer matches, e.g. a SnackBar covering a button.
@@ -108,6 +116,14 @@ Future<void> tapVisible(WidgetTester tester, Finder finder) async {
   // A focused field keeps scrolling its caret back into view.
   FocusManager.instance.primaryFocus?.unfocus();
   await tester.pump();
+  // A lazy list builds only what is on screen: scroll until it exists.
+  if (finder.evaluate().isEmpty) {
+    await tester.scrollUntilVisible(
+      finder,
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+  }
   await tester.ensureVisible(finder);
   await tester.pump(const Duration(milliseconds: 300));
   await tester.tap(finder);

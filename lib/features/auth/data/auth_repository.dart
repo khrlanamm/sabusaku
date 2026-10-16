@@ -418,9 +418,17 @@ class AuthRepository {
       throw const AppException(AppErrorCode.sessionExpired);
     }
     try {
-      await user.linkWithCredential(
-        EmailAuthProvider.credential(email: email, password: newPassword),
-      );
+      try {
+        await user.linkWithCredential(
+          EmailAuthProvider.credential(email: email, password: newPassword),
+        );
+      } on FirebaseAuthException catch (error) {
+        // Some Auth backends (the emulator among them) refuse to link a
+        // password credential whose email is the account's own. Setting the
+        // password directly adds the same `password` provider.
+        if (error.code != 'email-already-in-use') rethrow;
+        await user.updatePassword(newPassword);
+      }
       // userChanges does not always fire for a link; reload makes the new
       // provider visible to the session.
       await user.reload();
