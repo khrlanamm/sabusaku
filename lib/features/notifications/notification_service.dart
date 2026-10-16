@@ -45,16 +45,18 @@ class NotificationService {
     FirebaseMessaging.onMessageOpenedApp.listen(_onNotificationTapped);
     // The app was launched by tapping a notification.
     final initial = await _messaging.getInitialMessage();
-    if (initial != null) _onNotificationTapped(initial);
+    if (initial != null && _ref.mounted) _onNotificationTapped(initial);
   }
 
   /// Called whenever the signed-in session changes.
   Future<void> onSession(Session? session) async {
     await _tokenSub?.cancel();
     _tokenSub = null;
-    if (session == null) return;
+    if (session == null || !_ref.mounted) return;
 
     await _registerDevice(session);
+    // The app (and this provider) can be torn down while the token is fetched.
+    if (!_ref.mounted) return;
     _tokenSub = _messaging.onTokenRefresh.listen(
       (token) => _saveToken(session, token),
     );
@@ -212,9 +214,9 @@ class NotificationService {
     }
     _pendingLink = null;
     // After the redirect to the student shell has settled.
-    WidgetsBinding.instance.addPostFrameCallback(
-      (_) => _ref.read(appRouterProvider).push(link),
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_ref.mounted) _ref.read(appRouterProvider).push(link);
+    });
   }
 }
 
