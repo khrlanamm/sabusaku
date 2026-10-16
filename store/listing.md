@@ -9,35 +9,48 @@ Sabu Saku: Jurnal Membaca
 
 ## Short description (80 characters max)
 
-Satu bulan satu buku. Jurnal membaca harian siswa SMA yang dipantau guru.
+Jurnal membaca harian siswa, dengan katalog 1.000+ buku dan komentar guru.
 
 ## Full description (4000 characters max)
 
 ```text
 Sabu Saku (Satu Bulan Satu Buku) adalah jurnal membaca untuk sekolah. Siswa membaca satu buku setiap bulan dan mencatat bacaannya setiap hari. Penanggung jawab di sekolah, seperti guru atau pembina ekstrakurikuler, melihat siapa yang rajin dan siapa yang perlu didampingi, lalu memberi komentar langsung pada jurnal siswa.
 
+KATALOG BUKU BERSAMA
+
+Sekitar 1.200 buku Indonesia lengkap dengan cover: novel, sastra klasik, remaja, puisi, kumpulan cerpen, sejarah, biografi, agama, pengembangan diri, sains, dan lainnya. Katalog dipakai bersama oleh semua sekolah dan dirawat oleh para penanggung jawab.
+
 UNTUK SISWA
 
 • Masuk dengan akun Google, atau dengan email dan password.
-• Pilih buku sendiri. Satu buku aktif, dengan target selesai di akhir bulan.
+• Mulai buku cukup dengan mencari judul atau penulis di katalog.
+• Bukunya belum ada? Isi datanya sendiri dan tambahkan foto cover. Foto bisa dipotong dan diputar, lalu diperkecil sebelum dikirim. Bukumu ikut diusulkan ke katalog.
+• Jelajahi katalog: rekomendasi sekolahmu dan buku yang sedang ramai dibaca teman-temanmu.
 • Isi jurnal dalam satu menit: halaman yang dibaca, lama membaca, dan isi bacaan hari ini.
+• Tetap bisa menulis tanpa sinyal. Jurnal terkirim sendiri saat online.
 • Lihat progres buku dan streak membaca bertambah dari hari ke hari.
 • Dapat notifikasi saat penanggung jawab mengomentari jurnalmu.
-• Tetap bisa menulis tanpa sinyal. Jurnal terkirim sendiri saat online.
+• Tutup buku yang selesai dengan ulasan singkat.
+• Pilih tampilan terang atau gelap.
 • Atur foto profil, kelas, dan ekstrakurikuler sendiri.
 
 UNTUK PENANGGUNG JAWAB
 
-• Dashboard sekolah: siswa yang aktif, perlu perhatian, tidak aktif, dan yang belum punya buku.
+• Dashboard sekolah: siswa yang aktif, perlu perhatian, tidak aktif, dan yang belum punya buku, untuk seluruh sekolah atau per ekstrakurikuler.
 • Saring siswa menurut kelas, ekstrakurikuler, dan status, lengkap dengan progres bukunya.
-• Tambah siswa cukup dengan email. Nama dan kelas boleh dilengkapi siswa sendiri.
+• Tambah siswa cukup dengan email, satu per satu atau lewat berkas CSV. Nama dan kelas boleh dilengkapi siswa sendiri.
 • Buka jurnal siswa dan tulis komentar.
 • Atur label kelas, ekstrakurikuler, hari libur, dan ambang status.
+• Rawat katalog bersama: tambah, ubah, hapus, dan pulihkan buku, termasuk cover-nya.
+• Tinjau buku usulan siswa, lalu terapkan ke katalog atau tolak.
+• Rekomendasikan buku untuk sekolahmu. Buku rekomendasi tampil paling atas saat siswa mencari.
+• Setiap perubahan buku tercatat lengkap di riwayatnya.
 
 PRIVASI
 
 • Hanya email yang didaftarkan sekolah yang bisa membuka data sekolah.
-• Data tiap sekolah terpisah. Tanpa iklan dan tanpa ID iklan.
+• Data tiap sekolah terpisah. Hanya katalog buku yang dipakai bersama.
+• Tanpa iklan dan tanpa ID iklan.
 • Data disimpan di pusat data Jakarta.
 • Hapus akun kapan saja dari menu Profil.
 
@@ -64,16 +77,29 @@ Rilis pertama Sabu Saku: jurnal membaca harian untuk siswa, dashboard dan koment
 
 ## Graphics
 
-Raw screens in `raw/` came from v1.0.0 with the demo school (its capture
-script, `tool/store-screenshots.sh`, was removed with the demo school on
-16 Oct 2026). They still show the v1 admin role and school-code login. Retake
-them from a real school account before the next listing update. `make_assets.py` builds the listing images in `out/`:
+`make_assets.py` builds the listing images in `out/` from the screens in
+`raw/` (see its docstring to regenerate). The raws are production screens of
+SMA Negeri 1 Sukodadi, taken on 16 Oct 2026 with `tool/screenshots.sh`
+(phone 1080x2424, tablet 2560x1600 landscape) and copied in with
+`python3 -I store/make_assets.py --import`. Only screens without an email
+address are used; check any new one before committing it.
 
-- `icon-512.png` (512x512)
-- `feature-graphic.png` (1024x500)
-- `phone-1.png` to `phone-8.png` (1080x1920)
-- `tablet7-1.png` to `tablet7-6.png` (1080x1920)
-- `tablet10-1.png` to `tablet10-6.png` (1440x2560)
+| File | Size | Content |
+|---|---|---|
+| `icon-512.png` | 512x512 | App icon, a copy of `branding/png/playstore-icon-512.png` |
+| `feature-graphic.png` | 1024x500 | Logo, motto, "Jurnal membaca harian siswa, dengan katalog 1.000+ buku", two phones (jelajahi, beranda) |
+| `phone-1.png` | 1080x1920 | Siswa: beranda with a new teacher comment |
+| `phone-2.png` | 1080x1920 | Siswa: start a book by searching the catalog |
+| `phone-3.png` | 1080x1920 | Siswa: jelajahi katalog, popular at school |
+| `phone-4.png` | 1080x1920 | Siswa: isi jurnal |
+| `phone-5.png` | 1080x1920 | Siswa: journal with the teacher's comment |
+| `phone-6.png` | 1080x1920 | Penanggung jawab: dashboard, dark theme |
+| `phone-7.png` | 1080x1920 | Penanggung jawab: catalog book detail, recommend |
+| `phone-8.png` | 1080x1920 | Penanggung jawab: add students by email |
+| `tablet7-1.png` to `tablet7-6.png` | 1920x1200 | Tablet, landscape: siswa beranda, jelajahi, detail buku; dashboard (dark), katalog, komentar jurnal |
+| `tablet10-1.png` to `tablet10-6.png` | 2560x1600 | Same six screens at 10-inch size |
+
+All are 24-bit PNG without alpha.
 
 ## Other store settings
 
@@ -85,16 +111,25 @@ them from a real school account before the next listing update. `make_assets.py`
 
 ## App access (Play Console: Konten aplikasi > Detail login)
 
-**Needs an update before the next review.** The v1 instructions used the demo
-school (school code `demo`, username `2001`), which was deleted on 16 Oct 2026.
-Reviewers now need an email address registered in a school's `members` list,
-with a password: register a reviewer email (as student and, if wanted, as
-penanggung jawab via `add-guru`), sign in once to set the password, then put
-those credentials here and in Play Console. Play Console asks for this text in
-English, for example:
+**OPEN ITEM: no reviewer account exists yet.** Every screen after sign-in
+needs an email that a school has registered; the demo school (school code
+`demo`, username `2001`) was deleted on 16 Oct 2026. Before submitting 1.2.0:
+
+1. Pick a reviewer email the developer controls (for example a dedicated
+   Gmail address) so the verification email can be opened.
+2. Register it in a school with the tools in `functions/tools`, in
+   production: as a student with `import-students.ts` (CSV
+   `email,nama,kelas,ekskul`) and, to let the reviewer see the penanggung
+   jawab area too, a second email with `add-guru.ts`.
+3. Open the app, tap "Daftar", sign up with that email and a password, and
+   verify the email.
+4. Put the email(s) and password(s) in Play Console only (not in git), with
+   the instructions below.
+
+Play Console asks for the instructions in English, for example:
 
 ```text
-Sign in with the email and password given above (no school code). The app opens the student area. The account was registered by the school; accounts whose email is not registered see "Harap Menghubungi Administrator Sekolah". No payment, subscription or 2-step verification is needed.
+Sign in with the email and password given above (no school code). The student account opens the student area: start a book from the catalog, write today's journal, explore the catalog. The penanggung jawab account opens the teacher area: dashboard, students, catalog, school. Both accounts were registered by a school; accounts whose email is not registered see "Harap Menghubungi Administrator Sekolah". No payment, subscription or 2-step verification is needed.
 ```
 
 ## App content declarations
@@ -140,16 +175,21 @@ Submit a new questionnaire when a feature changes one of these answers. The v2 c
 - In-app account deletion: Profil → Hapus akun.
 - Account deletion and data deletion URL: https://sabusaku.web.app/hapus-data
 
-Every data type below is collected, not shared, not processed ephemerally,
-and required (users cannot turn it off).
+Every data type below is collected, not shared, and not processed
+ephemerally. All are required except **Photos, which is optional**: a
+profile photo and a cover photo are never needed to use the app. Users can
+ask for any of it to be deleted (account deletion removes the profile photo
+and the student's own cover photos; see hapus-data). Book data and covers a
+penanggung jawab accepted into the shared catalog stay in the catalog, and
+the catalog history keeps the name of the teacher who made each change.
 
 | Data type | Why it is collected | Source in the app |
 |---|---|---|
 | Name | App functionality, account management | Profile; entered by the school or the user, or taken from the Google account |
 | Email address | App functionality, account management | Sign-in (Google or email/password), school membership list |
-| Photos | App functionality | Profile photo, optional (picked by the user or the Google account photo) |
+| Photos (optional) | App functionality | Optional photos uploaded to Firebase Storage: the profile photo (picked by the user or the Google account photo), a student's cover photo for a book entered by hand (camera or gallery), and book covers a penanggung jawab sets in the catalog. Cropped, rotated and compressed on the device |
 | User IDs | App functionality, account management | Firebase Auth UID (no NIS or username since 16 Oct 2026) |
-| Other user-generated content | App functionality | Journals, book reviews, teacher comments |
+| Other user-generated content | App functionality | Journals, book reviews, teacher comments, books a student suggests for the catalog, catalog edits (the change history names the editor) |
 | App interactions | Analytics | Firebase Analytics |
 | Crash logs | Analytics | Firebase Crashlytics |
 | Diagnostics | Analytics | Firebase Crashlytics and Analytics |
@@ -161,6 +201,25 @@ Class and extracurricular labels are stored with the profile; they fall under
 Update this table and the Data safety form together whenever an SDK or a
 stored field changes.
 
+## Release checklist (1.2.0)
+
+- [ ] Upload the AAB of 1.2.0+3 (`pubspec.yaml` version) to the track and
+      paste the 1.2.0 release notes above.
+- [ ] Store listing: paste the new short and full description.
+- [ ] Store listing: replace the graphics with the files in `out/` (icon,
+      feature graphic, 8 phone, 6 seven-inch tablet and 6 ten-inch tablet
+      screenshots) and delete the v1 screenshots.
+- [ ] Data safety: re-check the form against the table above (new: book
+      cover photos under Photos; book suggestions and catalog edits under
+      Other user-generated content).
+- [ ] App access: create the reviewer account(s) and fill in Detail login
+      (open item above).
+- [ ] Content rating: decide whether "Interaction limited to invited
+      people" still holds. Catalog edits by a penanggung jawab, and a
+      student's suggested book or cover once a penanggung jawab applies it,
+      are seen by users of other schools. Submit a new questionnaire if the
+      answer changes.
+
 ## Release checklist (1.1.0, 16 Oct 2026)
 
 - Play App Signing SHA-1 and SHA-256 are registered in the Firebase Android
@@ -171,7 +230,8 @@ stored field changes.
   in-app deletion).
 - Update App access with a reviewer account (see above).
 - Paste the new full description and the 1.1.0 release notes.
-- The store screenshots still show v1 screens; retake them when convenient.
+- The store screenshots still show v1 screens; retake them when convenient
+  (done for 1.2.0).
 
 ## Testing track
 
