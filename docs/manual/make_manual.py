@@ -54,7 +54,7 @@ FONTS = ROOT / "assets" / "fonts"
 BRAND = ROOT / "branding" / "svg"
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
-APP_VERSION = "1.2.0"
+APP_VERSION = "1.2.1"
 SCHOOL = "SMA Negeri 1 Sukodadi"
 PLAY_URL = "https://play.google.com/store/apps/details?id=com.sabu.saku"
 HELP_EMAIL = "benevology@gmail.com"
@@ -171,8 +171,8 @@ PAGES = [
                (352, 478, "Pilih akun Google yang <b>emailnya didaftarkan sekolah</b>. Selesai, kamu sudah masuk."),
                (330, 592, "Akunnya belum ada di HP? Ketuk <b>Add another account</b>."))],
          path="Layar masuk", key="google",
-         tip="Pertama kali masuk? Layar <b>Lengkapi akun</b> muncul, lihat [[lengkapi]]. "
-             "Muncul pesan <b>Harap Menghubungi Administrator Sekolah</b>? Lihat [[email]]."),
+         tip="Pertama kali masuk? Setujui dulu <b>Ketentuan Penggunaan</b> ([[ketentuan]]), lalu <b>Lengkapi akun</b> "
+             "([[lengkapi]]). Muncul pesan <b>Harap Menghubungi Administrator Sekolah</b>? Lihat [[email]]."),
     page("tour", "mulai", "Masuk dengan email",
          "Untuk akun yang sudah punya password, atau yang tidak memakai Google.",
          [shot("mulai-login", "",
@@ -187,7 +187,8 @@ PAGES = [
                      "Setelah ditambahkan, masuk lagi dengan email yang sama.", tone="warn"),
                 note("Akun Google tidak punya password?",
                      "Tidak perlu <b>Lupa password</b>. Pakai <b>Masuk dengan Google</b> saja.")],
-         tip="Email dari Sabu Saku tidak ada di kotak masuk? Periksa folder <b>Spam</b>.",
+         tip="Pertama kali masuk? Layar <b>Ketentuan Penggunaan</b> muncul dulu, lihat [[ketentuan]]. "
+             "Email dari Sabu Saku tidak ada di kotak masuk? Periksa folder <b>Spam</b>.",
          toc="Masuk dengan email, lupa password"),
     page("tour", "mulai", "Daftar dengan email",
          "Tidak memakai Google? Buat akun dengan email yang didaftarkan sekolah, lalu verifikasi emailnya.",
@@ -201,12 +202,31 @@ PAGES = [
          path="Layar masuk › Daftar", key="daftar",
          notes=[note("Lalu verifikasi email",
                      "Layar <b>Cek email kamu</b> muncul.",
-                     "Buka email dari Sabu Saku, lalu ketuk tautan verifikasinya. Periksa juga folder Spam.",
+                     "Buka email dari Sabu Saku, lalu ketuk tautan verifikasinya. Belum datang? Periksa folder Spam, "
+                     "atau ketuk <b>Kirim ulang email</b>.",
                      "Kembali ke aplikasi dan ketuk <b>Saya sudah verifikasi</b>.",
-                     "Email belum datang? Ketuk <b>Kirim ulang email</b>.", ordered=True)],
+                     "Layar <b>Ketentuan Penggunaan</b> muncul, lihat [[ketentuan]].", ordered=True)],
          toc="Daftar dan verifikasi email"),
+    page("tour", "mulai", "Setujui ketentuan",
+         "Sebelum mulai, setiap pengguna, siswa maupun penanggung jawab, menyetujui aturan memakai Sabu Saku.",
+         [shot("mulai-ketentuan", "",
+               (355, 322, "Enam aturan singkat: pakai akunmu sendiri, tulis dengan sopan dan dengan kata-katamu sendiri, "
+                          "jangan melecehkan atau membuka data pribadi orang lain."),
+               (357, 607, "Lihat yang melanggar? Pakai menu <b>Laporkan</b>, lihat [[laporkan]]."),
+               (305, 708, "<b>Baca selengkapnya</b>: ketentuan lengkap di situs Sabu Saku."),
+               (40, 770, "Ketuk <b>Saya setuju</b>. Lalu layar <b>Lengkapi akun</b> muncul, lihat [[lengkapi]]."),
+               (250, 819, "Belum mau setuju? Ketuk <b>Keluar</b>. Sabu Saku baru bisa dipakai setelah ketentuan disetujui."))],
+         path="Setelah masuk", key="ketentuan",
+         notes=[note("Kapan layar ini muncul?",
+                     "Setelah pertama kali masuk, sebelum <b>Lengkapi akun</b>.",
+                     "Lagi saat ketentuannya berubah. Baca yang baru, lalu ketuk <b>Saya setuju</b>.",
+                     "Mau membacanya lagi? Buka <b>Profil › Ketentuan penggunaan</b>."),
+                note("Ketentuan lengkap",
+                     "<b>sabusaku.web.app/ketentuan</b>: konten yang dilarang, cara melapor, dan sanksinya.",
+                     tone="plain")],
+         toc="Setujui ketentuan penggunaan"),
     page("tour", "mulai", "Lengkapi akun dan password",
-         "Setelah pertama kali masuk, layar Lengkapi akun muncul. Syarat password di sana sama dengan layar Ubah password ini.",
+         "Setelah ketentuan disetujui, layar Lengkapi akun muncul. Syarat password di sana sama dengan layar Ubah password ini.",
          [shot("siswa-ubah-password", "",
                (300, 217, "<b>Password saat ini</b> hanya diminta saat mengganti password lama."),
                (300, 281, "Ketik password baru."),
@@ -291,12 +311,13 @@ PAGES = [
     page("tour", "siswa", "Detail buku",
          "Kenali bukunya dulu sebelum memilih.",
          [shot("siswa-detail-buku", "",
+               (377, 110, "<b>⋮</b> › <b>Laporkan buku</b>: datanya salah atau isinya tidak pantas? Lihat [[laporkan]]."),
                (318, 342, "Judul, penulis, dan kategori."),
                (330, 478, "Berapa siswa yang membacanya, dan berapa dari sekolahmu."),
                (330, 555, "Penerbit, tahun terbit, halaman, dan ISBN."),
                (110, 672, "<b>Sinopsis</b>. Ketuk <b>Selengkapnya</b> untuk membaca semuanya."),
                (200, 878, "Gulir ke bawah, lalu ketuk <b>Baca buku ini</b>."))],
-         path="Jelajahi katalog › ketuk buku",
+         path="Jelajahi katalog › ketuk buku", key="detail-buku-siswa",
          tip="Tombol <b>Baca buku ini</b> baru bisa diketuk kalau kamu tidak sedang membaca buku lain."),
     page("tour", "siswa", "Isi jurnal harian",
          "Satu jurnal untuk satu hari. Catat halaman yang kamu baca dan isi bacaannya.",
@@ -318,7 +339,7 @@ PAGES = [
           shot("siswa-jurnal-komentar", "Jurnal dan komentar",
                (320, 193, "Halaman dan durasi membaca."),
                (165, 628, "<b>Komentar guru</b> untuk jurnal ini."),
-               (372, 668, "Nama guru, isi komentar, dan waktunya."))],
+               (320, 683, "Nama guru, isi komentar, dan waktunya. Ketuk <b>⋮</b> untuk melaporkan, lihat [[laporkan]]."))],
          path="Tab Jurnal",
          tip="Pertanyaan <b>Aktifkan notifikasi?</b> muncul? Ketuk <b>Izinkan</b>. Kamu diberi tahu setiap kali guru berkomentar.",
          toc="Riwayat jurnal, komentar guru"),
@@ -342,6 +363,26 @@ PAGES = [
                (290, 668, "<b>Hentikan buku</b> kapan saja. Buku dan jurnalnya tetap ada di riwayat."))],
          path="Tab Buku", key="buku-saya",
          tip="Setelah buku selesai atau dihentikan, kamu bisa memulai buku baru dari tab <b>Buku</b>."),
+    page("tour", "siswa", "Laporkan komentar atau buku",
+         "Ada komentar atau buku yang melanggar ketentuan? Laporkan dari aplikasi.",
+         [shot("siswa-laporkan-komentar", "",
+               (268, 428, "Laporan tentang penanggung jawab, komentarnya atau dirinya, hanya dibaca <b>pengembang Sabu Saku</b>."),
+               (330, 516, "Pilih <b>alasannya</b>: tidak pantas, perundungan, data pribadi orang lain, hak cipta, atau lainnya."),
+               (355, 760, "<b>Catatan</b> boleh dikosongkan, paling banyak 500 karakter."),
+               (40, 862, "Ketuk <b>Kirim laporan</b>. Pesan <b>Laporan terkirim</b> muncul."))],
+         path="Jurnal › ⋮ pada komentar guru", key="laporkan",
+         notes=[note("Yang bisa dilaporkan",
+                     "<b>Komentar guru</b>: buka jurnalnya, ketuk <b>⋮</b> pada komentar, lalu <b>Laporkan komentar</b> "
+                     "atau <b>Laporkan pengguna</b>.",
+                     "<b>Buku katalog</b>: di Detail buku ketuk <b>⋮</b> › <b>Laporkan buku</b>. Ada alasan tambahan "
+                     "<b>Data buku salah</b>, lihat [[detail-buku-siswa]]."),
+                note("Siapa yang membaca?",
+                     "Laporan tentang penanggung jawab hanya dibaca pengembang. Guru yang kamu laporkan tidak melihatnya.",
+                     "Laporan buku dibaca penanggung jawab sekolah dan pengembang.", tone="plain"),
+                note("Melapor dengan jujur",
+                     "Laporan palsu, atau laporan berulang untuk mengganggu orang lain, juga melanggar ketentuan.",
+                     "Ada bahaya langsung bagi seseorang? Segera beri tahu guru atau orang tua.", tone="warn")],
+         toc="Laporkan komentar atau buku"),
     page("tour", "siswa", "Profil",
          "Statistik membaca, riwayat buku, dan pengaturan akunmu.",
          [shot("siswa-profil", "",
@@ -355,7 +396,8 @@ PAGES = [
          notes=[note("Tema gelap",
                      "Nyaman untuk membaca malam hari. Pilihan tema tersimpan di HP ini.",
                      shot="siswa-beranda-gelap"),
-                note("Gulir ke bawah: Akun",
+                note("Gulir ke bawah",
+                     "<b>Ketentuan penggunaan</b> dan <b>Kebijakan privasi</b>: dibuka di situs Sabu Saku.",
                      "<b>Ubah nama</b> dan <b>Ubah password</b>.",
                      "<b>Keluar</b> dari akun di HP ini.",
                      "<b>Hapus akun</b>: buku, jurnal, dan komentar guru ikut terhapus permanen. Ketik HAPUS untuk memastikan.")],
@@ -410,6 +452,7 @@ PAGES = [
     page("tour", "guru", "Detail siswa",
          "Buku aktif, keaktifan, dan riwayat buku satu siswa.",
          [shot("guru-detail-siswa", "",
+               (377, 106, "<b>⋮</b> › <b>Laporkan pengguna</b>: nama, foto, atau perilaku siswa melanggar ketentuan, lihat [[laporan]]."),
                (290, 165, "Nama, kelas, ekskul, email, dan status."),
                (255, 216, "<b>Ubah nama, kelas, ekskul</b>."),
                (372, 330, "<b>Buku aktif</b>. Ketuk untuk membaca jurnalnya."),
@@ -429,6 +472,7 @@ PAGES = [
                (240, 122, "Buku dan statusnya."),
                (372, 160, "Ketuk jurnal untuk membacanya.")),
           shot("guru-jurnal-komentar", "Baca dan komentari",
+               (377, 110, "<b>⋮</b> › <b>Laporkan jurnal</b>, lihat [[laporan]]."),
                (320, 193, "Halaman dan durasi membaca."),
                (320, 683, "Komentar Anda. Ketuk <b>⋮</b> untuk <b>Ubah</b> atau <b>Hapus</b>."),
                (290, 843, "Tulis komentar, lalu ketuk tombol kirim."))],
@@ -436,19 +480,20 @@ PAGES = [
          tip="Tanggapi isi bacaannya atau jawab pertanyaan siswa. Komentar singkat pun membuat siswa semangat.",
          toc="Jurnal siswa dan komentar"),
     page("tour", "guru", "Sekolah",
-         "Label kelas dan ekstrakurikuler yang dipilih siswa, serta daftar penanggung jawab.",
+         "Laporan, label kelas dan ekstrakurikuler yang dipilih siswa, serta daftar penanggung jawab.",
          [shot("guru-sekolah", "",
                (330, 150, "Nama sekolah Anda."),
-               (120, 224, "<b>Kelas</b>: siswa memilih kelasnya dari daftar ini. Format: XII-A1, X-G2."),
-               (262, 224, "<b>Tambah</b> label baru. Ketuk <b>✕</b> untuk menghapus label."),
-               (190, 582, "<b>Ekstrakurikuler</b>: siswa boleh ikut lebih dari satu, atau tidak sama sekali."),
-               (215, 776, "<b>Penanggung jawab</b> sekolah ini, ditambahkan oleh pengembang Sabu Saku."))],
+               (320, 210, "<b>Laporan</b> dari siswa dan penanggung jawab. Angkanya: laporan yang perlu ditinjau, lihat [[laporan]]."),
+               (120, 322, "<b>Kelas</b>: siswa memilih kelasnya dari daftar ini. Format: XII-A1, X-G2."),
+               (262, 322, "<b>Tambah</b> label baru. Ketuk <b>✕</b> untuk menghapus label."),
+               (190, 681, "<b>Ekstrakurikuler</b>: siswa boleh ikut lebih dari satu, atau tidak sama sekali."))],
          path="Tab Sekolah", key="sekolah",
          notes=[note("Label yang dihapus",
                      "Tidak bisa dipilih lagi. Siswa yang sudah memakainya tetap memakai label itu sampai diganti."),
                 note("Gulir ke bawah",
+                     "<b>Penanggung jawab</b> sekolah ini, ditambahkan oleh pengembang Sabu Saku.",
                      "<b>Pengaturan status siswa</b>: hari netral, ambang status, dan hari libur. Lihat [[pengaturan]].")],
-         toc="Sekolah: kelas dan ekskul"),
+         toc="Sekolah: laporan, kelas, ekskul"),
     page("tour", "guru", "Pengaturan status",
          "Atur kapan siswa dianggap aktif, perlu perhatian, atau tidak aktif.",
          [shot("guru-pengaturan-sekolah", "",
@@ -475,7 +520,8 @@ PAGES = [
     page("tour", "guru", "Detail buku dan rekomendasi",
          "Rapikan data buku dan pilih buku yang direkomendasikan untuk siswa Anda.",
          [shot("guru-detail-buku", "",
-               (372, 104, "Ikon pensil: <b>Ubah data buku</b>."),
+               (292, 80, "Ikon pensil: <b>Ubah data buku</b>."),
+               (377, 108, "<b>⋮</b> › <b>Laporkan buku</b>: isinya tidak pantas atau perlu diperiksa pengembang. Lihat [[laporan]]."),
                (140, 262, "Ikon kamera: <b>Ganti cover</b>. Foto bisa dipotong dan diputar."),
                (372, 330, "Data buku, jumlah pembaca, dan siapa yang terakhir mengubahnya."),
                (160, 856, "<b>★ Rekomendasikan</b>: buku tampil paling atas saat siswa mencari."))],
@@ -516,7 +562,10 @@ PAGES = [
                 note("Di mana saran muncul",
                      "Ikon kotak masuk di <b>Katalog Buku</b>. Angkanya menunjukkan saran yang menunggu.",
                      "Detail buku, di bagian <b>Saran menunggu</b>.",
-                     "Setiap keputusan tercatat di riwayat buku.", tone="plain")]),
+                     "Setiap keputusan tercatat di riwayat buku.", tone="plain"),
+                note("Saran tidak pantas?",
+                     "Buka sarannya, ketuk <b>⋮</b> › <b>Laporkan saran</b>, lihat [[laporan]]. Tolak juga sarannya.",
+                     tone="warn")]),
     page("tour", "guru", "Hapus buku dan Buku terhapus",
          "Menghapus buku tidak menghilangkan apa pun. Buku bisa diaktifkan kembali.",
          [shot("guru-buku-terhapus", "",
@@ -535,14 +584,37 @@ PAGES = [
                      "Ketuk <b>Aktifkan</b> pada bukunya, lalu <b>Aktifkan</b> lagi.",
                      "Buku kembali muncul di katalog dan pencarian siswa.", ordered=True, tone="plain")],
          toc="Hapus buku, Buku terhapus"),
+    page("tour", "guru", "Laporan dan moderasi",
+         "Siswa dan penanggung jawab bisa melaporkan konten yang melanggar ketentuan. Anda meninjau laporan sekolah Anda.",
+         [shot("guru-laporan", "",
+               (170, 138, "<b>Terbuka</b>: belum ditangani. <b>Selesai</b>: sudah ditandai selesai, beserta tindakannya."),
+               (245, 465, "Belum ada laporan. Bila ada, kartunya muncul di sini."))],
+         path="Sekolah › Laporan", key="laporan",
+         notes=[note("Isi kartu laporan",
+                     "Jenis, <b>alasan</b>, dan salinan konten saat dilaporkan.",
+                     "Catatan dan nama <b>pelapor</b>, serta waktunya.",
+                     "<b>Buka</b>: langsung ke konten yang dilaporkan.",
+                     "<b>Tandai selesai</b>: tulis tindakan yang diambil, boleh kosong."),
+                note("Melaporkan sendiri",
+                     "Ketuk <b>⋮</b> di Jurnal siswa, Detail siswa, Detail buku, atau Tinjau saran.",
+                     "Pilih alasannya, lalu <b>Kirim laporan</b>. <b>Data buku salah</b> khusus untuk buku dan saran.",
+                     shot="guru-laporkan-buku"),
+                note("Tindakan yang bisa diambil",
+                     "Ubah atau hapus buku, lihat [[terhapus]]. Tolak saran, lihat [[saran]].",
+                     "Ubah data siswa, keluarkan, atau hapus datanya, lihat [[detail-siswa]].", tone="plain"),
+                note("Laporan tentang penanggung jawab",
+                     "Komentar atau akun penanggung jawab yang dilaporkan hanya dibaca pengembang Sabu Saku, "
+                     "tidak muncul di sini.", tone="warn")],
+         toc="Laporan dan moderasi"),
     page("tour", "guru", "Profil penanggung jawab",
-         "Foto, ekskul yang dibina, tema, dan akun Anda.",
+         "Foto, ekskul yang dibina, pengaturan, dan akun Anda.",
          [shot("guru-profil", "",
                (36, 140, "Ketuk foto untuk menggantinya."),
                (190, 257, "<b>Ekskul yang dibina</b>, diatur oleh pengembang Sabu Saku."),
                (300, 397, "<b>Tema</b>: Terang, Gelap, atau Ikuti perangkat."),
-               (300, 530, "<b>Ubah nama</b>, <b>Ubah password</b>, dan <b>Keluar</b>."),
-               (165, 668, "<b>Hapus akun</b>. Komentar yang sudah Anda tulis tetap tersimpan."))],
+               (300, 492, "<b>Ketentuan penggunaan</b> dan <b>Kebijakan privasi</b>, dibuka di situs Sabu Saku."),
+               (300, 643, "<b>Ubah nama</b>, <b>Ubah password</b>, dan <b>Keluar</b>."),
+               (165, 781, "<b>Hapus akun</b>. Komentar yang sudah Anda tulis tetap tersimpan."))],
          path="Tab Profil",
          notes=[note("Tema gelap",
                      "Semua layar ikut gelap, termasuk katalog. Pilihan tema tersimpan di HP ini.",
@@ -551,7 +623,7 @@ PAGES = [
 
     # ---------------------------------------------------------------- semua
     page("rules", "semua", "Aturan penting",
-         "Ringkasan aturan Sabu Saku. Aplikasi menjaga aturan ini dengan sendirinya.",
+         "Ringkasan aturan Sabu Saku. Aturan buku dan jurnal dijaga aplikasi dengan sendirinya.",
          key="aturan"),
     page("tips", "semua", "Enam tips", "Supaya Sabu Saku terasa ringan dipakai setiap hari.",
          toc="Tips"),
@@ -563,10 +635,12 @@ PAGES = [
 ]
 
 RULES = [
-    ("Akun", "mulai", [
+    ("Akun dan ketentuan", "mulai", [
         "Masuk dengan email yang <b>didaftarkan sekolah</b>, lewat Google atau email dan password.",
         "Satu email untuk satu sekolah.",
-        "Password minimal 8 karakter, dengan huruf besar, huruf kecil, angka, dan karakter khusus.",
+        "Setujui <b>ketentuan penggunaan</b> sebelum mulai: sabusaku.web.app/ketentuan.",
+        "Lihat yang melanggar? Pakai menu <b>Laporkan</b>.",
+        "Password minimal 8 karakter: huruf besar dan kecil, angka, dan karakter khusus.",
         "Akun bisa dihapus kapan saja dari <b>Profil › Hapus akun</b>.",
     ]),
     ("Buku", "siswa", [
@@ -603,13 +677,15 @@ TIPS = [
      "Untuk penanggung jawab: buku rekomendasi tampil paling atas saat siswa mencari, jadi siswa cepat memilih."),
     ("Ganti HP? Masuk lagi",
      "Semua buku dan jurnal tersimpan di akun. Masuk dengan email yang sama di HP baru, datanya kembali."),
-    ("Data sekolah terpisah",
-     "Tanpa iklan. Data tiap sekolah terpisah dan hanya terbuka untuk email yang didaftarkan sekolah."),
+    ("Aman untuk semua",
+     "Tanpa iklan, dan data tiap sekolah terpisah. Ikuti ketentuan di <b>sabusaku.web.app/ketentuan</b>. "
+     "Ada yang melanggar? Pakai menu <b>Laporkan</b>."),
 ]
 
 MISSIONS = {
     "siswa": [
         "Pasang Sabu Saku dan masuk dengan email sekolah",
+        "Baca dan setujui ketentuan",
         "Lengkapi nama, kelas, dan ekskul",
         "Pasang foto profil",
         "Jelajahi katalog dan buka satu detail buku",
@@ -621,6 +697,7 @@ MISSIONS = {
         "Isi jurnal 7 hari berturut-turut",
     ],
     "guru": [
+        "Baca dan setujui ketentuan",
         "Buka Dashboard dan saring per ekskul",
         "Periksa label kelas dan ekskul di tab Sekolah",
         "Tambah satu siswa dengan email",
@@ -630,6 +707,7 @@ MISSIONS = {
         "Tulis komentar pada jurnal siswa",
         "Rekomendasikan 10 buku di katalog",
         "Tinjau saran dari siswa",
+        "Buka Sekolah › Laporan",
         "Periksa hari netral dan tambah hari libur",
     ],
 }
@@ -987,7 +1065,7 @@ h1 {{ margin: 12px 0 0; font: 700 28px/1.15 Poppins; letter-spacing: -.6px; colo
 .missions section {{ padding: 16px 18px 12px; border-radius: 20px; background: #fff; border: 1.5px solid {OUTLINE}; }}
 .missions h2 {{ display: flex; align-items: center; justify-content: space-between; margin: 0 0 8px; font: 600 17px/1 Poppins; color: {NAVY}; }}
 .missions h2 span {{ padding: 5px 9px; border-radius: 9px; background: var(--accent); color: var(--on); font: 600 10px/1 Poppins; letter-spacing: .8px; }}
-.missions label {{ display: flex; gap: 11px; align-items: flex-start; padding: 12.5px 0; font-size: 13.4px; line-height: 1.4;
+.missions label {{ display: flex; gap: 11px; align-items: flex-start; padding: 10px 0; font-size: 13.4px; line-height: 1.4;
   border-top: 1px solid #EDF1F6; }}
 .missions label:first-of-type {{ border-top: 0; }}
 .missions .box {{ flex: none; width: 19px; height: 19px; margin-top: 0; border-radius: 6px; border: 2px solid var(--accent-text); background: #fff; }}
@@ -1228,7 +1306,7 @@ def render_install(spec, number, keys):
 
 
 RULE_ICONS = {
-    "Akun": '<circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4.2 3.9-6.5 8-6.5s7.2 2.3 8 6.5"/>',
+    "Akun dan ketentuan": '<circle cx="12" cy="8" r="4"/><path d="M4 21c.8-4.2 3.9-6.5 8-6.5s7.2 2.3 8 6.5"/>',
     "Buku": '<path d="M12 6.5C9.8 4.8 6.5 4.3 3 5v13c3.5-.7 6.8-.2 9 1.5 2.2-1.7 5.5-2.2 9-1.5V5c-3.5-.7-6.8-.2-9 1.5z"/>'
             '<path d="M12 6.5v13"/>',
     "Jurnal": '<path d="M4 6h11M4 11h11M4 16h6"/><path d="m14 19 6-6 2 2-6 6h-2z"/>',
@@ -1297,8 +1375,9 @@ def render_help(spec, number, keys):
 <article class="wide faq"><h2>Sering ditanyakan</h2><dl>{faq}</dl></article>
 <article class="wide"><div class="share"><div class="code"><img src="{qr}"></div><div>
 <h2>Situs Sabu Saku</h2>
-<p>Informasi aplikasi, kebijakan privasi, dan cara menghapus akun beserta datanya. Kode QR di samping membuka Sabu Saku di Google Play, untuk dibagikan ke teman.</p>
+<p>Informasi aplikasi, ketentuan penggunaan, kebijakan privasi, dan cara menghapus akun beserta datanya. Kode QR di samping membuka Sabu Saku di Google Play, untuk dibagikan ke teman.</p>
 <div class="links"><a class="button" href="https://sabusaku.web.app">sabusaku.web.app</a>
+<a class="button light" href="https://sabusaku.web.app/ketentuan">sabusaku.web.app/ketentuan</a>
 <a class="button light" href="https://sabusaku.web.app/privasi">sabusaku.web.app/privasi</a>
 <a class="button light" href="https://sabusaku.web.app/hapus-data">sabusaku.web.app/hapus-data</a></div></div></div></article></div>
 <div class="thanks"><img src="{mark}"><div><h3>Satu Bulan Satu Buku</h3>
@@ -1370,7 +1449,11 @@ def main():
     if missing:
         raise SystemExit(f"Missing screenshots in {SHOTS.relative_to(ROOT)}: {', '.join(missing)}")
     check_pins()
-    print_pdf(build_html())
+    document = build_html()
+    broken = sorted(set(re.findall(r'href="#([\w-]+)"', document)) - set(re.findall(r'id="([\w-]+)"', document)))
+    if broken:
+        raise SystemExit(f"Links to missing pages: {', '.join(broken)}")
+    print_pdf(document)
     shutil.copyfile(OUT, HOSTED)
     print(HOSTED.relative_to(ROOT))
 
