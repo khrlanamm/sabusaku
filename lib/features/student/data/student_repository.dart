@@ -1,4 +1,7 @@
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -22,9 +25,16 @@ part 'student_repository.g.dart';
 /// offline; book actions are transactions, which need the server, because
 /// their rules depend on today's server date and on the BR-1 lock.
 class StudentRepository {
-  StudentRepository(this._firestore, this._reading, this._session, this._clock);
+  StudentRepository(
+    this._firestore,
+    this._reading,
+    this._session,
+    this._clock,
+    this._storage,
+  );
 
   final FirebaseFirestore _firestore;
+  final FirebaseStorage _storage;
   final ReadingRepository _reading;
   final Session _session;
   final WibClock _clock;
@@ -34,11 +44,18 @@ class StudentRepository {
   // ---------- Book ----------
 
   /// Creates the program and its BR-1 lock atomically.
+  ///
+  /// [bookId] and [coverUrl] link the program to the catalog book it was
+  /// picked from. The server compares the details with the catalog and turns
+  /// any difference (or a book without [bookId]) into a suggestion for the
+  /// teachers.
   Future<void> startBook({
     required String title,
     required String author,
     required int totalPages,
     String? isbn,
+    String? bookId,
+    String? coverUrl,
   }) => _online(() async {
     final today = _clock.today();
     final programRef = _reading.programs.doc();
@@ -60,6 +77,8 @@ class StudentRepository {
             'author': author,
             'totalPages': totalPages,
             if (isbn != null && isbn.isNotEmpty) 'isbn': isbn,
+            'bookId': ?bookId,
+            'coverUrl': ?coverUrl,
           },
           'month': DateId.monthOf(today),
           'startDate': today,
@@ -78,6 +97,33 @@ class StudentRepository {
         ..set(lockRef, {'programId': programRef.id});
     });
   });
+
+  /// Uploads the student's own cover photo for a book they start (already
+  /// cropped and compressed on the device) and returns its download URL, for
+  /// `book.coverUrl`. The server offers it to the teachers as a suggestion;
+  /// the catalog never points at this file.
+  Future<String> uploadProgramCover(Uint8List bytes) async {
+    final stamp = DateTime.now().millisecondsSinceEpoch;
+    final ref = _storage.ref(
+      'schools/${_session.schoolId}/programCovers/$_uid/$stamp.jpg',
+    );
+    try {
+      await ref.putData(bytes, SettableMetadata(contentType: 'image/jpeg'));
+      return await ref.getDownloadURL();
+    } on FirebaseException catch (error) {
+      // Storage refuses files that are not images or are too large; the
+      // date hint of _online does not apply here.
+      if (error.code == 'unauthorized') {
+        throw AppException(
+          AppErrorCode.permissionDenied,
+          message:
+              'Foto cover tidak bisa diunggah. Pilih foto lain lalu coba lagi.',
+          cause: error,
+        );
+      }
+      throw mapError(error);
+    }
+  }
 
   Future<void> extendTarget(Program program) => _online(
     () => _firestore.runTransaction((transaction) async {
@@ -231,6 +277,7 @@ StudentRepository studentRepository(Ref ref) => StudentRepository(
   ref.watch(readingRepositoryProvider),
   ref.watch(currentSessionProvider),
   ref.watch(wibClockProvider),
+  ref.watch(storageProvider),
 );
 
 /// The student's own summary (server-written).

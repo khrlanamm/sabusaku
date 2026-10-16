@@ -54,7 +54,7 @@ final class StudentRepositoryProvider
   }
 }
 
-String _$studentRepositoryHash() => r'd1e5075811087d0e8e9084c1087e8ecc5e7a363f';
+String _$studentRepositoryHash() => r'728ee0ed72346f8f8d4b29db4be0948b1fef8cdb';
 
 /// The student's own summary (server-written).
 

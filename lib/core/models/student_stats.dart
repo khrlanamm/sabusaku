@@ -18,6 +18,7 @@ abstract class ActiveProgramSummary with _$ActiveProgramSummary {
     required String targetDate,
     @Default(false) bool extended,
     @Default(false) bool overdue,
+    String? coverUrl,
   }) = _ActiveProgramSummary;
 
   factory ActiveProgramSummary.fromMap(Map<String, dynamic> data) =>
@@ -32,6 +33,7 @@ abstract class ActiveProgramSummary with _$ActiveProgramSummary {
         targetDate: data['targetDate'] as String? ?? '',
         extended: data['extended'] == true,
         overdue: data['overdue'] == true,
+        coverUrl: data['coverUrl'] as String?,
       );
 }
 

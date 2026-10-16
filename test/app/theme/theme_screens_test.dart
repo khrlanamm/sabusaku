@@ -310,7 +310,7 @@ const _tabIcons = {
   'Siswa': Icons.groups_outlined,
   'Sekolah': Icons.school_outlined,
 };
-const _teacherTabs = ['Dashboard', 'Siswa', 'Sekolah', 'Profil'];
+const _teacherTabs = ['Dashboard', 'Siswa', 'Buku', 'Sekolah', 'Profil'];
 
 final _cases = [
   const _Case('login', LoginScreen(), state: AuthSignedOut()),

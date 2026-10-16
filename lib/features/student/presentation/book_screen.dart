@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/models/program.dart';
@@ -11,6 +10,7 @@ import '../../../core/widgets/dialogs.dart';
 import '../../../core/widgets/states.dart';
 import '../data/student_repository.dart';
 import '../domain/reading_rules.dart';
+import 'start_book_form.dart';
 import 'student_home_screen.dart';
 
 /// "Buku Saya": the active book, or the form to start one.
@@ -26,127 +26,8 @@ class BookScreen extends ConsumerWidget {
         value: program,
         onRetry: () => ref.invalidate(activeProgramProvider),
         data: (active) => active == null
-            ? const _StartBookForm()
+            ? const StartBookForm()
             : _ActiveBook(program: active),
-      ),
-    );
-  }
-}
-
-class _StartBookForm extends ConsumerStatefulWidget {
-  const _StartBookForm();
-
-  @override
-  ConsumerState<_StartBookForm> createState() => _StartBookFormState();
-}
-
-class _StartBookFormState extends ConsumerState<_StartBookForm> {
-  final _formKey = GlobalKey<FormState>();
-  final _title = TextEditingController();
-  final _author = TextEditingController();
-  final _pages = TextEditingController();
-  final _isbn = TextEditingController();
-
-  @override
-  void dispose() {
-    _title.dispose();
-    _author.dispose();
-    _pages.dispose();
-    _isbn.dispose();
-    super.dispose();
-  }
-
-  Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
-    FocusScope.of(context).unfocus();
-    final ok = await runWithProgress(context, () async {
-      await ref
-          .read(studentRepositoryProvider)
-          .startBook(
-            title: _title.text.trim(),
-            author: _author.text.trim(),
-            totalPages: int.parse(_pages.text.trim()),
-            isbn: _isbn.text.trim(),
-          );
-      return true;
-    });
-    if (ok == true && mounted) showSnack(context, 'Selamat membaca!');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final target = defaultTargetDate(ref.watch(wibClockProvider).today());
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text('Mulai Buku', style: theme.textTheme.titleLarge),
-            const SizedBox(height: 4),
-            Text(
-              'Pilih buku apa saja. Target selesai: '
-              '${formatDateLong(target)}.',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextFormField(
-              key: const Key('book-title'),
-              controller: _title,
-              textCapitalization: TextCapitalization.words,
-              textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(labelText: 'Judul buku'),
-              validator: validateBookTitle,
-            ),
-            const SizedBox(height: 14),
-            TextFormField(
-              key: const Key('book-author'),
-              controller: _author,
-              textCapitalization: TextCapitalization.words,
-              textInputAction: TextInputAction.next,
-              decoration: const InputDecoration(labelText: 'Penulis'),
-              validator: validateBookAuthor,
-            ),
-            const SizedBox(height: 14),
-            TextFormField(
-              key: const Key('book-pages'),
-              controller: _pages,
-              keyboardType: TextInputType.number,
-              textInputAction: TextInputAction.next,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              decoration: const InputDecoration(
-                labelText: 'Jumlah halaman',
-                helperText: 'Tidak bisa diubah setelah buku dimulai',
-              ),
-              validator: validateTotalPages,
-            ),
-            const SizedBox(height: 14),
-            TextFormField(
-              controller: _isbn,
-              textInputAction: TextInputAction.done,
-              decoration: const InputDecoration(labelText: 'ISBN (opsional)'),
-              validator: validateIsbn,
-            ),
-            const SizedBox(height: 24),
-            FilledButton(
-              key: const Key('book-start'),
-              onPressed: _submit,
-              child: const Text('Mulai membaca'),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Memulai buku butuh koneksi internet.',
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -224,7 +105,11 @@ class _ActiveBook extends ConsumerWidget {
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            BookCover(title: program.book.title, width: 96),
+            BookCover(
+              title: program.book.title,
+              coverUrl: program.book.coverUrl,
+              width: 96,
+            ),
             const SizedBox(width: 16),
             Expanded(
               child: Column(

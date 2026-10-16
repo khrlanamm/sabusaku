@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
 
-/// Automatic cover: a colour derived from the title plus its initials.
-/// V1 has no cover upload (PRD §4).
+/// A book cover. Shows [coverUrl] when the book has one (catalog books),
+/// fading in over the automatic cover; otherwise, or when the image cannot
+/// load, the automatic cover: a colour derived from the title plus its
+/// initials.
 class BookCover extends StatelessWidget {
-  const BookCover({super.key, required this.title, this.width = 64});
+  const BookCover({
+    super.key,
+    required this.title,
+    this.width = 64,
+    this.coverUrl,
+  });
 
   final String title;
   final double width;
+  final String? coverUrl;
 
   static const _palette = <List<Color>>[
     [Color(0xFF2563EB), Color(0xFF1D4FC4)],
@@ -33,39 +41,90 @@ class BookCover extends StatelessWidget {
     return hash % _palette.length;
   }
 
+  double get _height => width * 1.4;
+
+  BorderRadius get _radius => BorderRadius.circular(width * 0.14);
+
+  Widget _generated(Border? edge) {
+    final colors = _palette[paletteIndexOf(title)];
+    return Container(
+      width: width,
+      height: _height,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: colors,
+        ),
+        borderRadius: _radius,
+        border: edge,
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        initialsOf(title),
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w800,
+          fontSize: width * 0.34,
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final colors = _palette[paletteIndexOf(title)];
     final theme = Theme.of(context);
-    // The navy cover would melt into dark surfaces without an edge.
+    // Dark covers would melt into dark surfaces without an edge.
     final edge = theme.brightness == Brightness.dark
         ? Border.all(color: theme.colorScheme.outline)
         : null;
+    final url = coverUrl;
+    final generated = _generated(edge);
+    final Widget cover;
+    if (url == null || url.isEmpty) {
+      cover = generated;
+    } else {
+      final pixels = (width * MediaQuery.devicePixelRatioOf(context)).round();
+      final image = ClipRRect(
+        borderRadius: _radius,
+        child: Image.network(
+          url,
+          width: width,
+          height: _height,
+          fit: BoxFit.cover,
+          cacheWidth: pixels,
+          gaplessPlayback: true,
+          frameBuilder: (context, child, frame, synchronous) {
+            if (synchronous) return child;
+            return Stack(
+              fit: StackFit.passthrough,
+              children: [
+                generated,
+                AnimatedOpacity(
+                  opacity: frame == null ? 0 : 1,
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOut,
+                  child: child,
+                ),
+              ],
+            );
+          },
+          errorBuilder: (_, _, _) => generated,
+        ),
+      );
+      cover = edge == null
+          ? image
+          : DecoratedBox(
+              position: DecorationPosition.foreground,
+              decoration: BoxDecoration(border: edge, borderRadius: _radius),
+              child: image,
+            );
+    }
+
     return Semantics(
       label: 'Sampul buku $title',
       excludeSemantics: true,
-      child: Container(
-        width: width,
-        height: width * 1.4,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: colors,
-          ),
-          borderRadius: BorderRadius.circular(width * 0.14),
-          border: edge,
-        ),
-        alignment: Alignment.center,
-        child: Text(
-          initialsOf(title),
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w800,
-            fontSize: width * 0.34,
-          ),
-        ),
-      ),
+      child: SizedBox(width: width, height: _height, child: cover),
     );
   }
 }

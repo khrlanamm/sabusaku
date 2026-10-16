@@ -49,6 +49,9 @@ abstract class School with _$School {
 
     /// Extracurricular labels (`Masis-KIR`). Teachers add more.
     @Default(<String>[]) List<String> extracurriculars,
+
+    /// Catalog books the school's teachers recommend (`books/{bookId}`).
+    @Default(<String>[]) List<String> recommendedBooks,
   }) = _School;
 
   factory School.fromMap(String id, Map<String, dynamic> data) => School(
@@ -60,6 +63,9 @@ abstract class School with _$School {
       ..sort(compareClassLabels),
     extracurriculars: List<String>.from(
       data['extracurriculars'] as List? ?? const [],
+    ),
+    recommendedBooks: List<String>.from(
+      data['recommendedBooks'] as List? ?? const [],
     ),
   );
 }

@@ -308,7 +308,8 @@ mixin _$School {
 
  String get id; String get name; bool get active; SchoolSettings get settings;/// Class labels (`XII-A1`), sorted by grade. Teachers add more.
  List<String> get classes;/// Extracurricular labels (`Masis-KIR`). Teachers add more.
- List<String> get extracurriculars;
+ List<String> get extracurriculars;/// Catalog books the school's teachers recommend (`books/{bookId}`).
+ List<String> get recommendedBooks;
 /// Create a copy of School
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -320,20 +321,20 @@ $SchoolCopyWith<School> get copyWith => _$SchoolCopyWithImpl<School>(this as Sch
 @override
 bool operator ==(Object other) {
   final _this = this as School;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is School&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.active, _this.active) || other.active == _this.active)&&(identical(other.settings, _this.settings) || other.settings == _this.settings)&&const DeepCollectionEquality().equals(other.classes, _this.classes)&&const DeepCollectionEquality().equals(other.extracurriculars, _this.extracurriculars));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is School&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.active, _this.active) || other.active == _this.active)&&(identical(other.settings, _this.settings) || other.settings == _this.settings)&&const DeepCollectionEquality().equals(other.classes, _this.classes)&&const DeepCollectionEquality().equals(other.extracurriculars, _this.extracurriculars)&&const DeepCollectionEquality().equals(other.recommendedBooks, _this.recommendedBooks));
 }
 
 
 @override
 int get hashCode {
   final _this = this as School;
-  return Object.hash(runtimeType,_this.id,_this.name,_this.active,_this.settings,const DeepCollectionEquality().hash(_this.classes),const DeepCollectionEquality().hash(_this.extracurriculars));
+  return Object.hash(runtimeType,_this.id,_this.name,_this.active,_this.settings,const DeepCollectionEquality().hash(_this.classes),const DeepCollectionEquality().hash(_this.extracurriculars),const DeepCollectionEquality().hash(_this.recommendedBooks));
 }
 
 @override
 String toString() {
   final _this = this as School;
-  return 'School(id: ${_this.id}, name: ${_this.name}, active: ${_this.active}, settings: ${_this.settings}, classes: ${_this.classes}, extracurriculars: ${_this.extracurriculars})';
+  return 'School(id: ${_this.id}, name: ${_this.name}, active: ${_this.active}, settings: ${_this.settings}, classes: ${_this.classes}, extracurriculars: ${_this.extracurriculars}, recommendedBooks: ${_this.recommendedBooks})';
 }
 
 
@@ -344,7 +345,7 @@ abstract mixin class $SchoolCopyWith<$Res>  {
   factory $SchoolCopyWith(School value, $Res Function(School) _then) = _$SchoolCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, bool active, SchoolSettings settings, List<String> classes, List<String> extracurriculars
+ String id, String name, bool active, SchoolSettings settings, List<String> classes, List<String> extracurriculars, List<String> recommendedBooks
 });
 
 
@@ -361,7 +362,7 @@ class _$SchoolCopyWithImpl<$Res>
 
 /// Create a copy of School
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? active = null,Object? settings = null,Object? classes = null,Object? extracurriculars = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? active = null,Object? settings = null,Object? classes = null,Object? extracurriculars = null,Object? recommendedBooks = null,}) {
   return _then(School(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -369,6 +370,7 @@ as String,active: null == active ? _self.active : active // ignore: cast_nullabl
 as bool,settings: null == settings ? _self.settings : settings // ignore: cast_nullable_to_non_nullable
 as SchoolSettings,classes: null == classes ? _self.classes : classes // ignore: cast_nullable_to_non_nullable
 as List<String>,extracurriculars: null == extracurriculars ? _self.extracurriculars : extracurriculars // ignore: cast_nullable_to_non_nullable
+as List<String>,recommendedBooks: null == recommendedBooks ? _self.recommendedBooks : recommendedBooks // ignore: cast_nullable_to_non_nullable
 as List<String>,
   ));
 }
@@ -463,10 +465,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  bool active,  SchoolSettings settings,  List<String> classes,  List<String> extracurriculars)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  bool active,  SchoolSettings settings,  List<String> classes,  List<String> extracurriculars,  List<String> recommendedBooks)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _School() when $default != null:
-return $default(_that.id,_that.name,_that.active,_that.settings,_that.classes,_that.extracurriculars);case _:
+return $default(_that.id,_that.name,_that.active,_that.settings,_that.classes,_that.extracurriculars,_that.recommendedBooks);case _:
   return orElse();
 
 }
@@ -484,10 +486,10 @@ return $default(_that.id,_that.name,_that.active,_that.settings,_that.classes,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  bool active,  SchoolSettings settings,  List<String> classes,  List<String> extracurriculars)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  bool active,  SchoolSettings settings,  List<String> classes,  List<String> extracurriculars,  List<String> recommendedBooks)  $default,) {final _that = this;
 switch (_that) {
 case _School():
-return $default(_that.id,_that.name,_that.active,_that.settings,_that.classes,_that.extracurriculars);case _:
+return $default(_that.id,_that.name,_that.active,_that.settings,_that.classes,_that.extracurriculars,_that.recommendedBooks);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -504,10 +506,10 @@ return $default(_that.id,_that.name,_that.active,_that.settings,_that.classes,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  bool active,  SchoolSettings settings,  List<String> classes,  List<String> extracurriculars)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  bool active,  SchoolSettings settings,  List<String> classes,  List<String> extracurriculars,  List<String> recommendedBooks)?  $default,) {final _that = this;
 switch (_that) {
 case _School() when $default != null:
-return $default(_that.id,_that.name,_that.active,_that.settings,_that.classes,_that.extracurriculars);case _:
+return $default(_that.id,_that.name,_that.active,_that.settings,_that.classes,_that.extracurriculars,_that.recommendedBooks);case _:
   return null;
 
 }
@@ -519,7 +521,7 @@ return $default(_that.id,_that.name,_that.active,_that.settings,_that.classes,_t
 
 
 class _School implements School {
-  const _School({required this.id, required this.name, this.active = true, this.settings = const SchoolSettings(),  List<String> classes = const <String>[],  List<String> extracurriculars = const <String>[]}): _classes = classes,_extracurriculars = extracurriculars;
+  const _School({required this.id, required this.name, this.active = true, this.settings = const SchoolSettings(),  List<String> classes = const <String>[],  List<String> extracurriculars = const <String>[],  List<String> recommendedBooks = const <String>[]}): _classes = classes,_extracurriculars = extracurriculars,_recommendedBooks = recommendedBooks;
   
 
 @override final  String id;
@@ -544,6 +546,15 @@ class _School implements School {
   return EqualUnmodifiableListView(_extracurriculars);
 }
 
+/// Catalog books the school's teachers recommend (`books/{bookId}`).
+ final  List<String> _recommendedBooks;
+/// Catalog books the school's teachers recommend (`books/{bookId}`).
+@override@JsonKey() List<String> get recommendedBooks {
+  if (_recommendedBooks is EqualUnmodifiableListView) return _recommendedBooks;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_recommendedBooks);
+}
+
 
 /// Create a copy of School
 /// with the given fields replaced by the non-null parameter values.
@@ -555,18 +566,18 @@ _$SchoolCopyWith<_School> get copyWith => __$SchoolCopyWithImpl<_School>(this, _
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _School&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.active, active) || other.active == active)&&(identical(other.settings, settings) || other.settings == settings)&&const DeepCollectionEquality().equals(other.classes, _classes)&&const DeepCollectionEquality().equals(other.extracurriculars, _extracurriculars));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _School&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.active, active) || other.active == active)&&(identical(other.settings, settings) || other.settings == settings)&&const DeepCollectionEquality().equals(other.classes, _classes)&&const DeepCollectionEquality().equals(other.extracurriculars, _extracurriculars)&&const DeepCollectionEquality().equals(other.recommendedBooks, _recommendedBooks));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,name,active,settings,const DeepCollectionEquality().hash(_classes),const DeepCollectionEquality().hash(_extracurriculars));
+    return Object.hash(runtimeType,id,name,active,settings,const DeepCollectionEquality().hash(_classes),const DeepCollectionEquality().hash(_extracurriculars),const DeepCollectionEquality().hash(_recommendedBooks));
 }
 
 @override
 String toString() {
-    return 'School(id: $id, name: $name, active: $active, settings: $settings, classes: $classes, extracurriculars: $extracurriculars)';
+    return 'School(id: $id, name: $name, active: $active, settings: $settings, classes: $classes, extracurriculars: $extracurriculars, recommendedBooks: $recommendedBooks)';
 }
 
 
@@ -577,7 +588,7 @@ abstract mixin class _$SchoolCopyWith<$Res> implements $SchoolCopyWith<$Res> {
   factory _$SchoolCopyWith(_School value, $Res Function(_School) _then) = __$SchoolCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, bool active, SchoolSettings settings, List<String> classes, List<String> extracurriculars
+ String id, String name, bool active, SchoolSettings settings, List<String> classes, List<String> extracurriculars, List<String> recommendedBooks
 });
 
 
@@ -594,7 +605,7 @@ class __$SchoolCopyWithImpl<$Res>
 
 /// Create a copy of School
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? active = null,Object? settings = null,Object? classes = null,Object? extracurriculars = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? active = null,Object? settings = null,Object? classes = null,Object? extracurriculars = null,Object? recommendedBooks = null,}) {
   return _then(_School(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -602,6 +613,7 @@ as String,active: null == active ? _self.active : active // ignore: cast_nullabl
 as bool,settings: null == settings ? _self.settings : settings // ignore: cast_nullable_to_non_nullable
 as SchoolSettings,classes: null == classes ? _self._classes : classes // ignore: cast_nullable_to_non_nullable
 as List<String>,extracurriculars: null == extracurriculars ? _self._extracurriculars : extracurriculars // ignore: cast_nullable_to_non_nullable
+as List<String>,recommendedBooks: null == recommendedBooks ? _self._recommendedBooks : recommendedBooks // ignore: cast_nullable_to_non_nullable
 as List<String>,
   ));
 }

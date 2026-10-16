@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ActiveProgramSummary {
 
- String get programId; String get title; String get author; int get totalPages; int get currentPage; int get percent; String get startDate; String get targetDate; bool get extended; bool get overdue;
+ String get programId; String get title; String get author; int get totalPages; int get currentPage; int get percent; String get startDate; String get targetDate; bool get extended; bool get overdue; String? get coverUrl;
 /// Create a copy of ActiveProgramSummary
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -27,20 +27,20 @@ $ActiveProgramSummaryCopyWith<ActiveProgramSummary> get copyWith => _$ActiveProg
 @override
 bool operator ==(Object other) {
   final _this = this as ActiveProgramSummary;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ActiveProgramSummary&&(identical(other.programId, _this.programId) || other.programId == _this.programId)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.author, _this.author) || other.author == _this.author)&&(identical(other.totalPages, _this.totalPages) || other.totalPages == _this.totalPages)&&(identical(other.currentPage, _this.currentPage) || other.currentPage == _this.currentPage)&&(identical(other.percent, _this.percent) || other.percent == _this.percent)&&(identical(other.startDate, _this.startDate) || other.startDate == _this.startDate)&&(identical(other.targetDate, _this.targetDate) || other.targetDate == _this.targetDate)&&(identical(other.extended, _this.extended) || other.extended == _this.extended)&&(identical(other.overdue, _this.overdue) || other.overdue == _this.overdue));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ActiveProgramSummary&&(identical(other.programId, _this.programId) || other.programId == _this.programId)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.author, _this.author) || other.author == _this.author)&&(identical(other.totalPages, _this.totalPages) || other.totalPages == _this.totalPages)&&(identical(other.currentPage, _this.currentPage) || other.currentPage == _this.currentPage)&&(identical(other.percent, _this.percent) || other.percent == _this.percent)&&(identical(other.startDate, _this.startDate) || other.startDate == _this.startDate)&&(identical(other.targetDate, _this.targetDate) || other.targetDate == _this.targetDate)&&(identical(other.extended, _this.extended) || other.extended == _this.extended)&&(identical(other.overdue, _this.overdue) || other.overdue == _this.overdue)&&(identical(other.coverUrl, _this.coverUrl) || other.coverUrl == _this.coverUrl));
 }
 
 
 @override
 int get hashCode {
   final _this = this as ActiveProgramSummary;
-  return Object.hash(runtimeType,_this.programId,_this.title,_this.author,_this.totalPages,_this.currentPage,_this.percent,_this.startDate,_this.targetDate,_this.extended,_this.overdue);
+  return Object.hash(runtimeType,_this.programId,_this.title,_this.author,_this.totalPages,_this.currentPage,_this.percent,_this.startDate,_this.targetDate,_this.extended,_this.overdue,_this.coverUrl);
 }
 
 @override
 String toString() {
   final _this = this as ActiveProgramSummary;
-  return 'ActiveProgramSummary(programId: ${_this.programId}, title: ${_this.title}, author: ${_this.author}, totalPages: ${_this.totalPages}, currentPage: ${_this.currentPage}, percent: ${_this.percent}, startDate: ${_this.startDate}, targetDate: ${_this.targetDate}, extended: ${_this.extended}, overdue: ${_this.overdue})';
+  return 'ActiveProgramSummary(programId: ${_this.programId}, title: ${_this.title}, author: ${_this.author}, totalPages: ${_this.totalPages}, currentPage: ${_this.currentPage}, percent: ${_this.percent}, startDate: ${_this.startDate}, targetDate: ${_this.targetDate}, extended: ${_this.extended}, overdue: ${_this.overdue}, coverUrl: ${_this.coverUrl})';
 }
 
 
@@ -51,7 +51,7 @@ abstract mixin class $ActiveProgramSummaryCopyWith<$Res>  {
   factory $ActiveProgramSummaryCopyWith(ActiveProgramSummary value, $Res Function(ActiveProgramSummary) _then) = _$ActiveProgramSummaryCopyWithImpl;
 @useResult
 $Res call({
- String programId, String title, String author, int totalPages, int currentPage, int percent, String startDate, String targetDate, bool extended, bool overdue
+ String programId, String title, String author, int totalPages, int currentPage, int percent, String startDate, String targetDate, bool extended, bool overdue, String? coverUrl
 });
 
 
@@ -68,7 +68,7 @@ class _$ActiveProgramSummaryCopyWithImpl<$Res>
 
 /// Create a copy of ActiveProgramSummary
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? programId = null,Object? title = null,Object? author = null,Object? totalPages = null,Object? currentPage = null,Object? percent = null,Object? startDate = null,Object? targetDate = null,Object? extended = null,Object? overdue = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? programId = null,Object? title = null,Object? author = null,Object? totalPages = null,Object? currentPage = null,Object? percent = null,Object? startDate = null,Object? targetDate = null,Object? extended = null,Object? overdue = null,Object? coverUrl = freezed,}) {
   return _then(ActiveProgramSummary(
 programId: null == programId ? _self.programId : programId // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -80,7 +80,8 @@ as int,startDate: null == startDate ? _self.startDate : startDate // ignore: cas
 as String,targetDate: null == targetDate ? _self.targetDate : targetDate // ignore: cast_nullable_to_non_nullable
 as String,extended: null == extended ? _self.extended : extended // ignore: cast_nullable_to_non_nullable
 as bool,overdue: null == overdue ? _self.overdue : overdue // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,coverUrl: freezed == coverUrl ? _self.coverUrl : coverUrl // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -165,10 +166,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String programId,  String title,  String author,  int totalPages,  int currentPage,  int percent,  String startDate,  String targetDate,  bool extended,  bool overdue)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String programId,  String title,  String author,  int totalPages,  int currentPage,  int percent,  String startDate,  String targetDate,  bool extended,  bool overdue,  String? coverUrl)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ActiveProgramSummary() when $default != null:
-return $default(_that.programId,_that.title,_that.author,_that.totalPages,_that.currentPage,_that.percent,_that.startDate,_that.targetDate,_that.extended,_that.overdue);case _:
+return $default(_that.programId,_that.title,_that.author,_that.totalPages,_that.currentPage,_that.percent,_that.startDate,_that.targetDate,_that.extended,_that.overdue,_that.coverUrl);case _:
   return orElse();
 
 }
@@ -186,10 +187,10 @@ return $default(_that.programId,_that.title,_that.author,_that.totalPages,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String programId,  String title,  String author,  int totalPages,  int currentPage,  int percent,  String startDate,  String targetDate,  bool extended,  bool overdue)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String programId,  String title,  String author,  int totalPages,  int currentPage,  int percent,  String startDate,  String targetDate,  bool extended,  bool overdue,  String? coverUrl)  $default,) {final _that = this;
 switch (_that) {
 case _ActiveProgramSummary():
-return $default(_that.programId,_that.title,_that.author,_that.totalPages,_that.currentPage,_that.percent,_that.startDate,_that.targetDate,_that.extended,_that.overdue);case _:
+return $default(_that.programId,_that.title,_that.author,_that.totalPages,_that.currentPage,_that.percent,_that.startDate,_that.targetDate,_that.extended,_that.overdue,_that.coverUrl);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -206,10 +207,10 @@ return $default(_that.programId,_that.title,_that.author,_that.totalPages,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String programId,  String title,  String author,  int totalPages,  int currentPage,  int percent,  String startDate,  String targetDate,  bool extended,  bool overdue)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String programId,  String title,  String author,  int totalPages,  int currentPage,  int percent,  String startDate,  String targetDate,  bool extended,  bool overdue,  String? coverUrl)?  $default,) {final _that = this;
 switch (_that) {
 case _ActiveProgramSummary() when $default != null:
-return $default(_that.programId,_that.title,_that.author,_that.totalPages,_that.currentPage,_that.percent,_that.startDate,_that.targetDate,_that.extended,_that.overdue);case _:
+return $default(_that.programId,_that.title,_that.author,_that.totalPages,_that.currentPage,_that.percent,_that.startDate,_that.targetDate,_that.extended,_that.overdue,_that.coverUrl);case _:
   return null;
 
 }
@@ -221,7 +222,7 @@ return $default(_that.programId,_that.title,_that.author,_that.totalPages,_that.
 
 
 class _ActiveProgramSummary implements ActiveProgramSummary {
-  const _ActiveProgramSummary({required this.programId, required this.title, required this.author, required this.totalPages, required this.currentPage, required this.percent, required this.startDate, required this.targetDate, this.extended = false, this.overdue = false});
+  const _ActiveProgramSummary({required this.programId, required this.title, required this.author, required this.totalPages, required this.currentPage, required this.percent, required this.startDate, required this.targetDate, this.extended = false, this.overdue = false, this.coverUrl});
   
 
 @override final  String programId;
@@ -234,6 +235,7 @@ class _ActiveProgramSummary implements ActiveProgramSummary {
 @override final  String targetDate;
 @override@JsonKey() final  bool extended;
 @override@JsonKey() final  bool overdue;
+@override final  String? coverUrl;
 
 /// Create a copy of ActiveProgramSummary
 /// with the given fields replaced by the non-null parameter values.
@@ -245,18 +247,18 @@ _$ActiveProgramSummaryCopyWith<_ActiveProgramSummary> get copyWith => __$ActiveP
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ActiveProgramSummary&&(identical(other.programId, programId) || other.programId == programId)&&(identical(other.title, title) || other.title == title)&&(identical(other.author, author) || other.author == author)&&(identical(other.totalPages, totalPages) || other.totalPages == totalPages)&&(identical(other.currentPage, currentPage) || other.currentPage == currentPage)&&(identical(other.percent, percent) || other.percent == percent)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.targetDate, targetDate) || other.targetDate == targetDate)&&(identical(other.extended, extended) || other.extended == extended)&&(identical(other.overdue, overdue) || other.overdue == overdue));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ActiveProgramSummary&&(identical(other.programId, programId) || other.programId == programId)&&(identical(other.title, title) || other.title == title)&&(identical(other.author, author) || other.author == author)&&(identical(other.totalPages, totalPages) || other.totalPages == totalPages)&&(identical(other.currentPage, currentPage) || other.currentPage == currentPage)&&(identical(other.percent, percent) || other.percent == percent)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.targetDate, targetDate) || other.targetDate == targetDate)&&(identical(other.extended, extended) || other.extended == extended)&&(identical(other.overdue, overdue) || other.overdue == overdue)&&(identical(other.coverUrl, coverUrl) || other.coverUrl == coverUrl));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,programId,title,author,totalPages,currentPage,percent,startDate,targetDate,extended,overdue);
+    return Object.hash(runtimeType,programId,title,author,totalPages,currentPage,percent,startDate,targetDate,extended,overdue,coverUrl);
 }
 
 @override
 String toString() {
-    return 'ActiveProgramSummary(programId: $programId, title: $title, author: $author, totalPages: $totalPages, currentPage: $currentPage, percent: $percent, startDate: $startDate, targetDate: $targetDate, extended: $extended, overdue: $overdue)';
+    return 'ActiveProgramSummary(programId: $programId, title: $title, author: $author, totalPages: $totalPages, currentPage: $currentPage, percent: $percent, startDate: $startDate, targetDate: $targetDate, extended: $extended, overdue: $overdue, coverUrl: $coverUrl)';
 }
 
 
@@ -267,7 +269,7 @@ abstract mixin class _$ActiveProgramSummaryCopyWith<$Res> implements $ActiveProg
   factory _$ActiveProgramSummaryCopyWith(_ActiveProgramSummary value, $Res Function(_ActiveProgramSummary) _then) = __$ActiveProgramSummaryCopyWithImpl;
 @override @useResult
 $Res call({
- String programId, String title, String author, int totalPages, int currentPage, int percent, String startDate, String targetDate, bool extended, bool overdue
+ String programId, String title, String author, int totalPages, int currentPage, int percent, String startDate, String targetDate, bool extended, bool overdue, String? coverUrl
 });
 
 
@@ -284,7 +286,7 @@ class __$ActiveProgramSummaryCopyWithImpl<$Res>
 
 /// Create a copy of ActiveProgramSummary
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? programId = null,Object? title = null,Object? author = null,Object? totalPages = null,Object? currentPage = null,Object? percent = null,Object? startDate = null,Object? targetDate = null,Object? extended = null,Object? overdue = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? programId = null,Object? title = null,Object? author = null,Object? totalPages = null,Object? currentPage = null,Object? percent = null,Object? startDate = null,Object? targetDate = null,Object? extended = null,Object? overdue = null,Object? coverUrl = freezed,}) {
   return _then(_ActiveProgramSummary(
 programId: null == programId ? _self.programId : programId // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -296,7 +298,8 @@ as int,startDate: null == startDate ? _self.startDate : startDate // ignore: cas
 as String,targetDate: null == targetDate ? _self.targetDate : targetDate // ignore: cast_nullable_to_non_nullable
 as String,extended: null == extended ? _self.extended : extended // ignore: cast_nullable_to_non_nullable
 as bool,overdue: null == overdue ? _self.overdue : overdue // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,coverUrl: freezed == coverUrl ? _self.coverUrl : coverUrl // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

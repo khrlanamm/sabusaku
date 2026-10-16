@@ -195,7 +195,11 @@ class _Body extends ConsumerWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    BookCover(title: book.title, width: 60),
+                    BookCover(
+                      title: book.title,
+                      width: 60,
+                      coverUrl: book.coverUrl,
+                    ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(

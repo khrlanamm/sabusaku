@@ -247,7 +247,11 @@ class ProgramHistoryTile extends StatelessWidget {
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              BookCover(title: program.book.title, width: 44),
+              BookCover(
+                title: program.book.title,
+                coverUrl: program.book.coverUrl,
+                width: 44,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(

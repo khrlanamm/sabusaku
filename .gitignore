@@ -53,3 +53,9 @@ app.*.map.json
 # Firebase
 .firebase/
 firebase-debug.log*
+
+# Book catalog import: raw API cache, covers and reports (not committed)
+functions/tools/books/out/
+
+# Golden test diff output
+**/failures/

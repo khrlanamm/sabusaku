@@ -136,7 +136,11 @@ class _BookCard extends ConsumerWidget {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                BookCover(title: program.book.title, width: 72),
+                BookCover(
+                  title: program.book.title,
+                  coverUrl: program.book.coverUrl,
+                  width: 72,
+                ),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Column(

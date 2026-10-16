@@ -11,6 +11,13 @@ import '../../features/auth/presentation/complete_profile_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/auth/presentation/verify_email_screen.dart';
+import '../../features/books/presentation/book_explore_screen.dart';
+import '../../features/books/presentation/catalog_book_screen.dart';
+import '../../features/books/presentation/teacher/book_editor_screen.dart';
+import '../../features/books/presentation/teacher/deleted_books_screen.dart';
+import '../../features/books/presentation/teacher/suggestions_screen.dart';
+import '../../features/books/presentation/teacher/teacher_book_screen.dart';
+import '../../features/books/presentation/teacher/teacher_books_screen.dart';
 import '../../features/student/presentation/book_screen.dart';
 import '../../features/student/presentation/journal_detail_screen.dart';
 import '../../features/student/presentation/journal_form_screen.dart';
@@ -53,6 +60,11 @@ const _teacherTabs = <ShellTab>[
     selectedIcon: Icons.dashboard,
   ),
   (label: 'Siswa', icon: Icons.groups_outlined, selectedIcon: Icons.groups),
+  (
+    label: 'Buku',
+    icon: Icons.menu_book_outlined,
+    selectedIcon: Icons.menu_book,
+  ),
   (label: 'Sekolah', icon: Icons.school_outlined, selectedIcon: Icons.school),
   (label: 'Profil', icon: Icons.person_outline, selectedIcon: Icons.person),
 ];
@@ -121,6 +133,15 @@ GoRouter appRouter(Ref ref) {
           programId: state.pathParameters['programId']!,
         ),
       ),
+      GoRoute(
+        path: Routes.studentExplore,
+        builder: (_, _) => const BookExploreScreen(),
+      ),
+      GoRoute(
+        path: '/siswa/buku/katalog/:bookId',
+        builder: (_, state) =>
+            CatalogBookScreen(bookId: state.pathParameters['bookId']!),
+      ),
 
       // ---------- Guru ----------
       StatefulShellRoute.indexedStack(
@@ -129,6 +150,7 @@ GoRouter appRouter(Ref ref) {
         branches: [
           tab(Routes.teacherDashboard, const TeacherDashboardScreen()),
           tab(Routes.teacherStudents, const TeacherStudentsScreen()),
+          tab(Routes.teacherBooks, const TeacherBooksScreen()),
           tab(Routes.teacherSchool, const SchoolScreen()),
           tab(Routes.teacherProfile, const TeacherProfileScreen()),
         ],
@@ -164,6 +186,35 @@ GoRouter appRouter(Ref ref) {
           studentId: state.pathParameters['studentId']!,
           programId: state.pathParameters['programId']!,
         ),
+      ),
+      // Catalog: the static paths before '/guru/buku/:bookId'.
+      GoRoute(
+        path: Routes.teacherAddBook,
+        builder: (_, state) =>
+            BookEditorScreen(seed: state.extra as BookEditorSeed?),
+      ),
+      GoRoute(
+        path: Routes.teacherSuggestions,
+        builder: (_, _) => const SuggestionsScreen(),
+      ),
+      GoRoute(
+        path: Routes.teacherDeletedBooks,
+        builder: (_, _) => const DeletedBooksScreen(),
+      ),
+      GoRoute(
+        path: '/guru/buku/saran/:id',
+        builder: (_, state) =>
+            SuggestionReviewScreen(id: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/guru/buku/:bookId',
+        builder: (_, state) =>
+            TeacherBookScreen(bookId: state.pathParameters['bookId']!),
+      ),
+      GoRoute(
+        path: '/guru/buku/:bookId/ubah',
+        builder: (_, state) =>
+            BookEditorScreen(bookId: state.pathParameters['bookId']!),
       ),
       GoRoute(
         path: '/guru/siswa/:studentId/buku/:programId/jurnal/:date',

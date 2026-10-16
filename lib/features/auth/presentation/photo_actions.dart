@@ -1,7 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/utils/image_capture.dart';
 import '../../../core/widgets/dialogs.dart';
 import '../data/auth_repository.dart';
 import '../domain/session.dart';
@@ -66,47 +69,30 @@ Future<void> showPhotoActions(
   final auth = ref.read(authRepositoryProvider);
   switch (action) {
     case _PhotoAction.gallery || _PhotoAction.camera:
-      final XFile? file;
+      final Uint8List? picked;
       try {
-        file = await ImagePicker().pickImage(
+        // Cropped to a square and compressed to a small JPEG on the device.
+        picked = await pickAndCropImage(
+          context,
+          shape: ImageCropShape.square,
           source: action == _PhotoAction.camera
               ? ImageSource.camera
               : ImageSource.gallery,
-          maxWidth: 512,
-          maxHeight: 512,
-          imageQuality: 85,
         );
-      } catch (_) {
-        if (context.mounted) {
-          showSnack(context, 'Tidak bisa membuka galeri atau kamera.');
-        }
+      } on ImageCaptureException catch (error) {
+        if (context.mounted) showSnack(context, error.message);
         return;
       }
-      if (file == null || !context.mounted) return;
-      final bytes = await file.readAsBytes();
+      final bytes = picked;
+      if (bytes == null || !context.mounted) return;
       if (bytes.length >= 1024 * 1024) {
-        if (context.mounted) {
-          showSnack(context, 'Foto terlalu besar. Pilih foto lain.');
-        }
+        showSnack(context, 'Foto terlalu besar. Pilih foto lain.');
         return;
       }
-      if (!context.mounted) return;
-      final type = file.mimeType ?? _mimeOf(file.name);
-      await runWithProgress(
-        context,
-        () => auth.uploadPhoto(session, bytes, contentType: type),
-      );
+      await runWithProgress(context, () => auth.uploadPhoto(session, bytes));
     case _PhotoAction.google:
       await runWithProgress(context, () => auth.useGooglePhoto(session));
     case _PhotoAction.remove:
       await runWithProgress(context, () => auth.removePhoto(session));
   }
-}
-
-String _mimeOf(String name) {
-  final lower = name.toLowerCase();
-  if (lower.endsWith('.png')) return 'image/png';
-  if (lower.endsWith('.webp')) return 'image/webp';
-  if (lower.endsWith('.gif')) return 'image/gif';
-  return 'image/jpeg';
 }

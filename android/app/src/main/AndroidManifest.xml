@@ -34,6 +34,11 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+        <!-- Crop and rotate screen for covers and profile photos (image_cropper). -->
+        <activity
+            android:name="com.yalantis.ucrop.UCropActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <!-- Analytics without advertising identifiers or ad personalisation. -->
         <meta-data
             android:name="google_analytics_adid_collection_enabled"
