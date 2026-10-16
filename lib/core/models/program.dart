@@ -27,6 +27,13 @@ abstract class Book with _$Book {
     required String author,
     required int totalPages,
     String? isbn,
+
+    /// The catalog book it was picked from (`books/{bookId}`), if any.
+    String? bookId,
+
+    /// Copied from the catalog when picked, so lists show the cover without
+    /// reading the catalog.
+    String? coverUrl,
   }) = _Book;
 
   factory Book.fromMap(Map<String, dynamic>? data) => Book(
@@ -34,6 +41,8 @@ abstract class Book with _$Book {
     author: data?['author'] as String? ?? '',
     totalPages: data?['totalPages'] as int? ?? 0,
     isbn: data?['isbn'] as String?,
+    bookId: data?['bookId'] as String?,
+    coverUrl: data?['coverUrl'] as String?,
   );
 }
 

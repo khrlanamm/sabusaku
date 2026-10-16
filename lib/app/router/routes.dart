@@ -22,6 +22,9 @@ abstract final class Routes {
       '/siswa/jurnal/$programId/$date';
   static String studentProgramJournals(String programId) =>
       '/siswa/profil/buku/$programId';
+  static const studentExplore = '/siswa/buku/jelajahi';
+  static String studentCatalogBook(String bookId) =>
+      '/siswa/buku/katalog/$bookId';
 
   // Guru (penanggung jawab)
   static const teacherDashboard = '/guru/dashboard';
@@ -31,6 +34,15 @@ abstract final class Routes {
   static const teacherAddStudents = '/guru/siswa/tambah';
   static const teacherImportStudents = '/guru/siswa/impor';
   static const teacherSettings = '/guru/sekolah/pengaturan';
+
+  // Guru: katalog buku (shared by every school)
+  static const teacherBooks = '/guru/buku';
+  static const teacherAddBook = '/guru/buku/tambah';
+  static const teacherSuggestions = '/guru/buku/saran';
+  static const teacherDeletedBooks = '/guru/buku/terhapus';
+  static String teacherBook(String bookId) => '/guru/buku/$bookId';
+  static String teacherEditBook(String bookId) => '/guru/buku/$bookId/ubah';
+  static String teacherSuggestion(String id) => '/guru/buku/saran/$id';
   static String teacherStudent(String studentId) => '/guru/siswa/$studentId';
   static String teacherPendingMember(String email) =>
       '/guru/anggota/${Uri.encodeComponent(email)}';
