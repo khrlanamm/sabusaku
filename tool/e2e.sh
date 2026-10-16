@@ -18,8 +18,8 @@ command -v adb >/dev/null 2>&1 || export PATH="$PATH:$HOME/Library/Android/sdk/p
 (cd functions && npm run build >/dev/null)
 
 # Fresh sign-in secrets for every run, shared by the seed and the tests.
-INITIAL="awal-$(openssl rand -hex 6)"
-NEW="baru-$(openssl rand -hex 6)"
+INITIAL="Awal#$(openssl rand -hex 6)9"
+NEW="Baru#$(openssl rand -hex 6)7"
 
 firebase emulators:exec --project sabusaku --only auth,firestore,functions,storage \
   "(cd functions && npx tsx tools/seed-e2e.ts --emulator --initial $INITIAL) && flutter test integration_test/app_test.dart -d $DEVICE --dart-define=USE_EMULATORS=true --dart-define=E2E_INITIAL=$INITIAL --dart-define=E2E_NEW=$NEW --reporter expanded"

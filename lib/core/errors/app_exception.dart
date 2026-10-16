@@ -42,7 +42,9 @@ const _defaultMessages = <AppErrorCode, String>{
   AppErrorCode.accountDisabled:
       'Akun dinonaktifkan. Hubungi penanggung jawab sekolah.',
   AppErrorCode.wrongPassword: 'Password saat ini salah.',
-  AppErrorCode.weakPassword: 'Password minimal 8 karakter.',
+  AppErrorCode.weakPassword:
+      'Password harus minimal 8 karakter, berisi huruf besar dan kecil, '
+      'angka, dan karakter khusus.',
   AppErrorCode.tooManyRequests:
       'Terlalu banyak percobaan. Tunggu sebentar lalu coba lagi.',
   AppErrorCode.alreadyExists: 'Data sudah ada.',

@@ -89,7 +89,7 @@ Cover buku: tanpa upload di V1; aplikasi membuat **sampul otomatis** (warna dari
 | BR-13 | **Status siswa** dari `d` = jumlah hari efektif sejak jurnal terakhir (atau sejak buku dimulai bila belum ada jurnal) sampai hari ini: **Aktif** `d ≤ 3`, **Perlu perhatian** `4–7`, **Tidak aktif** `> 7`, **Belum ada buku** bila tak ada buku aktif. Status hanya indikator, bukan nilai |
 | BR-14 | Penanggung jawab melihat semua siswa dan jurnal **di sekolahnya saja**. Data antar sekolah terisolasi. Satu email hanya bisa terdaftar di satu sekolah |
 | BR-15 | Siswa yang dikeluarkan dari sekolah kehilangan akses ke data sekolah, tetapi akun dan jurnalnya tetap ada; menambahkannya lagi mengembalikan riwayatnya. Hapus data permanen dan hapus akun adalah aksi terpisah |
-| BR-16 | Password minimal 8 karakter, dibuat pengguna sendiri. Akun email wajib terverifikasi sebelum bisa membuka data sekolah. Akun Google wajib membuat password di layar Lengkapi akun |
+| BR-16 | Password minimal 8 karakter dengan huruf besar, huruf kecil, angka, dan karakter khusus, dibuat pengguna sendiri (dipaksakan juga oleh Firebase Auth). Akun email wajib terverifikasi sebelum bisa membuka data sekolah. Akun Google wajib membuat password di layar Lengkapi akun |
 | BR-17 | Komentar guru: banyak komentar per jurnal; guru boleh mengubah/menghapus komentarnya sendiri; siswa hanya membaca. Komentar baru memicu notifikasi ke siswa |
 | BR-18 | **Kelas** dan **ekstrakurikuler** adalah label di dokumen sekolah. Satu siswa tepat satu kelas (format `X`/`XI`/`XII`, tanda hubung, huruf dan angka: `XII-A1`, `X-G2`) dan nol atau lebih ekstrakurikuler (awal: Masis-KIR, Paskibra, Pala, PMR). Siswa boleh mengganti kelas dan ekstrakurikulernya sendiri; penanggung jawab boleh menambah label |
 

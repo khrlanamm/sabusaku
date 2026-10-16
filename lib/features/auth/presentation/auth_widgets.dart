@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../app/theme/palette.dart';
 import '../../../core/utils/labels.dart';
 
 /// Email input with the hints that let Android offer and save credentials.
@@ -78,7 +79,6 @@ class _NewPasswordFieldsState extends State<NewPasswordFields> {
           obscureText: _obscure,
           decoration: InputDecoration(
             labelText: widget.label,
-            helperText: 'Minimal $minPasswordLength karakter',
             prefixIcon: const Icon(Icons.lock_outline),
             suffixIcon: toggle,
           ),
@@ -86,6 +86,8 @@ class _NewPasswordFieldsState extends State<NewPasswordFields> {
           autofillHints: const [AutofillHints.newPassword],
           validator: validateNewPassword,
         ),
+        const SizedBox(height: 8),
+        PasswordChecklist(controller: widget.password),
         const SizedBox(height: 14),
         TextFormField(
           key: const Key('password-confirm'),
@@ -103,6 +105,70 @@ class _NewPasswordFieldsState extends State<NewPasswordFields> {
               value != widget.password.text ? 'Password tidak sama' : null,
         ),
       ],
+    );
+  }
+}
+
+/// The password requirements under "Password baru", each turning green as
+/// soon as the typed password meets it.
+class PasswordChecklist extends StatelessWidget {
+  const PasswordChecklist({super.key, required this.controller});
+
+  final TextEditingController controller;
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    final palette = context.palette;
+    final style = Theme.of(context).textTheme.bodySmall;
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: controller,
+      builder: (context, value, _) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 4),
+        child: Column(
+          key: const Key('password-checklist'),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            for (final rule in passwordRules)
+              Builder(
+                builder: (context) {
+                  final met = rule.isMet(value.text);
+                  final color = met ? palette.success : scheme.onSurfaceVariant;
+                  return Semantics(
+                    label: '${rule.label}: ${met ? 'terpenuhi' : 'belum'}',
+                    excludeSemantics: true,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      child: Row(
+                        children: [
+                          Icon(
+                            met
+                                ? Icons.check_circle
+                                : Icons.radio_button_unchecked,
+                            size: 18,
+                            color: color,
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              rule.label,
+                              style: style?.copyWith(
+                                color: color,
+                                fontWeight: met
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -49,4 +49,23 @@ void main() {
     expect(isValidEmail('siswa@gmail'), isFalse);
     expect(isValidEmail('bukan email@gmail.com'), isFalse);
   });
+
+  test('a new password needs length, mixed case, a digit and a symbol', () {
+    expect(validateNewPassword('Rahasia#2026'), isNull);
+    for (final weak in [
+      '',
+      'Ra#1',
+      'rahasia#2026',
+      'RAHASIA#2026',
+      'Rahasia#lima',
+      'Rahasia2026',
+    ]) {
+      expect(validateNewPassword(weak), isNotNull, reason: weak);
+    }
+    final unmet = [
+      for (final rule in passwordRules)
+        if (!rule.isMet('rahasiaku')) rule.label,
+    ];
+    expect(unmet, hasLength(3));
+  });
 }

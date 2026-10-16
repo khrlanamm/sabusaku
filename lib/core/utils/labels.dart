@@ -69,10 +69,31 @@ bool isValidEmail(String email) =>
 
 const minPasswordLength = 8;
 
+/// One requirement of a new password. The same policy is enforced by
+/// Firebase Auth (Identity Platform password policy), so a password the form
+/// accepts is never refused by the server.
+typedef PasswordRule = ({String label, bool Function(String) isMet});
+
+final List<PasswordRule> passwordRules = [
+  (
+    label: 'Minimal $minPasswordLength karakter',
+    isMet: (value) => value.length >= minPasswordLength,
+  ),
+  (
+    label: 'Huruf besar dan huruf kecil',
+    isMet: (value) =>
+        RegExp('[A-Z]').hasMatch(value) && RegExp('[a-z]').hasMatch(value),
+  ),
+  (label: 'Angka', isMet: (value) => RegExp('[0-9]').hasMatch(value)),
+  (
+    label: r'Karakter khusus, misalnya & # $ ! @',
+    isMet: (value) => RegExp(r'[^A-Za-z0-9\s]').hasMatch(value),
+  ),
+];
+
 String? validateNewPassword(String? value) {
-  if (value == null || value.length < minPasswordLength) {
-    return 'Password minimal $minPasswordLength karakter';
-  }
-  if (value.length > 64) return 'Password maksimal 64 karakter';
-  return null;
+  final password = value ?? '';
+  if (password.length > 64) return 'Password maksimal 64 karakter';
+  final missing = passwordRules.where((rule) => !rule.isMet(password));
+  return missing.isEmpty ? null : 'Password belum memenuhi semua syarat';
 }
