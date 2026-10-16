@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/router/routes.dart';
 import '../../../app/theme/palette.dart';
+import '../../../core/models/report.dart';
 import '../../../core/widgets/book_cover.dart';
+import '../../../core/widgets/report_sheet.dart';
 import '../../../core/widgets/states.dart';
 import '../../student/data/student_repository.dart';
 import '../data/catalog_repository.dart';
@@ -21,7 +23,10 @@ class CatalogBookScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final book = ref.watch(catalogBookProvider(bookId));
     return Scaffold(
-      appBar: AppBar(title: const Text('Detail buku')),
+      appBar: AppBar(
+        title: const Text('Detail buku'),
+        actions: [if (book.value != null) BookReportMenu(bookId: bookId)],
+      ),
       body: AsyncView<CatalogBook?>(
         value: book,
         onRetry: () => ref.invalidate(catalogBookProvider(bookId)),
@@ -35,6 +40,29 @@ class CatalogBookScreen extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// App bar overflow with "Laporkan buku", shared with the teacher's book
+/// screen.
+class BookReportMenu extends ConsumerWidget {
+  const BookReportMenu({super.key, required this.bookId});
+
+  final String bookId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) =>
+      PopupMenuButton<ReportTarget>(
+        key: const Key('book-menu'),
+        tooltip: 'Lainnya',
+        onSelected: (target) => showReportSheet(context, ref, target: target),
+        itemBuilder: (_) => [
+          PopupMenuItem(
+            key: const Key('book-report'),
+            value: ReportTarget.book(bookId),
+            child: const Text('Laporkan buku'),
+          ),
+        ],
+      );
 }
 
 class _BookDetail extends ConsumerWidget {

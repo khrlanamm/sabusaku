@@ -155,7 +155,8 @@ class _Comments extends ConsumerWidget {
           ),
           AsyncData(:final value) => Column(
             children: [
-              for (final comment in value) CommentTile(comment: comment),
+              for (final comment in value)
+                CommentTile(comment: comment, programId: programId, date: date),
             ],
           ),
           AsyncError() => Text(

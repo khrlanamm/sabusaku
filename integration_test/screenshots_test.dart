@@ -6,11 +6,15 @@
 // device) and saves the images through test_driver/screenshots.dart.
 //
 // SHOT_PHASE picks what runs:
-//   siswa-start  signed-out screens, then the student starts a catalog book
-//                and writes today's journal (skipped if a book is active)
+//   siswa-start  signed-out screens, the terms of use (first sign-in only),
+//                then the student starts a catalog book and writes today's
+//                journal (skipped if a book is active)
 //   guru         the teacher comments on that journal once, then the
 //                teacher screens
 //   siswa        the student screens, including the comment
+//
+// Report sheets are opened for the pictures but never sent: no real report
+// is ever filed from here.
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -29,7 +33,8 @@ import 'package:sabusaku/core/storage/prefs.dart';
 import 'package:sabusaku/features/auth/data/auth_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'support.dart' show dismissNotificationPrompt, tapVisible, waitFor;
+import 'support.dart'
+    show dismissNotificationPrompt, tapVisible, termsAccept, waitFor;
 
 const _phase = String.fromEnvironment('SHOT_PHASE');
 const _token = String.fromEnvironment('SHOT_TOKEN');
@@ -99,10 +104,49 @@ void main() {
     );
   }
 
-  Future<void> signIn(WidgetTester tester) async {
+  /// Signs in with the custom token. An account that has not accepted the
+  /// terms of use yet sees them first: [onTerms] runs then, before "Saya
+  /// setuju" is tapped.
+  Future<void> signIn(
+    WidgetTester tester, {
+    Future<void> Function()? onTerms,
+  }) async {
     expect(_token, isNotEmpty, reason: 'Run through tool/screenshots.sh');
     await FirebaseAuth.instance.signInWithCustomToken(_token);
-    await waitFor(tester, find.byType(NavigationBar));
+    final terms = find.byKey(const Key('terms-screen'));
+    final shell = find.byType(NavigationBar);
+    final end = DateTime.now().add(const Duration(seconds: 40));
+    while (terms.evaluate().isEmpty && shell.evaluate().isEmpty) {
+      if (DateTime.now().isAfter(end)) fail('Sign-in did not finish');
+      await tester.pump(const Duration(milliseconds: 200));
+    }
+    if (terms.evaluate().isNotEmpty) {
+      await onTerms?.call();
+      await tapVisible(tester, termsAccept);
+    }
+    await waitFor(tester, shell, timeout: const Duration(seconds: 40));
+  }
+
+  /// Opens [menuKey]'s popup menu, picks [itemKey] and waits for the report
+  /// sheet. Leave it with [closeReportSheet], never by sending.
+  Future<void> openReportSheet(
+    WidgetTester tester,
+    String menuKey,
+    String itemKey,
+  ) async {
+    await tapVisible(tester, find.byKey(Key(menuKey)));
+    await waitFor(tester, find.byKey(Key(itemKey)));
+    await settle(tester, 600);
+    await tester.tap(find.byKey(Key(itemKey)));
+    await waitFor(tester, find.byKey(const Key('report-sheet')));
+    await settle(tester, 600);
+  }
+
+  Future<void> closeReportSheet(WidgetTester tester) async {
+    final sheet = find.byKey(const Key('report-sheet'));
+    Navigator.of(tester.element(sheet)).pop();
+    await settle(tester, 600);
+    expect(sheet, findsNothing);
   }
 
   String schoolId() => container.read(currentSessionProvider).schoolId;
@@ -144,7 +188,7 @@ void main() {
         await go(tester, Routes.register, find.byType(TextFormField));
         await shot(tester, 'mulai-daftar');
 
-        await signIn(tester);
+        await signIn(tester, onTerms: () => shot(tester, 'mulai-ketentuan'));
         await dismissNotificationPrompt(tester);
         final uid = container.read(currentSessionProvider).uid;
         if (await activeProgramId(uid) == null) {
@@ -287,6 +331,12 @@ void main() {
         await shot(tester, 'guru-pengaturan-sekolah', wait: 3000);
         await go(
           tester,
+          Routes.teacherReports,
+          find.byKey(const Key('reports-open')),
+        );
+        await shot(tester, 'guru-laporan', wait: 3000);
+        await go(
+          tester,
           Routes.teacherBooks,
           find.textContaining('Semua buku'),
         );
@@ -297,6 +347,13 @@ void main() {
           find.textContaining('Pembaca'),
         );
         await shot(tester, 'guru-detail-buku', wait: 4000);
+        await openReportSheet(tester, 'book-menu', 'book-report');
+        await tapVisible(
+          tester,
+          find.byKey(const Key('report-reason-wrong_data')),
+        );
+        await shot(tester, 'guru-laporkan-buku');
+        await closeReportSheet(tester);
         await go(
           tester,
           Routes.teacherAddBook,
@@ -344,6 +401,13 @@ void main() {
           find.text(_comment),
         );
         await shot(tester, 'siswa-jurnal-komentar');
+        await openReportSheet(tester, 'comment-menu', 'comment-report');
+        await tapVisible(
+          tester,
+          find.byKey(const Key('report-reason-inappropriate')),
+        );
+        await shot(tester, 'siswa-laporkan-komentar');
+        await closeReportSheet(tester);
         await go(
           tester,
           Routes.studentWriteJournal,

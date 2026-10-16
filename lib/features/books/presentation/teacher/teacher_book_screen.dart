@@ -12,6 +12,7 @@ import '../../data/book_admin_repository.dart';
 import '../../domain/book_history.dart';
 import '../../domain/book_suggestion.dart';
 import '../../domain/catalog_book.dart';
+import '../catalog_book_screen.dart' show BookReportMenu;
 import 'book_format.dart';
 import 'book_review_widgets.dart';
 
@@ -36,6 +37,7 @@ class TeacherBookScreen extends ConsumerWidget {
               onPressed: () => context.push(Routes.teacherEditBook(bookId)),
               icon: const Icon(Icons.edit_outlined),
             ),
+          if (book.value != null) BookReportMenu(bookId: bookId),
         ],
       ),
       body: AsyncView<CatalogBook?>(

@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/routes.dart';
 import '../../../../app/theme/palette.dart';
+import '../../../../core/models/report.dart';
 import '../../../../core/widgets/book_cover.dart';
 import '../../../../core/widgets/dialogs.dart';
+import '../../../../core/widgets/report_sheet.dart';
 import '../../../../core/widgets/states.dart';
 import '../../data/book_admin_repository.dart';
 import '../../data/catalog_repository.dart';
@@ -142,7 +144,25 @@ class SuggestionReviewScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final suggestion = ref.watch(suggestionProvider(id));
     return Scaffold(
-      appBar: AppBar(title: const Text('Tinjau saran')),
+      appBar: AppBar(
+        title: const Text('Tinjau saran'),
+        actions: [
+          if (suggestion.value != null)
+            PopupMenuButton<ReportTarget>(
+              key: const Key('suggestion-menu'),
+              tooltip: 'Lainnya',
+              onSelected: (target) =>
+                  showReportSheet(context, ref, target: target),
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  key: const Key('suggestion-report'),
+                  value: ReportTarget.suggestion(id),
+                  child: const Text('Laporkan saran'),
+                ),
+              ],
+            ),
+        ],
+      ),
       body: AsyncView<BookSuggestion?>(
         value: suggestion,
         onRetry: () => ref.invalidate(suggestionProvider(id)),

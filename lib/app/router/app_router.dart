@@ -10,6 +10,7 @@ import '../../features/auth/presentation/change_password_screen.dart';
 import '../../features/auth/presentation/complete_profile_screen.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
+import '../../features/auth/presentation/terms_screen.dart';
 import '../../features/auth/presentation/verify_email_screen.dart';
 import '../../features/books/presentation/book_explore_screen.dart';
 import '../../features/books/presentation/catalog_book_screen.dart';
@@ -27,6 +28,7 @@ import '../../features/student/presentation/student_profile_screen.dart';
 import '../../features/teacher/presentation/add_students_screen.dart';
 import '../../features/teacher/presentation/import_students_screen.dart';
 import '../../features/teacher/presentation/pending_member_screen.dart';
+import '../../features/teacher/presentation/reports_screen.dart';
 import '../../features/teacher/presentation/school_screen.dart';
 import '../../features/teacher/presentation/school_settings_screen.dart';
 import '../../features/teacher/presentation/teacher_dashboard_screen.dart';
@@ -95,6 +97,7 @@ GoRouter appRouter(Ref ref) {
         path: Routes.verifyEmail,
         builder: (_, _) => const VerifyEmailScreen(),
       ),
+      GoRoute(path: Routes.terms, builder: (_, _) => const TermsScreen()),
       GoRoute(
         path: Routes.completeProfile,
         builder: (_, _) => const CompleteProfileScreen(),
@@ -167,6 +170,10 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: Routes.teacherSettings,
         builder: (_, _) => const SchoolSettingsScreen(),
+      ),
+      GoRoute(
+        path: Routes.teacherReports,
+        builder: (_, _) => const ReportsScreen(),
       ),
       GoRoute(
         path: '/guru/anggota/:email',

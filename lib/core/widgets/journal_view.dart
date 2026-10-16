@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../app/theme/palette.dart';
+import '../../features/auth/data/auth_repository.dart';
 import '../models/journal.dart';
+import '../models/report.dart';
 import '../time/date_format.dart';
+import 'report_sheet.dart';
 
 /// The content of one journal, shared by the student and teacher views.
 class JournalContentView extends StatelessWidget {
@@ -225,15 +229,54 @@ class _CommentBadge extends StatelessWidget {
   }
 }
 
-/// A teacher's comment bubble. [actions] is shown to the author only.
-class CommentTile extends StatelessWidget {
-  const CommentTile({super.key, required this.comment, this.actions});
+/// A teacher's comment bubble. [actions] is shown to the author only; any
+/// other reader gets a menu to report the comment or its author when the
+/// journal ([programId], [date]) is given.
+class CommentTile extends ConsumerWidget {
+  const CommentTile({
+    super.key,
+    required this.comment,
+    this.actions,
+    this.programId,
+    this.date,
+  });
 
   final JournalComment comment;
   final Widget? actions;
+  final String? programId;
+  final String? date;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final myUid = ref.watch(currentSessionProvider.select((s) => s.uid));
+    final programId = this.programId;
+    final date = this.date;
+    final reportMenu =
+        programId == null || date == null || comment.teacherId == myUid
+        ? null
+        : PopupMenuButton<ReportTarget>(
+            key: const Key('comment-menu'),
+            tooltip: 'Laporkan',
+            onSelected: (target) =>
+                showReportSheet(context, ref, target: target),
+            itemBuilder: (_) => [
+              PopupMenuItem(
+                key: const Key('comment-report'),
+                value: ReportTarget.comment(
+                  programId: programId,
+                  date: date,
+                  commentId: comment.id,
+                ),
+                child: const Text('Laporkan komentar'),
+              ),
+              if (comment.teacherId.isNotEmpty)
+                PopupMenuItem(
+                  key: const Key('comment-report-user'),
+                  value: ReportTarget.user(comment.teacherId, teacher: true),
+                  child: const Text('Laporkan pengguna'),
+                ),
+            ],
+          );
     final theme = Theme.of(context);
     final created = comment.createdAt;
     final time = created == null
@@ -261,7 +304,7 @@ class CommentTile extends StatelessWidget {
                   ),
                 ),
               ),
-              ?actions,
+              ?(actions ?? reportMenu),
             ],
           ),
           Padding(

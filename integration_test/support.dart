@@ -73,8 +73,16 @@ Future<void> startApp(
   );
 }
 
+/// "Saya setuju" of the terms of use, shown once per account right after
+/// its first sign-in.
+final termsAccept = find.byKey(const Key('terms-accept'));
+
 /// Pumps until [finder] matches. Network-backed screens never "settle" on a
 /// fixed frame count, so tests wait on what they expect to see.
+///
+/// Accepts the terms of use when they show and [finder] is not on them, so
+/// every flow gets past the gate after a first sign-in (the seeded accounts
+/// have accepted nothing).
 Future<void> waitFor(
   WidgetTester tester,
   Finder finder, {
@@ -84,6 +92,7 @@ Future<void> waitFor(
   while (DateTime.now().isBefore(end)) {
     await tester.pump(const Duration(milliseconds: 200));
     if (finder.evaluate().isNotEmpty) return;
+    await acceptTermsIfShown(tester);
   }
   // What the screen showed instead, to make the failure readable.
   final texts = find
@@ -94,6 +103,16 @@ Future<void> waitFor(
       .toSet()
       .join(' | ');
   fail('Timed out waiting for $finder. On screen: $texts');
+}
+
+/// Taps "Saya setuju" when the terms gate is up and not already sending.
+Future<void> acceptTermsIfShown(WidgetTester tester) async {
+  if (termsAccept.evaluate().isEmpty) return;
+  if (tester.widget<FilledButton>(termsAccept).onPressed == null) return;
+  await tester.ensureVisible(termsAccept);
+  await tester.pump();
+  await tester.tap(termsAccept);
+  await tester.pump();
 }
 
 /// Pumps until [finder] no longer matches, e.g. a SnackBar covering a button.

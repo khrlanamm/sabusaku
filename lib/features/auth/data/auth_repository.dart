@@ -13,6 +13,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/firebase/firebase_providers.dart';
 import '../../../core/firebase/google_sign_in.dart';
+import '../../../core/policy/terms.dart';
 import '../../../core/storage/prefs.dart';
 import '../../../core/utils/labels.dart';
 import '../domain/app_user.dart';
@@ -464,6 +465,19 @@ class AuthRepository {
       throw mapError(error);
     }
   }
+
+  // ---------------------------------------------------------------------
+  // Terms of use
+  // ---------------------------------------------------------------------
+
+  /// Records that the user accepted the current terms of use. Only the server
+  /// writes `termsVersion`; the watched profile then carries it into the
+  /// session, which lets the router move on.
+  Future<void> acceptTerms() => _guard(
+    () => _functions.httpsCallable('acceptTerms').call<Object?>({
+      'version': currentTermsVersion,
+    }),
+  );
 
   // ---------------------------------------------------------------------
   // Profile

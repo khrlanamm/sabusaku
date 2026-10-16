@@ -43,7 +43,7 @@ const _teacher = Session(
     uid: 'g1',
     role: UserRole.guru,
     name: 'Sugito, S.T., M.Pd.',
-    email: 'githo82@gmail.com',
+    email: 'sugito@sekolah.test',
   ),
 );
 

@@ -20,7 +20,9 @@ mixin _$AppUser {
  String? get classId;/// Extracurricular labels, e.g. `Masis-KIR`. Teachers: the ones they
 /// supervise.
  List<String> get extracurriculars; String? get photoUrl;/// False once a teacher removed the student from the school.
- bool get active;
+ bool get active;/// The version of the terms of use the user accepted; 0 when none.
+/// Written by the `acceptTerms` callable only.
+ int get termsVersion;
 /// Create a copy of AppUser
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -32,20 +34,20 @@ $AppUserCopyWith<AppUser> get copyWith => _$AppUserCopyWithImpl<AppUser>(this as
 @override
 bool operator ==(Object other) {
   final _this = this as AppUser;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppUser&&(identical(other.uid, _this.uid) || other.uid == _this.uid)&&(identical(other.role, _this.role) || other.role == _this.role)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.email, _this.email) || other.email == _this.email)&&(identical(other.classId, _this.classId) || other.classId == _this.classId)&&const DeepCollectionEquality().equals(other.extracurriculars, _this.extracurriculars)&&(identical(other.photoUrl, _this.photoUrl) || other.photoUrl == _this.photoUrl)&&(identical(other.active, _this.active) || other.active == _this.active));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppUser&&(identical(other.uid, _this.uid) || other.uid == _this.uid)&&(identical(other.role, _this.role) || other.role == _this.role)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.email, _this.email) || other.email == _this.email)&&(identical(other.classId, _this.classId) || other.classId == _this.classId)&&const DeepCollectionEquality().equals(other.extracurriculars, _this.extracurriculars)&&(identical(other.photoUrl, _this.photoUrl) || other.photoUrl == _this.photoUrl)&&(identical(other.active, _this.active) || other.active == _this.active)&&(identical(other.termsVersion, _this.termsVersion) || other.termsVersion == _this.termsVersion));
 }
 
 
 @override
 int get hashCode {
   final _this = this as AppUser;
-  return Object.hash(runtimeType,_this.uid,_this.role,_this.name,_this.email,_this.classId,const DeepCollectionEquality().hash(_this.extracurriculars),_this.photoUrl,_this.active);
+  return Object.hash(runtimeType,_this.uid,_this.role,_this.name,_this.email,_this.classId,const DeepCollectionEquality().hash(_this.extracurriculars),_this.photoUrl,_this.active,_this.termsVersion);
 }
 
 @override
 String toString() {
   final _this = this as AppUser;
-  return 'AppUser(uid: ${_this.uid}, role: ${_this.role}, name: ${_this.name}, email: ${_this.email}, classId: ${_this.classId}, extracurriculars: ${_this.extracurriculars}, photoUrl: ${_this.photoUrl}, active: ${_this.active})';
+  return 'AppUser(uid: ${_this.uid}, role: ${_this.role}, name: ${_this.name}, email: ${_this.email}, classId: ${_this.classId}, extracurriculars: ${_this.extracurriculars}, photoUrl: ${_this.photoUrl}, active: ${_this.active}, termsVersion: ${_this.termsVersion})';
 }
 
 
@@ -56,7 +58,7 @@ abstract mixin class $AppUserCopyWith<$Res>  {
   factory $AppUserCopyWith(AppUser value, $Res Function(AppUser) _then) = _$AppUserCopyWithImpl;
 @useResult
 $Res call({
- String uid, UserRole role, String name, String email, String? classId, List<String> extracurriculars, String? photoUrl, bool active
+ String uid, UserRole role, String name, String email, String? classId, List<String> extracurriculars, String? photoUrl, bool active, int termsVersion
 });
 
 
@@ -73,7 +75,7 @@ class _$AppUserCopyWithImpl<$Res>
 
 /// Create a copy of AppUser
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? uid = null,Object? role = null,Object? name = null,Object? email = null,Object? classId = freezed,Object? extracurriculars = null,Object? photoUrl = freezed,Object? active = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? uid = null,Object? role = null,Object? name = null,Object? email = null,Object? classId = freezed,Object? extracurriculars = null,Object? photoUrl = freezed,Object? active = null,Object? termsVersion = null,}) {
   return _then(AppUser(
 uid: null == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
@@ -83,7 +85,8 @@ as String,classId: freezed == classId ? _self.classId : classId // ignore: cast_
 as String?,extracurriculars: null == extracurriculars ? _self.extracurriculars : extracurriculars // ignore: cast_nullable_to_non_nullable
 as List<String>,photoUrl: freezed == photoUrl ? _self.photoUrl : photoUrl // ignore: cast_nullable_to_non_nullable
 as String?,active: null == active ? _self.active : active // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,termsVersion: null == termsVersion ? _self.termsVersion : termsVersion // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
@@ -168,10 +171,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uid,  UserRole role,  String name,  String email,  String? classId,  List<String> extracurriculars,  String? photoUrl,  bool active)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uid,  UserRole role,  String name,  String email,  String? classId,  List<String> extracurriculars,  String? photoUrl,  bool active,  int termsVersion)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AppUser() when $default != null:
-return $default(_that.uid,_that.role,_that.name,_that.email,_that.classId,_that.extracurriculars,_that.photoUrl,_that.active);case _:
+return $default(_that.uid,_that.role,_that.name,_that.email,_that.classId,_that.extracurriculars,_that.photoUrl,_that.active,_that.termsVersion);case _:
   return orElse();
 
 }
@@ -189,10 +192,10 @@ return $default(_that.uid,_that.role,_that.name,_that.email,_that.classId,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uid,  UserRole role,  String name,  String email,  String? classId,  List<String> extracurriculars,  String? photoUrl,  bool active)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uid,  UserRole role,  String name,  String email,  String? classId,  List<String> extracurriculars,  String? photoUrl,  bool active,  int termsVersion)  $default,) {final _that = this;
 switch (_that) {
 case _AppUser():
-return $default(_that.uid,_that.role,_that.name,_that.email,_that.classId,_that.extracurriculars,_that.photoUrl,_that.active);case _:
+return $default(_that.uid,_that.role,_that.name,_that.email,_that.classId,_that.extracurriculars,_that.photoUrl,_that.active,_that.termsVersion);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -209,10 +212,10 @@ return $default(_that.uid,_that.role,_that.name,_that.email,_that.classId,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uid,  UserRole role,  String name,  String email,  String? classId,  List<String> extracurriculars,  String? photoUrl,  bool active)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uid,  UserRole role,  String name,  String email,  String? classId,  List<String> extracurriculars,  String? photoUrl,  bool active,  int termsVersion)?  $default,) {final _that = this;
 switch (_that) {
 case _AppUser() when $default != null:
-return $default(_that.uid,_that.role,_that.name,_that.email,_that.classId,_that.extracurriculars,_that.photoUrl,_that.active);case _:
+return $default(_that.uid,_that.role,_that.name,_that.email,_that.classId,_that.extracurriculars,_that.photoUrl,_that.active,_that.termsVersion);case _:
   return null;
 
 }
@@ -224,7 +227,7 @@ return $default(_that.uid,_that.role,_that.name,_that.email,_that.classId,_that.
 
 
 class _AppUser extends AppUser {
-  const _AppUser({required this.uid, required this.role, this.name = '', this.email = '', this.classId,  List<String> extracurriculars = const <String>[], this.photoUrl, this.active = true}): _extracurriculars = extracurriculars,super._();
+  const _AppUser({required this.uid, required this.role, this.name = '', this.email = '', this.classId,  List<String> extracurriculars = const <String>[], this.photoUrl, this.active = true, this.termsVersion = 0}): _extracurriculars = extracurriculars,super._();
   
 
 @override final  String uid;
@@ -248,6 +251,9 @@ class _AppUser extends AppUser {
 @override final  String? photoUrl;
 /// False once a teacher removed the student from the school.
 @override@JsonKey() final  bool active;
+/// The version of the terms of use the user accepted; 0 when none.
+/// Written by the `acceptTerms` callable only.
+@override@JsonKey() final  int termsVersion;
 
 /// Create a copy of AppUser
 /// with the given fields replaced by the non-null parameter values.
@@ -259,18 +265,18 @@ _$AppUserCopyWith<_AppUser> get copyWith => __$AppUserCopyWithImpl<_AppUser>(thi
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppUser&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.role, role) || other.role == role)&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email)&&(identical(other.classId, classId) || other.classId == classId)&&const DeepCollectionEquality().equals(other.extracurriculars, _extracurriculars)&&(identical(other.photoUrl, photoUrl) || other.photoUrl == photoUrl)&&(identical(other.active, active) || other.active == active));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppUser&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.role, role) || other.role == role)&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email)&&(identical(other.classId, classId) || other.classId == classId)&&const DeepCollectionEquality().equals(other.extracurriculars, _extracurriculars)&&(identical(other.photoUrl, photoUrl) || other.photoUrl == photoUrl)&&(identical(other.active, active) || other.active == active)&&(identical(other.termsVersion, termsVersion) || other.termsVersion == termsVersion));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,uid,role,name,email,classId,const DeepCollectionEquality().hash(_extracurriculars),photoUrl,active);
+    return Object.hash(runtimeType,uid,role,name,email,classId,const DeepCollectionEquality().hash(_extracurriculars),photoUrl,active,termsVersion);
 }
 
 @override
 String toString() {
-    return 'AppUser(uid: $uid, role: $role, name: $name, email: $email, classId: $classId, extracurriculars: $extracurriculars, photoUrl: $photoUrl, active: $active)';
+    return 'AppUser(uid: $uid, role: $role, name: $name, email: $email, classId: $classId, extracurriculars: $extracurriculars, photoUrl: $photoUrl, active: $active, termsVersion: $termsVersion)';
 }
 
 
@@ -281,7 +287,7 @@ abstract mixin class _$AppUserCopyWith<$Res> implements $AppUserCopyWith<$Res> {
   factory _$AppUserCopyWith(_AppUser value, $Res Function(_AppUser) _then) = __$AppUserCopyWithImpl;
 @override @useResult
 $Res call({
- String uid, UserRole role, String name, String email, String? classId, List<String> extracurriculars, String? photoUrl, bool active
+ String uid, UserRole role, String name, String email, String? classId, List<String> extracurriculars, String? photoUrl, bool active, int termsVersion
 });
 
 
@@ -298,7 +304,7 @@ class __$AppUserCopyWithImpl<$Res>
 
 /// Create a copy of AppUser
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? uid = null,Object? role = null,Object? name = null,Object? email = null,Object? classId = freezed,Object? extracurriculars = null,Object? photoUrl = freezed,Object? active = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? uid = null,Object? role = null,Object? name = null,Object? email = null,Object? classId = freezed,Object? extracurriculars = null,Object? photoUrl = freezed,Object? active = null,Object? termsVersion = null,}) {
   return _then(_AppUser(
 uid: null == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
@@ -308,7 +314,8 @@ as String,classId: freezed == classId ? _self.classId : classId // ignore: cast_
 as String?,extracurriculars: null == extracurriculars ? _self._extracurriculars : extracurriculars // ignore: cast_nullable_to_non_nullable
 as List<String>,photoUrl: freezed == photoUrl ? _self.photoUrl : photoUrl // ignore: cast_nullable_to_non_nullable
 as String?,active: null == active ? _self.active : active // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,termsVersion: null == termsVersion ? _self.termsVersion : termsVersion // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

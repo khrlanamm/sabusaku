@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sabusaku/app/router/routes.dart';
+import 'package:sabusaku/core/policy/terms.dart';
 import 'package:sabusaku/features/auth/domain/app_user.dart';
 import 'package:sabusaku/features/auth/domain/session.dart';
 
@@ -8,6 +9,7 @@ AuthSignedIn signedIn(
   String name = 'Nama Lengkap',
   String? classId = 'XII-A1',
   bool hasPassword = true,
+  int termsVersion = currentTermsVersion,
 }) => AuthSignedIn(
   Session(
     uid: 'u1',
@@ -20,6 +22,7 @@ AuthSignedIn signedIn(
       name: name,
       email: 'nama@example.com',
       classId: role == UserRole.siswa ? classId : null,
+      termsVersion: termsVersion,
     ),
   ),
 );
@@ -57,6 +60,45 @@ void main() {
       expect(redirectFor(auth, Routes.verifyEmail), isNull);
       expect(redirectFor(auth, Routes.login), Routes.verifyEmail);
       expect(redirectFor(auth, Routes.studentHome), Routes.verifyEmail);
+    });
+
+    test('the terms of use come before anything else', () {
+      for (final auth in [
+        signedIn(UserRole.siswa, termsVersion: 0),
+        signedIn(UserRole.guru, termsVersion: 0),
+        // Before "Lengkapi akun": name and photo are seen by others.
+        signedIn(UserRole.siswa, termsVersion: 0, name: '', classId: null),
+        signedIn(UserRole.guru, termsVersion: 0, hasPassword: false),
+        // Older terms than the app's are asked again.
+        signedIn(UserRole.siswa, termsVersion: currentTermsVersion - 1),
+      ]) {
+        expect(redirectFor(auth, Routes.terms), isNull);
+        expect(redirectFor(auth, Routes.login), Routes.terms);
+        expect(redirectFor(auth, Routes.splash), Routes.terms);
+        expect(redirectFor(auth, Routes.completeProfile), Routes.terms);
+        expect(redirectFor(auth, Routes.changePassword), Routes.terms);
+        expect(redirectFor(auth, Routes.studentHome), Routes.terms);
+        expect(redirectFor(auth, Routes.teacherReports), Routes.terms);
+      }
+    });
+
+    test('accepted terms move on to completion, then to the shell', () {
+      expect(
+        redirectFor(signedIn(UserRole.siswa, name: ''), Routes.terms),
+        Routes.completeProfile,
+      );
+      expect(
+        redirectFor(signedIn(UserRole.siswa), Routes.terms),
+        Routes.studentHome,
+      );
+      expect(
+        redirectFor(signedIn(UserRole.guru), Routes.terms),
+        Routes.teacherDashboard,
+      );
+    });
+
+    test('a signed-out user never sees the terms gate', () {
+      expect(redirectFor(const AuthSignedOut(), Routes.terms), Routes.login);
     });
 
     test('an incomplete profile is completed before anything else', () {
@@ -119,6 +161,10 @@ void main() {
       );
       expect(
         redirectFor(signedIn(UserRole.guru), Routes.teacherAddStudents),
+        isNull,
+      );
+      expect(
+        redirectFor(signedIn(UserRole.guru), Routes.teacherReports),
         isNull,
       );
       expect(

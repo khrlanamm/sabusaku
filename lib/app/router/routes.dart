@@ -8,6 +8,7 @@ abstract final class Routes {
   static const login = '/login';
   static const register = '/daftar';
   static const verifyEmail = '/verifikasi-email';
+  static const terms = '/ketentuan';
   static const completeProfile = '/lengkapi-akun';
   static const changePassword = '/ubah-password';
 
@@ -34,6 +35,7 @@ abstract final class Routes {
   static const teacherAddStudents = '/guru/siswa/tambah';
   static const teacherImportStudents = '/guru/siswa/impor';
   static const teacherSettings = '/guru/sekolah/pengaturan';
+  static const teacherReports = '/guru/sekolah/laporan';
 
   // Guru: katalog buku (shared by every school)
   static const teacherBooks = '/guru/buku';
@@ -67,8 +69,8 @@ abstract final class Routes {
 
 /// Where the user must go instead of [location], or null to stay.
 ///
-/// One gate for sign-in state, email verification, profile completion and
-/// role separation (docs/05 §3).
+/// One gate for sign-in state, email verification, the terms of use, profile
+/// completion and role separation (docs/05 §3).
 String? redirectFor(AuthState auth, String location) {
   switch (auth) {
     case AuthLoading():
@@ -80,6 +82,9 @@ String? redirectFor(AuthState auth, String location) {
     case AuthNeedsVerification():
       return location == Routes.verifyEmail ? null : Routes.verifyEmail;
     case AuthSignedIn(:final session):
+      if (session.needsTerms) {
+        return location == Routes.terms ? null : Routes.terms;
+      }
       if (session.needsCompletion) {
         return location == Routes.completeProfile
             ? null

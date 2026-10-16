@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../core/policy/terms.dart';
 import 'app_user.dart';
 
 part 'session.freezed.dart';
@@ -27,7 +28,11 @@ abstract class Session with _$Session {
     String? googlePhotoUrl,
   }) = _Session;
 
-  /// Sent to "Lengkapi akun" before anything else.
+  /// Sent to the terms of use before anything else, even "Lengkapi akun":
+  /// the name and photo asked there are visible to others.
+  bool get needsTerms => profile.termsVersion < currentTermsVersion;
+
+  /// Sent to "Lengkapi akun" once the terms are accepted.
   bool get needsCompletion => !profile.profileComplete || !hasPassword;
 }
 

@@ -11,11 +11,44 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 
 import 'package:sabusaku/core/widgets/journal_view.dart';
+import 'package:sabusaku/core/widgets/report_sheet.dart';
+import 'package:sabusaku/features/teacher/presentation/reports_screen.dart';
 
 import 'support.dart';
 
 const _wrongCredentials = 'Email atau password salah.';
 const _wrongInput = 'bukan-yang-benar';
+const _bookReportNote = 'Jumlah halamannya tidak sesuai bukunya.';
+const _resolution = 'Jumlah halaman sudah diperbaiki.';
+
+/// Opens [menuKey]'s popup menu and picks [itemKey].
+Future<void> _pickMenu(
+  WidgetTester tester,
+  String menuKey,
+  String itemKey,
+) async {
+  await tapVisible(tester, find.byKey(Key(menuKey)));
+  await waitFor(tester, find.byKey(Key(itemKey)));
+  // The menu grows in; tap once it stands still.
+  await tester.pump(const Duration(milliseconds: 500));
+  await tester.tap(find.byKey(Key(itemKey)));
+  await waitFor(tester, find.byKey(const Key('report-sheet')));
+  await tester.pump(const Duration(milliseconds: 500));
+}
+
+/// Picks [reason] in the open report sheet, adds [note] and sends it.
+Future<void> _sendReport(
+  WidgetTester tester,
+  String reason, {
+  String? note,
+}) async {
+  await tapVisible(tester, find.byKey(Key('report-reason-$reason')));
+  if (note != null) {
+    await tester.enterText(find.byKey(const Key('report-note')), note);
+  }
+  await tapVisible(tester, find.byKey(const Key('report-submit')));
+  await waitForGone(tester, find.byKey(const Key('report-sheet')));
+}
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();
@@ -55,6 +88,11 @@ void main() {
       email: e2eNewStudentEmail,
       password: e2eInitialPassword,
     );
+
+    // The first sign-in asks for the terms of use, even before the name.
+    await waitFor(tester, find.byKey(const Key('terms-screen')));
+    expect(find.byKey(const Key('complete-submit')), findsNothing);
+    await tapVisible(tester, termsAccept);
 
     await waitFor(tester, find.byKey(const Key('complete-submit')));
     // The account has a password: only name and class are asked.
@@ -306,5 +344,113 @@ void main() {
     await tester.tap(find.byType(BackButton));
     await waitFor(tester, find.text('Jurnal hari ini sudah diisi'));
     await waitForGone(tester, find.byKey(const Key('home-new-comments')));
+  });
+
+  testWidgets('siswa reports the teacher comment', (tester) async {
+    await startApp(tester);
+    await signIn(tester, email: e2eStudentEmail, password: e2eInitialPassword);
+    await waitFor(tester, find.text('Jurnal hari ini sudah diisi'));
+    await dismissNotificationPrompt(tester);
+
+    await tester.tap(navTab('Jurnal'));
+    await waitFor(tester, find.textContaining('Hal. 1–40'));
+    await tester.tap(find.textContaining('Hal. 1–40'));
+    await waitFor(
+      tester,
+      find.descendant(
+        of: find.byType(CommentTile),
+        matching: find.text(e2eCommentText),
+      ),
+    );
+
+    await _pickMenu(tester, 'comment-menu', 'comment-report');
+    expect(find.text('Laporkan komentar'), findsOneWidget);
+    await _sendReport(tester, 'inappropriate');
+    // About a teacher: only the developer reads it.
+    await waitFor(tester, find.text(reportSentToDeveloperMessage));
+  });
+
+  testWidgets('siswa reports a catalog book', (tester) async {
+    await startApp(tester);
+    await signIn(tester, email: e2eRegisterEmail, password: e2eNewPassword);
+    await waitFor(tester, find.byKey(const Key('home-start-book')));
+    await dismissNotificationPrompt(tester);
+
+    await tester.tap(find.byKey(const Key('home-start-book')));
+    await waitFor(tester, find.byKey(const Key('book-explore')));
+    await tapVisible(tester, find.byKey(const Key('book-explore')));
+    await waitFor(tester, find.byKey(const Key('explore-book-0')));
+    await tester.tap(find.byKey(const Key('explore-book-0')));
+    // The menu shows once the book has loaded.
+    await waitFor(tester, find.byKey(const Key('book-menu')));
+
+    await _pickMenu(tester, 'book-menu', 'book-report');
+    expect(find.text('Laporkan buku'), findsOneWidget);
+    await _sendReport(tester, 'wrong_data', note: _bookReportNote);
+    await waitFor(tester, find.text(reportSentMessage));
+  });
+
+  testWidgets('guru reports a journal and resolves the book report', (
+    tester,
+  ) async {
+    await startApp(tester);
+    await signIn(tester, email: e2eTeacherEmail, password: e2eInitialPassword);
+    await waitFor(tester, find.text('Status siswa'));
+
+    // The student's journal, from the student list.
+    await tester.tap(navTab('Siswa'));
+    await waitFor(tester, find.text(e2eStudentName));
+    await tester.tap(find.text(e2eStudentName));
+    await waitFor(tester, find.byKey(const Key('student-active-book')));
+    await tester.tap(find.byKey(const Key('student-active-book')));
+    await waitFor(tester, find.textContaining('Hal. 1–40'));
+    await tester.tap(find.textContaining('Hal. 1–40'));
+    await waitFor(tester, find.text(e2eJournalText));
+    await _pickMenu(tester, 'journal-menu', 'journal-report');
+    await _sendReport(tester, 'other');
+    await waitFor(tester, find.text(reportSentMessage));
+    while (find.byType(BackButton).evaluate().isNotEmpty) {
+      await tester.tap(find.byType(BackButton).first);
+      await tester.pump(const Duration(milliseconds: 500));
+    }
+
+    // Sekolah → Laporan: the journal and the book report, not the report
+    // about the teacher's comment.
+    await tester.tap(navTab('Sekolah'));
+    await waitFor(tester, find.text('2 laporan perlu ditinjau'));
+    await tapVisible(tester, find.byKey(const Key('school-reports')));
+    await waitFor(tester, find.byKey(const Key('report-card-1')));
+    expect(find.byKey(const Key('report-card-2')), findsNothing);
+    expect(find.text(e2eCommentText), findsNothing);
+    expect(find.text('Data buku salah'), findsOneWidget);
+    expect(find.textContaining(_bookReportNote), findsOneWidget);
+    expect(find.textContaining(e2eRegisterName), findsOneWidget);
+    expect(find.textContaining(e2eJournalText), findsOneWidget);
+
+    final bookCard = find.ancestor(
+      of: find.text('Data buku salah'),
+      matching: find.byType(ReportCard),
+    );
+    await tapVisible(
+      tester,
+      find.descendant(of: bookCard, matching: find.text('Tandai selesai')),
+    );
+    await waitFor(tester, find.byKey(const Key('report-resolution')));
+    await tester.enterText(
+      find.byKey(const Key('report-resolution')),
+      _resolution,
+    );
+    await tester.tap(find.byKey(const Key('report-resolve-confirm')));
+    await waitFor(tester, find.text('Laporan ditandai selesai.'));
+    await waitForGone(tester, find.byKey(const Key('report-card-1')));
+    expect(find.text('Data buku salah'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('reports-resolved')));
+    await waitFor(tester, find.text(_resolution));
+    expect(find.text('Data buku salah'), findsOneWidget);
+    expect(find.textContaining('Selesai oleh $e2eTeacherName'), findsOneWidget);
+
+    await tester.tap(find.byType(BackButton));
+    await waitFor(tester, find.text('1 laporan perlu ditinjau'));
   });
 }

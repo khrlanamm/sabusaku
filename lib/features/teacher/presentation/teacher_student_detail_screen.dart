@@ -6,12 +6,14 @@ import '../../../app/router/routes.dart';
 import '../../../app/theme/palette.dart';
 import '../../../core/data/reading_repository.dart';
 import '../../../core/models/program.dart';
+import '../../../core/models/report.dart';
 import '../../../core/models/student_stats.dart';
 import '../../../core/time/date_format.dart';
 import '../../../core/widgets/app_progress_bar.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/dialogs.dart';
 import '../../../core/widgets/journal_list.dart';
+import '../../../core/widgets/report_sheet.dart';
 import '../../../core/widgets/stat_card.dart';
 import '../../../core/widgets/states.dart';
 import '../../../core/widgets/status_chip.dart';
@@ -32,7 +34,25 @@ class TeacherStudentDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final stats = ref.watch(studentStatsProvider(studentId));
     return Scaffold(
-      appBar: AppBar(title: const Text('Detail siswa')),
+      appBar: AppBar(
+        title: const Text('Detail siswa'),
+        actions: [
+          if (stats.value != null)
+            PopupMenuButton<ReportTarget>(
+              key: const Key('student-menu'),
+              tooltip: 'Lainnya',
+              onSelected: (target) =>
+                  showReportSheet(context, ref, target: target),
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  key: const Key('student-report'),
+                  value: ReportTarget.user(studentId),
+                  child: const Text('Laporkan pengguna'),
+                ),
+              ],
+            ),
+        ],
+      ),
       body: AsyncView<StudentStats?>(
         value: stats,
         onRetry: () => ref.invalidate(studentStatsProvider(studentId)),

@@ -21,9 +21,11 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:sabusaku/app/theme/theme.dart';
 import 'package:sabusaku/core/data/reading_repository.dart';
+import 'package:sabusaku/core/data/report_repository.dart';
 import 'package:sabusaku/core/models/journal.dart';
 import 'package:sabusaku/core/models/member.dart';
 import 'package:sabusaku/core/models/program.dart';
+import 'package:sabusaku/core/models/report.dart';
 import 'package:sabusaku/core/models/school.dart';
 import 'package:sabusaku/core/models/student_stats.dart';
 import 'package:sabusaku/core/models/student_status.dart';
@@ -36,6 +38,7 @@ import 'package:sabusaku/features/auth/domain/session.dart';
 import 'package:sabusaku/features/auth/presentation/complete_profile_screen.dart';
 import 'package:sabusaku/features/auth/presentation/login_screen.dart';
 import 'package:sabusaku/features/auth/presentation/register_screen.dart';
+import 'package:sabusaku/features/auth/presentation/terms_screen.dart';
 import 'package:sabusaku/features/notifications/notification_service.dart';
 import 'package:sabusaku/features/student/data/student_repository.dart';
 import 'package:sabusaku/features/student/presentation/book_screen.dart';
@@ -46,6 +49,7 @@ import 'package:sabusaku/features/student/presentation/student_home_screen.dart'
 import 'package:sabusaku/features/student/presentation/student_profile_screen.dart';
 import 'package:sabusaku/features/teacher/data/teacher_repository.dart';
 import 'package:sabusaku/features/teacher/presentation/add_students_screen.dart';
+import 'package:sabusaku/features/teacher/presentation/reports_screen.dart';
 import 'package:sabusaku/features/teacher/presentation/school_screen.dart';
 import 'package:sabusaku/features/teacher/presentation/teacher_dashboard_screen.dart';
 import 'package:sabusaku/features/teacher/presentation/teacher_journal_detail_screen.dart';
@@ -57,6 +61,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 class _MockAuthRepository extends Mock implements AuthRepository {}
 
 class _MockNotifications extends Mock implements NotificationService {}
+
+class _MockReportRepository extends Mock implements ReportRepository {}
 
 const _today = '2026-10-16';
 // 10:00 WIB on the 16th.
@@ -72,8 +78,8 @@ const _school = School(
 const _studentProfile = AppUser(
   uid: 's1',
   role: UserRole.siswa,
-  name: 'Alfin Kurniawan',
-  email: 'alfinkurniawan@gmail.com',
+  name: 'Bima Saputra',
+  email: 'bima.saputra@gmail.com',
   classId: 'XII-A1',
   extracurriculars: ['Masis-KIR'],
 );
@@ -94,7 +100,7 @@ const _teacher = Session(
     uid: 'g1',
     role: UserRole.guru,
     name: 'Sugito, S.T., M.Pd.',
-    email: 'githo82@gmail.com',
+    email: 'sugito@sekolah.test',
     extracurriculars: ['Masis-KIR'],
   ),
 );
@@ -141,8 +147,8 @@ const _summary = ActiveProgramSummary(
 
 const _myStats = StudentStats(
   studentId: 's1',
-  name: 'Alfin Kurniawan',
-  email: 'alfinkurniawan@gmail.com',
+  name: 'Bima Saputra',
+  email: 'bima.saputra@gmail.com',
   classId: 'XII-A1',
   extracurriculars: ['Masis-KIR'],
   status: StudentStatus.aktif,
@@ -160,8 +166,8 @@ const _students = [
   _myStats,
   StudentStats(
     studentId: 's2',
-    name: 'Nasywa Anindita Herditya',
-    email: 'indyanindita@gmail.com',
+    name: 'Nadia Putri Lestari',
+    email: 'nadia.putri@gmail.com',
     classId: 'XII-A2',
     extracurriculars: ['Masis-KIR', 'PMR'],
     status: StudentStatus.perluPerhatian,
@@ -179,8 +185,8 @@ const _students = [
   ),
   StudentStats(
     studentId: 's3',
-    name: 'Muhammad Ikhsan Adinata',
-    email: 'nadit@gmail.com',
+    name: 'Fajar Ramadhan',
+    email: 'nadia.lestari@gmail.com',
     classId: 'X-D',
     extracurriculars: ['Masis-KIR'],
     status: StudentStatus.tidakAktif,
@@ -188,8 +194,8 @@ const _students = [
   ),
   StudentStats(
     studentId: 's4',
-    name: 'Zafira Nurrizkiyah',
-    email: 'zafira@gmail.com',
+    name: 'Salsabila Azzahra',
+    email: 'salsabila@gmail.com',
     classId: 'X-G',
     status: StudentStatus.belumMulai,
   ),
@@ -197,10 +203,10 @@ const _students = [
 
 const _pending = [
   Member(
-    email: 'alankhuromi@gmail.com',
+    email: 'rizky.maulana@gmail.com',
     schoolId: 'sman1sukodadi',
     role: UserRole.siswa,
-    name: 'Alan Khuromi',
+    name: 'Rizky Maulana',
     classId: 'XII-A1',
     extracurriculars: ['Masis-KIR'],
   ),
@@ -244,6 +250,59 @@ final _comments = [
   ),
 ];
 
+// Relative to now, so the cards always read "2 jam lalu", "5 jam lalu".
+final _reportsNow = DateTime.now();
+
+final _reports = [
+  Report(
+    id: 'r1',
+    kind: ReportKind.journal,
+    reason: ReportReason.harassment,
+    target: const ReportTarget.journal(programId: 'p2', date: '2026-10-11'),
+    note: 'Ada kalimat yang mengejek teman sekelas.',
+    reporterName: 'Khoirul Anam, S.Kom.',
+    reporterRole: UserRole.guru,
+    subjectId: 's2',
+    snapshot: const {
+      'studentName': 'Nadia Putri Lestari',
+      'date': '2026-10-11',
+      'keyInformation':
+          'Alif dan teman-temannya di Pondok Madani berjanji menjadi orang '
+          'besar.',
+    },
+    createdAt: _reportsNow.subtract(const Duration(hours: 2)),
+  ),
+  Report(
+    id: 'r2',
+    kind: ReportKind.book,
+    reason: ReportReason.wrongData,
+    target: const ReportTarget.book('b1'),
+    note: 'Jumlah halamannya 529, bukan 534.',
+    reporterName: 'Bima Saputra',
+    reporterRole: UserRole.siswa,
+    snapshot: const {
+      'title': 'Laskar Pelangi',
+      'authors': ['Andrea Hirata'],
+    },
+    createdAt: _reportsNow.subtract(const Duration(hours: 5)),
+  ),
+  Report(
+    id: 'r3',
+    kind: ReportKind.user,
+    reason: ReportReason.inappropriate,
+    target: const ReportTarget.user('s3'),
+    resolved: true,
+    reporterName: 'Sugito, S.T., M.Pd.',
+    reporterRole: UserRole.guru,
+    subjectId: 's3',
+    snapshot: const {'name': 'Fajar Ramadhan', 'role': 'siswa'},
+    createdAt: _reportsNow.subtract(const Duration(days: 3)),
+    resolvedAt: _reportsNow.subtract(const Duration(days: 2)),
+    resolvedByName: 'Sugito, S.T., M.Pd.',
+    resolution: 'Foto profil sudah diganti.',
+  ),
+];
+
 /// Every family instance the screens below read, with fixed data.
 List<Override> _data() => [
   wibClockProvider.overrideWithValue(_clock),
@@ -277,17 +336,25 @@ List<Override> _data() => [
         uid: 'g2',
         role: UserRole.guru,
         name: 'Khoirul Anam, S.Kom.',
-        email: 'anam160404@gmail.com',
+        email: 'khoirul@sekolah.test',
       ),
     ]),
   ),
   studentStatsProvider('s1').overrideWith((_) => Stream.value(_myStats)),
+  schoolReportsProvider.overrideWith((_) => Stream.value(_reports)),
   studentProgramsProvider('s1')
       .overrideWith((_) => Stream.value(const [_program, _finished])),
 ];
 
 class _Case {
-  const _Case(this.name, this.screen, {this.session, this.state, this.nav});
+  const _Case(
+    this.name,
+    this.screen, {
+    this.session,
+    this.state,
+    this.nav,
+    this.open,
+  });
 
   final String name;
   final Widget screen;
@@ -296,6 +363,19 @@ class _Case {
 
   /// Bottom navigation labels, to show the shell around a tab.
   final List<String>? nav;
+
+  /// Taps through to what the golden shows, e.g. an open sheet.
+  final Future<void> Function(WidgetTester tester)? open;
+}
+
+/// The report sheet on the teacher's comment, as a student opens it.
+Future<void> _openCommentReport(WidgetTester tester) async {
+  await tester.tap(find.byKey(const Key('comment-menu')));
+  await tester.pumpAndSettle();
+  await tester.tap(find.byKey(const Key('comment-report')));
+  await tester.pumpAndSettle();
+  await tester.tap(find.byKey(const Key('report-reason-harassment')));
+  await tester.pumpAndSettle();
 }
 
 const _studentTabs = ['Beranda', 'Buku', 'Jurnal', 'Profil'];
@@ -314,6 +394,13 @@ const _teacherTabs = ['Dashboard', 'Siswa', 'Buku', 'Sekolah', 'Profil'];
 
 final _cases = [
   const _Case('login', LoginScreen(), state: AuthSignedOut()),
+  _Case(
+    'terms',
+    const TermsScreen(),
+    session: _student.copyWith(
+      profile: _studentProfile.copyWith(termsVersion: 0),
+    ),
+  ),
   const _Case('register', RegisterScreen(), state: AuthSignedOut()),
   _Case(
     'complete_profile',
@@ -337,6 +424,12 @@ final _cases = [
     StudentJournalDetailScreen(programId: 'p1', date: '2026-10-15'),
     session: _student,
   ),
+  const _Case(
+    'report_sheet',
+    StudentJournalDetailScreen(programId: 'p1', date: '2026-10-15'),
+    session: _student,
+    open: _openCommentReport,
+  ),
   const _Case('student_profile', StudentProfileScreen(), session: _student),
   const _Case(
     'teacher_dashboard',
@@ -356,6 +449,7 @@ final _cases = [
     session: _teacher,
   ),
   const _Case('school', SchoolScreen(), session: _teacher),
+  const _Case('reports', ReportsScreen(), session: _teacher),
   const _Case('add_students', AddStudentsScreen(), session: _teacher),
   const _Case('teacher_profile', TeacherProfileScreen(), session: _teacher),
 ];
@@ -451,6 +545,7 @@ Future<void> _pumpCase(
         sharedPreferencesProvider.overrideWithValue(prefs),
         authRepositoryProvider.overrideWithValue(auth),
         notificationServiceProvider.overrideWithValue(notifications),
+        reportRepositoryProvider.overrideWithValue(_MockReportRepository()),
         authStateProvider.overrideWithValue(
           AsyncData(
             item.state ??
@@ -477,4 +572,5 @@ Future<void> _pumpCase(
   );
   await tester.pump(const Duration(milliseconds: 300));
   await tester.pump(const Duration(milliseconds: 300));
+  await item.open?.call(tester);
 }

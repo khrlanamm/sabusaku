@@ -3,8 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/data/reading_repository.dart';
 import '../../../core/models/journal.dart';
+import '../../../core/models/report.dart';
 import '../../../core/widgets/dialogs.dart';
 import '../../../core/widgets/journal_view.dart';
+import '../../../core/widgets/report_sheet.dart';
 import '../../../core/widgets/states.dart';
 import '../../auth/data/auth_repository.dart';
 import '../data/teacher_repository.dart';
@@ -99,7 +101,28 @@ class _TeacherJournalDetailScreenState
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Jurnal siswa')),
+      appBar: AppBar(
+        title: const Text('Jurnal siswa'),
+        actions: [
+          if (journal.value != null)
+            PopupMenuButton<ReportTarget>(
+              key: const Key('journal-menu'),
+              tooltip: 'Lainnya',
+              onSelected: (target) =>
+                  showReportSheet(context, ref, target: target),
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  key: const Key('journal-report'),
+                  value: ReportTarget.journal(
+                    programId: _programId,
+                    date: _date,
+                  ),
+                  child: const Text('Laporkan jurnal'),
+                ),
+              ],
+            ),
+        ],
+      ),
       body: AsyncView<Journal?>(
         value: journal,
         onRetry: () => ref.invalidate(journalProvider(_programId, _date)),
@@ -146,6 +169,8 @@ class _TeacherJournalDetailScreenState
                           for (final comment in value)
                             CommentTile(
                               comment: comment,
+                              programId: _programId,
+                              date: _date,
                               actions: comment.teacherId == myUid
                                   ? PopupMenuButton<String>(
                                       tooltip: 'Kelola komentar',

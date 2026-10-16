@@ -43,6 +43,10 @@ abstract class AppUser with _$AppUser {
 
     /// False once a teacher removed the student from the school.
     @Default(true) bool active,
+
+    /// The version of the terms of use the user accepted; 0 when none.
+    /// Written by the `acceptTerms` callable only.
+    @Default(0) int termsVersion,
   }) = _AppUser;
 
   factory AppUser.fromMap(String uid, Map<String, dynamic> data) => AppUser(
@@ -56,6 +60,7 @@ abstract class AppUser with _$AppUser {
     ),
     photoUrl: data['photoUrl'] as String?,
     active: data['status'] != 'removed',
+    termsVersion: (data['termsVersion'] as num?)?.toInt() ?? 0,
   );
 
   /// Name and, for a student, class are required before using the app.

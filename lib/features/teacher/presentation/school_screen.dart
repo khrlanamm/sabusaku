@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/router/routes.dart';
+import '../../../app/theme/palette.dart';
+import '../../../core/data/report_repository.dart';
 import '../../../core/models/school.dart';
 import '../../../core/utils/labels.dart';
 import '../../../core/widgets/dialogs.dart';
@@ -15,8 +17,8 @@ import '../data/teacher_repository.dart';
 /// Where penanggung jawab are added or changed (by the developer).
 const developerEmail = 'benevology@gmail.com';
 
-/// The school: class and extracurricular labels, the penanggung jawab, and
-/// the way to the status settings.
+/// The school: reports to review, class and extracurricular labels, the
+/// penanggung jawab, and the way to the status settings.
 class SchoolScreen extends ConsumerWidget {
   const SchoolScreen({super.key});
 
@@ -145,6 +147,8 @@ class _Body extends ConsumerWidget {
             title: Text(school.name, style: theme.textTheme.titleMedium),
           ),
         ),
+        const SizedBox(height: 12),
+        const _ReportsTile(),
         const SizedBox(height: 24),
         _SectionHeader(
           title: 'Kelas (${school.classes.length})',
@@ -214,6 +218,43 @@ class _Body extends ConsumerWidget {
         ),
         const SizedBox(height: 24),
       ],
+    );
+  }
+}
+
+/// "Laporan" with the number of reports still open.
+class _ReportsTile extends ConsumerWidget {
+  const _ReportsTile();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final open = ref.watch(openReportCountProvider);
+    final palette = context.palette;
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        key: const Key('school-reports'),
+        leading: Icon(
+          open > 0 ? Icons.flag : Icons.flag_outlined,
+          color: open > 0 ? palette.attentionText : null,
+        ),
+        title: const Text('Laporan'),
+        subtitle: Text(
+          open == 0
+              ? 'Tidak ada laporan yang perlu ditinjau'
+              : '$open laporan perlu ditinjau',
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (open > 0)
+              Badge.count(key: const Key('school-reports-count'), count: open),
+            const SizedBox(width: 8),
+            const Icon(Icons.chevron_right),
+          ],
+        ),
+        onTap: () => context.push(Routes.teacherReports),
+      ),
     );
   }
 }

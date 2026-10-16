@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/router/routes.dart';
+import '../../../core/policy/terms.dart';
 import '../../../core/widgets/dialogs.dart';
 import '../../../core/widgets/theme_controls.dart';
 import '../../../core/widgets/user_avatar.dart';
@@ -104,8 +106,9 @@ class AccountHeader extends ConsumerWidget {
   }
 }
 
-/// "Pengaturan" (theme plus [extraSettings]) and "Akun" (name, password,
-/// sign-out, account deletion). Shared by every role.
+/// "Pengaturan" (theme, [extraSettings], the terms of use and the privacy
+/// policy) and "Akun" (name, password, sign-out, account deletion). Shared by
+/// every role.
 class AccountSettings extends ConsumerWidget {
   const AccountSettings({super.key, this.extraSettings = const []});
 
@@ -131,6 +134,20 @@ class AccountSettings extends ConsumerWidget {
             children: [
               const ThemeSettingTile(),
               for (final tile in extraSettings) ...[const Divider(), tile],
+              const Divider(),
+              const _LinkTile(
+                key: Key('setting-terms'),
+                icon: Icons.gavel_outlined,
+                title: 'Ketentuan penggunaan',
+                url: termsUrl,
+              ),
+              const Divider(),
+              const _LinkTile(
+                key: Key('setting-privacy'),
+                icon: Icons.privacy_tip_outlined,
+                title: 'Kebijakan privasi',
+                url: privacyUrl,
+              ),
             ],
           ),
         ),
@@ -229,6 +246,29 @@ class AccountSettings extends ConsumerWidget {
       () => ref.read(authRepositoryProvider).deleteAccount(),
     );
   }
+}
+
+/// A settings row that opens a page of sabusaku.web.app in the browser.
+class _LinkTile extends StatelessWidget {
+  const _LinkTile({
+    super.key,
+    required this.icon,
+    required this.title,
+    required this.url,
+  });
+
+  final IconData icon;
+  final String title;
+  final String url;
+
+  @override
+  Widget build(BuildContext context) => ListTile(
+    leading: Icon(icon),
+    title: Text(title),
+    trailing: const Icon(Icons.open_in_new, size: 20),
+    onTap: () =>
+        launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
+  );
 }
 
 class _NameDialog extends StatefulWidget {
