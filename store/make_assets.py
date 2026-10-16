@@ -39,8 +39,10 @@ Input:  store/raw/phone/*.png    1080x2424
         store/raw/tablet/*.png   2560x1600
 Output: store/out/feature-graphic.png        1024x500
         store/out/phone-1..8.png             1080x1920
-        store/out/tablet7-1..6.png           1920x1200
-        store/out/tablet10-1..6.png          2560x1600
+        store/out/tablet7-1..6.png           1920x1080
+        store/out/tablet10-1..6.png          2560x1440
+(Play wants 16:9 or 9:16 for every screenshot; a 16:10 image is flagged
+"needs cropping" in the asset library.)
         store/out/icon-512.png               512x512, copy of branding/png/playstore-icon-512.png
 """
 
@@ -314,19 +316,19 @@ h1 {{ margin-top: 18px; font-size: 60px; line-height: 1.12; letter-spacing: -1.2
 
 
 def tablet_page(shot, dark):
-    """1920x1200 landscape: the tagline band on top, the whole app screen
-    below it."""
-    top, bottom = 212, 40
-    height = 1200 - top - bottom
+    """1920x1080 landscape (16:9): the tagline band on top, the whole app
+    screen below it."""
+    top, bottom = 200, 36
+    height = 1080 - top - bottom
     width = round(height * TABLET["width"] / (TABLET["height"] - TABLET["crop_top"]))
     return f"""<!doctype html><meta charset="utf-8"><style>{BASE_CSS}
-body {{ width: 1920px; height: 1200px; }}
+body {{ width: 1920px; height: 1080px; }}
 .copy {{ top: 36px; padding: 0 120px; }}
 .tag {{ font-size: 18px; padding: 6px 18px; letter-spacing: 2.4px; gap: 10px; }}
 .tag i {{ width: 10px; height: 10px; }}
 h1 {{ margin-top: 12px; font-size: 52px; line-height: 1.12; letter-spacing: -1.1px; }}
 .sub {{ margin-top: 4px; font-size: 25px; line-height: 1.35; }}
-</style><body class="{"dark" if dark else "light"}">{orbs(1920, 1200)}
+</style><body class="{"dark" if dark else "light"}">{orbs(1920, 1080)}
 {copy_block(shot)}
 {screen(shot, TABLET, (1920 - width) // 2, top, width, height, 32)}
 {MEASURE_JS}"""
@@ -476,16 +478,16 @@ def main():
                for i, shot in enumerate(TABLET_SHOTS, start=1)]
     errors = [error for name, html in phones for error in measure(html, name, 1080, 1920)]
     errors += [error for index, html in tablets
-               for error in measure(html, f"tablet-{index}", 1920, 1200)]
+               for error in measure(html, f"tablet-{index}", 1920, 1080)]
     if errors:
         raise SystemExit("\n".join(errors))
     render(feature_graphic_page(), "feature-graphic", 1024, 500)
     for name, html in phones:
         render(html, name, 1080, 1920)
     for index, html in tablets:
-        # Same page at two sizes: 1920x1200 for 7 inch, 2560x1600 for 10 inch.
-        render(html, f"tablet7-{index}", 1920, 1200)
-        render(html, f"tablet10-{index}", 1920, 1200, scale=4 / 3)
+        # Same page at two sizes: 1920x1080 for 7 inch, 2560x1440 for 10 inch.
+        render(html, f"tablet7-{index}", 1920, 1080)
+        render(html, f"tablet10-{index}", 1920, 1080, scale=4 / 3)
     shutil.copyfile(BRAND / "png" / "playstore-icon-512.png", OUT / "icon-512.png")
     print((OUT / "icon-512.png").relative_to(ROOT))
 

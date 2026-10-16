@@ -103,8 +103,8 @@ address are used; check any new one before committing it.
 | `phone-6.png` | 1080x1920 | Penanggung jawab: dashboard, dark theme |
 | `phone-7.png` | 1080x1920 | Penanggung jawab: catalog book detail, recommend |
 | `phone-8.png` | 1080x1920 | Penanggung jawab: add students by email |
-| `tablet7-1.png` to `tablet7-6.png` | 1920x1200 | Tablet, landscape: siswa beranda, jelajahi, detail buku; dashboard (dark), katalog, komentar jurnal |
-| `tablet10-1.png` to `tablet10-6.png` | 2560x1600 | Same six screens at 10-inch size |
+| `tablet7-1.png` to `tablet7-6.png` | 1920x1080 | Tablet, landscape: siswa beranda, jelajahi, detail buku; dashboard (dark), katalog, komentar jurnal |
+| `tablet10-1.png` to `tablet10-6.png` | 2560x1440 | Same six screens at 10-inch size |
 
 All are 24-bit PNG without alpha.
 

@@ -276,8 +276,8 @@ Default language: **Indonesian – id**. Paste from [`listing.md`](listing.md).
 | App icon | 512×512 PNG ≤1 MB | `out/icon-512.png` |
 | Feature graphic | 1024×500 PNG/JPEG, no alpha | `out/feature-graphic.png` |
 | Phone screenshots (2–8) | ≤ 2:1, 320–3840 px | `out/phone-1.png` … `phone-8.png` |
-| 7-inch tablet | 16:9 / 9:16 | `out/tablet7-1.png` … `tablet7-6.png` |
-| 10-inch tablet | 16:9 / 9:16 | `out/tablet10-1.png` … `tablet10-6.png` |
+| 7-inch tablet | 16:9, 1920x1080 | `out/tablet7-1.png` … `tablet7-6.png` |
+| 10-inch tablet | 16:9, 2560x1440 | `out/tablet10-1.png` … `tablet10-6.png` |
 | Video | — | none |
 
 Alt text (≤140 characters, no "photo of"/"image of"):
