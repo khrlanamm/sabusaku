@@ -43,7 +43,7 @@ Bagian ini mengalahkan baris di atas dan dokumen 01–06 bila berbeda.
 | Lingkungan | Produksi + emulator, sekolah demo | **Langsung produksi**. Tidak ada project dev dan sekolah demo; data lama direset setelah diekspor. Emulator hanya untuk tes otomatis lokal |
 | Sekolah awal | Demo | SMA Negeri 1 Sukodadi: 2 penanggung jawab (pembina Masis-KIR dan akun uji developer), 20 siswa ekstrakurikuler Masis-KIR, dimasukkan ke `members` sebelum mereka login |
 | SHA Android | Debug + upload | Ditambah SHA-1 dan SHA-256 kunci **Play App Signing**, sehingga Masuk dengan Google bekerja di build dari Google Play |
-| Pendaftaran sekolah | Email di halaman utama | Halaman `daftar-sekolah` dengan formulir yang membuka aplikasi email (mailto) ke benevology@gmail.com. Pengiriman lewat server menyusul |
+| Pendaftaran sekolah | Email di halaman utama | Halaman `daftar-sekolah` dengan formulir yang membuka aplikasi email (mailto) ke komunitaskertaskosong9@gmail.com. Pengiriman lewat server menyusul |
 | Aturan password | Minimal 8 karakter | Minimal 8 karakter, huruf besar dan kecil, angka, dan karakter khusus. Form menampilkan tiap syarat yang langsung hijau saat terpenuhi (hanya di kolom password, tidak di Ulangi password). Kebijakan yang sama dipaksakan Firebase Auth (Identity Platform, `ENFORCE`); password lama tetap bisa dipakai masuk |
 
 ## 1. Keputusan yang sudah Anda tetapkan

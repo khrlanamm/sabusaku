@@ -57,7 +57,7 @@ CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 APP_VERSION = "1.2.1"
 SCHOOL = "SMA Negeri 1 Sukodadi"
 PLAY_URL = "https://play.google.com/store/apps/details?id=com.sabu.saku"
-HELP_EMAIL = "benevology@gmail.com"
+HELP_EMAIL = "komunitaskertaskosong9@gmail.com"
 
 # Brand palette (lib/app/theme/colors.dart, branding/README.md).
 NAVY, NAVY_DEEP, BLUE, BLUE_DARK = "#17365D", "#0F2747", "#2563EB", "#1D4FC4"

@@ -15,7 +15,7 @@ export const CACHE = resolve(OUT, "cache");
 export const COVERS = resolve(OUT, "covers");
 export const SECRET = resolve(__dirname, "../../../secret");
 
-export const USER_AGENT = "SabuSaku/1.0 (benevology@gmail.com)";
+export const USER_AGENT = "SabuSaku/1.0 (komunitaskertaskosong9@gmail.com)";
 
 /** Google Books: stop well below the 1,000 queries/day project limit. */
 const GOOGLE_DAILY_BUDGET = 960;

@@ -425,9 +425,11 @@ EOF
 
 | Item | Status / decision |
 |---|---|
-| Blocking users | Not implemented. The UGC policy asks school-only apps for reporting (done); 1:1 blocking is a residual risk, answered by school moderation (PJ can remove a student; developer can act on reports). |
+| Blocking users | Not implemented, by decision (17 Oct 2026): the UGC policy asks school-only apps for reporting (done); blocking is left out and handled by school moderation (PJ can remove a student; developer acts on reports). |
 | Reviewer sees real school data | Accepted by the user (benevology account). |
 | 12 testers / 14 days | Testers must use Play accounts registered in Indonesia and stay opted in for 14 consecutive days. |
 | IARC category labels | Match the live menu (§2.4). |
-| Komdigi PSE registration, PP Tunas (PP 17/2025) | Legal questions for the developer; Play does not check them. |
+| Komdigi PSE registration | The developer registers Sabu Saku as PSE (decided 17 Oct 2026); Play does not check it. |
+| PP Tunas (PP 17/2025) | Left as is for now (decided 17 Oct 2026). |
+| Contact email | One address everywhere: komunitaskertaskosong9@gmail.com (app, site, guide, Play listing), since 17 Oct 2026. |
 | Store screenshots | Regenerated without device frames, taglines ≤20% (1.2.1). |

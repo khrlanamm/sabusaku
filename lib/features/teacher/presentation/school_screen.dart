@@ -15,7 +15,7 @@ import '../../auth/domain/app_user.dart';
 import '../data/teacher_repository.dart';
 
 /// Where penanggung jawab are added or changed (by the developer).
-const developerEmail = 'benevology@gmail.com';
+const developerEmail = 'komunitaskertaskosong9@gmail.com';
 
 /// The school: reports to review, class and extracurricular labels, the
 /// penanggung jawab, and the way to the status settings.
