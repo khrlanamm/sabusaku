@@ -1,22 +1,24 @@
 # 05 — Arsitektur Aplikasi Flutter
 
-Satu aplikasi Android, tiga "shell" menurut peran (siswa, guru, admin). Versi paket tidak dikunci di dokumen ini: gunakan versi stabil terbaru saat proyek dibuat dan kunci lewat `pubspec.lock`.
+Satu aplikasi Android, dua "shell" menurut peran (siswa dan penanggung jawab/guru). Diperbarui 16 Oktober 2026 untuk model v2 (login email/Google, tanpa admin). Versi paket tidak dikunci di dokumen ini: gunakan versi stabil terbaru saat proyek dibuat dan kunci lewat `pubspec.lock`.
 
 ## 1. Keputusan teknis
 
 | Aspek | Pilihan | Alasan |
 |---|---|---|
 | State management | **Riverpod** (dengan generator) | Teruji, mudah dites, cocok dengan stream Firestore |
-| Navigasi | **go_router** dengan `redirect` berbasis peran | Satu pintu untuk status login, ganti-password-wajib, dan deep link notifikasi |
+| Navigasi | **go_router** dengan `redirect` berbasis peran | Satu pintu untuk status login, verifikasi email, belum terdaftar, Lengkapi akun, dan deep link notifikasi |
 | Model | **freezed** + **json_serializable** | Immutable, `copyWith`, serialisasi aman |
 | Data | Firestore (cache offline aktif), Auth, Functions, Messaging, App Check, Crashlytics, Remote Config | BaaS penuh sesuai keputusan |
 | Arsitektur | **Feature-first + lapisan** (presentation / domain / data) | Fitur terisolasi, mudah dikerjakan bertahap |
 | Waktu | Utilitas WIB tunggal (`WibClock`) | Satu-satunya tempat mengubah "sekarang" menjadi tanggal `yyyy-MM-dd` |
 | Font | Poppins (di-bundle sebagai aset, tidak diunduh saat runtime) | Konsisten dengan logo dan tahan offline |
 | Lint | `flutter_lints` (atau `very_good_analysis`) | Disiplin gaya |
-| Flavor | `dev` dan `prod` (proyek Firebase berbeda) | Aman dari mencampur data |
+| Lingkungan | Satu project produksi `sabusaku`, tanpa flavor. Tes otomatis memakai Firebase Emulator lokal | Keputusan 16 Oktober 2026: semua langsung di produksi |
+| Login | `firebase_auth` (email/password) + `google_sign_in` (Credential Manager) | Email + password atau Google; `AutofillGroup` + `TextInput.finishAutofillContext()` memicu "Simpan password" Android |
+| Foto profil | `image_picker` (maks 512 px) + `firebase_storage` | Foto opsional, bisa diganti juga untuk akun Google |
 
-**Paket utama:** `flutter_riverpod`, `riverpod_annotation`, `go_router`, `freezed_annotation`, `json_annotation`, `firebase_core`, `firebase_auth`, `cloud_firestore`, `cloud_functions`, `firebase_messaging`, `firebase_app_check`, `firebase_crashlytics`, `firebase_remote_config`, `flutter_local_notifications`, `intl`, `shared_preferences`, `csv`, `file_picker`, `share_plus`, `connectivity_plus`. Dev: `build_runner`, `freezed`, `json_serializable`, `riverpod_generator`, `mocktail`, `fake_cloud_firestore` (opsional), `flutter_launcher_icons`, `flutter_native_splash`.
+**Paket utama:** `flutter_riverpod`, `riverpod_annotation`, `go_router`, `freezed_annotation`, `json_annotation`, `firebase_core`, `firebase_auth`, `google_sign_in`, `cloud_firestore`, `cloud_functions`, `firebase_storage`, `firebase_messaging`, `firebase_app_check`, `firebase_crashlytics`, `firebase_remote_config`, `flutter_local_notifications`, `intl`, `shared_preferences`, `csv`, `file_picker`, `share_plus`, `image_picker`, `url_launcher`, `connectivity_plus`. Dev: `build_runner`, `freezed`, `json_serializable`, `riverpod_generator`, `mocktail`, `fake_cloud_firestore` (opsional), `flutter_launcher_icons`, `flutter_native_splash`.
 
 ## 2. Struktur folder
 
@@ -35,13 +37,12 @@ lib/
     utils/                      # validators, debouncer, csv_parser
   features/
     auth/
-      data/ domain/ presentation/   # login, ganti password wajib, sesi & claims
+      data/ domain/ presentation/   # login email/Google, daftar, verifikasi email, Lengkapi akun,
+                                    # sesi & claims, profil (foto, password, hapus akun)
     student/
       home/  book/  journal/  history/  profile/
-    teacher/
-      dashboard/  students/  student_detail/  journal_detail/  recap/
-    admin/
-      home/  classes/  users/  import_csv/  settings/
+    teacher/                    # penanggung jawab: dashboard, siswa (tambah, impor, belum masuk),
+                                # detail siswa, jurnal + komentar, sekolah (label kelas/ekskul, pengaturan)
     notifications/              # FCM, channel, deep link
   l10n/                         # string Indonesia (ARB) bila dipakai
 test/                           # unit + widget
@@ -56,16 +57,19 @@ Aturan lapisan di tiap fitur:
 ## 3. Sesi, peran, dan navigasi
 
 ```
-AuthState: unauthenticated | loading | authenticated(user, role, schoolId, mustChangePassword)
+AuthState: loading | signedOut | needsVerification(email) | notRegistered(email) | signedIn(session)
 
 redirect:
+  loading                        → /
   belum login                    → /login
-  mustChangePassword             → /ganti-password
+  needsVerification              → /verifikasi-email
+  notRegistered                  → /login + dialog "Harap Menghubungi Administrator Sekolah" → keluar
+  session.needsCompletion        → /lengkapi-akun   (nama kosong, siswa tanpa kelas, atau belum punya password)
   role == siswa                  → /siswa/...   (StudentShell, 4 tab)
-  role == guru                   → /guru/...    (TeacherShell, 3 tab)
-  role == admin                  → /admin/...   (AdminShell, 4 tab)
+  role == guru                   → /guru/...    (TeacherShell, 4 tab: Dashboard · Siswa · Sekolah · Profil)
   akses lintas peran             → kembali ke beranda perannya
 ```
+- Token tanpa claim `schoolId` → aplikasi memanggil `claimAccount`, lalu `getIdToken(true)`. Galat `details.reason`: `not-registered` → notRegistered, `email-not-verified` → needsVerification.
 - Peran dibaca dari **custom claim** (sumber utama), profil dari `schools/{schoolId}/users/{uid}`.
 - Deep link dari notifikasi: `/siswa/jurnal/:programId/:date`.
 - `StatefulShellRoute` menjaga state tiap tab.
@@ -78,9 +82,10 @@ redirect:
 | Buku Saya | `activePrograms/{uid}` → `programs/{id}` | Stream; form Mulai Buku menulis program + kunci aktif dalam satu `WriteBatch` |
 | Isi Jurnal | program aktif + (opsional) jurnal tanggal terpilih | `pageStart` default = `currentPage + 1`; tanggal 3 pilihan (hari ini, kemarin, 2 hari lalu); jurnal tanggal itu sudah ada → mode ubah |
 | Riwayat | `journals orderBy date desc limit 20` | Paginasi dengan `startAfter` |
-| Dashboard guru | `studentStats where classId == X` per kelas, paralel | Hitung kartu di klien dari daftar (≤ beberapa ratus dokumen) |
-| Detail siswa (guru) | `studentStats/{id}`, `programs where studentId & classId`, `journals` | Baca saja |
-| Admin › Pengguna | `users where role == X orderBy name` | Aksi lewat callable |
+| Dashboard guru | `studentStats orderBy name` (seluruh sekolah) | Hitung kartu dan filter kelas/ekskul/status di klien |
+| Detail siswa (guru) | `studentStats/{id}`, `programs where studentId`, `journals` | Baca; ubah nama/kelas/ekskul langsung ke `users`; keluarkan/hapus lewat callable |
+| Belum masuk (guru) | `members where schoolId == S where role == siswa`, saring `uid == null` | Ubah langsung (rules), hapus lewat `removeStudent` |
+| Sekolah (guru) | `schools/{id}` | Ubah `classes`, `extracurriculars`, `settings` langsung (rules memvalidasi) |
 
 **Offline:** persistensi Firestore aktif (bawaan Android) dengan batas cache yang ditentukan. Tulis jurnal memakai penulisan standar (masuk antrean saat offline). Tampilkan penanda "menunggu sinkron" memakai `metadata.hasPendingWrites` dan tangani kegagalan sinkron (lihat dokumen 03).
 
@@ -107,7 +112,7 @@ Satu `AppException` dengan kode; pemetaan ke pesan Indonesia yang ramah (tidak a
 |---|---|
 | Unit | Validasi jurnal/buku, progres, `WibClock` (termasuk 23:59/00:01), parser CSV impor, redirect router |
 | Widget | Form jurnal (validasi), kartu beranda, daftar siswa dengan filter, login |
-| Integrasi | Alur dengan Firebase Emulator: login → mulai buku → jurnal → komentar |
+| Integrasi | Alur dengan Firebase Emulator: daftar/login → klaim → Lengkapi akun → mulai buku → jurnal → komentar; email tak terdaftar melihat dialog |
 | Rules & Functions | Lihat dokumen 03 dan 04 (di CI) |
 | Manual | Perangkat Android kelas bawah, mode pesawat (offline), font besar, rotasi layar |
 

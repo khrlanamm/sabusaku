@@ -11,56 +11,60 @@
 <main>
   <header><a href="/"><img src="/logo.png" alt="Sabu Saku"></a></header>
   <h1>Kebijakan privasi</h1>
-  <p class="muted">Berlaku sejak 7 Oktober 2026</p>
+  <p class="muted">Berlaku sejak 7 Oktober 2026, diperbarui 16 Oktober 2026</p>
 
   <p>Halaman ini menjelaskan data apa yang dikumpulkan aplikasi Sabu Saku, untuk apa data itu dipakai, siapa yang bisa melihatnya, dan cara menghapusnya. Sabu Saku dikembangkan oleh Kertas Kosong.</p>
 
   <h2>Siapa yang memakai Sabu Saku</h2>
-  <p>Sabu Saku dipakai oleh sekolah. Akun siswa, guru, dan admin dibuat oleh sekolah, bukan oleh pengguna sendiri. Sekolah menentukan siapa yang mendapat akun dan bertanggung jawab atas izin orang tua atau wali untuk siswa di bawah umur. Kami mengolah data itu atas nama sekolah.</p>
+  <p>Sabu Saku dipakai oleh sekolah. Ada dua peran: <strong>siswa</strong> dan <strong>penanggung jawab</strong> (misalnya guru atau pembina ekstrakurikuler). Sekolah dan penanggung jawabnya didaftarkan oleh pengembang. Penanggung jawab menentukan siswa mana yang boleh memakai aplikasi dengan menambahkan email mereka.</p>
+  <p>Pengguna membuat akunnya sendiri, dengan akun Google atau dengan email dan password. Akun itu baru bisa membuka data sekolah bila emailnya sudah didaftarkan oleh sekolah. Sekolah bertanggung jawab atas izin orang tua atau wali untuk siswa di bawah umur. Kami mengolah data sekolah atas nama sekolah.</p>
 
   <h2>Data yang kami kumpulkan</h2>
   <ul>
-    <li><strong>Data akun.</strong> Nama lengkap, NIS atau username, kelas, peran (siswa, guru, atau admin), dan sekolah. Password disimpan dalam bentuk teracak oleh Firebase Authentication. Kami tidak bisa melihatnya.</li>
+    <li><strong>Data akun.</strong> Nama lengkap, alamat email, kelas, ekstrakurikuler yang diikuti, peran (siswa atau penanggung jawab), dan sekolah. Password disimpan dalam bentuk teracak oleh Firebase Authentication. Kami tidak bisa melihatnya.</li>
+    <li><strong>Data dari akun Google</strong>, bila Anda masuk dengan Google: nama, alamat email, dan foto profil Google. Kami tidak mendapat akses ke Gmail, kontak, atau data Google lainnya.</li>
+    <li><strong>Foto profil</strong> (opsional). Foto yang Anda pilih sendiri di aplikasi, atau foto akun Google Anda. Bisa diganti atau dihapus kapan saja di menu Profil.</li>
     <li><strong>Jurnal membaca</strong> (siswa). Judul, penulis, dan jumlah halaman buku yang dibaca, halaman yang dibaca tiap hari, lama membaca, dan catatan yang ditulis siswa: informasi penting, hal yang menarik, pertanyaan, dan ulasan akhir buku.</li>
-    <li><strong>Komentar guru</strong> pada jurnal siswa.</li>
+    <li><strong>Komentar penanggung jawab</strong> pada jurnal siswa.</li>
     <li><strong>Ringkasan aktivitas.</strong> Progres buku, jumlah jurnal, streak, dan status keaktifan. Dihitung otomatis dari jurnal.</li>
-    <li><strong>Token notifikasi.</strong> Kode dari perangkat supaya kami bisa memberi tahu siswa saat guru mengomentari jurnalnya.</li>
-    <li><strong>Data teknis.</strong> Laporan saat aplikasi berhenti mendadak dan statistik penggunaan tanpa nama, NIS, atau isi jurnal. Dipakai untuk memperbaiki aplikasi.</li>
+    <li><strong>Token notifikasi.</strong> Kode dari perangkat supaya kami bisa memberi tahu siswa saat penanggung jawab mengomentari jurnalnya.</li>
+    <li><strong>Data teknis.</strong> Laporan saat aplikasi berhenti mendadak dan statistik penggunaan tanpa nama, email, atau isi jurnal. Dipakai untuk memperbaiki aplikasi.</li>
   </ul>
-  <p>Sabu Saku tidak mengumpulkan foto, lokasi, kontak, atau ID iklan. Tidak ada iklan di dalam aplikasi.</p>
+  <p>Sabu Saku tidak mengumpulkan lokasi, kontak, atau ID iklan, dan tidak mengakses foto di HP selain foto profil yang Anda pilih sendiri. Tidak ada iklan di dalam aplikasi.</p>
 
   <h2>Untuk apa data dipakai</h2>
   <ul>
-    <li>Menjalankan fitur aplikasi: jurnal, progres, streak, dashboard guru, dan komentar.</li>
-    <li>Mengirim notifikasi komentar guru kepada siswa.</li>
+    <li>Menjalankan fitur aplikasi: masuk, jurnal, progres, streak, dashboard penanggung jawab, dan komentar.</li>
+    <li>Mengirim email verifikasi alamat email dan email reset password saat Anda memintanya.</li>
+    <li>Mengirim notifikasi komentar penanggung jawab kepada siswa.</li>
     <li>Menjaga aplikasi tetap berjalan baik dan memperbaiki galat.</li>
   </ul>
   <p>Kami tidak menjual data dan tidak memakainya untuk iklan atau pembuatan profil.</p>
 
   <h2>Siapa yang bisa melihat data</h2>
   <ul>
-    <li><strong>Siswa</strong> melihat buku, jurnal, dan komentar miliknya sendiri.</li>
-    <li><strong>Guru</strong> melihat ringkasan, buku, dan jurnal siswa di kelas yang ditugaskan kepadanya saja.</li>
-    <li><strong>Admin sekolah</strong> mengelola akun dan kelas serta melihat angka statistik. Admin tidak bisa membaca isi jurnal.</li>
+    <li><strong>Siswa</strong> melihat profil, buku, jurnal, dan komentar miliknya sendiri.</li>
+    <li><strong>Penanggung jawab</strong> di sekolah yang sama melihat nama, email, kelas, ekstrakurikuler, foto profil, ringkasan, buku, dan jurnal semua siswa sekolah itu. Penanggung jawab bisa mengubah nama, kelas, dan ekstrakurikuler siswa serta mengeluarkan siswa dari sekolah.</li>
     <li><strong>Sekolah lain</strong> tidak bisa melihat data sekolah Anda. Data tiap sekolah dipisahkan.</li>
   </ul>
 
   <h2>Tempat data disimpan</h2>
-  <p>Data disimpan di layanan Google Firebase (Authentication, Cloud Firestore, Cloud Functions, Cloud Messaging, Crashlytics, dan Analytics). Basis data dan pemrosesannya berada di pusat data wilayah Jakarta. Layanan itu tunduk pada <a href="https://policies.google.com/privacy">kebijakan privasi Google</a>. Data dikirim lewat sambungan terenkripsi.</p>
+  <p>Data disimpan di layanan Google Firebase (Authentication, Cloud Firestore, Cloud Storage untuk foto profil, Cloud Functions, Cloud Messaging, Crashlytics, dan Analytics). Basis data dan pemrosesannya berada di pusat data wilayah Jakarta. Layanan itu tunduk pada <a href="https://policies.google.com/privacy">kebijakan privasi Google</a>. Data dikirim lewat sambungan terenkripsi.</p>
 
   <h2>Berapa lama data disimpan</h2>
-  <p>Data disimpan selama akun ada dan sekolah masih memakai Sabu Saku. Sekolah dapat menghapus data seorang siswa kapan saja, misalnya saat siswa lulus atau pindah. Caranya dijelaskan di halaman <a href="/hapus-data">cara menghapus akun dan data</a>.</p>
+  <p>Data disimpan selama akun ada dan sekolah masih memakai Sabu Saku. Anda bisa menghapus akun sendiri kapan saja dari aplikasi. Penanggung jawab dapat menghapus data seorang siswa di sekolahnya, misalnya saat siswa lulus atau pindah. Caranya dijelaskan di halaman <a href="/hapus-data">cara menghapus akun dan data</a>.</p>
 
   <h2>Hak Anda</h2>
   <ul>
     <li>Melihat data Anda langsung di aplikasi.</li>
     <li>Mengubah atau menghapus jurnal sampai sehari setelah tanggal jurnal.</li>
-    <li>Meminta penghapusan akun dan seluruh data lewat sekolah atau dengan menghubungi kami.</li>
+    <li>Mengubah nama, kelas, ekstrakurikuler, dan foto profil di menu Profil.</li>
+    <li>Menghapus akun dan seluruh data sendiri lewat <strong>Profil → Hapus akun</strong>, atau memintanya lewat sekolah atau dengan menghubungi kami.</li>
     <li>Mematikan notifikasi lewat pengaturan HP.</li>
   </ul>
 
   <h2>Anak dan remaja</h2>
-  <p>Sabu Saku ditujukan untuk siswa SMA, guru, dan staf sekolah. Aplikasi ini tidak ditujukan untuk anak di bawah 13 tahun. Siswa hanya bisa memakai Sabu Saku dengan akun yang dibuat sekolahnya.</p>
+  <p>Sabu Saku ditujukan untuk siswa SMA dan penanggung jawab di sekolah. Aplikasi ini tidak ditujukan untuk anak di bawah 13 tahun. Siswa hanya bisa memakai Sabu Saku bila emailnya didaftarkan oleh sekolahnya.</p>
 
   <h2>Perubahan</h2>
   <p>Kalau kebijakan ini berubah, tanggal di bagian atas diperbarui dan perubahan penting diberitahukan kepada sekolah.</p>

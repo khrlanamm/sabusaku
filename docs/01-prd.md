@@ -1,10 +1,12 @@
 # 01 — PRD Sabu Saku (Satu Bulan Satu Buku)
 
-Versi dokumen: 1.0 · 7 Oktober 2026 · Status: usulan final untuk persetujuan
+Versi dokumen: 2.0 · 16 Oktober 2026 · Status: berlaku (v1.0 · 7 Oktober 2026)
+
+> Versi 2 mengganti login kode sekolah + NIS dengan email/Google, menghapus peran admin sekolah, dan menjadikan kelas serta ekstrakurikuler sebagai label. Rincian keputusan ada di dokumen 07 §0.
 
 ## 1. Ringkasan
 
-Sabu Saku adalah aplikasi Android untuk **jurnal membaca**. Siswa SMA membaca satu buku per bulan dan mencatat hasil bacaan setiap hari. Guru memantau progres seluruh siswa di kelasnya dan memberi komentar pada jurnal. Satu aplikasi melayani banyak sekolah (multi-tenant); sekolah didaftarkan oleh developer, bukan lewat pendaftaran mandiri.
+Sabu Saku adalah aplikasi Android untuk **jurnal membaca**. Siswa SMA membaca satu buku per bulan dan mencatat hasil bacaan setiap hari. Penanggung jawab (guru atau pembina ekstrakurikuler) memantau progres seluruh siswa sekolahnya dan memberi komentar pada jurnal. Satu aplikasi melayani banyak sekolah (multi-tenant); sekolah dan penanggung jawabnya didaftarkan oleh developer, bukan lewat pendaftaran mandiri. Sekolah yang tertarik mengisi formulir di `sabusaku.web.app/daftar-sekolah`.
 
 **Fokus V1** (dari gambar rancangan): memastikan siswa benar-benar bisa mengisi jurnal setiap hari dan guru bisa memantaunya dengan mudah.
 
@@ -14,28 +16,35 @@ Sabu Saku adalah aplikasi Android untuk **jurnal membaca**. Siswa SMA membaca sa
 - Bekerja baik di jaringan buruk (jurnal bisa ditulis offline).
 
 ### Bukan tujuan V1
-AI, rekomendasi buku, ranking/gamifikasi, upload foto, chat siswa–guru, analisis otomatis, integrasi Google Books, iOS, web, pendaftaran sekolah mandiri, pembayaran.
+AI, rekomendasi buku, ranking/gamifikasi, upload foto selain foto profil, chat siswa–guru, analisis otomatis, integrasi Google Books, iOS, web, pendaftaran sekolah mandiri, pembayaran.
 
 ## 2. Peran dan hak akses
 
-| Peran | Dibuat oleh | Dipakai lewat | Ringkasan hak |
+| Peran | Didaftarkan oleh | Dipakai lewat | Ringkasan hak |
 |---|---|---|---|
-| **Developer** | — | Skrip CLI (di luar aplikasi) | Membuat sekolah dan admin pertama, menonaktifkan sekolah |
-| **Admin sekolah** | Developer | Aplikasi (menu admin) | Kelola kelas, guru, siswa, pengaturan sekolah; impor CSV; reset password. **Tidak membaca isi jurnal** |
-| **Guru** | Admin | Aplikasi (menu guru) | Melihat siswa dan jurnal di **kelas yang ditugaskan (banyak kelas)**, memberi komentar, reset password siswa kelasnya |
-| **Siswa** | Admin (impor CSV/manual) | Aplikasi (menu siswa) | Memilih buku bebas, mengisi dan melihat jurnal sendiri, membaca komentar guru |
+| **Developer** | — | Skrip CLI (di luar aplikasi) | Membuat sekolah, menambah dan mengeluarkan penanggung jawab, menangguhkan sekolah |
+| **Penanggung jawab** (`guru`) | Developer | Aplikasi (menu guru) | Melihat **semua siswa sekolahnya** beserta jurnal, memberi komentar, menambah siswa lewat email, mengubah nama/kelas/ekstrakurikuler siswa, mengeluarkan siswa dari sekolah, menghapus data siswa, mengelola label kelas dan ekstrakurikuler serta pengaturan sekolah. **Tidak bisa** menambah penanggung jawab lain |
+| **Siswa** | Penanggung jawab (email) | Aplikasi (menu siswa) | Memilih buku bebas, mengisi dan melihat jurnal sendiri, membaca komentar, mengubah nama, kelas, ekstrakurikuler, dan foto profil sendiri |
 
-Satu akun = satu peran, terikat ke satu sekolah. Data antar sekolah terisolasi total (lihat dokumen 03).
+Akun Firebase Auth dibuat pengguna sendiri (Google, atau daftar email + verifikasi). "Didaftarkan" berarti emailnya dimasukkan ke daftar anggota sekolah (`members/{email}`); tanpa itu akun tidak bisa membuka data apa pun.
+
+Satu email = satu peran, terikat ke paling banyak satu sekolah. Data antar sekolah terisolasi total (lihat dokumen 03).
 
 ## 3. Alur utama
 
-**Onboarding sekolah (developer):** `create-school` → sekolah + admin pertama dengan password awal → admin login, ganti password, membuat kelas, mengimpor guru dan siswa, menugaskan guru ke kelas.
+**Onboarding sekolah (developer):** `create-school` → sekolah dengan label kelas dan ekstrakurikuler awal → `add-guru` untuk tiap penanggung jawab → (opsional) `import-students` dari CSV `email,nama,kelas,ekskul`. Penanggung jawab lalu menambah siswa sendiri di aplikasi.
 
-**Login:** isi *Kode Sekolah* (diingat di perangkat), *Username/NIS*, *Password*. Aplikasi mengarahkan ke shell sesuai peran. Akun dengan password awal wajib ganti password di login pertama. "Lupa password" menampilkan petunjuk menghubungi admin/guru (tidak ada reset lewat email).
+**Login:** *Email* + *Password*, atau **Masuk dengan Google**. Tidak ada kode sekolah dan NIS. Setelah masuk, aplikasi memanggil `claimAccount`:
+- email belum terverifikasi (daftar email) → layar verifikasi email;
+- email tidak ada di daftar sekolah mana pun → pop-up **"Harap Menghubungi Administrator Sekolah"** dengan tautan "Ingin mendaftarkan sekolah Anda? Pelajari di sini" ke `sabusaku.web.app/daftar-sekolah`, lalu keluar;
+- nama kosong, siswa tanpa kelas, atau akun Google tanpa password → layar **Lengkapi akun** (nama, kelas, ekstrakurikuler, foto, buat password);
+- selain itu → shell sesuai peran.
+
+"Belum punya akun? Daftar" membuat akun email + password dan mengirim email verifikasi. "Lupa password?" mengirim email reset dari Firebase. Field email dan password memicu tawaran "Simpan password" Android.
 
 **Siswa:** login → Beranda → (jika belum ada buku) pilih buku → baca → Isi Jurnal → Simpan → lihat Riwayat → baca komentar guru (notifikasi masuk).
 
-**Guru:** login → Dashboard → Daftar Siswa (filter kelas/status) → Detail Siswa → Detail Jurnal → tulis komentar.
+**Penanggung jawab:** login → Dashboard → Daftar Siswa (filter kelas, ekstrakurikuler, status) → Detail Siswa → Detail Jurnal → tulis komentar. Tambah siswa: email wajib, nama/kelas/ekstrakurikuler opsional; siswa yang belum pernah masuk tampil di bagian "Belum masuk".
 
 ## 4. Layar dan fitur (V1)
 
@@ -47,26 +56,19 @@ Satu akun = satu peran, terikat ke satu sekolah. Data antar sekolah terisolasi t
 | Isi Jurnal | Tanggal, halaman dari–sampai (otomatis lanjut dari halaman terakhir), durasi (4 pilihan), informasi penting (wajib), hal menarik (opsional), pertanyaan (opsional) |
 | Riwayat Jurnal | Daftar jurnal (terbaru dulu), lencana komentar guru |
 | Detail Jurnal | Isi jurnal + komentar guru; edit/hapus bila masih dalam jendela edit |
-| Profil | Statistik (total jurnal, buku selesai, streak terbaik), **riwayat buku bulan-bulan sebelumnya**, ubah password, keluar |
+| Profil | Foto profil (ganti, pakai foto Google, hapus), nama, kelas, ekstrakurikuler, statistik (total jurnal, buku selesai, streak terbaik), **riwayat buku bulan-bulan sebelumnya**, atur/ubah password, keluar, hapus akun |
 
 Cover buku: tanpa upload di V1; aplikasi membuat **sampul otomatis** (warna dari judul + inisial).
 
-### Guru — navigasi bawah 3 tab: Dashboard · Siswa · Profil
+### Penanggung jawab (guru) — navigasi bawah 4 tab: Dashboard · Siswa · Sekolah · Profil
 | Layar | Isi |
 |---|---|
-| Dashboard | Kartu ringkasan (siswa, buku aktif, jurnal bulan ini), jumlah Aktif / Perlu perhatian / Tidak aktif / Belum ada buku, daftar siswa yang perlu perhatian |
-| Daftar Siswa | Filter kelas (dari kelas yang ditugaskan) dan status, pencarian nama, progres per siswa |
-| Detail Siswa | Buku aktif, progres, streak, aktivitas terakhir, riwayat buku, **Lihat semua jurnal**, tombol reset password |
+| Dashboard | Kartu ringkasan seluruh sekolah (siswa, buku aktif, jurnal bulan ini), jumlah Aktif / Perlu perhatian / Tidak aktif / Belum ada buku, daftar siswa yang perlu perhatian |
+| Daftar Siswa | Filter kelas, ekstrakurikuler, dan status; pencarian nama; progres per siswa; bagian "Belum masuk" (email terdaftar yang belum pernah login); tombol Tambah siswa dan Impor CSV |
+| Detail Siswa | Buku aktif, progres, streak, aktivitas terakhir, riwayat buku, **Lihat semua jurnal**, ubah nama/kelas/ekstrakurikuler, **Keluarkan dari sekolah**, **Hapus data permanen** |
 | Detail Jurnal + Komentar | Isi jurnal siswa, daftar komentar, kolom tulis komentar |
-| Rekap *(opsional, fase 6)* | Rekap bulanan per kelas, ekspor CSV |
-
-### Admin sekolah — navigasi bawah 4 tab: Beranda · Kelas · Pengguna · Pengaturan
-| Layar | Isi |
-|---|---|
-| Beranda | Jumlah siswa/guru/kelas, siswa aktif vs tidak aktif (angka saja) |
-| Kelas | Tambah/ubah kelas (mis. XII IPA 1, tahun ajaran), tugaskan guru ke kelas |
-| Pengguna | Daftar guru dan siswa, tambah manual, **impor CSV**, nonaktifkan/aktifkan, pindah kelas, reset password, ekspor daftar kredensial awal |
-| Pengaturan | Hari libur sekolah, hari netral (default Minggu), ambang status (default 3 dan 7 hari), data sekolah |
+| Sekolah | Label kelas (format `XII-A1`, `X-G2`) dan ekstrakurikuler (bisa ditambah), daftar penanggung jawab (hanya baca), pengaturan: hari libur, hari netral, ambang status |
+| Profil | Sama dengan profil siswa tanpa statistik membaca |
 
 ## 5. Aturan bisnis (final)
 
@@ -85,32 +87,33 @@ Cover buku: tanpa upload di V1; aplikasi membuat **sampul otomatis** (warna dari
 | BR-11 | **Hari efektif** = semua hari kecuali hari netral (default Minggu) dan hari libur sekolah. Hari netral tidak memutus streak dan tidak dihitung dalam ambang status |
 | BR-12 | **Streak** = jumlah hari efektif berurutan yang punya jurnal sampai hari ini. Streak putus jika ada hari efektif **sebelum hari ini** tanpa jurnal. Jurnal di hari netral tetap menambah hitungan |
 | BR-13 | **Status siswa** dari `d` = jumlah hari efektif sejak jurnal terakhir (atau sejak buku dimulai bila belum ada jurnal) sampai hari ini: **Aktif** `d ≤ 3`, **Perlu perhatian** `4–7`, **Tidak aktif** `> 7`, **Belum ada buku** bila tak ada buku aktif. Status hanya indikator, bukan nilai |
-| BR-14 | Guru hanya melihat siswa dan jurnal di kelas yang ditugaskan. Admin tidak membaca isi jurnal |
-| BR-15 | Akun nonaktif tidak bisa login; datanya tetap tersimpan |
-| BR-16 | Password awal acak dan wajib diganti di login pertama; password minimal 8 karakter |
+| BR-14 | Penanggung jawab melihat semua siswa dan jurnal **di sekolahnya saja**. Data antar sekolah terisolasi. Satu email hanya bisa terdaftar di satu sekolah |
+| BR-15 | Siswa yang dikeluarkan dari sekolah kehilangan akses ke data sekolah, tetapi akun dan jurnalnya tetap ada; menambahkannya lagi mengembalikan riwayatnya. Hapus data permanen dan hapus akun adalah aksi terpisah |
+| BR-16 | Password minimal 8 karakter, dibuat pengguna sendiri. Akun email wajib terverifikasi sebelum bisa membuka data sekolah. Akun Google wajib membuat password di layar Lengkapi akun |
 | BR-17 | Komentar guru: banyak komentar per jurnal; guru boleh mengubah/menghapus komentarnya sendiri; siswa hanya membaca. Komentar baru memicu notifikasi ke siswa |
+| BR-18 | **Kelas** dan **ekstrakurikuler** adalah label di dokumen sekolah. Satu siswa tepat satu kelas (format `X`/`XI`/`XII`, tanda hubung, huruf dan angka: `XII-A1`, `X-G2`) dan nol atau lebih ekstrakurikuler (awal: Masis-KIR, Paskibra, Pala, PMR). Siswa boleh mengganti kelas dan ekstrakurikulernya sendiri; penanggung jawab boleh menambah label |
 
-Nilai BR-3, BR-4, BR-7 dikunci di aplikasi dan rules (bukan pengaturan sekolah) supaya konsisten. BR-11 dan BR-13 dapat diatur admin.
+Nilai BR-3, BR-4, BR-7 dikunci di aplikasi dan rules (bukan pengaturan sekolah) supaya konsisten. BR-11 dan BR-13 dapat diatur penanggung jawab.
 
 ## 6. Kebutuhan non-fungsional
-- **Platform:** Android saja (satu aplikasi untuk siswa, guru, admin). minSdk diputuskan saat setup (kandidat 23).
+- **Platform:** Android saja (satu aplikasi untuk siswa dan penanggung jawab). minSdk diputuskan saat setup (kandidat 23).
 - **Bahasa:** Indonesia saja.
 - **Offline:** siswa dapat menulis jurnal tanpa sinyal; data tersinkron saat online. Jurnal yang ditolak saat sinkron (mis. lewat batas BR-3) harus tampak jelas di UI.
 - **Kinerja:** Beranda siswa dan Dashboard guru masing-masing dimuat dari 1–2 dokumen ringkasan, bukan menghitung ulang di klien.
 - **Keamanan dan privasi:** siswa SMA umumnya di bawah 18 tahun dan jurnal bersifat personal. Isolasi per sekolah, akses minimum per peran, App Check, wilayah data Jakarta, jalur penghapusan data. Lihat dokumen 03.
 - **Aksesibilitas:** ukuran sentuh ≥ 48dp, kontras AA, mendukung font besar sistem.
-- **Observabilitas:** Crashlytics, Analytics tanpa data personal siswa, log Functions terstruktur.
+- **Observabilitas:** Crashlytics, Analytics tanpa data personal siswa (tanpa nama dan email), log Functions terstruktur.
 
 ## 7. Prioritas (MoSCoW)
 
-- **Must:** login multi-sekolah, peran, kelas, impor CSV, mulai buku, isi jurnal, riwayat, progres, streak, status, dashboard guru, daftar/detail siswa, komentar, aturan database, offline dasar.
-- **Should:** notifikasi komentar, ulasan akhir buku, riwayat buku di Profil, perpanjang target, reset password oleh guru, ekspor kredensial awal.
+- **Must:** login email/Google multi-sekolah, peran, label kelas dan ekstrakurikuler, impor CSV, mulai buku, isi jurnal, riwayat, progres, streak, status, dashboard guru, daftar/detail siswa, komentar, aturan database, offline dasar.
+- **Should:** notifikasi komentar, ulasan akhir buku, riwayat buku di Profil, perpanjang target, foto profil, hapus akun dari aplikasi.
 - **Could:** Rekap bulanan + ekspor CSV, pengingat harian, mode gelap.
 - **Won't (V1):** daftar "belum ada" pada gambar rancangan.
 
 ## 8. Kriteria sukses V1
 1. Siswa dapat membuat jurnal pertama dalam < 1 menit setelah login pertama dan buku dipilih.
 2. Jurnal ke-2 pada tanggal yang sama ditolak oleh database, bukan hanya UI.
-3. Guru kelas A tidak dapat membaca data kelas B maupun sekolah lain (terbukti oleh pengujian rules).
+3. Penanggung jawab sekolah A tidak dapat membaca data sekolah B; email yang tidak terdaftar tidak dapat membaca apa pun (terbukti oleh pengujian rules).
 4. Jurnal yang ditulis offline tersimpan dan tersinkron setelah online.
-5. Dashboard guru memuat 36 siswa dalam 1 query tanpa agregasi di klien selain penghitungan ringan.
+5. Dashboard penanggung jawab memuat seluruh siswa sekolah dalam 1 query tanpa agregasi di klien selain penghitungan ringan.

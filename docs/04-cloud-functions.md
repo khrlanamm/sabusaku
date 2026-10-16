@@ -8,14 +8,13 @@ Semua callable: wajib login, periksa `role` dan `schoolId` dari token, validasi 
 
 | Callable | Peran | Fungsi |
 |---|---|---|
-| `createUsers` | admin | Membuat 1–100 pengguna per panggilan (impor CSV dipecah per batch di klien). Input: `[{role, name, username, classId?/classIds?}]`. Membuat akun Auth (email semu), dokumen `users`, claims, dan `studentStats` awal untuk siswa. Mengembalikan `[{username, password}]` (password awal acak, **hanya dikembalikan sekali**). Menolak username kembar per baris dengan alasan |
-| `resetPassword` | admin; guru (siswa di `classIds`-nya) | Membuat password sementara, set `mustChangePassword = true`, cabut sesi lama |
-| `setUserActive` | admin | Aktif/nonaktif: `disabled` di Auth, `revokeRefreshTokens`, ubah `status` |
-| `setTeacherClasses` | admin | Mengubah `users.classIds` guru, mencerminkan ke `classes.teacherIds`, memperbarui claim |
-| `moveStudentClass` | admin | Mengubah `users.classId` siswa, lalu `programs.classId` dan `studentStats.classId/className` |
-| `eraseStudent` | admin | Penghapusan data siswa menyeluruh (lihat dokumen 03). Disertai konfirmasi dua langkah di UI |
+| `claimAccount` | siapa pun yang login | Mensyaratkan `email_verified`. Mencari `members/{email}`: tidak ada → `not-found` (`details.reason = not-registered`). Ada → pasang claims `{role, schoolId}`, buat/perbarui `users/{uid}` (profil baru diisi nama, kelas, ekskul dari `members`; profil lama dipertahankan, `status` kembali `active`; bila `photoUrl` kosong dan akun masuk dengan Google, diisi foto Google ukuran 400 px, foto yang sudah ada tidak pernah ditimpa), isi `members.uid` (pindahkan bila sebelumnya menunjuk UID lain), hitung ulang `studentStats` untuk siswa. Idempoten. Aplikasi memanggilnya setelah setiap login Google |
+| `addStudents` | guru | 1–100 baris `{email, name?, classId?, extracurriculars?}`. Email dinormalkan dan divalidasi; kelas dinormalkan dengan `normalizeClassLabel` (label valid yang belum ada ditambahkan ke `schools.classes`); ekskul harus ada di daftar sekolah. `members` dibuat dengan `create()`, sehingga email yang sudah terdaftar di mana pun ditolak per baris ("Email sudah terdaftar.") tanpa menyebut sekolahnya |
+| `removeStudent` | guru | Mengeluarkan siswa sekolahnya: hapus `members`, cabut claims, `revokeRefreshTokens`, `users.status = removed` (trigger menghapus `studentStats`). Jurnal tetap ada; menambahkan lagi memulihkannya |
+| `eraseStudent` | guru | Menghapus `members`, profil, `studentStats`, `activePrograms`, semua program beserta jurnal dan komentar, dan foto profil siswa; mencabut claims. **Tidak** menghapus akun Auth. Konfirmasi dua langkah di UI |
+| `deleteMyAccount` | siapa pun yang login | Hapus akun dari aplikasi (kebijakan Google Play). Siswa: data sama seperti `eraseStudent`. Guru: profil dan `members`. Lalu foto profil dan akun Auth |
 
-Batas yang diterapkan: maks 100 pengguna per `createUsers`, `classIds` ≤ 20, username `[a-z0-9._-]{3,30}`.
+Dihapus dari v1: `createUsers`, `resetPassword`, `setUserActive`, `setTeacherClasses`, `moveStudentClass`. Ganti kelas kini ditulis langsung ke `users.classId` (dijaga rules) dan diteruskan oleh `onUserUpdated`.
 
 ## 2. Trigger Firestore
 
@@ -34,7 +33,9 @@ Saat dibuat, selesai, atau dihentikan: `refreshStudentStats(studentId)` (buku ak
 2. Kirim FCM ke semua token siswa (`users/{uid}/devices`). Isi notifikasi: judul "Komentar dari {nama guru}", isi dipotong 80 karakter; **tanpa data sensitif tambahan**. Data payload: `type=comment`, `programId`, `date` untuk deep link. Token tidak valid dihapus.
 
 ### 2.4 `onUserUpdated` — `users/{uid}`
-Bila `classId` berubah (siswa): sinkronkan ke `programs` dan `studentStats`. Bila nama berubah: perbarui `studentStats.name`.
+Bila `classId` berubah (siswa): sinkronkan ke `programs`. Bila `name`, `classId`, `extracurriculars`, `photoUrl`, `email`, atau `status` berubah: bangun ulang `studentStats` (siswa berstatus `removed` tidak punya ringkasan).
+
+`onClassUpdated` dihapus bersama koleksi `classes`.
 
 ## 3. Terjadwal
 
@@ -79,14 +80,17 @@ Satu fungsi yang membangun dokumen `studentStats` utuh dari: profil siswa, `acti
 
 ## 6. Alat developer (skrip CLI, di luar aplikasi)
 
-Folder `tools/` (Node/TypeScript, memakai Admin SDK dan service account lokal; tidak ikut ke klien).
+Folder `functions/tools/` (Node/TypeScript, Admin SDK, service account lokal di `secret/`). Tanpa `--emulator`, skrip bekerja langsung di **produksi**; tidak ada project dev dan tidak ada sekolah demo.
 
 | Skrip | Fungsi |
 |---|---|
-| `create-school --code sman1 --name "SMA Negeri 1 ..."` | Membuat `schools/sman1` dengan pengaturan default, membuat **admin pertama** (username + password awal acak, `mustChangePassword`), mencetak kredensial sekali |
-| `set-school-status --code sman1 --status suspended` | Menangguhkan sekolah: menonaktifkan seluruh akun dan mencabut sesi |
-| `seed-demo` | Mengisi proyek `dev` dengan sekolah demo: 2 kelas, 2 guru, 10 siswa, jurnal beberapa minggu (untuk pengembangan UI dan demo) |
+| `create-school --code sman1 --name "SMA Negeri 1 ..."` | Membuat `schools/sman1` dengan pengaturan default, `classes` kosong (atau dari `--classes`), dan ekstrakurikuler awal Masis-KIR, Paskibra, Pala, PMR |
+| `add-guru --school sman1 --email … --name "…" [--ekskul Masis-KIR]` | Mendaftarkan penanggung jawab (`members`, role `guru`). Satu-satunya jalan menambah guru |
+| `remove-guru --email …` | Mengeluarkan penanggung jawab: hapus `members`, cabut claims, `status = removed` |
+| `import-students --school sman1 --file secret/….csv` | Impor massal siswa dari CSV `email,nama,kelas,ekskul` (ekskul dipisah `;`); kelas dinormalkan dan ditambahkan ke label sekolah |
+| `set-school-status --code sman1 --status suspended` | Menangguhkan sekolah: menonaktifkan seluruh akun anggotanya dan mencabut sesi |
 | `export-school --code sman1` | Ekspor data sekolah (untuk permintaan sekolah/penghapusan) |
+| `delete-school --code sman1 --confirm sman1` | Menghapus sekolah, data, dan keanggotaannya |
 
 ## 7. Struktur proyek Functions
 
@@ -94,17 +98,17 @@ Folder `tools/` (Node/TypeScript, memakai Admin SDK dan service account lokal; t
 functions/
   src/
     index.ts                 # ekspor semua fungsi
-    callables/               # createUsers, resetPassword, ...
+    callables/               # claimAccount, addStudents, removeStudent, ...
     triggers/                # onJournalWritten, onCommentCreated, ...
     scheduled/               # dailyRefresh
-    domain/                  # computeStreak, computeStatus, dateUtils (WIB) — tanpa dependensi Firebase
+    domain/                  # computeStreak, computeStatus, dateUtils (WIB), labels — tanpa dependensi Firebase
     infra/                   # akses Firestore/Auth/FCM, auth guard, validasi
   test/                      # unit domain + integrasi dengan emulator
-tools/                       # skrip developer
+  tools/                     # skrip developer
 ```
 
 ## 8. Pengujian dan operasi
 - Unit test `domain/` (cepat, tanpa emulator) dengan tabel kasus di atas.
-- Tes integrasi dengan Firebase Emulator Suite (Auth, Firestore, Functions): jalur `createUsers` → login → buat program → tulis jurnal → cek `studentStats` terisi.
+- Tes integrasi dengan Firebase Emulator Suite (Auth, Firestore, Functions), dijalankan lokal dan di CI: `addStudents` → daftar + verifikasi → `claimAccount` → buat program → tulis jurnal → cek `studentStats` terisi; `removeStudent` dan `eraseStudent` mempertahankan akun Auth.
 - Alarm: galat Functions di Cloud Monitoring; log terstruktur dengan `schoolId` (bukan data siswa).
 - Idempotensi dan percobaan ulang: trigger tidak boleh menggandakan efek (notifikasi komentar dikirim berdasarkan penanda `notifiedAt` pada dokumen komentar agar percobaan ulang tidak mengirim ganda).

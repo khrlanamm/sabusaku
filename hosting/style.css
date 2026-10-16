@@ -31,3 +31,52 @@ a { color: var(--blue); font-weight: 600; }
 }
 .links a { display: block; padding: 6px 0; }
 footer { margin-top: 40px; border-top: 1px solid var(--border); padding-top: 16px; }
+
+/* Call to action */
+.button {
+  display: inline-block;
+  background: var(--blue);
+  color: #fff;
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 20px;
+  font: inherit;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  min-height: 48px;
+}
+.button:hover, .button:focus-visible { background: #1d4fc4; }
+.button.secondary {
+  background: #fff;
+  color: var(--blue);
+  border: 1px solid var(--border);
+}
+.button.secondary:hover, .button.secondary:focus-visible { background: var(--sky); }
+.cta { background: var(--sky); border-color: #c9dafb; }
+.cta p:last-child { margin-bottom: 0; }
+
+/* Form */
+form { display: grid; gap: 16px; }
+.field { display: grid; gap: 6px; }
+label { font-weight: 600; font-size: 15px; }
+.hint { color: var(--muted); font-size: 14px; font-weight: 400; }
+input, textarea, select {
+  width: 100%;
+  font: inherit;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  min-height: 48px;
+}
+textarea { min-height: 120px; resize: vertical; }
+input:focus, textarea:focus, select:focus {
+  outline: 2px solid var(--blue);
+  outline-offset: 1px;
+  border-color: var(--blue);
+}
+.actions { display: flex; flex-wrap: wrap; gap: 12px; }
+.status { min-height: 24px; color: var(--navy); font-weight: 600; }
+.error-text { color: #b42318; font-size: 14px; }

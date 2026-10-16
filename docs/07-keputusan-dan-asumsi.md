@@ -18,6 +18,33 @@ Bagian ini mengalahkan isi dokumen 01–07 bila berbeda.
 | App Check | Aktif dengan Play Integrity | Terpasang tetapi hanya aktif bila di-build dengan `--dart-define=APP_CHECK=true`. Sebelum aplikasi didistribusikan lewat Google Play dan Play Integrity tertaut, permintaan token gagal lambat dan menunda login pertama sekitar 20 detik. Enforcement di server belum dinyalakan |
 | Model | `freezed` + `json_serializable` | `freezed` saja; dokumen Firestore dipetakan manual (`fromMap`) |
 
+### 16 Oktober 2026: login email/Google, tanpa admin, label kelas dan ekstrakurikuler
+
+Bagian ini mengalahkan baris di atas dan dokumen 01–06 bila berbeda.
+
+| Topik | Sebelumnya | Yang dipakai |
+|---|---|---|
+| Login | Kode sekolah + username/NIS + password, email semu `.invalid` | **Email + password** atau **Masuk dengan Google**. Tanpa kode sekolah, NIS, NISN, dan email semu |
+| Pembuatan akun | Admin membuat akun dengan password awal acak | Pengguna membuat akun sendiri (Google, atau daftar email + verifikasi email). Akses data hanya bila emailnya ada di `members/{email}`; dipasang lewat callable `claimAccount` |
+| Email tak terdaftar | — | Pop-up "Harap Menghubungi Administrator Sekolah" dengan tautan ke `sabusaku.web.app/daftar-sekolah`, lalu keluar |
+| Akun Google | — | Wajib membuat password di layar Lengkapi akun (agar bisa masuk dengan email + password juga) |
+| Lupa password | Minta admin/guru mereset | Email reset Firebase (template Indonesia, pengirim "Sabu Saku") |
+| Simpan password | — | `AutofillGroup` + `finishAutofillContext()` memicu tawaran simpan password Android |
+| Peran | admin, guru, siswa | **guru** (penanggung jawab) dan **siswa**. Admin dihapus |
+| Sekolah dan penanggung jawab | `create-school` membuat admin pertama | Hanya developer, lewat `create-school`, `add-guru`, `remove-guru`. Guru tidak bisa menambah guru lain |
+| Akses guru | Kelas yang ditugaskan (claim `classIds`) | Semua siswa di sekolahnya. Claims hanya `{role, schoolId}` |
+| Kelas | Dokumen `classes/{id}` dikelola admin | **Label** di `schools.classes` (format `XII-A1`, `X-G2`), ditambah guru. Satu siswa tepat satu kelas; siswa boleh ganti sendiri |
+| Ekstrakurikuler | — | **Label** di `schools.extracurriculars` (awal Masis-KIR, Paskibra, Pala, PMR). Siswa ikut nol atau lebih, boleh ganti sendiri |
+| Satu email satu sekolah | — | Dijamin ID dokumen `members/{email}` |
+| Tambah siswa | Admin: CSV/manual dengan username | Guru: email wajib, nama/kelas/ekskul opsional; siswa tanpa data lengkap diarahkan ke Lengkapi akun saat masuk |
+| Keluarkan siswa | Nonaktifkan akun | `removeStudent`: akses dicabut, akun Auth dan jurnal tetap. `eraseStudent`: data sekolah dihapus, akun Auth tetap |
+| Hapus akun | Lewat sekolah/email | Juga dari aplikasi: Profil → Hapus akun (`deleteMyAccount`), wajib Google Play karena akun kini dibuat di aplikasi |
+| Foto profil | Tidak ada | Opsional, Cloud Storage `schools/{s}/avatars/{uid}.jpg`. Akun Google tanpa foto memakai foto Google; foto yang ada tidak ditimpa |
+| Lingkungan | Produksi + emulator, sekolah demo | **Langsung produksi**. Tidak ada project dev dan sekolah demo; data lama direset setelah diekspor. Emulator hanya untuk tes otomatis lokal |
+| Sekolah awal | Demo | SMA Negeri 1 Sukodadi: 2 penanggung jawab (pembina Masis-KIR dan akun uji developer), 20 siswa ekstrakurikuler Masis-KIR, dimasukkan ke `members` sebelum mereka login |
+| SHA Android | Debug + upload | Ditambah SHA-1 dan SHA-256 kunci **Play App Signing**, sehingga Masuk dengan Google bekerja di build dari Google Play |
+| Pendaftaran sekolah | Email di halaman utama | Halaman `daftar-sekolah` dengan formulir yang membuka aplikasi email (mailto) ke benevology@gmail.com. Pengiriman lewat server menyusul |
+
 ## 1. Keputusan yang sudah Anda tetapkan
 
 | # | Topik | Keputusan |
@@ -44,7 +71,7 @@ Semua ini sudah tertulis di PRD/rules. Yang bertanda ⚠ paling layak Anda tinja
 
 | # | Asumsi | Dampak bila diubah |
 |---|---|---|
-| A1 | ⚠ **Admin sekolah tidak dapat membaca isi jurnal**, hanya statistik | Jika admin perlu membaca: tambah aturan baca di rules + layar admin |
+| A1 | ⚠ **Admin sekolah tidak dapat membaca isi jurnal**, hanya statistik (v2: peran admin dihapus) | Jika admin perlu membaca: tambah aturan baca di rules + layar admin |
 | A2 | ⚠ Siswa **boleh menghapus** jurnal sendiri, tetapi hanya dalam jendela edit (H+1) | Jika tidak boleh: hapus aturan `delete` |
 | A3 | Hanya *Informasi penting* yang wajib (≥ 30 karakter); *Hal menarik* dan *Pertanyaan* opsional | Jika semua wajib: ubah `validJournalContent` dan form |
 | A4 | Hari **Minggu netral** (tidak memutus streak, tidak dihitung ambang) selain tanggal libur yang diisi admin | Jika Sabtu juga netral: ubah `settings.neutralWeekdays` (tanpa kode) |
@@ -54,9 +81,9 @@ Semua ini sudah tertulis di PRD/rules. Yang bertanda ⚠ paling layak Anda tinja
 | A8 | Komentar guru berupa daftar komentar (bukan satu komentar tunggal), siswa tidak membalas | Balasan siswa = fitur chat, di luar V1 |
 | A9 | Sampul buku otomatis (tanpa upload dan tanpa pencarian buku) | Upload/Google Books ada di daftar "belum ada" |
 | A10 | Siswa memakai 4 tab: Beranda, Buku, Jurnal, Profil; guru 3 tab; admin 4 tab | Murni UI |
-| A11 | Kelas dikelola admin; pindah/naik kelas manual lewat `moveStudentClass` | Naik kelas massal (akhir tahun ajaran) dapat ditambahkan di M2 jika perlu |
+| A11 | Kelas dikelola admin; pindah/naik kelas manual lewat `moveStudentClass` (v2: kelas berupa label, ganti kelas ditulis langsung ke profil) | Naik kelas massal (akhir tahun ajaran) dapat ditambahkan di M2 jika perlu |
 | A12 | Wilayah data Jakarta (`asia-southeast2`) | Tidak dapat diubah setelah database dibuat |
-| A13 | Dibuat dua lingkungan Firebase: `dev` dan `prod` | — |
+| A13 | Dibuat dua lingkungan Firebase: `dev` dan `prod` | Diganti: satu project produksi |
 
 ## 3. Pertanyaan tersisa (tidak menghambat perencanaan, tetapi perlu sebelum M0/M7)
 

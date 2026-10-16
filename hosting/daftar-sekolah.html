@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Daftarkan sekolah ke Sabu Saku</title>
+  <meta name="description" content="Cara sekolah mulai memakai Sabu Saku, jurnal membaca harian untuk siswa.">
+  <link rel="icon" href="/icon.png">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+<main>
+  <header><a href="/"><img src="/logo.png" alt="Sabu Saku"></a></header>
+  <h1>Daftarkan sekolah Anda</h1>
+  <p>Sabu Saku membantu siswa membiasakan membaca satu buku setiap bulan. Siswa mencatat bacaannya setiap hari di aplikasi, dan penanggung jawab di sekolah melihat siapa yang rajin dan siapa yang perlu didampingi.</p>
+
+  <h2>Manfaat</h2>
+  <ul>
+    <li>Kebiasaan membaca yang terukur: progres buku, jumlah jurnal, dan streak harian.</li>
+    <li>Penanggung jawab langsung tahu siswa yang aktif, perlu perhatian, atau tidak aktif.</li>
+    <li>Komentar pada jurnal siswa, dengan notifikasi ke HP siswa.</li>
+    <li>Bisa dipakai satu kelas, satu ekstrakurikuler, atau satu sekolah.</li>
+    <li>Data tiap sekolah terpisah dan disimpan di pusat data Jakarta. Tanpa iklan.</li>
+  </ul>
+
+  <h2>Cara kerja</h2>
+  <ol>
+    <li>Anda mengisi formulir di bawah. Kami menghubungi Anda untuk memastikan kebutuhan sekolah.</li>
+    <li>Kami mendaftarkan sekolah dan akun penanggung jawabnya, misalnya guru atau pembina ekstrakurikuler.</li>
+    <li>Penanggung jawab menambahkan siswa cukup dengan email. Nama dan kelas boleh diisi belakangan.</li>
+    <li>Siswa masuk dengan akun Google, atau mendaftar dengan email lalu memverifikasinya. Siswa yang datanya belum lengkap diminta melengkapi nama dan kelas.</li>
+    <li>Kelas (misalnya XII-A1) dan ekstrakurikuler (misalnya Masis-KIR) dipakai sebagai label untuk menyaring siswa. Satu siswa punya satu kelas dan boleh ikut beberapa ekstrakurikuler.</li>
+  </ol>
+
+  <h2>Formulir pendaftaran</h2>
+  <p class="muted">Tombol Kirim membuka aplikasi email Anda dengan isi yang sudah terisi, ditujukan ke <a href="mailto:benevology@gmail.com">benevology@gmail.com</a>. Kalau aplikasi email tidak terbuka, pakai tombol Salin isi lalu kirim lewat email apa saja.</p>
+
+  <div class="card">
+    <form id="daftar" novalidate>
+      <div class="field">
+        <label for="sekolah">Nama sekolah</label>
+        <input id="sekolah" name="sekolah" required autocomplete="organization" placeholder="SMA Negeri 1 …">
+      </div>
+      <div class="field">
+        <label for="npsn">NPSN <span class="hint">(opsional)</span></label>
+        <input id="npsn" name="npsn" inputmode="numeric" pattern="[0-9]{8}" placeholder="8 digit">
+      </div>
+      <div class="field">
+        <label for="kota">Kota atau kabupaten</label>
+        <input id="kota" name="kota" required autocomplete="address-level2">
+      </div>
+      <div class="field">
+        <label for="pj">Nama penanggung jawab</label>
+        <input id="pj" name="pj" required autocomplete="name">
+      </div>
+      <div class="field">
+        <label for="email">Email penanggung jawab <span class="hint">(dipakai untuk masuk ke aplikasi)</span></label>
+        <input id="email" name="email" type="email" required autocomplete="email">
+      </div>
+      <div class="field">
+        <label for="wa">Nomor WhatsApp <span class="hint">(opsional)</span></label>
+        <input id="wa" name="wa" type="tel" autocomplete="tel" placeholder="08…">
+      </div>
+      <div class="field">
+        <label for="jumlah">Perkiraan jumlah siswa</label>
+        <select id="jumlah" name="jumlah">
+          <option value="">Pilih</option>
+          <option>Kurang dari 50</option>
+          <option>50–200</option>
+          <option>200–500</option>
+          <option>Lebih dari 500</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="kelompok">Kelas atau ekstrakurikuler yang akan memakai <span class="hint">(opsional)</span></label>
+        <input id="kelompok" name="kelompok" placeholder="Misalnya: XII-A1, XII-A2, Masis-KIR">
+      </div>
+      <div class="field">
+        <label for="pesan">Pesan <span class="hint">(opsional)</span></label>
+        <textarea id="pesan" name="pesan"></textarea>
+      </div>
+      <p id="galat" class="error-text" role="alert" hidden></p>
+      <div class="actions">
+        <button class="button" type="submit">Kirim lewat email</button>
+        <button class="button secondary" type="button" id="salin">Salin isi</button>
+      </div>
+      <p id="status" class="status" aria-live="polite"></p>
+    </form>
+  </div>
+
+  <footer class="muted"><a href="/">Sabu Saku</a> · <a href="/privasi">Kebijakan privasi</a></footer>
+</main>
+<script>
+(function () {
+  var TO = 'benevology@gmail.com';
+  var form = document.getElementById('daftar');
+  var galat = document.getElementById('galat');
+  var status = document.getElementById('status');
+
+  var fields = [
+    ['sekolah', 'Nama sekolah'],
+    ['npsn', 'NPSN'],
+    ['kota', 'Kota/kabupaten'],
+    ['pj', 'Penanggung jawab'],
+    ['email', 'Email penanggung jawab'],
+    ['wa', 'WhatsApp'],
+    ['jumlah', 'Perkiraan jumlah siswa'],
+    ['kelompok', 'Kelas/ekstrakurikuler'],
+    ['pesan', 'Pesan']
+  ];
+
+  function value(id) { return form.elements[id].value.trim(); }
+
+  function check() {
+    var invalid = Array.prototype.filter.call(form.elements, function (el) {
+      return el.willValidate && !el.checkValidity();
+    });
+    if (invalid.length === 0) {
+      galat.hidden = true;
+      return true;
+    }
+    var names = invalid.map(function (el) {
+      return form.querySelector('label[for="' + el.id + '"]').firstChild.textContent.trim();
+    });
+    galat.textContent = 'Periksa lagi: ' + names.join(', ') + '.';
+    galat.hidden = false;
+    invalid[0].focus();
+    return false;
+  }
+
+  function subject() { return 'Pendaftaran sekolah Sabu Saku: ' + value('sekolah'); }
+
+  function body() {
+    var lines = ['Halo, kami ingin mendaftarkan sekolah ke Sabu Saku.', ''];
+    fields.forEach(function (f) {
+      var v = value(f[0]);
+      if (v) lines.push(f[1] + ': ' + v);
+    });
+    return lines.join('\n');
+  }
+
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    if (!check()) return;
+    window.location.href = 'mailto:' + TO +
+      '?subject=' + encodeURIComponent(subject()) +
+      '&body=' + encodeURIComponent(body());
+    status.textContent = 'Aplikasi email dibuka. Kalau tidak terbuka, pakai Salin isi lalu kirim ke ' + TO + '.';
+  });
+
+  document.getElementById('salin').addEventListener('click', function () {
+    if (!check()) return;
+    var text = 'Kepada: ' + TO + '\nSubjek: ' + subject() + '\n\n' + body();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(function () {
+        status.textContent = 'Isi tersalin. Tempel di email baru ke ' + TO + '.';
+      }, function () {
+        status.textContent = 'Gagal menyalin. Kirim isi formulir ke ' + TO + '.';
+      });
+    } else {
+      status.textContent = 'Browser ini tidak bisa menyalin otomatis. Kirim isi formulir ke ' + TO + '.';
+    }
+  });
+})();
+</script>
+</body>
+</html>
