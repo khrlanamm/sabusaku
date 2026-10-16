@@ -26,6 +26,9 @@ service cloud.firestore {
     function inSchool(s) { return signedIn() && tokenSchool() == s; }
     function isTeacher(s) { return inSchool(s) && role() == 'guru'; }
     function isStudent(s) { return inSchool(s) && role() == 'siswa'; }
+    // Joined some school (the book catalog is shared by every school).
+    function isMember() { return signedIn() && tokenSchool() != '' && role() in ['guru', 'siswa']; }
+    function isAnyTeacher() { return isMember() && role() == 'guru'; }
 
     // ---------- Time (WIB = UTC+7, no DST) ----------
     // Dates are compared as whole-day numbers so the device clock is never
@@ -74,12 +77,47 @@ service cloud.firestore {
         && v.matches('^https://(firebasestorage[.]googleapis[.]com|lh[0-9][.]googleusercontent[.]com)/.*$'));
     }
 
+    // A program's cover: a Firebase Storage download URL, or none.
+    function validCoverUrl(v) {
+      return v == null || (v is string && v.size() <= 2048
+        && v.matches('^https://firebasestorage[.]googleapis[.]com/.*$'));
+    }
+    // Recommended catalog books of a school: unique book IDs, at most 200.
+    function validBookIdList(v) {
+      return v is list && v.size() <= 200 && v.toSet().size() == v.size()
+        && (v.size() == 0 || v.join(',').matches('^[A-Za-z0-9_-]{1,64}(,[A-Za-z0-9_-]{1,64})*$'));
+    }
+
     // ---------- Paths ----------
     function programPath(s, p) { return /databases/$(database)/documents/schools/$(s)/programs/$(p); }
     function activePath(s, uid) { return /databases/$(database)/documents/schools/$(s)/activePrograms/$(uid); }
     function userPath(s, uid) { return /databases/$(database)/documents/schools/$(s)/users/$(uid); }
 
     // =================================================================
+    // ---------- book catalog (shared by every school) ----------
+    // Written only by Cloud Functions (saveBook, deleteBook, restoreBook,
+    // setBookCover, reviewSuggestion, the import), so every change lands in
+    // the book's history.
+    match /books/{bookId} {
+      allow read: if isMember();
+      allow write: if false;
+      match /history/{entryId} {
+        allow read: if isMember();
+        allow write: if false;
+      }
+    }
+    // Search index: catalog/shard-{n}.
+    match /catalog/{shard} {
+      allow read: if isMember();
+      allow write: if false;
+    }
+    // Students' proposals; teachers of every school review them. They carry
+    // school names, never student names.
+    match /bookSuggestions/{suggestionId} {
+      allow read: if isAnyTeacher();
+      allow write: if false;
+    }
+
     // ---------- members (roster; written by Cloud Functions) ----------
     match /members/{email} {
       // Teachers see the roster of their own school (query: schoolId == theirs).
@@ -114,13 +152,21 @@ service cloud.firestore {
       allow get: if inSchool(schoolId);
       allow list: if false;
       allow create, delete: if false;
-      // Teachers change the settings and the class and extracurricular labels.
+      // Teachers change the settings, the class and extracurricular labels and
+      // the catalog books the school recommends.
       allow update: if isTeacher(schoolId)
         && request.resource.data.diff(resource.data).affectedKeys()
-             .hasOnly(['settings', 'classes', 'extracurriculars'])
+             .hasOnly(['settings', 'classes', 'extracurriculars', 'recommendedBooks'])
         && validSettings(request.resource.data.settings)
         && validClassList(request.resource.data.get('classes', []))
-        && validExtracurricularList(request.resource.data.get('extracurriculars', []));
+        && validExtracurricularList(request.resource.data.get('extracurriculars', []))
+        && validBookIdList(request.resource.data.get('recommendedBooks', []));
+
+      // ---------- bookStats (readers per catalog book; server-written) ----------
+      match /bookStats/{bookId} {
+        allow read: if inSchool(schoolId);
+        allow write: if false;
+      }
 
       // ---------- users ----------
       match /users/{uid} {
@@ -214,11 +260,16 @@ service cloud.firestore {
             // derived fields start empty; only Cloud Functions change them
             && d.currentPage == 0 && d.journalCount == 0
             && d.lastJournalDate == null && d.streakCurrent == 0 && d.streakBest == 0
-            && d.book.keys().hasOnly(['title', 'author', 'totalPages', 'isbn'])
-            && validStr(d.book.title, 2, 120)
-            && validStr(d.book.author, 2, 80)
+            && d.book.keys().hasOnly(['title', 'author', 'totalPages', 'isbn', 'bookId', 'coverUrl'])
+            && validStr(d.book.title, 2, 200)
+            && validStr(d.book.author, 2, 200)
             && d.book.totalPages is int && d.book.totalPages >= 10 && d.book.totalPages <= 2000
             && optStr(d.book, 'isbn', 20)
+            // picked from the catalog: the book must exist there
+            && (d.book.get('bookId', null) == null
+                || (d.book.bookId is string
+                    && exists(/databases/$(database)/documents/books/$(d.book.bookId))))
+            && validCoverUrl(d.book.get('coverUrl', null))
             && isDateId(d.startDate) && daysAgo(d.startDate) == 0
             && d.month == d.startDate[0:7]
             && isDateId(d.targetDate) && d.targetDate >= d.startDate

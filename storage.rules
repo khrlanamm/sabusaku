@@ -1,7 +1,8 @@
 rules_version = '2';
 
-// Profile photos only: schools/{schoolId}/avatars/{uid}.jpg. The app keeps
-// the download URL in users/{uid}.photoUrl. Everything else is closed.
+// Profile photos (schools/{schoolId}/avatars/{uid}.jpg, URL kept in
+// users/{uid}.photoUrl), students' own book covers and the catalog covers.
+// Everything else is closed.
 service firebase.storage {
   match /b/{bucket}/o {
     match /schools/{schoolId}/avatars/{file} {
@@ -15,6 +16,33 @@ service firebase.storage {
         && request.resource.size < 1024 * 1024
         && request.resource.contentType.matches('image/.*');
       allow delete: if isOwnPhoto();
+    }
+
+    // A cover a student took for their own book. Members of the school can
+    // see it; the catalog never points at it (accepted suggestions are copied
+    // to books/ by Cloud Functions).
+    match /schools/{schoolId}/programCovers/{uid}/{file} {
+      function inSchool() {
+        return request.auth != null && request.auth.token.get('schoolId', '') == schoolId;
+      }
+      allow read: if inSchool();
+      allow create, update: if inSchool() && request.auth.uid == uid
+        && request.resource.size < 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if inSchool() && request.auth.uid == uid;
+    }
+
+    // Catalog covers (shared by every school). Teachers upload; Cloud
+    // Functions set them on the book. Nothing is deleted from the app.
+    match /books/{bookId}/{file} {
+      function isMember() {
+        return request.auth != null && request.auth.token.get('schoolId', '') != '';
+      }
+      allow read: if isMember();
+      allow create, update: if isMember() && request.auth.token.get('role', '') == 'guru'
+        && request.resource.size < 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+      allow delete: if false;
     }
 
     match /{allPaths=**} {

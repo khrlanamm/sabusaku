@@ -21,6 +21,12 @@ export const auditCol = (schoolId: string) => schoolRef(schoolId).collection("au
 /** Top-level roster: `members/{email}`. The ID makes an email belong to one school. */
 export const membersCol = () => db.collection("members");
 
+/** The book catalog shared by every school, and what students suggest for it. */
+export const booksCol = () => db.collection("books");
+export const bookSuggestionsCol = () => db.collection("bookSuggestions");
+/** Per school: how many students read each catalog book. */
+export const bookStatsCol = (schoolId: string) => schoolRef(schoolId).collection("bookStats");
+
 /** Storage path of a profile photo uploaded from the app. */
 export const avatarPath = (schoolId: string, uid: string) => `schools/${schoolId}/avatars/${uid}.jpg`;
 

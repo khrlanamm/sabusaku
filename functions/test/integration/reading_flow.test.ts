@@ -120,6 +120,7 @@ describe("alur membaca", () => {
       activeProgram: {
         title: "Laskar Pelangi",
         totalPages: 100,
+        coverUrl: null,
         currentPage: 0,
         percent: 0,
         overdue: false,

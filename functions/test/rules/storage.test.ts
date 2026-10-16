@@ -69,3 +69,59 @@ describe("foto profil", () => {
     await assertFails(deleteObject(ref(teacher, path("siswa1"))));
   });
 });
+
+describe("cover buku milik siswa", () => {
+  const cover = (uid: string, school = SCHOOL) => `schools/${school}/programCovers/${uid}/1700000000.jpg`;
+  const student = () => storageOf("siswa1", {role: "siswa", schoolId: SCHOOL});
+
+  it("siswa mengunggah dan menghapus cover di foldernya sendiri", async () => {
+    const mine = ref(student(), cover("siswa1"));
+    await assertSucceeds(uploadBytes(mine, photo, jpeg));
+    await assertSucceeds(getBytes(mine));
+    await assertSucceeds(deleteObject(mine));
+  });
+
+  it("bukan gambar, terlalu besar, atau folder orang lain ditolak", async () => {
+    await assertFails(uploadBytes(ref(student(), cover("siswa1")), photo, {contentType: "text/plain"}));
+    await assertFails(
+      uploadBytes(ref(student(), cover("siswa1")), new Uint8Array(1024 * 1024 + 1), jpeg),
+    );
+    await assertFails(uploadBytes(ref(student(), cover("siswa2")), photo, jpeg));
+    await assertFails(uploadBytes(ref(student(), cover("siswa1", OTHER_SCHOOL)), photo, jpeg));
+  });
+
+  it("anggota sekolah melihatnya; sekolah lain tidak; orang lain tidak menghapus", async () => {
+    await env.withSecurityRulesDisabled(async (context) => {
+      await uploadBytes(ref(context.storage(), cover("siswa1")), photo, jpeg);
+    });
+    const teacher = storageOf("guru1", {role: "guru", schoolId: SCHOOL});
+    await assertSucceeds(getBytes(ref(teacher, cover("siswa1"))));
+    await assertFails(
+      getBytes(ref(storageOf("guru9", {role: "guru", schoolId: OTHER_SCHOOL}), cover("siswa1"))),
+    );
+    await assertFails(deleteObject(ref(teacher, cover("siswa1"))));
+  });
+});
+
+describe("cover katalog", () => {
+  const path = "books/bk_laskar/cover-1700000000.jpg";
+  const teacher = (school = SCHOOL) => storageOf("guru1", {role: "guru", schoolId: school});
+
+  it("guru sekolah mana pun mengunggah; anggota mana pun melihat", async () => {
+    await assertSucceeds(uploadBytes(ref(teacher(OTHER_SCHOOL), path), photo, jpeg));
+    await assertSucceeds(getBytes(ref(storageOf("siswa1", {role: "siswa", schoolId: SCHOOL}), path)));
+    await assertFails(getBytes(ref(storageOf("ghost", {}), path)));
+  });
+
+  it("siswa, bukan gambar, terlalu besar, dan menghapus ditolak", async () => {
+    await assertFails(
+      uploadBytes(ref(storageOf("siswa1", {role: "siswa", schoolId: SCHOOL}), path), photo, jpeg),
+    );
+    await assertFails(uploadBytes(ref(teacher(), path), photo, {contentType: "text/plain"}));
+    await assertFails(uploadBytes(ref(teacher(), path), new Uint8Array(1024 * 1024 + 1), jpeg));
+    await env.withSecurityRulesDisabled(async (context) => {
+      await uploadBytes(ref(context.storage(), path), photo, jpeg);
+    });
+    await assertFails(deleteObject(ref(teacher(), path)));
+  });
+});

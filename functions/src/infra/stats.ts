@@ -20,6 +20,8 @@ export interface ActiveProgramSummary {
   title: string;
   author: string;
   totalPages: number;
+  /** The book's cover (catalog copy or the student's own photo), if any. */
+  coverUrl: string | null;
   currentPage: number;
   percent: number;
   startDate: string;
@@ -161,6 +163,7 @@ export async function refreshStudentStats(
       title: active.get("book.title") as string,
       author: active.get("book.author") as string,
       totalPages,
+      coverUrl: (active.get("book.coverUrl") as string | null | undefined) ?? null,
       currentPage,
       percent: percentOf(currentPage, totalPages),
       startDate: active.get("startDate") as string,
