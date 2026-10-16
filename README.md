@@ -30,8 +30,9 @@ functions/
 firestore.rules   aturan keamanan; setiap kasus di docs/03 §6 diuji otomatis
 storage.rules     foto profil schools/{s}/avatars/{uid}.jpg
 integration_test/ alur ujung ke ujung di perangkat Android
-hosting/          situs sabusaku.web.app: penjelasan, daftar sekolah, privasi, hapus data
+hosting/          situs sabusaku.web.app: penjelasan, daftar sekolah, privasi, hapus data, panduan
 store/            teks dan grafik listing Google Play
+docs/manual/      buku panduan PDF dan skrip pembuatnya
 ```
 
 ## Prasyarat
@@ -79,6 +80,16 @@ Dijalankan dari `functions/`. Tanpa `--emulator`, skrip bekerja di **produksi** 
 | `npx tsx tools/set-school-status.ts --code sman1 --status suspended` | Menangguhkan atau mengaktifkan sekolah |
 | `npx tsx tools/export-school.ts --code sman1` | Ekspor seluruh data sekolah ke `secret/exports/` |
 | `npx tsx tools/delete-school.ts --code sman1 --confirm sman1` | Menghapus sekolah beserta data dan keanggotaannya. Tidak bisa dibatalkan |
+
+## Buku panduan
+
+Panduan pengguna untuk siswa dan penanggung jawab ada di `docs/manual/panduan-sabu-saku.pdf` dan disajikan di [sabusaku.web.app/panduan.pdf](https://sabusaku.web.app/panduan.pdf) (`hosting/panduan.pdf`). Keduanya dibuat ulang dengan:
+
+```sh
+python3 -I docs/manual/make_manual.py   # butuh Pillow dan Google Chrome
+```
+
+Teks, letak nomor pada gambar, dan susunan halaman ada di skrip itu. Tangkapan layar mentah (PNG 1080×2424) diambil dengan `tool/screenshots.sh` dari akun produksi (kecuali `mulai-pilih-akun-google.png`, tangkapan layar biasa dari perangkat), lalu disalin ke `docs/manual/raw/`, yang tidak masuk git. Skrip menutup semua alamat email dengan `MASKS`, memotong bagian atas, lalu menyimpan JPEG ke `docs/manual/shots/`; hanya JPEG itu yang di-commit. Tangkapan layar baru yang memuat email wajib ditambahkan ke `MASKS` sebelum dipakai. Kode QR ke Google Play (`docs/manual/assets/qr-play.svg`) statis; buat ulang hanya bila tautan toko berubah.
 
 ## Deploy
 
