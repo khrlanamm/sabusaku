@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:sabusaku/app/theme/theme.dart';
 import 'package:sabusaku/features/auth/presentation/auth_widgets.dart';
 
+import '../../helpers/sample_password.dart';
+
 void main() {
   testWidgets('each requirement turns green as the password meets it', (
     tester,
@@ -33,13 +35,22 @@ void main() {
         .length;
 
     expect(met(), 0);
-    await tester.enterText(find.byKey(const Key('password-new')), 'rahasia');
+    await tester.enterText(
+      find.byKey(const Key('password-new')),
+      samplePassword(upper: false, digit: false, symbol: false, length: 7),
+    );
     await tester.pump();
     expect(met(), 0);
-    await tester.enterText(find.byKey(const Key('password-new')), 'Rahasia1');
+    await tester.enterText(
+      find.byKey(const Key('password-new')),
+      samplePassword(symbol: false, length: 8),
+    );
     await tester.pump();
     expect(met(), 3);
-    await tester.enterText(find.byKey(const Key('password-new')), 'Rahasia#1');
+    await tester.enterText(
+      find.byKey(const Key('password-new')),
+      samplePassword(length: 9),
+    );
     await tester.pump();
     expect(met(), 4);
 

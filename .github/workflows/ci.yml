@@ -48,6 +48,6 @@ jobs:
       # Rules run without the Functions emulator so triggers do not react to
       # their fixture writes.
       - name: Security rules tests
-        run: npx --yes firebase-tools@15 emulators:exec --project demo-sabusaku --only firestore "npm run test:rules"
+        run: npx --yes firebase-tools@15 emulators:exec --project demo-sabusaku --only firestore,storage "npm run test:rules"
       - name: Callable and trigger integration tests
-        run: npx --yes firebase-tools@15 emulators:exec --project demo-sabusaku --only auth,firestore,functions "npm run test:integration"
+        run: npx --yes firebase-tools@15 emulators:exec --project demo-sabusaku --only auth,firestore,functions,storage "npm run test:integration"

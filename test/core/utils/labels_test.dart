@@ -1,6 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sabusaku/core/utils/labels.dart';
 
+import '../../helpers/sample_password.dart';
+
 void main() {
   test('normalises what people type into class labels', () {
     const cases = {
@@ -51,20 +53,21 @@ void main() {
   });
 
   test('a new password needs length, mixed case, a digit and a symbol', () {
-    expect(validateNewPassword('Rahasia#2026'), isNull);
+    expect(validateNewPassword(samplePassword()), isNull);
     for (final weak in [
       '',
-      'Ra#1',
-      'rahasia#2026',
-      'RAHASIA#2026',
-      'Rahasia#lima',
-      'Rahasia2026',
+      samplePassword(length: 4),
+      samplePassword(upper: false),
+      samplePassword(lower: false),
+      samplePassword(digit: false),
+      samplePassword(symbol: false),
     ]) {
       expect(validateNewPassword(weak), isNotNull, reason: weak);
     }
+    final lowerOnly = samplePassword(upper: false, digit: false, symbol: false);
     final unmet = [
       for (final rule in passwordRules)
-        if (!rule.isMet('rahasiaku')) rule.label,
+        if (!rule.isMet(lowerOnly)) rule.label,
     ];
     expect(unmet, hasLength(3));
   });

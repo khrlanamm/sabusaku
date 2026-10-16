@@ -7,6 +7,8 @@ import 'package:sabusaku/features/auth/data/auth_repository.dart';
 import 'package:sabusaku/features/auth/domain/session.dart';
 import 'package:sabusaku/features/auth/presentation/login_screen.dart';
 
+import '../../helpers/sample_password.dart';
+
 class _MockAuthRepository extends Mock implements AuthRepository {}
 
 void main() {
@@ -49,7 +51,10 @@ void main() {
   testWidgets('a malformed email is rejected', (tester) async {
     await pump(tester);
     await tester.enterText(find.byKey(const Key('login-email')), 'bukan-email');
-    await tester.enterText(find.byKey(const Key('login-password')), 'rahasia');
+    await tester.enterText(
+      find.byKey(const Key('login-password')),
+      samplePassword(),
+    );
     await tester.tap(find.byKey(const Key('login-submit')));
     await tester.pump();
 
