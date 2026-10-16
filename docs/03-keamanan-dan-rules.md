@@ -1,6 +1,6 @@
 # 03 — Keamanan, Autentikasi, dan Security Rules
 
-Berkas terkait: `firestore.rules`, `storage.rules`, `firestore.indexes.json`. Diperbarui 16 Oktober 2026 untuk model v2.
+Berkas terkait: `firestore.rules`, `storage.rules`, `firestore.indexes.json`. Diperbarui 16 Oktober 2026 untuk model v2, dan 17 Oktober 2026 untuk 1.2.1: katalog buku bersama, laporan konten dan pengguna, persetujuan ketentuan, status App Check, dan Firebase Analytics yang dihapus.
 
 ## 1. Autentikasi
 
@@ -27,6 +27,15 @@ Setelah claim berubah, klien memanggil `getIdToken(true)`. Mengeluarkan siswa me
 ### Kebijakan password
 Minimal 8 karakter, maksimal 64, dibuat pengguna sendiri.
 
+### Persetujuan ketentuan penggunaan
+Ketentuan: https://sabusaku.web.app/ketentuan (`hosting/ketentuan.html`). Versi berlaku `CURRENT_TERMS_VERSION = 1` di `functions/src/domain/terms.ts` dan `lib/core/policy/terms.dart` (harus sama).
+
+- Setelah klaim, router mengecek `users.termsVersion` (tidak ada = 0). Selama lebih kecil dari versi berlaku, semua lokasi diarahkan ke `/ketentuan`. Urutan gerbang: **ketentuan dulu**, lalu Lengkapi akun, lalu area peran, karena nama dan foto profil sudah konten yang dilihat orang lain.
+- Layar ketentuan berisi ringkasan, tautan ke halaman lengkap, "Saya setuju" (memanggil `acceptTerms`), dan "Keluar".
+- Callable `acceptTerms({version})`: peran `guru` atau `siswa` dengan sekolah; `version` harus sama dengan versi server, kalau tidak `invalid-argument` "Ketentuan sudah diperbarui. Muat ulang aplikasi." (aplikasi lama tidak bisa menyetujui ketentuan baru yang belum ditampilkannya). Mengisi `termsVersion` dan `termsAcceptedAt` (waktu server), idempoten, tercatat di `auditLogs`.
+- Kedua field hanya ditulis server: daftar `hasOnly` di rules `users` tidak memuatnya.
+- Menaikkan versi (ketentuan berubah) memaksa semua pengguna menyetujui lagi saat membuka aplikasi.
+
 ## 2. Model otorisasi
 
 | Data | Siswa | Penanggung jawab (guru) |
@@ -37,8 +46,15 @@ Minimal 8 karakter, maksimal 64, dibuat pengguna sendiri.
 | `studentStats` | miliknya | semua di sekolahnya |
 | `programs`, `journals` | miliknya (tulis dalam aturan BR) | baca semua di sekolahnya |
 | `comments` | baca miliknya | buat/ubah/hapus miliknya |
-| `schools` (`settings`, `classes`, `extracurriculars`) | baca | ubah |
+| `schools` (`settings`, `classes`, `extracurriculars`, `recommendedBooks`) | baca | ubah |
+| Ketentuan (`termsVersion`, `termsAcceptedAt`) | lewat `acceptTerms` | lewat `acceptTerms` |
+| Katalog `books`, `books/*/history`, `catalog` (semua sekolah) | baca | baca; ubah lewat callable (`saveBook`, `deleteBook`, `restoreBook`, `setBookCover`) |
+| `bookSuggestions` (semua sekolah) | — (usulan dibuat server dari program barunya) | baca; tinjau lewat `reviewSuggestion` |
+| `bookStats` sekolahnya | baca | baca |
+| `reports` | kirim lewat `reportContent` (komentar pada jurnalnya, penulis komentar, buku); tidak bisa membaca | kirim (juga jurnal, usulan, siswa); baca laporan yang `schools`-nya memuat sekolahnya; selesaikan lewat `resolveReport` |
 | Foto profil (Storage) | tulis miliknya, baca sekolahnya | tulis miliknya, baca sekolahnya |
+| Cover milik siswa `programCovers/{uid}/` (Storage) | tulis miliknya, baca sekolahnya | baca sekolahnya |
+| Cover katalog `books/{bookId}/` (Storage) | baca | baca; unggah (tidak bisa menghapus) |
 
 Peran admin sekolah dihapus. Menambah sekolah dan penanggung jawab hanya lewat skrip developer. Menambah, mengeluarkan, dan menghapus data siswa lewat callable (`addStudents`, `removeStudent`, `eraseStudent`). Claims, `status`, `email`, dan angka turunan **hanya** ditulis Functions.
 
@@ -55,10 +71,13 @@ Peran admin sekolah dihapus. Menambah sekolah dan penanggung jawab hanya lewat s
 | Angka turunan | Daftar `hasOnly` pada `affectedKeys`; field server tidak ada di daftar yang boleh diubah klien |
 | BR-14 isolasi | Pemeriksaan `schoolId` claim terhadap path (dan terhadap `members.schoolId`) |
 | BR-18 label | `classId` harus ada di `schools.classes`; `extracurriculars` harus himpunan bagian `schools.extracurriculars`, maks 10 |
+| Ketentuan | `termsVersion` dan `termsAcceptedAt` tidak ada di daftar `hasOnly` pemilik maupun penanggung jawab, jadi klien tidak bisa mengisinya |
+| Katalog bersama | `books`, `history`, `catalog`, `bookSuggestions`: `allow write: if false`; baca `isMember()` (claim `schoolId` dan `role` terisi), `bookSuggestions` hanya `isAnyTeacher()`. Program dari katalog: `book.bookId` harus ada di `books`, `book.coverUrl` harus URL Firebase Storage. `recommendedBooks`: ID unik, maks 200 |
+| Laporan | `match /reports/{id} { allow read: if isTeacherOfAny(resource.data.schools); allow write: if false; }`: guru yang claim `schoolId`-nya ada di `schools`. Siswa tidak bisa membaca laporan, termasuk laporannya sendiri. Semua tulis lewat Functions. Laporan tentang penanggung jawab (komentarnya, atau dirinya sebagai pengguna) disimpan dengan `schools: []`, jadi hanya pengembang yang melihatnya lewat `tools/reports.ts`; guru yang dilaporkan tidak bisa melihat pelapornya |
 
 ### Pola query yang harus dipatuhi klien (karena "rules bukan filter")
 - Siswa: `programs where studentId == uid`; jurnal dibaca per program.
-- Penanggung jawab: `studentStats orderBy name`, `programs where studentId == S`, `members where schoolId == S where role == siswa`.
+- Penanggung jawab: `studentStats orderBy name`, `programs where studentId == S`, `members where schoolId == S where role == siswa`, `reports where schools array-contains S orderBy createdAt desc`.
 - **Tidak memakai collection-group query** untuk `journals`/`comments`.
 
 ### Catatan perilaku offline
@@ -68,13 +87,14 @@ Jurnal ditulis offline akan dikirim saat online. Bila tanggal jurnal sudah melew
 
 | Lapisan | Rencana |
 |---|---|
-| **App Check** | Provider Play Integrity untuk Firestore, Functions, dan Auth; provider debug untuk emulator/dev. **Perlu keputusan distribusi:** jika aplikasi dibagikan sebagai APK langsung (bukan dari Google Play), verifikasi Play Integrity bisa menolak instalasi tersebut. Verifikasi perilakunya di dokumentasi Firebase sebelum menyalakan enforcement |
-| **Wilayah** | Firestore dan Functions di `asia-southeast2` (Jakarta) |
-| **Storage** | `schools/{s}/avatars/{uid}.jpg`: tulis hanya pemilik, `image/*`, < 1 MB; baca hanya anggota sekolah |
-| **Functions** | Setiap callable memeriksa claim `role`/`schoolId` dari `request.auth` (`claimAccount` memeriksa `email_verified`), memvalidasi input (skema), membatasi ukuran batch, dan menulis log audit sederhana (`auditLogs` di sisi server saja) |
+| **App Check** | **Belum ditegakkan.** Aplikasi hanya mengaktifkan App Check bila dibangun dengan `--dart-define=APP_CHECK=true` (`lib/bootstrap.dart`; Play Integrity di rilis, provider debug di debug); build biasa tidak mengirim token. Semua callable berjalan dengan `enforceAppCheck: false` (`CALLABLE_OPTIONS` di `functions/src/config.ts`). Di konsol, API App Check tidak mengembalikan konfigurasi layanan apa pun untuk project `sabusaku` (dicek 17 Oktober 2026), jadi Firestore, Storage, dan Auth juga tidak ditegakkan. Untuk menyalakan: rilis lewat Google Play, tautkan Play Integrity, bangun dengan `APP_CHECK=true`, pantau metrik App Check, baru ubah `enforceAppCheck` dan enforcement di konsol. APK di luar Google Play akan ditolak setelah itu |
+| **Wilayah** | Firestore, bucket Storage `sabusaku.firebasestorage.app`, dan Cloud Functions di `asia-southeast2` (Jakarta). Firebase Authentication, Cloud Messaging (FCM), dan Crashlytics adalah layanan global Google, tidak terikat wilayah |
+| **Storage** | `schools/{s}/avatars/{uid}.jpg`: tulis hanya pemilik. `schools/{s}/programCovers/{uid}/…`: tulis/hapus hanya siswa pemilik folder. Keduanya `image/*`, < 1 MB, baca hanya anggota sekolah. `books/{bookId}/…`: unggah hanya guru (sekolah mana pun), `image/*`, < 1 MB, baca anggota sekolah mana pun, tidak bisa dihapus dari klien. Selain itu tertutup |
+| **Functions** | Setiap callable memeriksa claim `role`/`schoolId` dari `request.auth` (`claimAccount` memeriksa `email_verified`), memvalidasi input (skema), membatasi ukuran batch, dan menulis log audit sederhana (`auditLogs` di sisi server saja). `reportContent` membatasi 20 laporan per pelapor dalam 24 jam |
+| **Analytics** | Firebase Analytics dihapus di 1.2.1 (dependensi, import, dan meta-data `google_analytics_*` di manifest). Tidak ada statistik pemakaian dan tidak ada lokasi. Izin `AD_ID`/ADSERVICES tetap dicabut dengan `tools:node="remove"`. Crashlytics tetap ada, hanya untuk build rilis yang memakai produksi (`lib/bootstrap.dart`) |
 | **Rahasia** | Tidak ada kunci rahasia di klien. Skrip developer memakai service account lokal yang tidak masuk repositori |
 | **Pemisahan lingkungan** | Satu project produksi `sabusaku`. Tes otomatis memakai Firebase Emulator secara lokal; tidak ada project dev atau sekolah demo |
-| **Backup** | Aktifkan *scheduled backups* Firestore (harian) dan *point-in-time recovery* di prod |
+| **Backup** | Aktif di prod (dicek 17 Oktober 2026): *point-in-time recovery* Firestore 7 hari dan jadwal backup harian dengan retensi 7 hari. Halaman `/hapus-data` menyebut salinan cadangan terhapus paling lama 7 hari; ubah halaman itu bila retensi berubah |
 | **Pembatasan penyalahgunaan** | Batas panjang teks dan ukuran batch; Firestore dan Auth sudah membatasi percobaan login berulang |
 
 ## 5. Privasi dan kepatuhan (siswa di bawah 18 tahun)
@@ -82,11 +102,11 @@ Jurnal ditulis offline akan dikirim saat online. Bila tanggal jurnal sudah melew
 Ini bukan nasihat hukum; konfirmasikan dengan pihak sekolah/konsultan hukum sebelum rilis.
 
 - Posisi yang disarankan: **sekolah sebagai pengendali data, aplikasi sebagai pemroses**. Persetujuan orang tua/wali ditangani sekolah (mis. lewat formulir sekolah), dan sekolah yang mendaftarkan email siswa.
-- **Minimisasi data:** nama, email, kelas, ekstrakurikuler, foto profil opsional, dan isi jurnal. Tidak ada NIS, lokasi, kontak, atau pelacak iklan. Analytics tidak boleh menyertakan nama/email/isi jurnal.
+- **Minimisasi data:** nama, email, kelas, ekstrakurikuler, foto profil dan foto cover opsional, isi jurnal, dan laporan. Tidak ada NIS, lokasi (juga perkiraan), kontak, statistik pemakaian, atau pelacak iklan. Laporan kerusakan Crashlytics tidak boleh menyertakan nama, email, atau isi jurnal (jangan memanggil `setUserIdentifier`/`log` dengan data itu).
 - Penanggung jawab hanya melihat siswa sekolahnya sendiri.
-- **Penghapusan data:** `eraseStudent` (penanggung jawab) menghapus keanggotaan, profil, `studentStats`, `programs` beserta jurnal dan komentarnya, dan foto profil, tanpa menghapus akun Auth milik siswa. `deleteMyAccount` (Profil → Hapus akun, wajib Google Play karena akun dibuat di aplikasi) menghapus data yang sama lalu akun Auth. `removeStudent` hanya mencabut akses.
+- **Penghapusan data:** `eraseStudent` (penanggung jawab) menghapus keanggotaan, profil, `studentStats`, `programs` beserta jurnal dan komentarnya, foto profil, dan foto cover milik siswa beserta rujukannya di usulan (`forgetStudentCovers`), tanpa menghapus akun Auth milik siswa. `deleteMyAccount` (Profil → Hapus akun, wajib Google Play karena akun dibuat di aplikasi) menghapus data yang sama lalu akun Auth. Keduanya memanggil `forgetReports`: laporan yang dikirim orang itu dihapus, laporan tentang dia tinggal tanpa salinan konten (`snapshot = {}`, `targetDeleted = true`). `removeStudent` hanya mencabut akses. Buku dan cover yang sudah diterima ke katalog, serta riwayat katalog yang memuat nama penanggung jawab, tetap ada (dijelaskan di `/hapus-data`).
 - **Retensi:** tentukan bersama sekolah (usulan: data siswa dihapus/diarsipkan 1 tahun setelah lulus).
-- **Dokumen yang perlu disiapkan sebelum rilis:** kebijakan privasi (Bahasa Indonesia), halaman penghapusan data untuk formulir *Data safety* Google Play, dan pernyataan target audiens aplikasi di Play Console (pengguna remaja). Periksa kebijakan Google Play terbaru untuk aplikasi yang melibatkan anak/remaja.
+- **Dokumen publik** (`hosting/`, https://sabusaku.web.app): `/privasi` (kebijakan privasi), `/ketentuan` (ketentuan penggunaan), `/hapus-data` (penghapusan akun dan data untuk formulir *Data safety*). Ubah halaman itu bersama perubahan data yang dikumpulkan; jawaban Play Console ada di `store/listing.md`. Periksa kebijakan Google Play terbaru untuk aplikasi yang melibatkan remaja.
 
 ## 6. Daftar kasus uji rules (wajib, otomatis di CI)
 
@@ -123,4 +143,33 @@ Gunakan `@firebase/rules-unit-testing` dengan Firebase Emulator. Minimal:
 22. Siswa yang dikeluarkan: claims hilang, akun Auth tetap ada, data jurnal tetap ada.
 23. Storage: avatar milik orang lain atau > 1 MB atau bukan gambar: ditolak; anggota sekolah lain tidak bisa membaca.
 
+**Katalog, ketentuan, laporan**
+24. Anggota sekolah mana pun membaca `books`, riwayat, dan `catalog`; tidak ada klien (termasuk guru) yang menulisnya langsung.
+25. `bookSuggestions` dibaca guru sekolah mana pun, tidak oleh siswa. `bookStats` hanya untuk anggota sekolahnya.
+26. Guru mengubah `recommendedBooks` sekolahnya; daftar tidak valid, siswa, dan guru sekolah lain ditolak.
+27. Program dari katalog: `bookId` yang ada dengan cover Storage diterima; `bookId` yang tidak ada, cover dari luar Storage, atau field asing ditolak.
+28. Storage cover siswa: hanya di folder sendiri, gambar < 1 MB, dibaca anggota sekolahnya saja. Cover katalog: guru sekolah mana pun mengunggah, anggota mana pun membaca, siswa dan hapus ditolak.
+29. Klien tidak bisa menulis `termsVersion` atau `termsAcceptedAt` (pemilik maupun penanggung jawab).
+30. `reports`: guru membaca laporan yang `schools`-nya memuat sekolahnya; guru sekolah lain dan semua siswa (termasuk pelapornya) ditolak; klien tidak bisa membuat, mengubah, atau menghapus laporan.
+
+Alur callable (`reportContent`, `resolveReport`, `acceptTerms`, `forgetReports`) diuji di `functions/test/integration/reports_flow.test.ts`.
+
 Catatan teknis untuk pengujian: simulasikan waktu server dengan mengatur jam pada test (atau menulis jurnal dengan ID tanggal relatif terhadap tanggal sistem saat tes berjalan) dan uji khusus batas tengah malam WIB (23:59 vs 00:01).
+
+## 7. Kepatuhan kebijakan Konten Buatan Pengguna (UGC) Google Play
+
+Jurnal, ulasan, komentar, foto profil, foto cover, usulan buku, dan suntingan katalog adalah konten buatan pengguna. Walau Sabu Saku hanya dipakai di dalam sekolah dan katalognya dibagi antarsekolah, kebijakan UGC Google Play tetap meminta (1) persetujuan ketentuan sebelum pengguna membuat atau mengunggah konten, (2) pelaporan konten dan pengguna dari dalam aplikasi, dan (3) moderasi yang berjalan terus. Cara Sabu Saku memenuhinya:
+
+| Syarat | Implementasi |
+|---|---|
+| Ketentuan yang melarang konten tidak pantas | `/ketentuan`: konten yang dilarang, cara melapor, moderasi dan sanksi, katalog bersama |
+| Disetujui sebelum membuat konten | Gerbang `/ketentuan` sebelum Lengkapi akun dan area peran; `acceptTerms` mencatat `termsVersion` dan `termsAcceptedAt` (§1) |
+| Pelaporan di aplikasi | Menu "Laporkan" pada komentar (dan penulisnya), jurnal (guru), buku, saran (guru), dan siswa (guru), lewat `reportContent`. Alasan: konten tidak pantas, pelecehan atau perundungan, data pribadi, hak cipta, data buku salah, lainnya |
+| Moderasi oleh sekolah | Penanggung jawab membuka Sekolah → Laporan (`/guru/sekolah/laporan`), melihat laporan terbuka dan selesai, membuka kontennya, bertindak, lalu "Tandai selesai" (`resolveReport`). Tindakan yang tersedia: hapus komentar sendiri, ubah atau hapus lunak buku katalog, tolak usulan, ubah profil siswa, keluarkan siswa (`removeStudent`), hapus data siswa (`eraseStudent`) |
+| Moderasi oleh pengembang | `functions/tools/reports.ts --list [--status open\|resolved\|all] [--school id]` untuk semua sekolah, `--resolve <id> --note "…"` (tercatat "Pengembang"). Pengembang menindak lewat Admin SDK: hapus konten, hapus akun, `remove-guru.ts`, `set-school-status.ts`. Jalankan `--list` secara berkala (mis. tiap minggu) supaya laporan yang tidak ditangani sekolah, laporan tentang penanggung jawab, dan laporan katalog tetap tertangani |
+| Penyalahgunaan laporan | Maks 20 laporan per pelapor per 24 jam; konten atau akun sendiri tidak bisa dilaporkan |
+
+Risiko yang tersisa:
+- Belum ada fitur blokir pengguna. Interaksi hanya antara siswa dan penanggung jawab sekolahnya (komentar), sehingga ditangani lewat laporan dan tindakan sekolah.
+- Laporan memuat nama pelapor dan bisa dibaca semua penanggung jawab sekolah itu, termasuk penanggung jawab yang dilaporkan. Halaman `/ketentuan` menyarankan email langsung ke pengembang untuk kasus seperti ini.
+- Tidak ada notifikasi laporan baru ke penanggung jawab atau pengembang; jumlah laporan terbuka tampil di kartu Sekolah → Laporan.

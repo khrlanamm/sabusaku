@@ -102,7 +102,7 @@ Nilai BR-3, BR-4, BR-7 dikunci di aplikasi dan rules (bukan pengaturan sekolah) 
 - **Kinerja:** Beranda siswa dan Dashboard guru masing-masing dimuat dari 1–2 dokumen ringkasan, bukan menghitung ulang di klien.
 - **Keamanan dan privasi:** siswa SMA umumnya di bawah 18 tahun dan jurnal bersifat personal. Isolasi per sekolah, akses minimum per peran, App Check, wilayah data Jakarta, jalur penghapusan data. Lihat dokumen 03.
 - **Aksesibilitas:** ukuran sentuh ≥ 48dp, kontras AA, mendukung font besar sistem.
-- **Observabilitas:** Crashlytics, Analytics tanpa data personal siswa (tanpa nama dan email), log Functions terstruktur.
+- **Observabilitas:** Crashlytics (tanpa nama, email, atau isi jurnal) dan log Functions terstruktur. Firebase Analytics dilepas di 1.2.1.
 
 ## 7. Prioritas (MoSCoW)
 

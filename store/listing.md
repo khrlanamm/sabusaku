@@ -51,10 +51,17 @@ PRIVASI
 • Hanya email yang didaftarkan sekolah yang bisa membuka data sekolah.
 • Data tiap sekolah terpisah. Hanya katalog buku yang dipakai bersama.
 • Tanpa iklan dan tanpa ID iklan.
-• Data disimpan di pusat data Jakarta.
+• Data sekolah disimpan di pusat data Google di Jakarta.
+• Laporkan komentar, jurnal, buku, atau pengguna yang tidak pantas langsung dari aplikasi; penanggung jawab dan pengembang meninjaunya.
 • Hapus akun kapan saja dari menu Profil.
 
 Sabu Saku dipakai lewat sekolah. Ingin sekolahmu ikut? Daftar di sabusaku.web.app/daftar-sekolah
+```
+
+## Release notes of 1.2.1 (500 characters max)
+
+```text
+Ketentuan penggunaan: setiap pengguna membaca dan menyetujuinya sekali sebelum memakai aplikasi. Tombol Laporkan untuk komentar, jurnal, buku, saran buku, dan pengguna yang tidak pantas. Penanggung jawab melihat dan menyelesaikan laporan di menu Sekolah → Laporan. Statistik pemakaian (analytics) dihapus dari aplikasi, jadi data yang dikumpulkan makin sedikit. Perbaikan kecil lainnya.
 ```
 
 ## Release notes of 1.2.0 (500 characters max)
@@ -129,7 +136,7 @@ needs an email that a school has registered; the demo school (school code
 Play Console asks for the instructions in English, for example:
 
 ```text
-Sign in with the email and password given above (no school code). The student account opens the student area: start a book from the catalog, write today's journal, explore the catalog. The penanggung jawab account opens the teacher area: dashboard, students, catalog, school. Both accounts were registered by a school; accounts whose email is not registered see "Harap Menghubungi Administrator Sekolah". No payment, subscription or 2-step verification is needed.
+Sign in with the email and password given above (no school code). On first sign-in the app shows the terms of use: tap "Saya setuju". The student account opens the student area: start a book from the catalog, write today's journal, explore the catalog. The penanggung jawab account opens the teacher area: dashboard, students, catalog, school. Both accounts were registered by a school; accounts whose email is not registered see "Harap Menghubungi Administrator Sekolah". Reporting: the "Laporkan" menu is on comments, journals, books, suggestions and users; teachers review reports in Sekolah > Laporan. No payment, subscription or 2-step verification is needed.
 ```
 
 ## App content declarations
@@ -156,7 +163,7 @@ Category: all other app types. Contact email: the developer email.
 | Users can interact or exchange content | Yes (a penanggung jawab/teacher comments on a student's journal) |
 | Shared user content is the main content | No (a journal is the student's own record) |
 | Public sharing of nudity or real-life graphic violence | No |
-| Block users, report users, chat moderation | No |
+| Block users, report users, chat moderation | Report: yes, since 1.2.1 (the "Laporkan" menu on comments, journals, books, suggestions and users; the school's penanggung jawab and the developer review reports). Block: no |
 | Interaction limited to invited people | Yes (only the penanggung jawab of the student's school; since 16 Oct 2026 every penanggung jawab of the school, not only the class teacher) |
 | Online content from outside the app | No |
 | Promotes age-restricted products | No |
@@ -177,7 +184,9 @@ Submit a new questionnaire when a feature changes one of these answers. The v2 c
 
 Every data type below is collected, not shared, and not processed
 ephemerally. All are required except **Photos, which is optional**: a
-profile photo and a cover photo are never needed to use the app. Users can
+profile photo and a cover photo are never needed to use the app. Since
+1.2.1 the app has no Firebase Analytics: nothing is collected as App
+interactions, and no location of any kind. Users can
 ask for any of it to be deleted (account deletion removes the profile photo
 and the student's own cover photos; see hapus-data). Book data and covers a
 penanggung jawab accepted into the shared catalog stay in the catalog, and
@@ -189,17 +198,34 @@ the catalog history keeps the name of the teacher who made each change.
 | Email address | App functionality, account management | Sign-in (Google or email/password), school membership list |
 | Photos (optional) | App functionality | Optional photos uploaded to Firebase Storage: the profile photo (picked by the user or the Google account photo), a student's cover photo for a book entered by hand (camera or gallery), and book covers a penanggung jawab sets in the catalog. Cropped, rotated and compressed on the device |
 | User IDs | App functionality, account management | Firebase Auth UID (no NIS or username since 16 Oct 2026) |
-| Other user-generated content | App functionality | Journals, book reviews, teacher comments, books a student suggests for the catalog, catalog edits (the change history names the editor) |
-| App interactions | Analytics | Firebase Analytics |
+| Other info | App functionality | Class and extracurricular labels, role and school, stored with the profile |
+| Other in-app messages | App functionality | Teacher comments on a student's journal |
+| Other user-generated content | App functionality; fraud prevention, security, and compliance (reports) | Journals, book reviews, books a student suggests for the catalog, catalog edits (the change history names the editor), reports filed with "Laporkan" (reporter name, reason, note, a copy of the reported content) |
 | Crash logs | Analytics | Firebase Crashlytics |
-| Diagnostics | Analytics | Firebase Crashlytics and Analytics |
-| Device or other IDs | App functionality, analytics | FCM token, Firebase installation ID |
+| Diagnostics | Analytics | Firebase Crashlytics only (device model, OS version, device state at the crash) |
+| Device or other IDs | App functionality, analytics | FCM token (comment notifications), Firebase installation ID (FCM and Crashlytics) |
 
-Class and extracurricular labels are stored with the profile; they fall under
-"Other info" only if Play Console asks, and are not shared.
+The terms acceptance (`termsVersion`, `termsAcceptedAt`) is part of the
+account record and needs no data type of its own.
 
 Update this table and the Data safety form together whenever an SDK or a
 stored field changes.
+
+## Release checklist (1.2.1)
+
+- [ ] Upload the AAB of 1.2.1+4 and paste the 1.2.1 release notes above.
+- [ ] Store listing: paste the new full description (PRIVASI: Jakarta
+      wording and the reporting bullet).
+- [ ] Data safety: re-check the form against the table above (removed: App
+      interactions; Diagnostics from Crashlytics only; new: reports under
+      Other user-generated content, teacher comments under Other in-app
+      messages, labels under Other info).
+- [ ] Content rating: retake the questionnaire, users can now report
+      content and users.
+- [ ] App access: the reviewer instructions mention the terms screen
+      ("Saya setuju") and Sekolah > Laporan.
+- [ ] Deploy hosting so https://sabusaku.web.app/ketentuan is live before
+      the app that links to it is reviewed.
 
 ## Release checklist (1.2.0)
 

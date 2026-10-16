@@ -11,29 +11,32 @@
 <main>
   <header><a href="/"><img src="/logo.png" alt="Sabu Saku"></a></header>
   <h1>Kebijakan privasi</h1>
-  <p class="muted">Berlaku sejak 7 Oktober 2026, diperbarui 16 Oktober 2026</p>
+  <p class="muted">Berlaku sejak 7 Oktober 2026, diperbarui 17 Oktober 2026</p>
 
   <p>Halaman ini menjelaskan data apa yang dikumpulkan aplikasi Sabu Saku, untuk apa data itu dipakai, siapa yang bisa melihatnya, dan cara menghapusnya. Sabu Saku dikembangkan oleh Kertas Kosong.</p>
 
   <h2>Siapa yang memakai Sabu Saku</h2>
   <p>Sabu Saku dipakai oleh sekolah. Ada dua peran: <strong>siswa</strong> dan <strong>penanggung jawab</strong> (misalnya guru atau pembina ekstrakurikuler). Sekolah dan penanggung jawabnya didaftarkan oleh pengembang. Penanggung jawab menentukan siswa mana yang boleh memakai aplikasi dengan menambahkan email mereka.</p>
   <p>Pengguna membuat akunnya sendiri, dengan akun Google atau dengan email dan password. Akun itu baru bisa membuka data sekolah bila emailnya sudah didaftarkan oleh sekolah. Sekolah bertanggung jawab atas izin orang tua atau wali untuk siswa di bawah umur. Kami mengolah data sekolah atas nama sekolah.</p>
+  <p>Sebelum memakai aplikasi, setiap pengguna diminta menyetujui <a href="/ketentuan">Ketentuan penggunaan</a>. Ketentuan itu mengatur konten apa yang boleh dibuat dan cara melaporkan pelanggaran.</p>
 
   <h2>Data yang kami kumpulkan</h2>
   <ul>
     <li><strong>Data akun.</strong> Nama lengkap, alamat email, kelas, ekstrakurikuler yang diikuti, peran (siswa atau penanggung jawab), dan sekolah. Password disimpan dalam bentuk teracak oleh Firebase Authentication. Kami tidak bisa melihatnya.</li>
     <li><strong>Data dari akun Google</strong>, bila Anda masuk dengan Google: nama, alamat email, dan foto profil Google. Kami tidak mendapat akses ke Gmail, kontak, atau data Google lainnya.</li>
+    <li><strong>Persetujuan ketentuan.</strong> Versi <a href="/ketentuan">Ketentuan penggunaan</a> yang Anda setujui dan waktunya.</li>
     <li><strong>Foto profil</strong> (opsional). Foto yang Anda pilih sendiri di aplikasi, atau foto akun Google Anda. Bisa diganti atau dihapus kapan saja di menu Profil.</li>
     <li><strong>Jurnal membaca</strong> (siswa). Judul, penulis, dan jumlah halaman buku yang dibaca, halaman yang dibaca tiap hari, lama membaca, dan catatan yang ditulis siswa: informasi penting, hal yang menarik, pertanyaan, dan ulasan akhir buku.</li>
-    <li><strong>Foto cover buku</strong> (opsional, siswa). Foto sampul buku yang siswa ambil dengan kamera atau pilih dari galeri saat mengisi data bukunya sendiri. Foto dipotong dan diputar di HP, dikompres, lalu disimpan di Cloud Storage.</li>
+    <li><strong>Foto cover buku</strong> (opsional, siswa). Foto sampul buku yang siswa ambil dengan kamera atau pilih dari galeri lewat pemilih foto di HP saat mengisi data bukunya sendiri. Foto dipotong, diputar, dan dikompres di HP, lalu disimpan di Cloud Storage.</li>
     <li><strong>Usulan buku</strong> (siswa). Bila siswa mengisi buku yang belum ada di katalog, atau mengubah data buku katalog untuk bukunya sendiri, data buku itu (judul, penulis, jumlah halaman, ISBN, dan foto cover bila ada) dikirim sebagai usulan kepada penanggung jawab. Usulan mencatat nama sekolah asal, bukan nama siswa.</li>
     <li><strong>Riwayat katalog buku</strong> (penanggung jawab). Setiap perubahan pada katalog buku bersama (menambah, mengubah, menghapus, memulihkan, mengganti cover, menerapkan usulan) dicatat bersama nama penanggung jawab, nama sekolahnya, dan waktunya.</li>
     <li><strong>Komentar penanggung jawab</strong> pada jurnal siswa.</li>
+    <li><strong>Laporan</strong> yang Anda kirim dengan menu Laporkan. Isinya dijelaskan di bagian <a href="#laporan">Laporan konten dan pengguna</a>.</li>
     <li><strong>Ringkasan aktivitas.</strong> Progres buku, jumlah jurnal, streak, dan status keaktifan. Dihitung otomatis dari jurnal. Jumlah siswa yang membaca tiap buku katalog juga dihitung, tanpa nama.</li>
     <li><strong>Token notifikasi.</strong> Kode dari perangkat supaya kami bisa memberi tahu siswa saat penanggung jawab mengomentari jurnalnya.</li>
-    <li><strong>Data teknis.</strong> Laporan saat aplikasi berhenti mendadak dan statistik penggunaan tanpa nama, email, atau isi jurnal. Dipakai untuk memperbaiki aplikasi.</li>
+    <li><strong>Laporan kerusakan.</strong> Bila aplikasi berhenti mendadak, Firebase Crashlytics mengirim laporan yang berisi antara lain jejak galat (stack trace), model perangkat, versi sistem operasi, dan ID instalasi aplikasi. Tanpa nama, email, atau isi jurnal. Dipakai hanya untuk memperbaiki aplikasi.</li>
   </ul>
-  <p>Sabu Saku tidak mengumpulkan lokasi, kontak, atau ID iklan, dan tidak mengakses foto di HP selain foto profil dan foto cover buku yang Anda ambil atau pilih sendiri. Tidak ada iklan di dalam aplikasi.</p>
+  <p>Sabu Saku tidak mencatat statistik pemakaian (analytics). Sabu Saku tidak mengumpulkan lokasi (tepat maupun perkiraan), kontak, atau ID iklan, dan tidak mengakses foto di HP selain foto profil dan foto cover buku yang Anda ambil atau pilih sendiri. Tidak ada iklan di dalam aplikasi.</p>
 
   <h2>Untuk apa data dipakai</h2>
   <ul>
@@ -41,6 +44,7 @@
     <li>Menjalankan katalog buku bersama: pencarian buku, rekomendasi sekolah, buku populer, dan peninjauan usulan siswa oleh penanggung jawab.</li>
     <li>Mengirim email verifikasi alamat email dan email reset password saat Anda memintanya.</li>
     <li>Mengirim notifikasi komentar penanggung jawab kepada siswa.</li>
+    <li>Mencatat persetujuan Anda atas Ketentuan penggunaan, menerima dan meninjau laporan, serta menindak pelanggaran.</li>
     <li>Menjaga aplikasi tetap berjalan baik dan memperbaiki galat.</li>
   </ul>
   <p>Kami tidak menjual data dan tidak memakainya untuk iklan atau pembuatan profil.</p>
@@ -49,22 +53,35 @@
   <ul>
     <li><strong>Siswa</strong> melihat profil, buku, jurnal, dan komentar miliknya sendiri.</li>
     <li><strong>Penanggung jawab</strong> di sekolah yang sama melihat nama, email, kelas, ekstrakurikuler, foto profil, ringkasan, buku, dan jurnal semua siswa sekolah itu. Penanggung jawab bisa mengubah nama, kelas, dan ekstrakurikuler siswa serta mengeluarkan siswa dari sekolah.</li>
-    <li><strong>Foto cover</strong> yang diunggah siswa untuk bukunya sendiri hanya bisa dibuka pengguna di sekolah yang sama.</li>
-    <li><strong>Sekolah lain</strong> tidak bisa melihat data sekolah Anda. Data tiap sekolah dipisahkan, kecuali katalog buku bersama di bawah ini.</li>
+    <li><strong>Foto cover</strong> yang diunggah siswa untuk bukunya sendiri bisa dibuka pengguna di sekolah yang sama. Bila buku itu menjadi usulan, penanggung jawab dari semua sekolah bisa melihat usulan itu beserta foto cover-nya. Bila penanggung jawab menerapkan usulan itu, foto cover disalin ke katalog dan bisa dilihat semua pengguna.</li>
+    <li><strong>Sekolah lain</strong> tidak bisa melihat data sekolah Anda. Data tiap sekolah dipisahkan, kecuali katalog buku bersama dan usulan buku di bawah ini.</li>
     <li><strong>Katalog buku bersama.</strong> Pengguna dari semua sekolah melihat data buku katalog, cover-nya, jumlah pembacanya (angka tanpa nama), dan riwayat perubahannya, termasuk nama penanggung jawab dan sekolah yang mengubah. Usulan dari siswa dilihat penanggung jawab semua sekolah, tanpa nama siswa. Bila penanggung jawab menerima usulan, data buku dan foto cover-nya disalin ke katalog dan bisa dilihat semua pengguna.</li>
+    <li><strong>Laporan</strong> dilihat penanggung jawab di sekolah yang terkait dengan laporan itu dan pengembang. Laporan tentang seorang penanggung jawab (komentarnya atau dirinya) hanya dilihat pengembang. Siswa tidak bisa membuka laporan.</li>
+    <li><strong>Pengembang</strong> (Kertas Kosong) membaca laporan untuk meninjaunya, dan membuka data lain hanya bila perlu untuk menjalankan layanan, menindaklanjuti laporan, memperbaiki masalah, atau memenuhi permintaan sekolah atau Anda.</li>
   </ul>
 
+  <h2 id="laporan">Laporan konten dan pengguna</h2>
+  <p>Pengguna bisa melaporkan komentar, jurnal, buku, saran buku, atau pengguna yang melanggar <a href="/ketentuan">Ketentuan penggunaan</a>. Laporan disimpan di Cloud Firestore dan berisi:</p>
+  <ul>
+    <li>nama dan peran pelapor;</li>
+    <li>alasan laporan, dan catatan tambahan bila pelapor mengisinya;</li>
+    <li>salinan konten yang dilaporkan saat laporan dibuat: isi komentar dan nama penulisnya, nama siswa dan awal jurnalnya (paling banyak 300 karakter dari informasi penting), judul, penulis, dan cover buku, judul dan cover saran buku, atau nama dan peran pengguna yang dilaporkan;</li>
+    <li>status laporan, dan setelah selesai: siapa yang menyelesaikannya, waktunya, dan catatannya.</li>
+  </ul>
+  <p>Laporan bisa dilihat penanggung jawab di sekolah yang terkait dan pengembang, dan mereka bisa melihat nama pelapornya. Laporan tentang seorang penanggung jawab, yaitu tentang komentarnya atau dirinya, hanya dikirim kepada pengembang, sehingga penanggung jawab tidak bisa melihat siapa yang melaporkannya. Laporan disimpan sebagai catatan moderasi. Laporan yang Anda kirim ikut terhapus saat akun Anda dihapus atau data Anda dihapus oleh sekolah. Laporan orang lain tentang Anda atau konten Anda tetap ada sebagai catatan moderasi, tetapi salinan konten dan catatan pelapornya dihapus; yang tersisa hanya jenis dan alasan laporan, pelapor, dan statusnya.</p>
+
   <h2>Tempat data disimpan</h2>
-  <p>Data disimpan di layanan Google Firebase (Authentication, Cloud Firestore, Cloud Storage untuk foto profil dan foto cover buku, Cloud Functions, Cloud Messaging, Crashlytics, dan Analytics). Basis data dan pemrosesannya berada di pusat data wilayah Jakarta. Layanan itu tunduk pada <a href="https://policies.google.com/privacy">kebijakan privasi Google</a>. Data dikirim lewat sambungan terenkripsi.</p>
+  <p>Data disimpan dan diproses dengan layanan Google Firebase. Cloud Firestore (basis data), Cloud Storage (foto profil dan foto cover buku), dan Cloud Functions (pemrosesan di server) berada di pusat data Google di Jakarta. Firebase Authentication (akun masuk serta email verifikasi dan reset password), Cloud Messaging (notifikasi), dan Crashlytics (laporan kerusakan) adalah layanan global Google, sehingga datanya bisa diproses di pusat data Google di luar Indonesia. Layanan itu tunduk pada <a href="https://policies.google.com/privacy">kebijakan privasi Google</a>. Data dikirim lewat sambungan terenkripsi.</p>
 
   <h2>Berapa lama data disimpan</h2>
-  <p>Data disimpan selama akun ada dan sekolah masih memakai Sabu Saku. Anda bisa menghapus akun sendiri kapan saja dari aplikasi. Penanggung jawab dapat menghapus data seorang siswa di sekolahnya, misalnya saat siswa lulus atau pindah. Caranya dijelaskan di halaman <a href="/hapus-data">cara menghapus akun dan data</a>.</p>
+  <p>Data disimpan selama akun ada dan sekolah masih memakai Sabu Saku. Anda bisa menghapus akun sendiri kapan saja dari aplikasi. Penanggung jawab dapat menghapus data seorang siswa di sekolahnya, misalnya saat siswa lulus atau pindah. Caranya dijelaskan di halaman <a href="/hapus-data">cara menghapus akun dan data</a>. Salinan cadangan basis data terhapus otomatis paling lama 7 hari setelah dibuat.</p>
 
   <h2>Hak Anda</h2>
   <ul>
     <li>Melihat data Anda langsung di aplikasi.</li>
     <li>Mengubah atau menghapus jurnal sampai sehari setelah tanggal jurnal.</li>
     <li>Mengubah nama, kelas, ekstrakurikuler, dan foto profil di menu Profil.</li>
+    <li>Membaca Ketentuan penggunaan dan kebijakan ini kapan saja dari menu Profil.</li>
     <li>Menghapus akun dan seluruh data sendiri lewat <strong>Profil → Hapus akun</strong>, atau memintanya lewat sekolah atau dengan menghubungi kami.</li>
     <li>Mematikan notifikasi lewat pengaturan HP.</li>
   </ul>
@@ -78,7 +95,7 @@
   <h2>Kontak</h2>
   <p>Pertanyaan atau permintaan tentang data Anda: <a href="mailto:komunitaskertaskosong9@gmail.com">komunitaskertaskosong9@gmail.com</a>.</p>
 
-  <footer class="muted"><a href="/">Sabu Saku</a> · <a href="/hapus-data">Hapus akun dan data</a></footer>
+  <footer class="muted"><a href="/">Sabu Saku</a> · <a href="/ketentuan">Ketentuan penggunaan</a> · <a href="/hapus-data">Hapus akun dan data</a></footer>
 </main>
 </body>
 </html>
