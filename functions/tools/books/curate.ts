@@ -24,7 +24,7 @@ import {FieldValue} from "firebase-admin/firestore";
 import {rebuildCatalog} from "../../src/infra/catalog";
 import {booksCol, db} from "../../src/infra/firebase";
 import {OUT, hasFlag, readJson} from "./common";
-import {ImportBook} from "./normalize";
+import {ImportBook, cleanDescription} from "./normalize";
 import {CATEGORY_OVERRIDES, CORRECTIONS, REJECTED_BOOKS} from "./review";
 
 const ACTOR = {name: "Kurasi pengembang", kind: "import"} as const;
@@ -73,6 +73,20 @@ async function main() {
     }
     if ("description" in patch) patch.descriptionSource = patch.description ? "review" : null;
     if (Object.keys(changes).length) patches.push({id, title: data.title as string, patch, changes});
+  }
+  // Synopses stored before cleanDescription learned about mojibake and quote artifacts.
+  const active = await booksCol().where("status", "==", "active").get();
+  for (const doc of active.docs) {
+    const data = doc.data();
+    if (data.updatedBy?.kind !== "import" || !data.description || patches.some((p) => p.id === doc.id)) continue;
+    const cleaned = cleanDescription(data.description as string);
+    if (cleaned === data.description) continue;
+    patches.push({
+      id: doc.id,
+      title: data.title as string,
+      patch: {description: cleaned, descriptionSource: cleaned ? data.descriptionSource ?? null : null},
+      changes: {description: {from: data.description, to: cleaned}},
+    });
   }
   console.log(`Koreksi data: ${patches.length} buku`);
   for (const {id, title, changes} of patches) console.log(`  - ${title} (${id}): ${Object.keys(changes).join(", ")}`);

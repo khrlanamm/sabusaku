@@ -194,12 +194,16 @@ export function cleanDescription(raw: string | null | undefined): string | null 
     .replace(/&#39;|&rsquo;|&lsquo;/g, "'")
     .replace(/&ldquo;|&rdquo;/g, '"')
     .replace(/&[a-z]+;/g, " ")
+    .replace(/``|''/g, '"')
+    .replace(/"{2,}/g, '"')
     .replace(/[ \t]+/g, " ")
     .replace(/\n{3,}/g, "\n\n")
     .trim();
   if (text.length < 40) return null;
   // A Wikipedia disambiguation page, not a synopsis.
   if (/dapat merujuk pada|may refer to/i.test(text)) return null;
+  // Mojibake (UTF-8 read as Latin-1) or a store's menu text pasted into a word.
+  if (/[ÃÌ][\u0080-\u00ff]|åÉ|â€|\wManga, Manhua & Manhwa/.test(text)) return null;
   if (text.length > 2000) {
     const cut = text.slice(0, 2000);
     const end = Math.max(cut.lastIndexOf(". "), cut.lastIndexOf(".\n"), cut.lastIndexOf("! "), cut.lastIndexOf("? "));
@@ -761,6 +765,7 @@ function main() {
     const correction = CORRECTIONS[book.id];
     if (!correction) continue;
     Object.assign(book, correction);
+    if (correction.title) book.searchKey = bookKey(book.title, book.authors[0] ?? "");
     if (correction.description !== undefined) book.descriptionSource = correction.description ? "review" : null;
   }
 

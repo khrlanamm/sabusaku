@@ -10,6 +10,35 @@ import type {Category} from "./seeds";
 
 /** Book ID → reason. */
 export const REJECTED_BOOKS: Record<string, string> = {
+  // ---- Review of the books added on 17 Oct 2026 (new IDs of books already in production count as duplicates) ----
+  bk_d683f8977266dd5f: "tinjauan: buku teks/kajian akademik", // Menuju Era Wakaf Produktif
+  bk_a5b068ad3d24b8f2: "tinjauan: buku teks/kajian akademik", // M. Natsir, Dakwah dan Pemikirannya
+  bk_02949da2c9bbeb3f: "tinjauan: buku teks/kajian akademik", // Lihatlah Sang Manusia! (etika Kristen)
+  bk_8d24ef112a91f20b: "tinjauan: buku teks/kajian akademik", // Kerukunan Umat Beragama Pilar Utama Kerukunan Berbangsa
+  bk_f243b80825222619: "tinjauan: buku teks/kajian akademik", // Ekonomi Politik Media Penyiaran
+  bk_ad4b1e1e6c268546: "tinjauan: buku teks/kajian akademik", // Kepuasan Hidup dan Dukungan Sosial Lanjut Usia
+  bk_d34b92be59906b38: "tinjauan: buku teks/kajian akademik", // Kura-Kura & Buaya Indonesia dan Papua Nugini
+  bk_8eca66e0f1003763: "tinjauan: politik praktis/polemik", // Supersemar Palsu
+  bk_610c3b07dea24bc7: "tinjauan: politik praktis/polemik", // Dari Papua Meneropong Indonesia
+  bk_6ca69366d12a298e: "tinjauan: politik praktis/polemik", // Membongkar Supersemar!
+  bk_b5a87348d25d75c1: "tinjauan: buku teks/kajian akademik", // Mencapai Pertanian yang Lebih Baik
+  bk_f6e06e89d874c8fb: "tinjauan: buku teks/kajian akademik", // Identitas Dayak
+  bk_e5f4666c2a5a0bfe: "tinjauan: bukan buku utuh (snackbook)", // Charles Lebourne - Orang-Orang Bloomington
+  bk_4037da2a8536a7b8: "tinjauan: bukan buku utuh (snackbook)", // Laki-Laki Tua Tanpa Nama - Orang-Orang Bloomington
+  bk_b90f39a24170d281: "tinjauan: edisi lain dari buku yang sudah ada", // 5 cm (Hc)
+  bk_a8c8f204e16de708: "tinjauan: edisi lain dari buku yang sudah ada", // 9 Summers 10 Autumns (Augmented Hinted Ilustrative Book)
+  bk_b5bcdcb741a88e99: "tinjauan: edisi lain dari buku yang sudah ada", // Badai Pasti Berlalu - CU Format Baru
+  bk_d021640ef918b505: "tinjauan: bukan buku utuh (cuplikan)", // Geez & Ann #1: Free Chapter
+  bk_2d3710b24b973eac: "tinjauan: bukan buku utuh (cuplikan)", // Geez & Ann #2: Free Chapter
+  bk_8dd4183fc60f3b20: "tinjauan: politik praktis/polemik", // Tangsel: Dari Politik Gragasan Ke Politik Gagasan
+  bk_252a7d250466c316: "tinjauan: buku teks/kajian akademik", // Semangat Nasionalisme dalam Puisi Sebelum Kemerdekaan
+  bk_f7c071f968cdd3da: "tinjauan: edisi lain dari buku yang sudah ada", // Classics: Sebatang Kara (Nobody's Boy)
+  bk_f711d0551436a8ea: "tinjauan: buku teks/kajian akademik", // Sufisme Jawa
+  bk_ff2d03f2926f4cb2: "duplikat: sudah ada sebagai bk_c70a7466f524e8af", // "Membumikan" Al-Qur'an
+  bk_a70308d4c5eaf269: "duplikat: sudah ada sebagai bk_d5599c5f588d42ff", // Bilangan Fu
+  bk_666d9e9dfb4f08cb: "duplikat: sudah ada sebagai bk_f56fc1f1abf0c110", // Kubah
+  bk_75b89165960be70b: "duplikat: sudah ada sebagai bk_4f10875a86b3127b", // Senja di Jakarta
+  bk_0a6f24ecee1e2f14: "duplikat: sudah ada sebagai bk_13680be1fda7d8e5", // Seperti Dendam, Rindu Harus Dibayar Tuntas
   // ---- Curation of the production catalog (17 Oct 2026, curate.ts soft-deletes them) ----
   bk_ce95b2ed0bd844a3: "kurasi: konten dewasa", // Saman
   bk_9091dabd2bea65fb: "kurasi: konten dewasa", // Larung
@@ -427,6 +456,9 @@ export const REJECTED_BOOKS: Record<string, string> = {
 
 /** Cover URLs that show the wrong book, a person, a placeholder or a page. */
 export const REJECTED_COVERS = new Set<string>([
+  "https://books.google.com/books/content?id=z5xkAAAAMAAJ&printsec=frontcover&img=1&zoom=1&fife=w600", // Deru Campur Debu, library binding or title-page scan
+  "https://books.google.com/books/content?id=Zo-5AAAAIAAJ&printsec=frontcover&img=1&zoom=1&fife=w600", // Canting, library binding or title-page scan
+  "https://books.google.com/books/content?vid=ISBN9789794030875&printsec=frontcover&img=1&zoom=1", // Cinta Olimpiade, library binding or title-page scan
   "https://books.google.com/books/content?id=5XWN0FNrAekC&printsec=frontcover&img=1&zoom=1&fife=w600", // Kampus Maut!, partial scan
   "https://covers.openlibrary.org/b/id/4250547-L.jpg?default=false", // Air Mata Saudaraku
   "https://covers.openlibrary.org/b/id/10618331-L.jpg?default=false", // Alam Kubur
@@ -1066,6 +1098,12 @@ export const CATEGORY_OVERRIDES: Record<string, Category[]> = {
   bk_e7ebb3afc1415e84: ["Nonfiksi Umum", "Sejarah"], // Zaman peralihan
   bk_4e205071e10690f3: ["Novel"], // Zat
   bk_a1489fae246601c5: ["Biografi", "Nonfiksi Umum"], // Di Atas Siang di Bawah Malam (renungan eks-tapol, bukan buku anak)
+  bk_faadfc3ec56f79f6: ["Remaja", "Novel"], // Artemis Fowl
+  bk_e2c9383f1334c24d: ["Novel"], // Jodoh (Fahd Pahdepie)
+  bk_b2adcbe0743665a0: ["Remaja"], // Cinta Olimpiade (Hilman)
+  bk_d8c737fa6b62ce04: ["Remaja"], // Tragedi Sinemata (Hilman)
+  bk_0e5f9ddb09d108d7: ["Nonfiksi Umum", "Agama"], // Humor Ngaji Kaum Santri
+  bk_7a4b8031314beca9: ["Puisi"], // Matahari-Matahari Kecil: Pilihan Sajak
 };
 
 /** normalizeSearchText(source title) → title to use. */
@@ -1096,6 +1134,8 @@ export const AUTHOR_RENAMES: Record<string, string> = {
  */
 export const CORRECTIONS: Record<string, {title?: string; subtitle?: string | null; description?: string | null}> = {
   bk_ca03cf8cb4132e4e: {title: "Atomic Habits", subtitle: "Perubahan Kecil yang Memberikan Hasil Luar Biasa"},
+  bk_49e859417a3d8420: {title: "Kami (Bukan) Sarjana Kertas"},
+  bk_64363070e88550d9: {title: "Masih Ingatkah Kau Jalan Pulang"},
   bk_6de9653c9e9e966b: {
     description:
       "Khairul Azzam, mahasiswa Indonesia di Universitas Al-Azhar, Kairo, bertahun-tahun menunda kuliahnya karena harus berjualan tempe dan bakso untuk menghidupi ibu dan adik-adiknya di Solo. Di tengah kerja kerasnya ia mulai memikirkan pendamping hidup, dan perjalanan cintanya diuji oleh kesabaran, kejujuran, dan keteguhan iman.",

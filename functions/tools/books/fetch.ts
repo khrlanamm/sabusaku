@@ -202,6 +202,9 @@ interface GoogleItem {
   };
 }
 
+/** Queries left for enrich.ts before fetch stops asking Google (GOOGLE_RESERVE overrides). */
+const RESERVE = process.env.GOOGLE_RESERVE ? Number(process.env.GOOGLE_RESERVE) : undefined;
+
 const googleUrl = (q: string) =>
   `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(q)}` +
   `&langRestrict=id&printType=books&maxResults=40&key=${readGoogleKey()}`;
@@ -341,7 +344,7 @@ async function main() {
     console.log(`Google Books: ${thinAuthors.length} penulis tipis, sisa kuota ${googleQueriesLeft()}`);
     for (const author of thinAuthors) {
       // Keep quota for descriptions (enrich.ts); cached answers are free.
-      if (!googleCached(author.name) && googleQueriesLeft() < 450) continue;
+      if (!googleCached(author.name) && googleQueriesLeft() < (RESERVE ?? 450)) continue;
       for (const item of await googleSearch(author.name)) {
         const authors = item.volumeInfo.authors ?? [];
         if (!authors.some((n) => authorMatches(n, author.name, author.aliases))) continue;
@@ -351,7 +354,7 @@ async function main() {
     const missingTitles = SEED_TITLES.filter((s) => !titleFound.get(s));
     console.log(`Google Books: ${missingTitles.length} judul yang belum ketemu`);
     for (const seed of missingTitles) {
-      if (!googleCached(`${seed.title} ${seed.author}`) && googleQueriesLeft() < 350) continue;
+      if (!googleCached(`${seed.title} ${seed.author}`) && googleQueriesLeft() < (RESERVE ?? 350)) continue;
       const translated = translatedAuthors.has(seed.author);
       for (const item of await googleSearch(`${seed.title} ${seed.author}`)) {
         const info = item.volumeInfo;

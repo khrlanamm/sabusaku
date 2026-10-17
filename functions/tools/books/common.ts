@@ -18,7 +18,7 @@ export const SECRET = resolve(__dirname, "../../../secret");
 export const USER_AGENT = "SabuSaku/1.0 (komunitaskertaskosong9@gmail.com)";
 
 /** Google Books: stop well below the 1,000 queries/day project limit. */
-const GOOGLE_DAILY_BUDGET = 960;
+const GOOGLE_DAILY_BUDGET = Math.min(960, Number(process.env.GOOGLE_BUDGET ?? 960));
 
 export function ensureDir(dir: string): void {
   if (!existsSync(dir)) mkdirSync(dir, {recursive: true});
