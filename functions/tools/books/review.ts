@@ -10,6 +10,61 @@ import type {Category} from "./seeds";
 
 /** Book ID → reason. */
 export const REJECTED_BOOKS: Record<string, string> = {
+  // ---- Curation of the production catalog (17 Oct 2026, curate.ts soft-deletes them) ----
+  bk_ce95b2ed0bd844a3: "kurasi: konten dewasa", // Saman
+  bk_9091dabd2bea65fb: "kurasi: konten dewasa", // Larung
+  bk_a2389da179a04b52: "kurasi: konten dewasa", // Pengakuan Eks Parasit Lajang
+  bk_c53cef1ffe57f1c8: "kurasi: konten dewasa", // Cerita Cinta Enrico
+  bk_472bef9d519b5036: "kurasi: konten dewasa", // Nayla
+  bk_447938d611903a14: "kurasi: konten dewasa", // Mereka Bilang, Saya Monyet!
+  bk_734b290aa24f1515: "kurasi: konten dewasa", // Cerita Pendek tentang Cerita Cinta Pendek
+  bk_1eddb869538e4a4e: "kurasi: konten dewasa", // Pillow Talk
+  bk_2f5e80dd6498db2a: "kurasi: konten dewasa", // Mouth To Mouth
+  bk_b614646feae1ad0b: "kurasi: konten dewasa", // Good Fight
+  bk_d8ae91ac6ff3341e: "kurasi: konten dewasa", // With You
+  bk_caa743a96cd6a698: "kurasi: konten dewasa", // Coklat Stroberi
+  bk_c0d82a72a5666e29: "kurasi: konten dewasa", // Kuta Bali
+  bk_64cb7e67ac9f2513: "kurasi: konten dewasa", // Misteri Perawan Kubur
+  bk_5cfe1f51d5ddbe19: "kurasi: konten dewasa", // Nyanyian Maldoror dan Poésies
+  bk_693362707e658e9a: "kurasi: konten dewasa", // The Last Don
+  bk_4c737fb8ee0779ec: "kurasi: konten dewasa", // Deadline
+  bk_a8967eef3bf408b2: "kurasi: bukan buku utuh / bukan bacaan", // A Moment To Love You Chapter 1
+  bk_9d88d8a9cf10aa14: "kurasi: bukan buku utuh / bukan bacaan", // Paranormal
+  bk_a03b8b3ce034300b: "kurasi: bukan buku utuh / bukan bacaan", // Sebuah Catatan, Untuk Kita Renungkan
+  bk_8eade154a27128dd: "kurasi: bukan buku utuh / bukan bacaan", // The Perfect Cakes
+  bk_a4b951ddee1bdd4c: "kurasi: bukan buku utuh / bukan bacaan", // Asian Games 2018
+  bk_d6eeda54f8f218ef: "kurasi: bukan buku utuh / bukan bacaan", // Hello Shinee
+  bk_d96d2225b6c38588: "kurasi: bukan buku utuh / bukan bacaan", // Fikih Manhaji 5 – Haji dan Umrah
+  bk_5dec76d629ed9b77: "kurasi: bacaan anak kecil", // Asyiknya Bertualang di Kampung Naga
+  bk_0506668876332b48: "kurasi: bacaan anak kecil", // Babi Sombong dan Kuda Kurus
+  bk_36b346b86bdf87c9: "kurasi: bacaan anak kecil", // Kreasi Asyik Muslim Cilik
+  bk_5ecb754f1c10dd50: "kurasi: bacaan anak kecil", // Nyi Loro Kidul
+  bk_01e193382ce88821: "kurasi: bacaan anak kecil", // Animal Antics
+  bk_355bd1f0bd1a4f57: "kurasi: bacaan anak kecil", // Sahabiyah Stories for Kids: Meneladani Sifat-Sifat Mulia Sah
+  bk_04ebb9204bcafe5b: "kurasi: bacaan anak kecil", // Komik Fiqih Untuk Anak
+  bk_5144cb9e19082a51: "kurasi: bacaan anak kecil", // Komik Hari Besar Islam
+  bk_c282a85fb88dd935: "kurasi: bacaan anak kecil", // Komik Tadabur Al-Qur`an
+  bk_793e56a0139f7b0b: "kurasi: bacaan anak kecil", // Haid Pertamaku
+  bk_36567d6c4ac1f0b2: "kurasi: bacaan anak kecil", // Si Untung
+  bk_ab2703fb60d74d37: "kurasi: buku teks/teknis", // Syarah Shahih Muslim, Tahqiq Khalil Ma'mun Syiha
+  bk_0a128ebfaad7b15d: "kurasi: buku teks/teknis", // Berbagai Aliran di dalam dan di Sekitar Gereja
+  bk_3baf4be2f4fece52: "kurasi: buku teks/teknis", // Dekolonisasi Gereja di Indonesia
+  bk_2e26a1cbca5d1ec4: "kurasi: buku teks/teknis", // Berkawan Harimau Bersama Alam
+  bk_08e40fc369324eaa: "kurasi: buku teks/teknis", // Sepak Bola Indonesia
+  bk_f6ab7935f3b7bba9: "kurasi: buku teks/teknis", // Ekologi
+  bk_aa418dbf1f1fbf97: "kurasi: buku teks/teknis", // Membidik Pasar Indonesia
+  bk_e0252582b70ce31e: "kurasi: buku teks/teknis", // Danger Zone
+  bk_5977d3bc7f265f4f: "kurasi: buku teks/teknis", // Hipnoterapi
+  bk_a92692d8ecff48f9: "kurasi: buku teks/teknis", // Sejarah Satrya Dalem Cili Ularan dari Majapahit
+  bk_388fbe28b49917f7: "kurasi: politik praktis/polemik/judul kasar", // 10 Dosa Besar Soeharto
+  bk_b3035d87b0568f30: "kurasi: politik praktis/polemik/judul kasar", // Agenda Mendesak Bangsa
+  bk_c368392e0418a763: "kurasi: politik praktis/polemik/judul kasar", // Gerakan Politik Indonesia
+  bk_b15fd025216108fa: "kurasi: politik praktis/polemik/judul kasar", // Gus Dur Garis Miring PKB
+  bk_681b92c3e96d67c5: "kurasi: politik praktis/polemik/judul kasar", // Mengapa Partai Islam Kalah?
+  bk_be9809f46f7aa2a0: "kurasi: politik praktis/polemik/judul kasar", // Sang Pemimpin
+  bk_6264830ee7073fd5: "kurasi: politik praktis/polemik/judul kasar", // Bunuh Sang Nabi!
+  bk_904c0f5e81fc04cf: "kurasi: politik praktis/polemik/judul kasar", // Umat Islam Menghadapi Tantangan Kristenisasi dan Sekularisas
+  bk_5fed3ca829de8a95: "kurasi: politik praktis/polemik/judul kasar", // Jiwo J[a]ncuk
   // ---- Books that came in after the title-case rerun (16 Oct 2026) ----
   bk_8b96295e6634bde9: "tidak relevan untuk siswa SMA", // Istri Kontrak
   bk_6dec0a255e6efa69: "tidak relevan untuk siswa SMA", // Kawin Kontrak
@@ -1010,6 +1065,7 @@ export const CATEGORY_OVERRIDES: Record<string, Category[]> = {
   bk_38d0b844fd16e26e: ["Biografi"], // Yuni Shara & cangkir kopi
   bk_e7ebb3afc1415e84: ["Nonfiksi Umum", "Sejarah"], // Zaman peralihan
   bk_4e205071e10690f3: ["Novel"], // Zat
+  bk_a1489fae246601c5: ["Biografi", "Nonfiksi Umum"], // Di Atas Siang di Bawah Malam (renungan eks-tapol, bukan buku anak)
 };
 
 /** normalizeSearchText(source title) → title to use. */
@@ -1030,4 +1086,22 @@ export const AUTHOR_RENAMES: Record<string, string> = {
   "puspa swara": "Tim Puspa Swara",
   // The Tempo series ("Seri Buku Tempo") lists the publisher as author.
   "kepustakaan populer gramedia": "Tim Buku Tempo",
+};
+
+/**
+ * Book ID → field values that replace what the sources give (17 Oct 2026):
+ * a title that repeats its subtitle, and Wikipedia disambiguation pages
+ * taken as synopses. normalize.ts applies them; curate.ts writes them to
+ * books that no teacher has edited.
+ */
+export const CORRECTIONS: Record<string, {title?: string; subtitle?: string | null; description?: string | null}> = {
+  bk_ca03cf8cb4132e4e: {title: "Atomic Habits", subtitle: "Perubahan Kecil yang Memberikan Hasil Luar Biasa"},
+  bk_6de9653c9e9e966b: {
+    description:
+      "Khairul Azzam, mahasiswa Indonesia di Universitas Al-Azhar, Kairo, bertahun-tahun menunda kuliahnya karena harus berjualan tempe dan bakso untuk menghidupi ibu dan adik-adiknya di Solo. Di tengah kerja kerasnya ia mulai memikirkan pendamping hidup, dan perjalanan cintanya diuji oleh kesabaran, kejujuran, dan keteguhan iman.",
+  },
+  bk_94c39a7abd2651c2: {
+    description:
+      "Buku kedua kisah Gajah Mada karya Langit Kresna Hariadi. Di tengah perebutan takhta dan intrik di istana Majapahit, Gajah Mada berjuang menjaga keselamatan raja dan keutuhan negeri.",
+  },
 };

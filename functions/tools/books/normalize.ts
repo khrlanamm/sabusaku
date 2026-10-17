@@ -10,7 +10,7 @@ import {resolve} from "node:path";
 
 import {BOOK_CATEGORIES, bookKey, normalizeSearchText} from "../../src/domain/search";
 import {Candidate, OUT, authorMatches, properName, readJson, sha1, writeJson} from "./common";
-import {AUTHOR_RENAMES, CATEGORY_OVERRIDES, REJECTED_BOOKS, TITLE_RENAMES} from "./review";
+import {AUTHOR_RENAMES, CATEGORY_OVERRIDES, CORRECTIONS, REJECTED_BOOKS, TITLE_RENAMES} from "./review";
 import {Category, SEED_AUTHORS, SEED_TITLES} from "./seeds";
 import {WikiBook} from "./wikipedia";
 
@@ -41,7 +41,7 @@ export interface ImportBook {
   /** Filled by covers.ts. */
   cover?: {provider: CoverProvider; url: string; sourceId: string; file: string};
   /** Where the synopsis came from. */
-  descriptionSource: "google" | "openlibrary" | "wikipedia" | null;
+  descriptionSource: "google" | "openlibrary" | "wikipedia" | "review" | null;
   sources: {google?: string[]; openlibrary?: string[]};
   workKey?: string;
   seeds: string[];
@@ -198,6 +198,8 @@ export function cleanDescription(raw: string | null | undefined): string | null 
     .replace(/\n{3,}/g, "\n\n")
     .trim();
   if (text.length < 40) return null;
+  // A Wikipedia disambiguation page, not a synopsis.
+  if (/dapat merujuk pada|may refer to/i.test(text)) return null;
   if (text.length > 2000) {
     const cut = text.slice(0, 2000);
     const end = Math.max(cut.lastIndexOf(". "), cut.lastIndexOf(".\n"), cut.lastIndexOf("! "), cut.lastIndexOf("? "));
@@ -753,6 +755,13 @@ function main() {
     }
     count.set(book.authors[0], n + 1);
     kept.push(book);
+  }
+
+  for (const book of kept) {
+    const correction = CORRECTIONS[book.id];
+    if (!correction) continue;
+    Object.assign(book, correction);
+    if (correction.description !== undefined) book.descriptionSource = correction.description ? "review" : null;
   }
 
   kept.sort((x, y) => x.title.localeCompare(y.title, "id"));
