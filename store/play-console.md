@@ -21,13 +21,13 @@ Indonesian one is known; the Console follows the account language.
 
 | # | Where | What | Status |
 |---|---|---|---|
-| 1 | Home | Android developer verification: `com.sabu.saku` registered | check |
-| 2 | Policy and programs → App content | Privacy policy, Sign-in details (App access), Ads, Content rating, Target audience, News, COVID-19, Data safety, Government, Financial, Health, Advertising ID | fill |
-| 3 | Grow users → Store presence → Store settings | Category, tags, contact | fill |
-| 4 | Grow users → Store presence → Main store listing | Text, icon, feature graphic, screenshots, alt text | fill |
-| 5 | Test and release → Testing → Closed testing | Countries, testers, feedback, release 1.2.1 (4) | fill |
-| 6 | Test and release → Pre-launch report → Settings | Test account | fill |
-| 7 | Publishing overview | Send changes for review | after 1–6 |
+| 1 | Home | Android developer verification: `com.sabu.saku` registered | done (all apps registered) |
+| 2 | Policy and programs → App content | Privacy policy, Sign-in details (App access), Ads, Content rating, Target audience, News, COVID-19, Data safety, Government, Financial, Health, Advertising ID | done 17 Oct 2026 |
+| 3 | Grow users → Store presence → Store settings | Category, tags, contact | done (tags: Pendidikan, Buku & referensi) |
+| 4 | Grow users → Store presence → Main store listing | Text, icon, feature graphic, screenshots (no alt-text field in the Console) | done |
+| 5 | Test and release → Testing → Closed testing | Countries, testers, feedback, release 1.2.1 (4) | done (AAB uploaded by the user) |
+| 6 | Test and release → Pre-launch report → Settings | Test account | not needed: uses the App access login |
+| 7 | Publishing overview | Send changes for review | sent by the user, 17 Oct 2026 |
 | 8 | Dashboard → Apply for production | After 12 testers × 14 days | later (§8) |
 
 Target API (36 ✓), 16 KB page size (all `.so` aligned 16 KB ✓), Play App
@@ -313,7 +313,7 @@ feature exists in 1.2.1.
 | Setting | Value |
 |---|---|
 | Countries/regions | Indonesia |
-| Testers | Email list "SMAN 1 Sukodadi" ← upload `secret/closed-testers.csv` (22 emails). Add more later; production needs ≥12 opted in for 14 days in a row. |
+| Testers | Account-wide email list "masis-kir" (34 emails since 17 Oct 2026: its 20 earlier ones plus the 14 school accounts from `secret/closed-testers.csv` it lacked). The list is shared with the account's other apps. Production needs ≥12 opted in for 14 days in a row. |
 | Feedback URL or email | komunitaskertaskosong9@gmail.com |
 | Opt-in link | Copy after saving; share with the testers (WhatsApp group) together with the guide `https://sabusaku.web.app/panduan.pdf`. |
 
