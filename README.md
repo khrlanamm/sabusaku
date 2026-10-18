@@ -97,7 +97,7 @@ Panduan pengguna untuk siswa dan penanggung jawab ada di `docs/manual/panduan-sa
 python3 -I docs/manual/make_manual.py   # butuh Pillow dan Google Chrome
 ```
 
-Teks, letak nomor pada gambar, dan susunan halaman ada di skrip itu. Tangkapan layar mentah (PNG 1080×2424) diambil dengan `tool/screenshots.sh` dari akun produksi (kecuali `mulai-pilih-akun-google.png`, tangkapan layar biasa dari perangkat), lalu disalin ke `docs/manual/raw/`, yang tidak masuk git. Skrip menutup semua alamat email dengan `MASKS`, memotong bagian atas, lalu menyimpan JPEG ke `docs/manual/shots/`; hanya JPEG itu yang di-commit. Tangkapan layar baru yang memuat email wajib ditambahkan ke `MASKS` sebelum dipakai. Kode QR ke Google Play (`docs/manual/assets/qr-play.svg`) statis; buat ulang hanya bila tautan toko berubah.
+Teks, letak nomor pada gambar, dan susunan halaman ada di skrip itu. Tangkapan layar mentah (PNG 1080×2424) diambil dengan `tool/screenshots.sh` dari akun produksi (kecuali `mulai-pilih-akun-google.png`, tangkapan layar biasa dari perangkat), lalu disalin ke `docs/manual/raw/`, yang tidak masuk git. Skrip menutup semua alamat email dengan `MASKS`, memotong bagian atas, lalu menyimpan JPEG ke `docs/manual/shots/`; hanya JPEG itu yang di-commit. Tangkapan layar baru yang memuat email, atau nama dan foto siswa atau guru selain dua akun tangkapan layar, wajib ditambahkan ke `MASKS` sebelum dipakai (nama diganti nama rekaan). Kode QR ke Google Play (`docs/manual/assets/qr-play.svg`) statis; buat ulang hanya bila tautan toko berubah.
 
 ## Deploy
 

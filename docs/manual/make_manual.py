@@ -20,14 +20,19 @@ run (needs Pillow): MASKS below are painted over it first, then the top
 142 px (status bar, or empty app background on Flutter captures) is cropped
 and the image is shrunk to 640 px wide.
 
-PRIVACY: every email address in a screenshot must be listed in MASKS before
-the screenshot is used. Only masked JPEGs go into shots/ (committed).
+PRIVACY: every email address in a screenshot, and every name and photo of
+a real student or teacher other than the two screenshot accounts, must be
+listed in MASKS before the screenshot is used. Only masked JPEGs go into
+shots/ (committed).
 
 Coordinates for pins and masks are in a 401x900 preview of the full raw
 screenshot, which is what `sips -Z 900 raw/<name>.png` gives. Fractions are
-fine. A mask is (left, top, right, bottom, fill, text): with text, the email
-is replaced by that placeholder in the original colour and size; with None,
-it becomes a soft rounded bar.
+fine. A mask is (left, top, right, bottom, fill, text[, style]): with text,
+the email or name is replaced by that placeholder in the original colour and
+size, in the Poppins weight named by style (Regular by default); with "",
+the area is only painted over; with None, it becomes a soft rounded bar.
+Style "circle" paints a round avatar over the box instead: fill is then
+"background/letter colour" and text the initial.
 
 The QR code is static: regenerate it only if the store link changes, e.g.
 with `pip install segno` in a throwaway venv and
@@ -54,7 +59,7 @@ FONTS = ROOT / "assets" / "fonts"
 BRAND = ROOT / "branding" / "svg"
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
-APP_VERSION = "1.2.1"
+APP_VERSION = "1.3.0"
 SCHOOL = "SMA Negeri 1 Sukodadi"
 PLAY_URL = "https://play.google.com/store/apps/details?id=com.sabu.saku"
 HELP_EMAIL = "komunitaskertaskosong9@gmail.com"
@@ -72,15 +77,58 @@ RAW_W, RAW_H, STATUS_BAR = 1080, 2424, 142
 PREVIEW_W, PREVIEW_H = 401, 900
 SHOT_W = 640
 
-# Email addresses painted over before a screenshot is used, in preview
-# coordinates: (left, top, right, bottom, fill, placeholder or None).
+# Email addresses, names and avatars painted over before a screenshot is
+# used, in preview coordinates: (left, top, right, bottom, fill, placeholder
+# or None[, style]). See the docstring.
+# Avatar colours of the app's initials (UserAvatar), for the "circle" style.
+AVATAR = "#DBE1FF/#324478"
+
+# The other students in the leaderboards, under made-up names.
+RANKED = [(117.3, 401.7, 227.6, 412.5, "#FFFFFF", "Bima Setiawan", "SemiBold"),
+          (72.0, 405.5, 107.3, 440.7, AVATAR, "B", "circle"),
+          (117.7, 479.7, 235.0, 490.5, "#FFFFFF", "Nadia Lestari", "SemiBold"),
+          (72.0, 483.4, 107.3, 518.7, AVATAR, "N", "circle"),
+          (117.7, 557.7, 220.2, 572.2, "#FFFFFF", "Yoga Saputra", "SemiBold"),
+          (72.0, 561.4, 107.3, 596.7, AVATAR, "Y", "circle"),
+          (117.3, 635.7, 299.6, 650.1, "#FFFFFF", "Laras Ayu Wulandari", "SemiBold"),
+          (72.0, 639.4, 107.3, 674.6, AVATAR, "L", "circle")]
+
 MASKS = {
     "mulai-pilih-akun-google": [(89.5, 480.5, 217.6, 492.3, "#FFFFFF", None),
                                 (89.1, 543.2, 221.3, 555.1, "#FFFFFF", None)],
-    "siswa-profil": [(109.9, 169.3, 264.4, 181.2, "#FFFFFF", "nama@gmail.com")],
+    "siswa-profil": [(109.9, 169.3, 264.7, 180.8, "#FFFFFF", "nama@gmail.com"),
+                     (245.8, 264.0, 312.3, 275.9, "#FFFFFF", "Nama Guru)"),
+                     (71.3, 279.6, 106.2, 293.0, "#FFFFFF", "")],
     "siswa-ubah-password": [(70.9, 145.9, 277.0, 161.9, "#FFFFFF", "nama@gmail.com")],
-    "guru-detail-siswa": [(82.4, 172.3, 237.3, 184.2, BG, "nama@gmail.com")],
-    "guru-profil": [(110.3, 166.3, 258.8, 178.2, "#FFFFFF", "nama@gmail.com")],
+    "siswa-peringkat": RANKED,
+    "guru-peringkat": RANKED,
+    "guru-detail-siswa": [(82.4, 172.3, 237.6, 184.5, BG, "nama@gmail.com")],
+    "guru-profil": [(110.3, 166.3, 259.2, 177.9, "#FFFFFF", "nama@gmail.com"),
+                    (109.9, 181.9, 332.7, 194.2, "#FFFFFF", "Penanggung jawab · SMA Negeri 1 Sukodadi")],
+    "guru-buku-aktif": [(93.9, 397.7, 201.6, 408.4, "#FFFFFF", "Bima Setiawan"),
+                        (94.7, 543.9, 211.3, 554.7, "#FFFFFF", "Nadia Lestari"),
+                        (94.7, 709.5, 209.0, 720.3, "#FFFFFF", "Citra Maharani"),
+                        (94.3, 875.1, 195.3, 889.6, "#FFFFFF", "Yoga Saputra")],
+    "guru-jurnal-bulan-ini": [(86.5, 347.2, 212.0, 359.4, "#FFFFFF", "Bima Setiawan"),
+                              (31.2, 344.2, 70.2, 383.2, AVATAR, "B", "circle"),
+                              (87.3, 418.5, 223.1, 430.7, "#FFFFFF", "Nadia Lestari"),
+                              (31.2, 415.5, 70.2, 454.1, AVATAR, "N", "circle"),
+                              (86.9, 489.4, 205.0, 505.7, "#FFFFFF", "Yoga Saputra"),
+                              (31.0, 486.2, 70.4, 525.6, AVATAR, "Y", "circle"),
+                              (86.5, 560.7, 298.5, 577.0, "#FFFFFF", "Laras Ayu Wulandari"),
+                              (31.2, 557.7, 70.2, 596.7, "#78909C/#FFFFFF", "L", "circle")],
+    "guru-siswa": [(80.2, 376.1, 183.4, 386.9, "#FFFFFF", "Rafi Hakim", "SemiBold"),
+                   (80.9, 396.2, 194.2, 410.3, "#FFFFFF", "Prayoga", "SemiBold"),
+                   (29.3, 380.2, 68.3, 419.2, AVATAR, "R", "circle"),
+                   (80.2, 581.1, 190.5, 591.8, "#FFFFFF", "Bima Setiawan", "SemiBold"),
+                   (29.3, 575.1, 68.3, 614.1, AVATAR, "B", "circle"),
+                   (80.9, 692.1, 198.3, 702.9, "#FFFFFF", "Nadia Lestari", "SemiBold"),
+                   (29.3, 686.2, 68.3, 725.1, AVATAR, "N", "circle"),
+                   (80.9, 803.1, 197.2, 810.5, "#FFFFFF", ""),
+                   (30.4, 797.2, 67.2, 810.5, "#FFFFFF", "")],
+    "guru-penanggung-jawab": [(86.9, 593.3, 221.7, 609.7, "#FFFFFF", "Agus Priyono, S.Pd."),
+                              (86.5, 615.2, 227.2, 629.7, "#FFFFFF", "nama@gmail.com"),
+                              (31.0, 587.9, 70.4, 627.3, AVATAR, "A", "circle")],
 }
 
 # label, accent, text on accent, tint, accent as text on white
@@ -109,8 +157,25 @@ def prepare_shots():
             continue
         image = Image.open(source).convert("RGB")
         draw = ImageDraw.Draw(image)
-        for left, top, right, bottom, fill, text in MASKS.get(source.stem, []):
+        for left, top, right, bottom, fill, text, *style in MASKS.get(source.stem, []):
+            style = style[0] if style else "Regular"
             box = [round(left * scale), round(top * scale), round(right * scale), round(bottom * scale)]
+            if style == "circle":
+                background, ink = fill.split("/")
+                draw.ellipse(box, fill=background)
+                # The initial's capital is 0.28 of the avatar, as in the app.
+                cap = round((box[3] - box[1]) * 0.28)
+                size = cap
+                for _ in range(4):
+                    font = ImageFont.truetype(str(FONTS / "Poppins-SemiBold.ttf"), size)
+                    glyphs = font.getbbox(text)
+                    size = max(8, round(size * cap / (glyphs[3] - glyphs[1])))
+                font = ImageFont.truetype(str(FONTS / "Poppins-SemiBold.ttf"), size)
+                glyphs = font.getbbox(text)
+                x = (box[0] + box[2]) / 2 - (glyphs[0] + glyphs[2]) / 2
+                y = (box[1] + box[3]) / 2 - (glyphs[1] + glyphs[3]) / 2
+                draw.text((x, y), text, font=font, fill=ink)
+                continue
             # The darkest pixel of the original text gives the placeholder colour.
             fill_rgb = tuple(int(fill[i:i + 2], 16) for i in (1, 3, 5))
             region = image.crop(box)
@@ -118,6 +183,8 @@ def prepare_shots():
             ink = max(pixels, key=lambda p: sum(abs(p[i] - fill_rgb[i]) for i in range(3)))
             pad = 6
             draw.rectangle([box[0] - pad, box[1] - pad, box[2] + pad, box[3] + pad], fill=fill)
+            if text == "":
+                continue
             height = box[3] - box[1]
             if text is None:
                 bar = round(height * 0.62)
@@ -127,11 +194,12 @@ def prepare_shots():
                 continue
             # Size the placeholder so its glyph box is as tall as the email's.
             size = height
+            weight = FONTS / f"Poppins-{style}.ttf"
             for _ in range(4):
-                font = ImageFont.truetype(str(FONTS / "Poppins-Regular.ttf"), size)
+                font = ImageFont.truetype(str(weight), size)
                 glyphs = font.getbbox(text)
                 size = max(8, round(size * height / (glyphs[3] - glyphs[1])))
-            font = ImageFont.truetype(str(FONTS / "Poppins-Regular.ttf"), size)
+            font = ImageFont.truetype(str(weight), size)
             glyphs = font.getbbox(text)
             draw.text((box[0] - glyphs[0], box[1] - glyphs[1]), text, font=font, fill=ink)
         image = image.crop((0, STATUS_BAR, RAW_W, RAW_H))
@@ -245,20 +313,35 @@ PAGES = [
 
     # ---------------------------------------------------------------- siswa
     page("divider", "siswa", "Siswa",
-         "Pilih satu buku setiap bulan, catat bacaanmu setiap hari, dan baca komentar dari guru.",
+         "Pilih satu buku setiap bulan, catat bacaanmu setiap hari, baca komentar guru, dan kumpulkan lencana.",
          [shot("siswa-beranda", "")], key="siswa"),
     page("tour", "siswa", "Beranda",
-         "Semua yang perlu kamu tahu hari ini ada di satu layar.",
-         [shot("siswa-beranda-komentar", "",
+         "Buku yang sedang kamu baca, jurnal hari ini, dan statistik membacamu ada di satu layar.",
+         [shot("siswa-beranda", "",
                (365, 160, "<b>Buku bulan ini</b>: cover, judul, dan penulis."),
-               (330, 237, "Progres: halaman terakhir yang kamu catat."),
+               (330, 238, "Progres: halaman terakhir yang kamu catat."),
                (280, 291, "Sudah menulis hari ini? Tanda centang muncul, ketuk <b>Lihat</b>. Belum? Ketuk <b>Isi Jurnal Hari Ini</b>."),
-               (172, 372, "Jumlah jurnal bulan ini."),
-               (362, 372, "<b>Streak</b>: hari berturut-turut kamu menulis jurnal."),
-               (300, 498, "<b>Komentar baru dari guru</b>. Ketuk untuk membacanya."),
+               (104, 381, "<b>Statistik</b>: enam kartu yang bisa diketuk, lihat [[statistik]]."),
+               (238, 693, "<b>Riwayat buku</b>: buku terakhirmu. <b>Lihat semua</b> membuka semuanya, lihat [[riwayat-buku]]."),
                (200, 833, "Menu: <b>Beranda</b>, <b>Buku</b>, <b>Jurnal</b>, <b>Profil</b>."))],
          path="Tab Beranda",
+         notes=[note("Komentar baru dari guru",
+                     "Muncul di bawah kartu buku saat guru mengomentari jurnalmu.",
+                     "Ketuk untuk membacanya. Setelah dibaca, kartunya hilang.")],
          tip="Lewat dari target selesai? Label <b>Terlambat</b> muncul di kartu buku."),
+    page("tour", "siswa", "Statistik di Beranda",
+         "Gulir Beranda ke bawah. Setiap kartu bisa diketuk untuk melihat rinciannya.",
+         [shot("siswa-beranda-statistik", "",
+               (180, 206, "<b>Jurnal bulan ini</b> dari jumlah hari di bulan ini. Membuka jurnal bulan ini."),
+               (369, 206, "<b>Streak</b> sekarang dan terbaikmu. Membuka halaman Streak, lihat [[streak]]."),
+               (180, 298, "<b>Buku selesai</b>. Membuka Riwayat buku yang selesai."),
+               (369, 298, "<b>Total jurnal</b> dari semua buku. Membuka semua jurnalmu."),
+               (180, 374, "<b>Peringkat</b> bulan ini di sekolahmu, lihat [[peringkat]]."),
+               (369, 374, "<b>Lencana</b> yang sudah kamu dapat, lihat [[lencana]]."),
+               (238, 476, "<b>Lihat semua</b>: semua buku yang pernah kamu baca, lihat [[riwayat-buku]]."),
+               (372, 548, "Tiga buku terakhir. Ketuk buku untuk melihat detail dan jurnalnya."))],
+         path="Tab Beranda › gulir ke bawah", key="statistik",
+         tip="Statistik dihitung dari jurnal <b>semua bukumu</b>. Ganti buku tidak memutus streak."),
     page("duo", "siswa", "Mulai buku dari katalog",
          "Katalog berisi sekitar 1.200 buku Indonesia, lengkap dengan cover. Cari dulu di sana.",
          [shot("siswa-mulai-buku", "Buka Mulai Buku",
@@ -330,39 +413,112 @@ PAGES = [
                (240, 633, "<b>Hal yang menarik</b> dan <b>Pertanyaan</b> boleh kosong. Semua isian maksimal 1000 karakter."))],
          path="Tab Jurnal › Isi Jurnal", key="jurnal",
          tip="Tidak ada sinyal? Tetap ketuk <b>Simpan</b>. Jurnal tersimpan di HP dan terkirim sendiri saat online."),
-    page("duo", "siswa", "Riwayat jurnal dan komentar guru",
-         "Semua jurnalmu tersimpan. Komentar guru muncul di bawah jurnal yang dikomentari.",
-         [shot("siswa-riwayat-jurnal", "Riwayat Jurnal",
-               (240, 122, "Buku yang sedang dibaca."),
-               (372, 160, "Jurnal terbaru di atas. Ketuk untuk membukanya."),
-               (245, 748, "<b>Isi Jurnal</b>: tulis jurnal baru.")),
-          shot("siswa-jurnal-komentar", "Jurnal dan komentar",
-               (320, 193, "Halaman dan durasi membaca."),
-               (165, 628, "<b>Komentar guru</b> untuk jurnal ini."),
-               (320, 683, "Nama guru, isi komentar, dan waktunya. Ketuk <b>⋮</b> untuk melaporkan, lihat [[laporkan]]."))],
-         path="Tab Jurnal",
+    page("duo", "siswa", "Riwayat jurnal",
+         "Semua jurnalmu dari semua buku, per bulan. Lihat sebagai daftar atau kalender.",
+         [shot("siswa-riwayat-jurnal", "Daftar",
+               (372, 134, "Pilih <b>Daftar</b> atau <b>Kalender</b>."),
+               (150, 167, "Saring satu buku."),
+               (305, 167, "Saring satu bulan atau rentang tanggal. Geser ke kanan untuk urutan terbaru atau terlama."),
+               (205, 234, "Jurnal dikelompokkan per bulan, beserta jumlahnya."),
+               (372, 275, "Ketuk jurnal untuk membukanya."),
+               (245, 767, "<b>Isi Jurnal</b>: tulis jurnal baru.")),
+          shot("siswa-jurnal-kalender", "Kalender",
+               (372, 240, "Panah: bulan sebelum atau sesudahnya."),
+               (225, 325, "Hari biru: ada jurnal. Ketuk untuk membukanya."),
+               (352, 362, "Hari ini dilingkari."),
+               (372, 607, "Jurnal bulan itu ada di bawah kalender."))],
+         path="Tab Jurnal", key="riwayat-jurnal",
          tip="Pertanyaan <b>Aktifkan notifikasi?</b> muncul? Ketuk <b>Izinkan</b>. Kamu diberi tahu setiap kali guru berkomentar.",
-         toc="Riwayat jurnal, komentar guru"),
-    page("duo", "siswa", "Ubah atau hapus jurnal",
-         "Salah ketik? Jurnal masih bisa diubah atau dihapus sampai akhir hari berikutnya.",
+         toc="Riwayat jurnal dan kalender"),
+    page("duo", "siswa", "Komentar guru, ubah atau hapus",
+         "Komentar guru ada di bawah jurnalnya. Jurnal masih bisa diubah atau dihapus sampai akhir hari berikutnya.",
          [shot("siswa-jurnal-komentar", "Buka jurnalnya",
                (292, 80, "Ikon pensil: <b>ubah</b> jurnal."),
-               (377, 114, "Ikon tempat sampah: <b>hapus</b> jurnal. Komentar guru ikut terhapus.")),
+               (377, 114, "Ikon tempat sampah: <b>hapus</b> jurnal. Komentar guru ikut terhapus."),
+               (165, 628, "<b>Komentar guru</b> untuk jurnal ini."),
+               (320, 683, "Nama guru, isi komentar, dan waktunya. Ketuk <b>⋮</b> untuk melaporkan, lihat [[laporkan]].")),
           shot("siswa-ubah-jurnal", "Ubah isinya",
                (252, 196, "Tanda <b>mengubah jurnal</b>."),
                (372, 253, "Ubah halaman, durasi, atau isinya, lalu ketuk <b>Simpan perubahan</b> di bawah."))],
          path="Tab Jurnal › ketuk jurnal",
-         tip="Contoh: jurnal hari Jumat bisa diubah sampai Sabtu malam. Setelah itu jurnal terkunci dan ikonnya hilang."),
+         tip="Contoh: jurnal hari Jumat bisa diubah sampai Sabtu malam. Setelah itu jurnal terkunci dan ikonnya hilang.",
+         toc="Komentar guru, ubah jurnal"),
     page("tour", "siswa", "Buku Saya",
          "Pantau progres bukumu dan selesaikan sebelum target.",
          [shot("siswa-buku-saya", "",
+               (377, 80, "Ikon jam: <b>Riwayat buku</b>, lihat [[riwayat-buku]]."),
                (200, 300, "<b>Progres</b> dari jurnal terakhirmu."),
                (340, 415, "Tanggal mulai, <b>target selesai</b>, dan jumlah hari berjurnal."),
                (40, 541, "<b>Tandai Selesai</b> aktif setelah jurnalmu mencapai halaman terakhir. Boleh tulis ulasan akhir."),
                (40, 617, "<b>Perpanjang target</b>: sekali saja, sampai akhir bulan berikutnya, paling lama 31 hari."),
-               (290, 668, "<b>Hentikan buku</b> kapan saja. Buku dan jurnalnya tetap ada di riwayat."))],
+               (290, 668, "<b>Hentikan buku</b> kapan saja. Buku dan jurnalnya tetap ada di riwayat."),
+               (238, 730, "<b>Buku sebelumnya</b>: tiga terakhir. <b>Lihat semua</b> membuka Riwayat buku."))],
          path="Tab Buku", key="buku-saya",
          tip="Setelah buku selesai atau dihentikan, kamu bisa memulai buku baru dari tab <b>Buku</b>."),
+    page("duo", "siswa", "Riwayat buku",
+         "Semua buku yang pernah kamu baca: sedang dibaca, selesai, atau dihentikan.",
+         [shot("siswa-riwayat-buku", "Riwayat buku",
+               (372, 140, "Cari judul atau penulis."),
+               (372, 198, "Saring status: Sedang dibaca, Selesai, atau Dihentikan."),
+               (28, 245, "<b>Rentang tanggal</b> mulai membaca, <b>Buku unik</b> (buku yang dibaca lagi dihitung sekali), "
+                         "dan urutan: terbaru, terlama, judul, jurnal terbanyak, tercepat selesai, atau progres."),
+               (360, 665, "Buku selesai: tanggal selesai dan lama membacanya.")),
+          shot("siswa-buku-lama", "Ketuk satu buku",
+               (365, 170, "Status dan progres akhir."),
+               (372, 310, "Mulai, selesai, lama membaca, hari berjurnal, dan <b>streak terbaik</b> di buku ini. Target yang diperpanjang ditandai."),
+               (140, 388, "<b>Ulasan akhir</b>, kalau kamu menulisnya."),
+               (372, 618, "Semua jurnal buku ini. Ketuk untuk membukanya."))],
+         path="Beranda › Riwayat buku › Lihat semua", key="riwayat-buku",
+         tip="Riwayat buku juga terbuka dari ikon jam di tab <b>Buku</b>, dan dari kartu <b>Buku selesai</b> di Beranda."),
+    page("tour", "siswa", "Streak dan kalender",
+         "Streak adalah hari berturut-turut kamu menulis jurnal, dari semua bukumu.",
+         [shot("siswa-streak", "",
+               (175, 150, "<b>Streak sekarang</b>."),
+               (365, 150, "<b>Streak terbaik</b> yang pernah kamu capai."),
+               (365, 279, "Cara streak dihitung."),
+               (110, 538, "Kalender: hari biru ada jurnal, hari ini dilingkari. Panah untuk bulan lain."),
+               (80, 878, "<b>Lihat peringkat streak</b> di sekolahmu."))],
+         path="Beranda › kartu Streak", key="streak",
+         notes=[note("Contoh",
+                     "Kamu menulis Sabtu, lalu Senin. Minggu hari netral, jadi streak tidak putus.",
+                     "Buku selesai hari Rabu, lalu kamu memulai buku baru dan menulis hari Kamis: streak tetap jalan.",
+                     "Lupa menulis kemarin? Isi jurnal untuk kemarin hari ini juga, streak tersambung lagi.",
+                     tone="plain")],
+         tip="Jurnal boleh diisi sampai 2 hari ke belakang. Isi hari yang terlewat sebelum lewat batasnya."),
+    page("tour", "siswa", "Peringkat sekolah",
+         "Bandingkan bacaanmu dengan teman sesekolah, dari satu bulan sampai sepanjang waktu.",
+         [shot("siswa-peringkat", "",
+               (386, 108, "Periode: <b>Bulan</b>, <b>Tahun</b>, <b>Tahun ajaran</b> (1 Juli–30 Juni), atau <b>Semua</b> waktu."),
+               (372, 178, "Panah: periode sebelumnya atau sesudahnya."),
+               (386, 210, "Urutkan: <b>Buku</b> selesai, <b>Streak</b> terpanjang dalam periode itu, atau <b>Hari baca</b>."),
+               (380, 279, "Saring: seluruh sekolah, kelasmu, atau ekskulmu."),
+               (300, 330, "Barismu bertanda <b>(kamu)</b>."),
+               (200, 766, "Urutan bila nilainya sama, dan kapan peringkat terakhir diperbarui."),
+               (260, 851, "<b>Posisimu</b> selalu terlihat di bawah."))],
+         path="Beranda › kartu Peringkat", key="peringkat",
+         notes=[note("Yang dilihat temanmu",
+                     "Nama, kelas, ekskul, dan angka membacamu, hanya untuk teman sesekolah.",
+                     "Isi jurnalmu tidak pernah ditampilkan di peringkat.", tone="plain"),
+                note("Rekap bulanan",
+                     "Tanggal 1 pukul 07.00 WIB kamu mendapat notifikasi rekap bulan lalu: angka membaca dan posisimu.",
+                     "Rekap hanya dikirim bila bulan lalu kamu menulis jurnal atau menyelesaikan buku.")],
+         tip="Peringkat diperbarui saat jurnal tersimpan dan setiap malam."),
+    page("tour", "siswa", "Lencana",
+         "Dua belas lencana untuk dikumpulkan dari buku, streak, dan jurnalmu.",
+         [shot("siswa-lencana", "",
+               (180, 140, "Lencana yang sudah <b>Didapat</b> berwarna."),
+               (180, 540, "Yang belum: terkunci, dengan progresnya, misalnya 1/3 buku."))],
+         path="Beranda › kartu Lencana", key="lencana",
+         notes=[note("Daftar lencana",
+                     "<b>Buku</b>: selesaikan 1, 3, 6, dan 12 buku.",
+                     "<b>Streak</b>: 7, 14, dan 30 hari.",
+                     "<b>Jurnal</b>: tulis 30, 100, dan 200 jurnal.",
+                     "<b>Tepat waktu</b>: selesaikan buku sebelum target, tanpa perpanjangan.",
+                     "<b>Pengulas</b>: tulis ulasan akhir untuk 3 buku."),
+                note("Di mana lencana terlihat",
+                     "Kartu <b>Lencana</b> di Beranda dan di Profil.",
+                     "Penanggung jawab melihat lencanamu di detail siswa.", tone="plain")],
+         tip="Gulir ke bawah untuk melihat semua lencana beserta progresnya."),
     page("tour", "siswa", "Laporkan komentar atau buku",
          "Ada komentar atau buku yang melanggar ketentuan? Laporkan dari aplikasi.",
          [shot("siswa-laporkan-komentar", "",
@@ -384,14 +540,13 @@ PAGES = [
                      "Ada bahaya langsung bagi seseorang? Segera beri tahu guru atau orang tua.", tone="warn")],
          toc="Laporkan komentar atau buku"),
     page("tour", "siswa", "Profil",
-         "Statistik membaca, riwayat buku, dan pengaturan akunmu.",
+         "Data dirimu, lencana, pengaturan, dan akun. Statistik membaca ada di Beranda.",
          [shot("siswa-profil", "",
                (36, 140, "Ketuk foto: <b>pilih dari galeri</b>, <b>ambil foto</b>, atau <b>pakai foto Google</b>."),
-               (372, 240, "Ketuk pensil untuk mengubah <b>kelas</b> dan <b>ekskul</b>."),
-               (195, 330, "Total jurnal, buku selesai, dan streak terbaik."),
-               (150, 503, "<b>Riwayat buku</b>: semua buku yang pernah kamu baca."),
-               (300, 697, "<b>Tema</b>: Terang, Gelap, atau Ikuti perangkat."),
-               (372, 765, "Notifikasi komentar guru belum aktif? Ketuk <b>Aktifkan</b>."))],
+               (372, 245, "Ketuk pensil untuk mengubah <b>kelas</b> dan <b>ekskul</b>. Nama wali kelas dan pembina ekskulmu tertulis di sini."),
+               (372, 384, "<b>Lencana</b>: ketuk untuk melihat semuanya, lihat [[lencana]]."),
+               (300, 530, "<b>Tema</b>: Terang, Gelap, atau Ikuti perangkat."),
+               (372, 600, "Notifikasi belum aktif? Ketuk <b>Aktifkan</b> untuk komentar guru dan rekap bulanan."))],
          path="Tab Profil", key="profil",
          notes=[note("Tema gelap",
                      "Nyaman untuk membaca malam hari. Pilihan tema tersimpan di HP ini.",
@@ -405,16 +560,18 @@ PAGES = [
 
     # ----------------------------------------------------------------- guru
     page("divider", "guru", "Penanggung jawab",
-         "Pantau keaktifan siswa, beri komentar pada jurnal, kelola siswa dan katalog buku sekolah.",
+         "Pantau keaktifan siswa dan siswa binaan, beri komentar pada jurnal, kelola siswa, penanggung jawab, dan katalog buku.",
          [shot("guru-dashboard-gelap", "")], key="guru"),
     page("tour", "guru", "Dashboard",
-         "Ringkasan keaktifan siswa di sekolah Anda.",
+         "Ringkasan keaktifan siswa: seluruh sekolah, siswa binaan Anda, satu kelas, atau satu ekskul.",
          [shot("guru-dashboard", "",
-               (372, 200, "Saring: <b>Semua siswa</b> atau satu ekskul."),
-               (372, 255, "Jumlah siswa, <b>Buku aktif</b>, dan <b>Jurnal bulan ini</b>."),
-               (372, 400, "Siswa yang <b>belum masuk aplikasi</b>. Ketuk untuk melihat daftarnya."),
-               (200, 545, "<b>Status siswa</b>. Ketuk satu status untuk melihat siswanya."),
-               (165, 757, "<b>Perlu perhatian</b>: yang paling lama tidak menulis di atas."),
+               (386, 184, "Saring: <b>Semua siswa</b>, <b>Binaan saya</b>, satu <b>Kelas</b>, atau satu <b>Ekskul</b>. Halaman yang dibuka dari sini ikut saringan ini."),
+               (108, 256, "<b>Siswa</b>: membuka daftar siswa."),
+               (235, 256, "<b>Buku aktif</b>, lihat [[buku-aktif]]."),
+               (361, 256, "<b>Jurnal bulan ini</b>, lihat [[buku-aktif]]."),
+               (372, 404, "Siswa yang <b>belum masuk aplikasi</b>. Ketuk untuk melihat daftarnya."),
+               (372, 500, "<b>Peringkat siswa</b>, lihat [[peringkat-guru]]."),
+               (150, 594, "<b>Status siswa</b>. Ketuk satu status untuk melihat siswanya."),
                (240, 833, "Menu: Dashboard, Siswa, Buku, Sekolah, Profil."))],
          path="Tab Dashboard", key="dashboard",
          notes=[note("Arti status",
@@ -423,16 +580,62 @@ PAGES = [
                      '<span class="chip bad">Tidak aktif</span> lebih dari 7 hari efektif.',
                      '<span class="chip none">Belum ada buku</span> belum memulai buku.',
                      "Hari netral dan hari libur tidak dihitung. Angkanya bisa diatur, lihat [[pengaturan]].",
-                     tone="plain")]),
+                     tone="plain"),
+                note("Binaan saya",
+                     "Siswa kelas perwalian Anda dan siswa ekskul yang Anda bina.",
+                     "Muncul setelah peran diatur, lihat [[peran]]. Belum diatur? Kartu ajakannya ada di bawah Dashboard.",
+                     "Gulir ke bawah: <b>Perlu perhatian</b>, yang paling lama tidak menulis di atas.")]),
+    page("duo", "guru", "Buku aktif dan jurnal bulan ini",
+         "Dua kartu di Dashboard membuka daftar lengkapnya, dengan saringan yang sama.",
+         [shot("guru-buku-aktif", "Buku aktif",
+               (372, 130, "Saringan sama dengan Dashboard."),
+               (290, 172, "Jumlah buku aktif dan rata-rata progres."),
+               (372, 240, "Buku, siswa, progres, dan target. Yang terlambat dan targetnya terdekat di atas. Ketuk untuk membaca jurnalnya.")),
+          shot("guru-jurnal-bulan-ini", "Jurnal bulan ini",
+               (372, 192, "Jumlah jurnal, siswa yang menulis, dan rata-ratanya."),
+               (290, 283, "Jurnal tiap siswa, terbanyak di atas. Ketuk untuk membuka detail siswa."),
+               (372, 652, "<b>Belum menulis bulan ini</b>: ketuk untuk melihat siswanya."))],
+         path="Dashboard › kartu Buku aktif atau Jurnal", key="buku-aktif",
+         tip="Siswa yang belum menulis bulan ini perlu diingatkan. Komentar singkat pada jurnal terakhirnya pun membantu.",
+         toc="Buku aktif, jurnal bulan ini"),
+    page("tour", "guru", "Peringkat siswa",
+         "Siapa yang paling banyak membaca, dari satu bulan sampai sepanjang waktu.",
+         [shot("guru-peringkat", "",
+               (386, 108, "Periode: <b>Bulan</b>, <b>Tahun</b>, <b>Tahun ajaran</b> (1 Juli–30 Juni), atau <b>Semua</b>."),
+               (372, 178, "Panah: periode sebelumnya atau sesudahnya."),
+               (386, 210, "Urutkan: buku selesai, streak terpanjang dalam periode itu, atau hari membaca."),
+               (386, 262, "Saring: Semua siswa, Binaan saya, kelas, atau ekskul."),
+               (300, 330, "Ketuk siswa untuk membuka detailnya."),
+               (200, 766, "Urutan bila nilainya sama, dan kapan peringkat terakhir diperbarui."))],
+         path="Dashboard › Peringkat siswa", key="peringkat-guru",
+         notes=[note("Yang dilihat siswa",
+                     "Siswa melihat peringkat sekolahnya: nama, kelas, ekskul, dan angka membaca teman sesekolah.",
+                     "Isi jurnal tidak pernah ditampilkan di peringkat.", tone="plain")],
+         tip="Umumkan pembaca teratas setiap bulan. Peringkat <b>Tahun ajaran</b> cocok untuk penghargaan akhir tahun."),
+    page("tour", "guru", "Peran: wali kelas dan pembina",
+         "Atur kelas perwalian dan ekskul yang Anda bina, supaya siswa binaan Anda bisa dilihat sekaligus.",
+         [shot("guru-peran", "",
+               (372, 560, "<b>Wali kelas</b>: pilih satu kelas, atau <b>Bukan wali kelas</b>."),
+               (372, 640, "<b>Pembina ekstrakurikuler</b>: ketuk ekskul yang Anda bina. Boleh lebih dari satu."),
+               (40, 767, "Ketuk <b>Simpan</b>."))],
+         path="Profil › Peran di sekolah", key="peran",
+         notes=[note("Setelah disimpan",
+                     "Saringan <b>Binaan saya</b> muncul di Dashboard, Siswa, dan Peringkat.",
+                     "Siswa binaan melihat nama Anda di Profil mereka, sebagai wali kelas atau pembina.",
+                     "Setiap pagi pukul 06.30 WIB, notifikasi memberi tahu siswa binaan yang baru berstatus Perlu perhatian "
+                     "atau Tidak aktif. Tidak ada perubahan, tidak ada notifikasi."),
+                note("Aktifkan notifikasinya",
+                     "Di Profil, ketuk <b>Aktifkan</b> pada <b>Notifikasi siswa binaan</b>.", tone="plain")],
+         toc="Peran: wali kelas, pembina"),
     page("tour", "guru", "Daftar siswa",
          "Cari dan saring siswa, lalu buka detailnya.",
          [shot("guru-siswa", "",
                (372, 137, "Cari nama atau email."),
-               (340, 188, "Saring menurut <b>kelas</b> dan <b>ekskul</b>."),
+               (158, 168, "Saring: <b>Binaan saya</b>, kelas, dan ekskul."),
                (372, 236, "Saring menurut status."),
-               (372, 280, "<b>Belum masuk</b>: sudah didaftarkan, belum pernah masuk. Ketuk untuk membuka daftarnya."),
-               (240, 384, "Kelas, ekskul, status, dan progres buku. Ketuk untuk membuka detail siswa."),
-               (245, 748, "<b>Tambah</b>: satu per satu atau impor CSV."))],
+               (372, 292, "<b>Belum masuk</b>: sudah didaftarkan, belum pernah masuk. Ketuk untuk membuka daftarnya."),
+               (300, 505, "Kelas, ekskul, status, dan progres buku. Ketuk untuk membuka detail siswa."),
+               (245, 767, "<b>Tambah</b>: satu per satu atau impor CSV."))],
          path="Tab Siswa", key="daftar-siswa",
          tip="Siswa yang belum masuk bisa diubah datanya atau dihapus dari daftar. Ketuk namanya di bagian <b>Belum masuk</b>."),
     page("duo", "guru", "Tambah siswa",
@@ -450,22 +653,23 @@ PAGES = [
          tip="Setelah ditambahkan, siswa masuk dengan email itu lewat <b>Masuk dengan Google</b> atau <b>Daftar</b>.",
          toc="Tambah siswa, impor CSV"),
     page("tour", "guru", "Detail siswa",
-         "Buku aktif, keaktifan, dan riwayat buku satu siswa.",
+         "Buku aktif, keaktifan, lencana, dan riwayat buku satu siswa.",
          [shot("guru-detail-siswa", "",
-               (377, 106, "<b>⋮</b> › <b>Laporkan pengguna</b>: nama, foto, atau perilaku siswa melanggar ketentuan, lihat [[laporan]]."),
+               (377, 80, "<b>⋮</b> › <b>Laporkan pengguna</b>: nama, foto, atau perilaku siswa melanggar ketentuan, lihat [[laporan]]."),
                (290, 165, "Nama, kelas, ekskul, email, dan status."),
                (255, 216, "<b>Ubah nama, kelas, ekskul</b>."),
-               (372, 330, "<b>Buku aktif</b>. Ketuk untuk membaca jurnalnya."),
-               (372, 410, "Streak, jurnal bulan ini, dan buku selesai."),
+               (372, 280, "<b>Buku aktif</b>. Ketuk untuk membaca jurnalnya."),
+               (372, 420, "Streak sekarang dan terbaik, jurnal bulan ini, dan buku selesai."),
                (180, 563, "<b>Aktivitas terakhir</b>."),
-               (150, 667, "<b>Riwayat buku</b>. Ketuk buku untuk melihat semua jurnalnya."),
-               (40, 847, "<b>Keluarkan dari sekolah</b>: akun, jurnal, dan riwayat bukunya tetap disimpan."))],
+               (120, 666, "<b>Lencana</b> siswa. Ketuk untuk melihat semuanya."),
+               (150, 816, "<b>Riwayat buku</b>. Ketuk buku untuk melihat semua jurnalnya."))],
          path="Tab Siswa › ketuk siswa", key="detail-siswa",
-         notes=[note("Hapus data permanen",
+         notes=[note("Keluarkan atau hapus?",
+                     "Paling bawah ada <b>Keluarkan dari sekolah</b>: akun, jurnal, dan riwayat bukunya tetap disimpan.",
+                     "Pilih <b>Keluarkan</b> bila siswa pindah. Datanya kembali bila emailnya ditambahkan lagi."),
+                note("Hapus data permanen",
                      "Tombolnya paling bawah. Semua buku, jurnal, dan komentar siswa di sekolah ini hilang selamanya.",
-                     "Ketik <b>HAPUS</b> untuk memastikan. Akun siswanya sendiri tetap ada.", tone="warn"),
-                note("Keluarkan atau hapus?",
-                     "Pilih <b>Keluarkan</b> bila siswa pindah. Datanya kembali bila emailnya ditambahkan lagi.")]),
+                     "Ketik <b>HAPUS</b> untuk memastikan. Akun siswanya sendiri tetap ada.", tone="warn")]),
     page("duo", "guru", "Jurnal siswa dan komentar",
          "Baca jurnal siswa dan beri tanggapan. Siswa langsung mendapat notifikasi.",
          [shot("guru-jurnal-siswa", "Daftar jurnal",
@@ -491,9 +695,25 @@ PAGES = [
          notes=[note("Label yang dihapus",
                      "Tidak bisa dipilih lagi. Siswa yang sudah memakainya tetap memakai label itu sampai diganti."),
                 note("Gulir ke bawah",
-                     "<b>Penanggung jawab</b> sekolah ini, ditambahkan oleh pengembang Sabu Saku.",
+                     "<b>Penanggung jawab</b> sekolah ini: tambah atau keluarkan, lihat [[tambah-pj]].",
                      "<b>Pengaturan status siswa</b>: hari netral, ambang status, dan hari libur. Lihat [[pengaturan]].")],
          toc="Sekolah: laporan, kelas, ekskul"),
+    page("duo", "guru", "Tambah penanggung jawab",
+         "Ajak guru lain, misalnya wali kelas atau pembina ekskul, ikut memantau siswa sekolah Anda.",
+         [shot("guru-penanggung-jawab", "Penanggung jawab",
+               (262, 513, "Ketuk <b>Tambah</b>."),
+               (372, 600, "Penanggung jawab sekolah ini dan perannya. Ketuk untuk melihat atau <b>mengeluarkannya</b>."),
+               (372, 708, "<b>Pengaturan status siswa</b>, lihat [[pengaturan]].")),
+          shot("guru-tambah-pj", "Isi datanya",
+               (372, 269, "<b>Email</b> untuk masuk. Wajib."),
+               (372, 331, "<b>Nama lengkap dan gelar</b>. Wajib."),
+               (372, 400, "<b>Wali kelas</b>, opsional."),
+               (372, 452, "<b>Pembina ekstrakurikuler</b>, opsional. Boleh lebih dari satu."),
+               (40, 582, "Ketuk <b>Tambah penanggung jawab</b>."))],
+         path="Tab Sekolah › Penanggung jawab", key="tambah-pj",
+         tip="Ia masuk dengan Google atau <b>Daftar</b> memakai email itu. Sebelum masuk, ia ada di <b>Belum masuk</b>: perannya bisa diubah "
+             "atau undangannya dibatalkan. Setelah masuk, hanya ia yang mengubah perannya. Anda tidak bisa mengeluarkan diri sendiri.",
+         toc="Tambah penanggung jawab"),
     page("tour", "guru", "Pengaturan status",
          "Atur kapan siswa dianggap aktif, perlu perhatian, atau tidak aktif.",
          [shot("guru-pengaturan-sekolah", "",
@@ -608,18 +828,20 @@ PAGES = [
                      "tidak muncul di sini.", tone="warn")],
          toc="Laporan dan moderasi"),
     page("tour", "guru", "Profil penanggung jawab",
-         "Foto, ekskul yang dibina, pengaturan, dan akun Anda.",
+         "Foto, peran di sekolah, notifikasi, pengaturan, dan akun Anda.",
          [shot("guru-profil", "",
                (36, 140, "Ketuk foto untuk menggantinya."),
-               (190, 257, "<b>Ekskul yang dibina</b>, diatur oleh pengembang Sabu Saku."),
-               (300, 397, "<b>Tema</b>: Terang, Gelap, atau Ikuti perangkat."),
-               (300, 492, "<b>Ketentuan penggunaan</b> dan <b>Kebijakan privasi</b>, dibuka di situs Sabu Saku."),
-               (300, 643, "<b>Ubah nama</b>, <b>Ubah password</b>, dan <b>Keluar</b>."),
-               (165, 781, "<b>Hapus akun</b>. Komentar yang sudah Anda tulis tetap tersimpan."))],
+               (172, 254, "<b>Peran di sekolah</b>: wali kelas dan pembina ekskul, lihat [[peran]]."),
+               (300, 535, "<b>Tema</b>: Terang, Gelap, atau Ikuti perangkat."),
+               (372, 595, "<b>Notifikasi siswa binaan</b> belum aktif? Ketuk <b>Aktifkan</b>."),
+               (300, 670, "<b>Ketentuan penggunaan</b> dan <b>Kebijakan privasi</b>, dibuka di situs Sabu Saku."))],
          path="Tab Profil",
          notes=[note("Tema gelap",
                      "Semua layar ikut gelap, termasuk katalog. Pilihan tema tersimpan di HP ini.",
-                     shot="guru-katalog-gelap")],
+                     shot="guru-katalog-gelap"),
+                note("Gulir ke bawah",
+                     "<b>Ubah nama</b>, <b>Ubah password</b>, dan <b>Keluar</b>.",
+                     "<b>Hapus akun</b>. Komentar yang sudah Anda tulis tetap tersimpan.")],
          toc="Profil dan tema gelap"),
 
     # ---------------------------------------------------------------- semua
@@ -663,6 +885,7 @@ RULES = [
         "<b>Perlu perhatian</b>: 4–7 hari. <b>Tidak aktif</b>: lebih dari 7 hari.",
         "<b>Belum ada buku</b>: belum memulai buku.",
         "Hari netral (bawaannya Minggu) dan hari libur sekolah tidak dihitung dan tidak memutus streak.",
+        "Streak dihitung dari jurnal <b>semua buku</b>: ganti buku tidak memutus streak.",
         "Ambang status dan hari netral diatur penanggung jawab.",
     ]),
 ]
@@ -673,7 +896,8 @@ TIPS = [
     ("Tanpa sinyal tetap bisa",
      "Jurnal tersimpan di HP dan terkirim sendiri saat online. Memulai buku dan membuka katalog butuh internet."),
     ("Izinkan notifikasi",
-     "Siswa diberi tahu saat guru mengomentari jurnalnya. Tidak ada notifikasi lain."),
+     "Siswa diberi tahu saat guru berkomentar, dan mendapat rekap tiap awal bulan. Wali kelas dan pembina "
+     "mendapat kabar pagi tentang siswa binaan."),
     ("Rekomendasikan 10–20 buku",
      "Untuk penanggung jawab: buku rekomendasi tampil paling atas saat siswa mencari, jadi siswa cepat memilih."),
     ("Ganti HP? Masuk lagi",
@@ -695,11 +919,13 @@ MISSIONS = {
         "Izinkan notifikasi komentar guru",
         "Baca komentar guru di jurnalmu",
         "Coba tema gelap dari Profil",
-        "Isi jurnal 7 hari berturut-turut",
+        "Lihat posisimu di Peringkat",
+        "Isi jurnal 7 hari berturut-turut dan dapatkan lencananya",
     ],
     "guru": [
         "Baca dan setujui ketentuan",
-        "Buka Dashboard dan saring per ekskul",
+        "Atur peran wali kelas atau pembina di Profil",
+        "Buka Dashboard dan saring Binaan saya",
         "Periksa label kelas dan ekskul di tab Sekolah",
         "Tambah satu siswa dengan email",
         "Impor beberapa siswa dari berkas CSV",
@@ -708,7 +934,7 @@ MISSIONS = {
         "Tulis komentar pada jurnal siswa",
         "Rekomendasikan 10 buku di katalog",
         "Tinjau saran dari siswa",
-        "Buka Sekolah › Laporan",
+        "Lihat Peringkat siswa bulan ini",
         "Periksa hari netral dan tambah hari libur",
     ],
 }
@@ -963,7 +1189,7 @@ h1 {{ margin: 12px 0 0; font: 700 28px/1.15 Poppins; letter-spacing: -.6px; colo
 .toc h2 {{ display: flex; align-items: center; gap: 9px; margin: 0 0 6px; font: 600 15.5px/1 Poppins; color: {NAVY}; }}
 .toc h2 i {{ width: 12px; height: 12px; border-radius: 4px; background: var(--accent); }}
 .toc h2 a {{ margin-left: auto; font: 500 10.5px/1 Poppins; color: var(--accent-text); }}
-.toc a.row {{ display: flex; align-items: baseline; gap: 8px; padding: 3.6px 0; font-size: 12.4px; line-height: 1.25; }}
+.toc a.row {{ display: flex; align-items: baseline; gap: 8px; padding: 2.6px 0; font-size: 12.4px; line-height: 1.25; }}
 .toc a.row u {{ flex: 1; border-bottom: 1.5px dotted #C3CEDD; transform: translateY(-3px); text-decoration: none; }}
 .toc a.row b {{ font: 600 11.5px/1 Poppins; color: var(--accent-text); }}
 .how {{ display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-top: 14px; padding: 12px 16px; border-radius: 18px;
@@ -1066,7 +1292,7 @@ h1 {{ margin: 12px 0 0; font: 700 28px/1.15 Poppins; letter-spacing: -.6px; colo
 .missions section {{ padding: 16px 18px 12px; border-radius: 20px; background: #fff; border: 1.5px solid {OUTLINE}; }}
 .missions h2 {{ display: flex; align-items: center; justify-content: space-between; margin: 0 0 8px; font: 600 17px/1 Poppins; color: {NAVY}; }}
 .missions h2 span {{ padding: 5px 9px; border-radius: 9px; background: var(--accent); color: var(--on); font: 600 10px/1 Poppins; letter-spacing: .8px; }}
-.missions label {{ display: flex; gap: 11px; align-items: flex-start; padding: 10px 0; font-size: 13.4px; line-height: 1.4;
+.missions label {{ display: flex; gap: 11px; align-items: flex-start; padding: 9px 0; font-size: 13.4px; line-height: 1.4;
   border-top: 1px solid #EDF1F6; }}
 .missions label:first-of-type {{ border-top: 0; }}
 .missions .box {{ flex: none; width: 19px; height: 19px; margin-top: 0; border-radius: 6px; border: 2px solid var(--accent-text); background: #fff; }}
@@ -1234,8 +1460,8 @@ def render_cover(pages):
 <div class="school">{SCHOOL_ICON}Untuk {SCHOOL}</div>
 <p class="sub">Panduan bergambar untuk siswa dan penanggung jawab. Ikuti nomor kuning pada tiap gambar.</p>
 <div class="roles">{roles}</div>
-<div class="stage">{device({'name': 'siswa-beranda-komentar', 'pins': ()}, pins=False)}
-<div class="badge" style="left:-64px;top:478px;transform:rotate(-7deg)"><i style="background:{SKY}">{COMMENT}</i>Komentar baru dari guru</div>
+<div class="stage">{device({'name': 'siswa-beranda', 'pins': ()}, pins=False)}
+<div class="badge" style="left:-64px;top:405px;transform:rotate(-7deg)"><i style="background:{SKY}">{COMMENT}</i>Peringkat dan lencana</div>
 </div>
 <div class="ver">Untuk aplikasi Sabu Saku versi {APP_VERSION}</div>{SHELF_COVER}</div>"""
 
@@ -1445,7 +1671,6 @@ def main():
     prepare_shots()
     names = {item["name"] for spec in PAGES for item in spec["shots"]}
     names |= {n["shot"] for spec in PAGES for n in spec["notes"] if n["shot"]}
-    names.add("siswa-beranda-komentar")
     missing = sorted(name for name in names if not (SHOTS / f"{name}.jpg").exists())
     if missing:
         raise SystemExit(f"Missing screenshots in {SHOTS.relative_to(ROOT)}: {', '.join(missing)}")
