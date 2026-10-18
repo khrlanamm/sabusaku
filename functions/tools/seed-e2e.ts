@@ -19,6 +19,9 @@
 //   siswa    daftar@e2e.test     roster only, no account (for "Daftar")
 //   outsider luar@e2e.test       password, on no roster
 //            → "Harap Menghubungi Administrator Sekolah"
+//   superadmin benevology@gmail.com "Superadmin Uji" password, on no roster
+//            → opens "SMA Uji Coba" (first by name) at sign-in
+//   school   e2e2 "SMA Uji Coba Dua"; class XII-A1; nobody on its roster
 //   catalog  Laskar Pelangi (529 hal.), Bumi Manusia (535 hal.)
 
 import {requireArg, run, useEmulator} from "./_env";
@@ -30,6 +33,7 @@ import {rebuildCatalog} from "../src/infra/catalog";
 import {createSchool} from "../src/infra/schools";
 
 export const E2E_SCHOOL = "e2e";
+export const E2E_SECOND_SCHOOL = "e2e2";
 
 async function clearEmulators(): Promise<void> {
   const project = process.env.GCLOUD_PROJECT;
@@ -51,6 +55,7 @@ run(async () => {
 
   await clearEmulators();
   await createSchool(E2E_SCHOOL, "SMA Uji Coba", ["XII-A1", "XII-A2"]);
+  await createSchool(E2E_SECOND_SCHOOL, "SMA Uji Coba Dua", ["XII-A1"]);
 
   const roster = [
     {email: "guru@e2e.test", role: "guru", name: "Sari Wulandari", classId: null, extracurriculars: ["Masis-KIR"]},
@@ -74,6 +79,8 @@ run(async () => {
   // Joined by the app at first sign-in.
   await withPassword("baru@e2e.test");
   await withPassword("luar@e2e.test", "Orang Luar");
+  // The superadmin joins no roster; the app opens a school at sign-in.
+  await withPassword("benevology@gmail.com", "Superadmin Uji");
 
   // google@e2e.test has no account yet: like a real student, the first
   // Google sign-in creates it, and the app then asks for a password.

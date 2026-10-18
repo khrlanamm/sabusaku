@@ -70,7 +70,7 @@ Data buku tetap disalin ke `programs.book`, sehingga jurnal tidak bergantung pad
 | `staff.supervisors` | map label ekskul → string[] | Nama pembina per ekstrakurikuler, urut abjad. Ditulis trigger `onTeacherWritten` |
 | `createdAt` | timestamp | |
 
-Tulis: developer (skrip), Functions (`staff`), dan penanggung jawab (hanya `settings`, `classes`, `extracurriculars`, `recommendedBooks`, divalidasi rules). Baca: seluruh anggota sekolah. `staff` ada karena siswa tidak boleh membaca profil guru, tetapi profil siswa menampilkan wali kelas dan pembina ekskulnya.
+Tulis: superadmin (callable `addSchool`) atau developer (skrip), Functions (`staff`), dan penanggung jawab (hanya `settings`, `classes`, `extracurriculars`, `recommendedBooks`, divalidasi rules). Baca: seluruh anggota sekolah; superadmin membaca dan me-list semua sekolah. `staff` ada karena siswa tidak boleh membaca profil guru, tetapi profil siswa menampilkan wali kelas dan pembina ekskulnya.
 
 Masukan kelas yang diketik bebas (`12  A1`, `XIIC2`, `Xll-A1`, `XD`) dinormalkan ke label baku oleh `normalizeClassLabel` (`lib/core/utils/labels.dart` dan `functions/src/domain/labels.ts`, harus sama).
 
@@ -85,10 +85,10 @@ Masukan kelas yang diketik bebas (`12  A1`, `XIIC2`, `Xll-A1`, `XD`) dinormalkan
 | `extracurriculars` | string[] | Label ekstrakurikuler (siswa; untuk guru = yang dibina) |
 | `homeroomClass` | string? | Guru saja: kelas perwaliannya (wali kelas). Disalin ke `users/{uid}` saat klaim |
 | `uid` | string? | Terisi saat akun mengklaim keanggotaan |
-| `addedBy` | string | UID penanggung jawab, atau `developer` |
+| `addedBy` | string | UID penanggung jawab atau superadmin, atau `developer` |
 | `createdAt`, `updatedAt` | timestamp | |
 
-ID dokumen = email, sehingga satu email otomatis hanya terdaftar di satu sekolah. Dibuat dan dihapus hanya oleh Functions/skrip (`addStudents`, `removeStudent`, `eraseStudent`, `addTeacher`, `removeTeacher`, `add-guru`). Penanggung jawab boleh membaca entri sekolahnya dan, selama orangnya belum pernah masuk (`uid == null`), mengubah `name`/`classId`/`extracurriculars` siswa atau `name`/`homeroomClass`/`extracurriculars` guru. Yang sudah masuk diubah lewat `users/{uid}`.
+ID dokumen = email, sehingga satu email otomatis hanya terdaftar di satu sekolah. Dibuat dan dihapus hanya oleh Functions/skrip (`addStudents`, `removeStudent`, `eraseStudent`, `addTeacher`, `removeTeacher`, `addSchool`, `add-guru`). Email superadmin tidak pernah ada di sini: semua jalur menolaknya. Penanggung jawab boleh membaca entri sekolahnya dan, selama orangnya belum pernah masuk (`uid == null`), mengubah `name`/`classId`/`extracurriculars` siswa atau `name`/`homeroomClass`/`extracurriculars` guru. Yang sudah masuk diubah lewat `users/{uid}`.
 
 ### 3.2 `schools/{schoolId}/users/{uid}`
 | Field | Tipe | Keterangan |
@@ -103,9 +103,10 @@ ID dokumen = email, sehingga satu email otomatis hanya terdaftar di satu sekolah
 | `status` | string | `active` · `removed` (dikeluarkan dari sekolah) |
 | `termsVersion` | int? | Versi Ketentuan penggunaan (https://sabusaku.web.app/ketentuan) yang disetujui. Tidak ada = 0 (belum setuju). Saat ini `CURRENT_TERMS_VERSION = 1` (`functions/src/domain/terms.ts`, `lib/core/policy/terms.dart`) |
 | `termsAcceptedAt` | timestamp? | Waktu server saat versi itu disetujui. Menyetujui versi yang sama lagi tidak mengubahnya |
+| `superadmin` | bool? | `true` pada profil superadmin di sekolah yang pernah dibukanya. Tidak tampil di daftar penanggung jawab, `staff`, dan ringkasan pagi. Hanya ditulis Functions |
 | `createdAt`, `updatedAt` | timestamp | |
 
-Dibuat oleh `claimAccount` saat pengguna pertama kali masuk dengan email yang terdaftar. Pemilik boleh mengubah `name`, `classId` (siswa), `extracurriculars`, `homeroomClass` (guru), `photoUrl`; penanggung jawab boleh mengubah `name`, `classId`, `extracurriculars` siswa. `role`, `email`, `status`, `termsVersion`, `termsAcceptedAt` hanya lewat Functions (`termsVersion`/`termsAcceptedAt` lewat callable `acceptTerms`). Selama `termsVersion < CURRENT_TERMS_VERSION`, aplikasi hanya membuka layar ketentuan. Field v1 `username`, `nis`, `classIds`, `mustChangePassword` dihapus.
+Dibuat oleh `claimAccount` saat pengguna pertama kali masuk dengan email yang terdaftar. Profil superadmin dibuat oleh `claimAccount` atau `switchSchool` saat ia membuka sekolah itu, dengan nama, foto, dan persetujuan ketentuan yang disalin dari sekolah sebelumnya; profil di sekolah yang ditinggalkan tetap `active`. Pemilik boleh mengubah `name`, `classId` (siswa), `extracurriculars`, `homeroomClass` (guru), `photoUrl`; penanggung jawab boleh mengubah `name`, `classId`, `extracurriculars` siswa. `role`, `email`, `status`, `termsVersion`, `termsAcceptedAt` hanya lewat Functions (`termsVersion`/`termsAcceptedAt` lewat callable `acceptTerms`). Selama `termsVersion < CURRENT_TERMS_VERSION`, aplikasi hanya membuka layar ketentuan. Field v1 `username`, `nis`, `classIds`, `mustChangePassword` dihapus.
 
 ### 3.3 `schools/{schoolId}/users/{uid}/devices/{tokenHash}`
 `token`, `platform` (`android`), `updatedAt`. Ditulis pemilik akun. Dibaca server untuk mengirim FCM; token tidak valid dibersihkan server.
@@ -309,7 +310,7 @@ Penghapusan (`forgetReports`, dipanggil `eraseStudentData` dan `deleteMyAccount`
 
 | Data | Siswa | Penanggung jawab | Functions / skrip developer |
 |---|---|---|---|
-| `schools` | — | `settings`, `classes`, `extracurriculars`, `recommendedBooks` | buat sekolah, `status`, `staff` (trigger) |
+| `schools` | — | `settings`, `classes`, `extracurriculars`, `recommendedBooks` | buat sekolah (`addSchool` oleh superadmin, atau skrip), `status`, `staff` (trigger) |
 | `members` | — | ubah nama/kelas/ekskul siswa dan nama/wali kelas/ekskul guru yang belum masuk; tambah/keluarkan guru lain lewat `addTeacher`/`removeTeacher` | buat, hapus, `uid` |
 | `users` | `name`, `classId`, `extracurriculars`, `photoUrl` miliknya | miliknya: `name`, `extracurriculars`, `homeroomClass`, `photoUrl`; siswa: `name`, `classId`, `extracurriculars` | buat (klaim), `status`, `email`, claims, `termsVersion`/`termsAcceptedAt` (`acceptTerms`) |
 | `programs` (isi buku, target, status) | buat + ubah terbatas | — | field turunan, `classId`, `book.bookId`/`book.coverUrl` saat usulan diterima |
@@ -403,7 +404,7 @@ Sengaja **tidak memakai collection-group query** untuk jurnal: rules tidak bisa 
 ## 7. Batas dan risiko yang sudah dipertimbangkan
 - Batas tulis ±1 per detik per dokumen: aman, satu siswa menulis ≤ 1 jurnal per hari ke dokumen berbeda; `studentStats` per siswa diperbarui jarang.
 - Ukuran dokumen jauh di bawah 1 MiB.
-- Custom claim hanya `{role, schoolId}`, jauh di bawah batas 1000 byte.
+- Custom claim hanya `{role, schoolId}`, ditambah `superadmin: true` untuk superadmin; jauh di bawah batas 1000 byte.
 - Ganti kelas siswa: `programs.classId` dan `studentStats.classId` diperbarui trigger `onUserUpdated`. Akses tidak berubah karena semua penanggung jawab sekolah melihat semua siswa.
 - Satu email satu sekolah dijamin ID dokumen `members/{email}`; `create()` kedua gagal.
 - Mengeluarkan siswa (`status: removed`) mencabut claims dan menghapus `studentStats`, tetapi `programs` dan `journals` tetap; klaim ulang memulihkan semuanya.

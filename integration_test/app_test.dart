@@ -12,6 +12,7 @@ import 'package:integration_test/integration_test.dart';
 
 import 'package:sabusaku/core/widgets/journal_view.dart';
 import 'package:sabusaku/core/widgets/report_sheet.dart';
+import 'package:sabusaku/features/teacher/presentation/add_school_screen.dart';
 import 'package:sabusaku/features/teacher/presentation/reports_screen.dart';
 
 import 'support.dart';
@@ -565,5 +566,85 @@ void main() {
 
     await tester.tap(find.byType(BackButton));
     await waitFor(tester, find.text('1 laporan perlu ditinjau'));
+  });
+
+  testWidgets('superadmin switches schools and adds one', (tester) async {
+    await startApp(tester);
+    await signIn(
+      tester,
+      email: e2eSuperadminEmail,
+      password: e2eInitialPassword,
+    );
+    // On no roster: the first school by name opens.
+    await waitFor(tester, find.text('Status siswa'));
+    await dismissNotificationPrompt(tester);
+    await tester.tap(navTab('Sekolah'));
+    await waitFor(tester, find.byKey(const Key('school-switch')));
+    expect(find.text(e2eSchoolName), findsOneWidget);
+
+    // A teacher there, but not in the school's list of teachers.
+    await tester.scrollUntilVisible(
+      find.text(e2eTeacherName),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text(e2eSuperadminName), findsNothing);
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('school-switch')),
+      -300,
+      scrollable: find.byType(Scrollable).first,
+    );
+
+    await tapVisible(tester, find.byKey(const Key('school-switch')));
+    await waitFor(
+      tester,
+      find.byKey(const Key('school-option-$e2eSecondSchool')),
+    );
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tap(find.byKey(const Key('school-option-$e2eSecondSchool')));
+    await waitFor(tester, find.text('Sekarang di $e2eSecondSchoolName.'));
+    await waitFor(tester, find.text('Kode: $e2eSecondSchool'));
+    expect(find.text(e2eSecondSchoolName), findsOneWidget);
+
+    // A new school with its first teacher, opened right away.
+    await tapVisible(tester, find.byKey(const Key('school-switch')));
+    await waitFor(tester, find.byKey(const Key('school-add-school')));
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tap(find.byKey(const Key('school-add-school')));
+    await waitFor(tester, find.byKey(const Key('add-school-code')));
+    await tester.enterText(find.byKey(const Key('add-school-code')), 'e2etiga');
+    await tester.enterText(
+      find.byKey(const Key('add-school-name')),
+      'SMA Uji Coba Tiga',
+    );
+    await tester.enterText(
+      find.byKey(const Key('add-school-teacher-email')),
+      'budi@e2e.test',
+    );
+    await tester.enterText(
+      find.byKey(const Key('add-school-teacher-name')),
+      'Budi Santoso, S.Pd.',
+    );
+    // The form's own list: the Sekolah tab's list lies under this page.
+    FocusManager.instance.primaryFocus?.unfocus();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.scrollUntilVisible(
+      find.byKey(const Key('add-school-submit')),
+      200,
+      scrollable: find
+          .descendant(
+            of: find.byType(AddSchoolScreen),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    await tester.pump(const Duration(milliseconds: 300));
+    await tester.tap(find.byKey(const Key('add-school-submit')));
+    await waitFor(tester, find.text('SMA Uji Coba Tiga dibuat'));
+    await tester.tap(find.text('Buka'));
+    await waitFor(tester, find.text('Sekarang di SMA Uji Coba Tiga.'));
+    await waitFor(tester, find.text('Kode: e2etiga'));
+    await tapVisible(tester, find.byKey(const Key('school-pending-teachers')));
+    await waitFor(tester, find.text('Budi Santoso, S.Pd.'));
   });
 }

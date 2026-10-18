@@ -6,7 +6,7 @@ Versi dokumen: 2.0 · 16 Oktober 2026 · Status: berlaku (v1.0 · 7 Oktober 2026
 
 ## 1. Ringkasan
 
-Sabu Saku adalah aplikasi Android untuk **jurnal membaca**. Siswa SMA membaca satu buku per bulan dan mencatat hasil bacaan setiap hari. Penanggung jawab (guru atau pembina ekstrakurikuler) memantau progres seluruh siswa sekolahnya dan memberi komentar pada jurnal. Satu aplikasi melayani banyak sekolah (multi-tenant); sekolah dan penanggung jawabnya didaftarkan oleh developer, bukan lewat pendaftaran mandiri. Sekolah yang tertarik mengisi formulir di `sabusaku.web.app/daftar-sekolah`.
+Sabu Saku adalah aplikasi Android untuk **jurnal membaca**. Siswa SMA membaca satu buku per bulan dan mencatat hasil bacaan setiap hari. Penanggung jawab (guru atau pembina ekstrakurikuler) memantau progres seluruh siswa sekolahnya dan memberi komentar pada jurnal. Satu aplikasi melayani banyak sekolah (multi-tenant); sekolah dan penanggung jawab pertamanya didaftarkan oleh superadmin di aplikasi (atau developer lewat skrip), bukan lewat pendaftaran mandiri. Sekolah yang tertarik mengisi formulir di `sabusaku.web.app/daftar-sekolah`.
 
 **Fokus V1** (dari gambar rancangan): memastikan siswa benar-benar bisa mengisi jurnal setiap hari dan guru bisa memantaunya dengan mudah.
 
@@ -23,7 +23,8 @@ AI, rekomendasi buku, upload foto selain foto profil, chat siswa–guru, analisi
 | Peran | Didaftarkan oleh | Dipakai lewat | Ringkasan hak |
 |---|---|---|---|
 | **Developer** | — | Skrip CLI (di luar aplikasi) | Membuat sekolah, menambah dan mengeluarkan penanggung jawab, menangguhkan sekolah |
-| **Penanggung jawab** (`guru`) | Developer | Aplikasi (menu guru) | Melihat **semua siswa sekolahnya** beserta jurnal, memberi komentar, menambah siswa lewat email, mengubah nama/kelas/ekstrakurikuler siswa, mengeluarkan siswa dari sekolah, menghapus data siswa, mengelola label kelas dan ekstrakurikuler serta pengaturan sekolah. **Tidak bisa** menambah penanggung jawab lain |
+| **Superadmin** (benevology@gmail.com) | Kode (`SUPERADMIN_EMAILS`) | Aplikasi (menu guru) | Menambah sekolah beserta penanggung jawab pertamanya, berpindah ke sekolah mana pun dan bertindak sebagai penanggung jawabnya. Tidak tampil di daftar penanggung jawab |
+| **Penanggung jawab** (`guru`) | Superadmin, developer, atau penanggung jawab lain | Aplikasi (menu guru) | Melihat **semua siswa sekolahnya** beserta jurnal, memberi komentar, menambah siswa lewat email, mengubah nama/kelas/ekstrakurikuler siswa, mengeluarkan siswa dari sekolah, menghapus data siswa, mengelola label kelas dan ekstrakurikuler serta pengaturan sekolah, menambah dan mengeluarkan penanggung jawab lain (bukan dirinya sendiri) |
 | **Siswa** | Penanggung jawab (email) | Aplikasi (menu siswa) | Memilih buku bebas, mengisi dan melihat jurnal sendiri, membaca komentar, mengubah nama, kelas, ekstrakurikuler, dan foto profil sendiri |
 
 Akun Firebase Auth dibuat pengguna sendiri (Google, atau daftar email + verifikasi). "Didaftarkan" berarti emailnya dimasukkan ke daftar anggota sekolah (`members/{email}`); tanpa itu akun tidak bisa membuka data apa pun.
@@ -32,7 +33,9 @@ Satu email = satu peran, terikat ke paling banyak satu sekolah. Data antar sekol
 
 ## 3. Alur utama
 
-**Onboarding sekolah (developer):** `create-school` → sekolah dengan label kelas dan ekstrakurikuler awal → `add-guru` untuk tiap penanggung jawab → (opsional) `import-students` dari CSV `email,nama,kelas,ekskul`. Penanggung jawab lalu menambah siswa sendiri di aplikasi.
+**Onboarding sekolah (superadmin):** Sekolah → **Ganti** → **Tambah sekolah**: kode, nama sekolah, nama dan email penanggung jawab pertama. Sekolah baru mendapat ekstrakurikuler awal tanpa kelas; superadmin bisa langsung membukanya untuk menambah kelas. Penanggung jawab lalu menambah kelas, siswa, dan penanggung jawab lain sendiri di aplikasi.
+
+**Onboarding sekolah (developer):** `create-school` → sekolah dengan label kelas dan ekstrakurikuler awal → `add-guru` untuk tiap penanggung jawab → (opsional) `import-students` dari CSV `email,nama,kelas,ekskul`.
 
 **Login:** *Email* + *Password*, atau **Masuk dengan Google**. Tidak ada kode sekolah dan NIS. Setelah masuk, aplikasi memanggil `claimAccount`:
 - email belum terverifikasi (daftar email) → layar verifikasi email;
@@ -70,7 +73,7 @@ Cover buku: tanpa upload di V1; aplikasi membuat **sampul otomatis** (warna dari
 | Peringkat | Sama dengan peringkat siswa, disaring dengan cakupan dashboard (Semua siswa, Binaan saya, kelas, ekskul); ketuk siswa untuk membuka detailnya. Dibuka dari kartu "Peringkat siswa" di Dashboard |
 | Detail Siswa | Buku aktif, progres, streak (sekarang dan terbaik), aktivitas terakhir, lencana, riwayat buku, **Lihat semua jurnal**, ubah nama/kelas/ekstrakurikuler, **Keluarkan dari sekolah**, **Hapus data permanen** |
 | Detail Jurnal + Komentar | Isi jurnal siswa, daftar komentar, kolom tulis komentar |
-| Sekolah | Label kelas (format `XII-A1`, `X-G2`) dan ekstrakurikuler (bisa ditambah), daftar penanggung jawab (hanya baca), pengaturan: hari libur, hari netral, ambang status |
+| Sekolah | Label kelas (format `XII-A1`, `X-G2`) dan ekstrakurikuler (bisa ditambah), daftar penanggung jawab (tambah dan keluarkan), pengaturan: hari libur, hari netral, ambang status. Superadmin: kode sekolah dan tombol **Ganti** (daftar semua sekolah, **Tambah sekolah**) |
 | Profil | Sama dengan profil siswa tanpa statistik membaca |
 
 ## 5. Aturan bisnis (final)

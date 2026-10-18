@@ -1,6 +1,6 @@
 # 03 — Keamanan, Autentikasi, dan Security Rules
 
-Berkas terkait: `firestore.rules`, `storage.rules`, `firestore.indexes.json`. Diperbarui 16 Oktober 2026 untuk model v2, dan 17 Oktober 2026 untuk 1.2.1: katalog buku bersama, laporan konten dan pengguna, persetujuan ketentuan, status App Check, dan Firebase Analytics yang dihapus.
+Berkas terkait: `firestore.rules`, `storage.rules`, `firestore.indexes.json`. Diperbarui 16 Oktober 2026 untuk model v2, 17 Oktober 2026 untuk 1.2.1: katalog buku bersama, laporan konten dan pengguna, persetujuan ketentuan, status App Check, dan Firebase Analytics yang dihapus, dan 18 Oktober 2026 untuk superadmin.
 
 ## 1. Autentikasi
 
@@ -14,13 +14,24 @@ Provider Firebase Auth yang aktif: **Email/Password** dan **Google**. Akun Auth 
 - **Klaim**: setelah login, bila token belum punya claim `schoolId`, aplikasi memanggil `claimAccount`. Server mensyaratkan `email_verified`, mencari `members/{email}`, lalu memasang claims, membuat `users/{uid}`, dan mengisi `members.uid`. Tanpa entri `members`, server mengembalikan `not-found` dan aplikasi menampilkan "Harap Menghubungi Administrator Sekolah".
 - Akun yang tidak terdaftar tetap ada di Auth tetapi tidak punya claim, sehingga rules menolak semua akses data.
 
+### Superadmin
+Email di `SUPERADMIN_EMAILS` (`functions/src/domain/superadmin.ts`, saat ini hanya benevology@gmail.com) tidak pernah masuk `members`: `cleanMember` menolaknya di `addTeacher`, `addStudents`, `addSchool`, impor, dan `add-guru`.
+
+- `claimAccount` untuk superadmin membuka sekolah yang sedang dibukanya (claim `schoolId`) bila masih ada, atau sekolah `active` pertama menurut nama. Masuk lagi dengan Google tidak memindahkannya.
+- Callable `switchSchool({schoolId})` membuka sekolah lain (juga yang `suspended`); `addSchool({code, name, teacherName, teacherEmail})` membuat sekolah dengan penanggung jawab pertamanya. Keduanya hanya untuk superadmin, dicatat di `auditLogs` sekolah tujuan.
+- Membuka sekolah = profil `users/{uid}` ber-`superadmin: true` di sekolah itu (dibuat bila belum ada, menyalin nama, foto, dan persetujuan ketentuan dari sekolah asal) lalu claims `{role: 'guru', schoolId, superadmin: true}`. Di sekolah itu superadmin adalah penanggung jawab biasa; rules dan callable tidak membedakannya, kecuali `list` sekolah. Profil di sekolah yang ditinggalkan tetap `active`.
+- Server mengenali superadmin dari email, bukan dari claim. Email harus terbukti: `email_verified`, atau alamat akun Google yang tertaut (akun Google yang menambah password tampil belum terverifikasi).
+- Profil superadmin tidak tampil di daftar penanggung jawab aplikasi, tidak masuk `schools.staff`, dan tidak menerima ringkasan pagi. `deleteMyAccount` menolak superadmin.
+- Mencabut superadmin: hapus email dari `SUPERADMIN_EMAILS`, deploy, lalu kosongkan claims akun itu dengan Admin SDK.
+
 ### Custom claims
-Dipasang `claimAccount`, dicabut `removeStudent`/`eraseStudent`/`remove-guru`:
+Dipasang `claimAccount` (dan `switchSchool` untuk superadmin), dicabut `removeStudent`/`eraseStudent`/`remove-guru`:
 
 | Claim | Nilai |
 |---|---|
 | `role` | `guru` · `siswa` |
 | `schoolId` | kode sekolah |
+| `superadmin` | `true` hanya untuk superadmin; tidak ada pada akun lain |
 
 Setelah claim berubah, klien memanggil `getIdToken(true)`. Mengeluarkan siswa memanggil `revokeRefreshTokens` dan menandai `users.status = removed`; ID token yang sudah terbit tetap berlaku sampai kedaluwarsa (maks sekitar 1 jam), tetapi aplikasi mendengarkan dokumen profil dan langsung keluar saat status berubah.
 
@@ -46,7 +57,7 @@ Ketentuan: https://sabusaku.web.app/ketentuan (`hosting/ketentuan.html`). Versi 
 | `studentStats` | miliknya | semua di sekolahnya |
 | `programs`, `journals` | miliknya (tulis dalam aturan BR) | baca semua di sekolahnya |
 | `comments` | baca miliknya | buat/ubah/hapus miliknya |
-| `schools` (`settings`, `classes`, `extracurriculars`, `recommendedBooks`) | baca | ubah |
+| `schools` (`settings`, `classes`, `extracurriculars`, `recommendedBooks`) | baca | ubah. Superadmin juga me-list dan membaca semua sekolah (`isSuperadmin()`) |
 | `schools.staff` (nama wali kelas dan pembina) | baca | baca; hanya Functions yang menulis |
 | Ketentuan (`termsVersion`, `termsAcceptedAt`) | lewat `acceptTerms` | lewat `acceptTerms` |
 | Katalog `books`, `books/*/history`, `catalog` (semua sekolah) | baca | baca; ubah lewat callable (`saveBook`, `deleteBook`, `restoreBook`, `setBookCover`) |
@@ -58,7 +69,7 @@ Ketentuan: https://sabusaku.web.app/ketentuan (`hosting/ketentuan.html`). Versi 
 | Cover milik siswa `programCovers/{uid}/` (Storage) | tulis miliknya, baca sekolahnya | baca sekolahnya |
 | Cover katalog `books/{bookId}/` (Storage) | baca | baca; unggah (tidak bisa menghapus) |
 
-Peran admin sekolah dihapus. Menambah sekolah dan penanggung jawab pertamanya hanya lewat skrip developer; sesudahnya penanggung jawab menambah dan mengeluarkan penanggung jawab lain sekolahnya lewat callable (`addTeacher`, `removeTeacher`), tidak pernah dirinya sendiri. Wali kelas dan ekskul binaan tidak memberi hak akses tambahan: setiap penanggung jawab tetap melihat dan mengelola semua siswa sekolahnya. Menambah, mengeluarkan, dan menghapus data siswa lewat callable (`addStudents`, `removeStudent`, `eraseStudent`). Claims, `status`, `email`, dan angka turunan **hanya** ditulis Functions.
+Peran admin sekolah dihapus. Menambah sekolah dan penanggung jawab pertamanya lewat superadmin (`addSchool`) atau skrip developer; sesudahnya penanggung jawab menambah dan mengeluarkan penanggung jawab lain sekolahnya lewat callable (`addTeacher`, `removeTeacher`), tidak pernah dirinya sendiri. Wali kelas dan ekskul binaan tidak memberi hak akses tambahan: setiap penanggung jawab tetap melihat dan mengelola semua siswa sekolahnya. Menambah, mengeluarkan, dan menghapus data siswa lewat callable (`addStudents`, `removeStudent`, `eraseStudent`). Claims, `status`, `email`, dan angka turunan **hanya** ditulis Functions.
 
 ## 3. Cara rules menegakkan aturan bisnis
 
@@ -157,6 +168,10 @@ Gunakan `@firebase/rules-unit-testing` dengan Firebase Emulator. Minimal:
 
 **Peringkat**
 31. `leaderboards`: siswa dan guru sekolahnya membaca satu periode (juga periode yang belum ada); sekolah lain, tanpa claim, dan peran salah ditolak; `list` ditolak; tidak ada klien yang menulis atau menghapus.
+
+**Superadmin**
+32. Hanya claim `superadmin` yang bisa me-list `schools` dan membaca sekolah lain; di sekolah lain itu ia tidak bisa membaca `users` atau mengubah sekolah. Tidak ada klien yang menulis atau menghapus `superadmin` di profil.
+33. `switchSchool` dan `addSchool` dari guru biasa: `permission-denied`. `addSchool` dengan kode terpakai, email terdaftar (tanpa sekolah tertinggal), email superadmin, atau kode tidak valid: ditolak (`functions/test/integration/superadmin_flow.test.ts`).
 
 Alur callable (`reportContent`, `resolveReport`, `acceptTerms`, `forgetReports`) diuji di `functions/test/integration/reports_flow.test.ts`; `addTeacher`/`removeTeacher` dan `schools.staff` di `members_flow.test.ts`; `statusChangedAt` dan `teacherDigest` di `digest_flow.test.ts`; baris `leaderboards` (jurnal, buku selesai, siswa dikeluarkan, refresh harian) di `reading_flow.test.ts`; `monthlyRecap` di `recap_flow.test.ts`.
 

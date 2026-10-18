@@ -73,6 +73,19 @@ Bagian ini mengalahkan baris di atas dan dokumen 01–06 bila berbeda. Gamifikas
 | Riwayat jurnal | Satu buku (aktif atau terakhir) | Semua buku, per bulan, dengan filter buku, rentang tanggal, dan urutan; tampilan kalender |
 | Tambahan | — | Kalender membaca, halaman Streak, **lencana** (dihitung di aplikasi dari ringkasan dan program, juga terlihat penanggung jawab), dan **rekap bulanan** lewat notifikasi tanggal 1 pukul 07.00 WIB |
 
+### 18 Oktober 2026 (lanjutan): superadmin
+
+Bagian ini mengalahkan baris di atas dan dokumen 01–06 bila berbeda.
+
+| Topik | Sebelumnya | Yang dipakai |
+|---|---|---|
+| Sekolah dan penanggung jawab pertama | Hanya developer, lewat `create-school` dan `add-guru` | **Superadmin** (benevology@gmail.com, `SUPERADMIN_EMAILS` di `functions/src/domain/superadmin.ts`) menambahnya di aplikasi: Sekolah → Ganti → Tambah sekolah (kode, nama sekolah, nama dan email penanggung jawab pertama; callable `addSchool`). Skrip tetap ada |
+| Berpindah sekolah | — | Superadmin membuka sekolah mana pun dari daftar di kartu sekolah (callable `switchSchool`) dan bertindak sebagai penanggung jawabnya di halaman yang sama. Tidak ada halaman admin terpisah |
+| Data superadmin | — | Tidak ada di `members`. Satu profil per sekolah yang pernah dibuka (`users.superadmin: true`); claims `{role: guru, schoolId, superadmin: true}` |
+| Terlihat oleh sekolah | — | Superadmin **tidak** tampil di daftar penanggung jawab, wali kelas/pembina yang dilihat siswa (`staff`), dan ringkasan pagi. Komentar yang ditulisnya tetap memakai namanya |
+| Akun benevology@gmail.com | Penanggung jawab SMA Negeri 1 Sukodadi (`members`) | Entri `members` dihapus; profil Sukodadi menjadi profil superadmin |
+| Mencabut superadmin | — | Hapus email dari `SUPERADMIN_EMAILS`, deploy, lalu kosongkan claims akun itu dengan Admin SDK |
+
 ## 1. Keputusan yang sudah Anda tetapkan
 
 | # | Topik | Keputusan |

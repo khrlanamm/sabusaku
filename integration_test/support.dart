@@ -23,6 +23,11 @@ const e2eGoogleName = 'Gita Lestari';
 const e2eRegisterEmail = 'daftar@e2e.test';
 const e2eRegisterName = 'Dewi Anggraini';
 const e2eOutsiderEmail = 'luar@e2e.test';
+const e2eSchoolName = 'SMA Uji Coba';
+const e2eSuperadminEmail = 'benevology@gmail.com';
+const e2eSuperadminName = 'Superadmin Uji';
+const e2eSecondSchool = 'e2e2';
+const e2eSecondSchoolName = 'SMA Uji Coba Dua';
 
 /// The Auth emulator accepts an unsigned JSON ID token for Google.
 const e2eGoogleIdToken =

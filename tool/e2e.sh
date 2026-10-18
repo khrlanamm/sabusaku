@@ -17,6 +17,13 @@ command -v adb >/dev/null 2>&1 || export PATH="$PATH:$HOME/Library/Android/sdk/p
 
 (cd functions && npm run build >/dev/null)
 
+# A device signed in to Google offers to save each new password; that sheet
+# can cover the app, and the password flows then time out. Autofill is off
+# during the run and restored afterwards.
+AUTOFILL="$(adb -s "$DEVICE" shell settings get secure autofill_service | tr -d '\r')"
+adb -s "$DEVICE" shell settings put secure autofill_service null
+trap 'adb -s "$DEVICE" shell settings put secure autofill_service "$AUTOFILL"' EXIT
+
 # Fresh sign-in secrets for every run, shared by the seed and the tests.
 INITIAL="Awal#$(openssl rand -hex 6)9"
 NEW="Baru#$(openssl rand -hex 6)7"
