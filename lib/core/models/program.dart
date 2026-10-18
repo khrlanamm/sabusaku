@@ -70,8 +70,14 @@ abstract class Program with _$Program {
     @Default(0) int currentPage,
     @Default(0) int journalCount,
     String? lastJournalDate,
+
+    /// Streak of this book alone; the student's runs across books.
     @Default(0) int streakCurrent,
     @Default(0) int streakBest,
+
+    /// Every journal date of this book, oldest first (server-written). Null
+    /// on a program the server has not filled in yet.
+    List<String>? journalDates,
   }) = _Program;
 
   factory Program.fromMap(String id, Map<String, dynamic> data) => Program(
@@ -90,6 +96,10 @@ abstract class Program with _$Program {
     lastJournalDate: data['lastJournalDate'] as String?,
     streakCurrent: data['streakCurrent'] as int? ?? 0,
     streakBest: data['streakBest'] as int? ?? 0,
+    journalDates: switch (data['journalDates']) {
+      final List<dynamic> dates => List<String>.from(dates),
+      _ => null,
+    },
   );
 
   bool get isActive => status == ProgramStatus.active;
@@ -109,4 +119,23 @@ abstract class Program with _$Program {
   /// The WIB date it was marked finished, if it was.
   String? get completedDate =>
       completedAt == null ? null : WibClock.dateIdOf(completedAt!);
+
+  /// The last day the book was read: when it was finished, its last journal,
+  /// or today while it is still being read.
+  String endDate(String today) => switch (status) {
+    ProgramStatus.active => today,
+    _ => completedDate ?? lastJournalDate ?? startDate,
+  };
+
+  /// Whether the book may have journals between [from] and [to] (inclusive).
+  /// Exact once [journalDates] is filled in; otherwise from its dates.
+  bool mayHaveJournalsBetween(String from, String to, String today) {
+    final dates = journalDates;
+    if (dates != null) {
+      return dates.any(
+        (date) => date.compareTo(from) >= 0 && date.compareTo(to) <= 0,
+      );
+    }
+    return startDate.compareTo(to) <= 0 && endDate(today).compareTo(from) >= 0;
+  }
 }

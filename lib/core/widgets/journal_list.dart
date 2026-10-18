@@ -17,10 +17,14 @@ class JournalList extends ConsumerStatefulWidget {
     required this.program,
     required this.onOpen,
     this.showUnreadBadge = true,
+    this.header,
   });
 
   final Program program;
   final ValueChanged<Journal> onOpen;
+
+  /// Shown above the journals instead of the book's title and status.
+  final Widget? header;
 
   /// The "unread comment" marker is the student's; teachers do not see it.
   final bool showUnreadBadge;
@@ -42,7 +46,7 @@ class _JournalListState extends ConsumerState<JournalList> {
       value: journals,
       onRetry: () => ref.invalidate(journalsProvider(program.id, _limit)),
       data: (items) {
-        if (items.isEmpty) {
+        if (items.isEmpty && widget.header == null) {
           return EmptyState(
             icon: Icons.edit_note,
             title: 'Belum ada jurnal',
@@ -56,14 +60,21 @@ class _JournalListState extends ConsumerState<JournalList> {
           separatorBuilder: (_, _) => const SizedBox(height: 10),
           itemBuilder: (context, index) {
             if (index == 0) {
-              return Text(
-                '${program.book.title} · ${program.status.label}',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
-                ),
-              );
+              return widget.header ??
+                  Text(
+                    '${program.book.title} · ${program.status.label}',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  );
             }
             if (index == items.length + 1) {
+              if (items.isEmpty) {
+                return const EmptyState(
+                  icon: Icons.edit_note,
+                  title: 'Belum ada jurnal',
+                );
+              }
               return hasMore
                   ? OutlinedButton(
                       onPressed: () => setState(() => _limit += _pageSize),

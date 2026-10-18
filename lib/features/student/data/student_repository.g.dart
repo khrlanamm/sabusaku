@@ -186,6 +186,104 @@ final class MyProgramsProvider
 
 String _$myProgramsHash() => r'853a75e5dd19d5473e06f8bb683d84183fa0a3d2';
 
+/// The student's journals from [from] to [to] (inclusive) over all their
+/// books, or one book when [programId] is given; newest first. Only books
+/// with a journal in the range are queried (`journalDates`).
+
+@ProviderFor(myJournalsBetween)
+final myJournalsBetweenProvider = MyJournalsBetweenFamily._();
+
+/// The student's journals from [from] to [to] (inclusive) over all their
+/// books, or one book when [programId] is given; newest first. Only books
+/// with a journal in the range are queried (`journalDates`).
+
+final class MyJournalsBetweenProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Journal>>,
+          List<Journal>,
+          Stream<List<Journal>>
+        >
+    with $FutureModifier<List<Journal>>, $StreamProvider<List<Journal>> {
+  /// The student's journals from [from] to [to] (inclusive) over all their
+  /// books, or one book when [programId] is given; newest first. Only books
+  /// with a journal in the range are queried (`journalDates`).
+  MyJournalsBetweenProvider._({
+    required MyJournalsBetweenFamily super.from,
+    required (String, String, String?) super.argument,
+  }) : super(
+         retry: null,
+         name: r'myJournalsBetweenProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$myJournalsBetweenHash();
+
+  @override
+  String toString() {
+    return r'myJournalsBetweenProvider'
+        ''
+        '$argument';
+  }
+
+  @$internal
+  @override
+  $StreamProviderElement<List<Journal>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<Journal>> create(Ref ref) {
+    final argument = this.argument as (String, String, String?);
+    return myJournalsBetween(ref, argument.$1, argument.$2, argument.$3);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is MyJournalsBetweenProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
+String _$myJournalsBetweenHash() => r'cb57b852ad70ce0a85a9812664f00cc40003fdf7';
+
+/// The student's journals from [from] to [to] (inclusive) over all their
+/// books, or one book when [programId] is given; newest first. Only books
+/// with a journal in the range are queried (`journalDates`).
+
+final class MyJournalsBetweenFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          Stream<List<Journal>>,
+          (String, String, String?)
+        > {
+  MyJournalsBetweenFamily._()
+    : super(
+        retry: null,
+        name: r'myJournalsBetweenProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// The student's journals from [from] to [to] (inclusive) over all their
+  /// books, or one book when [programId] is given; newest first. Only books
+  /// with a journal in the range are queried (`journalDates`).
+
+  MyJournalsBetweenProvider call(String from, String to, String? programId) =>
+      MyJournalsBetweenProvider._(argument: (from, to, programId), from: this);
+
+  @override
+  String toString() => r'myJournalsBetweenProvider';
+}
+
 @ProviderFor(unreadJournals)
 final unreadJournalsProvider = UnreadJournalsFamily._();
 

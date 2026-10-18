@@ -307,6 +307,31 @@ Stream<List<Program>> myPrograms(Ref ref) => ref
     .watch(readingRepositoryProvider)
     .watchPrograms(ref.watch(currentSessionProvider.select((s) => s.uid)));
 
+/// The student's journals from [from] to [to] (inclusive) over all their
+/// books, or one book when [programId] is given; newest first. Only books
+/// with a journal in the range are queried (`journalDates`).
+@riverpod
+Stream<List<Journal>> myJournalsBetween(
+  Ref ref,
+  String from,
+  String to,
+  String? programId,
+) async* {
+  final reading = ref.watch(readingRepositoryProvider);
+  final today = ref.watch(wibClockProvider).today();
+  final programs = await ref.watch(myProgramsProvider.future);
+  final streams = [
+    for (final program in programs)
+      if ((programId == null || program.id == programId) &&
+          program.mayHaveJournalsBetween(from, to, today))
+        reading.watchJournalsBetween(program.id, from, to),
+  ];
+  yield* combineLatest(streams).map(
+    (lists) => [for (final list in lists) ...list]
+      ..sort((a, b) => b.date.compareTo(a.date)),
+  );
+}
+
 @riverpod
 Stream<List<Journal>> unreadJournals(Ref ref, String programId) =>
     ref.watch(studentRepositoryProvider).watchUnreadJournals(programId);

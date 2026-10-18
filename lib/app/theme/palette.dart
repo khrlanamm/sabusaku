@@ -23,6 +23,12 @@ class AppPalette extends ThemeExtension<AppPalette> {
     required this.inactiveTint,
     required this.neutralText,
     required this.neutralTint,
+    required this.goldText,
+    required this.goldTint,
+    required this.silverText,
+    required this.silverTint,
+    required this.bronzeText,
+    required this.bronzeTint,
   });
 
   /// Titles and emphasised labels (navy on light, pale blue on dark).
@@ -53,6 +59,14 @@ class AppPalette extends ThemeExtension<AppPalette> {
   final Color neutralText;
   final Color neutralTint;
 
+  /// Medals of the first three places on a leaderboard (text on tint).
+  final Color goldText;
+  final Color goldTint;
+  final Color silverText;
+  final Color silverTint;
+  final Color bronzeText;
+  final Color bronzeTint;
+
   static const light = AppPalette(
     heading: AppColors.navy,
     // blueDark, not blue: brand blue is 4.4:1 on sky, just under AA.
@@ -70,6 +84,12 @@ class AppPalette extends ThemeExtension<AppPalette> {
     inactiveTint: AppColors.inactiveTint,
     neutralText: AppColors.neutralText,
     neutralTint: AppColors.neutralTint,
+    goldText: Color(0xFF7A5200),
+    goldTint: Color(0xFFFFF0C2),
+    silverText: Color(0xFF4A5566),
+    silverTint: Color(0xFFE8ECF2),
+    bronzeText: Color(0xFF8A4515),
+    bronzeTint: Color(0xFFFBE6D6),
   );
 
   static const dark = AppPalette(
@@ -88,6 +108,12 @@ class AppPalette extends ThemeExtension<AppPalette> {
     inactiveTint: Color(0xFF4A1C19),
     neutralText: Color(0xFFC3CDDB),
     neutralTint: Color(0xFF243247),
+    goldText: Color(0xFFFFD37E),
+    goldTint: Color(0xFF3B2C0B),
+    silverText: Color(0xFFD5DCE6),
+    silverTint: Color(0xFF2A3445),
+    bronzeText: Color(0xFFFFC09A),
+    bronzeTint: Color(0xFF43281A),
   );
 
   @override
@@ -107,6 +133,12 @@ class AppPalette extends ThemeExtension<AppPalette> {
     Color? inactiveTint,
     Color? neutralText,
     Color? neutralTint,
+    Color? goldText,
+    Color? goldTint,
+    Color? silverText,
+    Color? silverTint,
+    Color? bronzeText,
+    Color? bronzeTint,
   }) => AppPalette(
     heading: heading ?? this.heading,
     info: info ?? this.info,
@@ -123,6 +155,12 @@ class AppPalette extends ThemeExtension<AppPalette> {
     inactiveTint: inactiveTint ?? this.inactiveTint,
     neutralText: neutralText ?? this.neutralText,
     neutralTint: neutralTint ?? this.neutralTint,
+    goldText: goldText ?? this.goldText,
+    goldTint: goldTint ?? this.goldTint,
+    silverText: silverText ?? this.silverText,
+    silverTint: silverTint ?? this.silverTint,
+    bronzeText: bronzeText ?? this.bronzeText,
+    bronzeTint: bronzeTint ?? this.bronzeTint,
   );
 
   @override
@@ -145,6 +183,12 @@ class AppPalette extends ThemeExtension<AppPalette> {
       inactiveTint: mix(inactiveTint, other.inactiveTint),
       neutralText: mix(neutralText, other.neutralText),
       neutralTint: mix(neutralTint, other.neutralTint),
+      goldText: mix(goldText, other.goldText),
+      goldTint: mix(goldTint, other.goldTint),
+      silverText: mix(silverText, other.silverText),
+      silverTint: mix(silverTint, other.silverTint),
+      bronzeText: mix(bronzeText, other.bronzeText),
+      bronzeTint: mix(bronzeTint, other.bronzeTint),
     );
   }
 }

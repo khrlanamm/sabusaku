@@ -131,6 +131,7 @@ class JournalListTile extends StatelessWidget {
     required this.journal,
     required this.onTap,
     this.showUnreadBadge = true,
+    this.bookTitle,
   });
 
   final Journal journal;
@@ -138,6 +139,9 @@ class JournalListTile extends StatelessWidget {
 
   /// Teachers do not see the student's "unread comment" marker.
   final bool showUnreadBadge;
+
+  /// Shown when the list mixes the journals of several books.
+  final String? bookTitle;
 
   @override
   Widget build(BuildContext context) {
@@ -177,8 +181,13 @@ class JournalListTile extends StatelessWidget {
               ),
               const SizedBox(height: 2),
               Text(
-                'Hal. ${journal.pageStart}–${journal.pageEnd} · '
-                '${journal.durationRange.label}',
+                [
+                  ?bookTitle,
+                  'Hal. ${journal.pageStart}–${journal.pageEnd}',
+                  journal.durationRange.label,
+                ].join(' · '),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: theme.colorScheme.onSurfaceVariant,
                 ),

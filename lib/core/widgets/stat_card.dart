@@ -7,12 +7,16 @@ class StatCard extends StatelessWidget {
     required this.value,
     required this.icon,
     this.color,
+    this.caption,
     this.onTap,
   });
 
   final String label;
   final String value;
   final IconData icon;
+
+  /// A second, smaller line under the label (e.g. "Terbaik 12 hari").
+  final String? caption;
 
   /// Icon colour; the primary colour when null.
   final Color? color;
@@ -32,15 +36,30 @@ class StatCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: color.withValues(
-                    alpha: theme.brightness == Brightness.dark ? 0.18 : 0.12,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: color.withValues(
+                        alpha: theme.brightness == Brightness.dark
+                            ? 0.18
+                            : 0.12,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(icon, color: color, size: 20),
                   ),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, color: color, size: 20),
+                  const Spacer(),
+                  // Tells a tappable card from a plain one.
+                  if (onTap != null)
+                    Icon(
+                      Icons.chevron_right,
+                      size: 20,
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                ],
               ),
               const SizedBox(height: 10),
               Text(value, style: theme.textTheme.headlineSmall),
@@ -51,6 +70,13 @@ class StatCard extends StatelessWidget {
                   color: theme.colorScheme.onSurfaceVariant,
                 ),
               ),
+              if (caption case final caption?)
+                Text(
+                  caption,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
             ],
           ),
         ),

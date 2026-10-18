@@ -48,8 +48,8 @@ class ReadingRepository {
       .snapshots()
       .map((doc) => doc.exists ? Program.fromMap(doc.id, doc.data()!) : null);
 
-  /// Newest first. A teacher must pass [classId] (one class per query) so the
-  /// rules can prove access; a student reads their own.
+  /// Newest first. A student reads their own; [classId] narrows a teacher's
+  /// query to one class.
   Stream<List<Program>> watchPrograms(String studentId, {String? classId}) {
     var query = programs.where('studentId', isEqualTo: studentId);
     if (classId != null) query = query.where('classId', isEqualTo: classId);
@@ -77,6 +77,22 @@ class ReadingRepository {
                 Journal.fromSnapshot(programId, doc),
             ],
           );
+
+  /// Journals of one program from [from] to [to] (inclusive), newest first.
+  Stream<List<Journal>> watchJournalsBetween(
+    String programId,
+    String from,
+    String to,
+  ) => journals(programId)
+      .where('date', isGreaterThanOrEqualTo: from)
+      .where('date', isLessThanOrEqualTo: to)
+      .orderBy('date', descending: true)
+      .snapshots(includeMetadataChanges: true)
+      .map(
+        (snapshot) => [
+          for (final doc in snapshot.docs) Journal.fromSnapshot(programId, doc),
+        ],
+      );
 
   Stream<Journal?> watchJournal(String programId, String date) =>
       journals(programId)
