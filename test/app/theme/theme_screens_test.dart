@@ -119,7 +119,7 @@ const _program = Program(
   streakBest: 7,
 );
 
-const _finished = Program(
+final _finished = Program(
   id: 'p0',
   studentId: 's1',
   book: Book(
@@ -130,6 +130,7 @@ const _finished = Program(
   startDate: '2026-09-01',
   targetDate: '2026-09-30',
   status: ProgramStatus.completed,
+  completedAt: DateTime.utc(2026, 9, 26, 5),
   currentPage: 240,
   journalCount: 22,
 );
@@ -142,7 +143,8 @@ const _summary = ActiveProgramSummary(
   currentPage: 186,
   percent: 62,
   startDate: '2026-10-01',
-  targetDate: '2026-10-31',
+  targetDate: '2026-11-30',
+  extended: true,
 );
 
 const _myStats = StudentStats(
@@ -309,7 +311,7 @@ List<Override> _data() => [
   schoolProvider.overrideWith((_) => Stream.value(_school)),
   activeProgramProvider.overrideWith((_) => Stream.value(_program)),
   myProgramsProvider.overrideWith(
-    (_) => Stream.value(const [_program, _finished]),
+    (_) => Stream.value([_program, _finished]),
   ),
   myStatsProvider.overrideWith((_) => Stream.value(_myStats)),
   unreadJournalsProvider('p1')
@@ -343,7 +345,7 @@ List<Override> _data() => [
   studentStatsProvider('s1').overrideWith((_) => Stream.value(_myStats)),
   schoolReportsProvider.overrideWith((_) => Stream.value(_reports)),
   studentProgramsProvider('s1')
-      .overrideWith((_) => Stream.value(const [_program, _finished])),
+      .overrideWith((_) => Stream.value([_program, _finished])),
 ];
 
 class _Case {

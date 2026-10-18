@@ -109,3 +109,8 @@ String extendedTargetDate(String targetDate) {
   final cap = DateId.addDays(targetDate, 31);
   return endOfNext.compareTo(cap) <= 0 ? endOfNext : cap;
 }
+
+/// Days spent on a book, counting both the start and the end date, so a
+/// book started and finished on the same day took 1 day.
+int readingDays({required String startDate, required String endDate}) =>
+    DateId.daysBetween(startDate, endDate) + 1;

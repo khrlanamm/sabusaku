@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../time/date_id.dart';
+import '../time/wib_clock.dart';
 
 part 'program.freezed.dart';
 
@@ -62,6 +64,9 @@ abstract class Program with _$Program {
     @Default(false) bool extended,
     @Default(ProgramStatus.active) ProgramStatus status,
     String? finalReflection,
+
+    /// When the student marked the book finished.
+    DateTime? completedAt,
     @Default(0) int currentPage,
     @Default(0) int journalCount,
     String? lastJournalDate,
@@ -79,6 +84,7 @@ abstract class Program with _$Program {
     extended: data['extended'] == true,
     status: ProgramStatus.fromWire(data['status']),
     finalReflection: data['finalReflection'] as String?,
+    completedAt: (data['completedAt'] as Timestamp?)?.toDate(),
     currentPage: data['currentPage'] as int? ?? 0,
     journalCount: data['journalCount'] as int? ?? 0,
     lastJournalDate: data['lastJournalDate'] as String?,
@@ -99,4 +105,8 @@ abstract class Program with _$Program {
   /// Past its target and still being read (PRD BR-9).
   bool isOverdue(String today) =>
       isActive && DateId.daysBetween(targetDate, today) > 0;
+
+  /// The WIB date it was marked finished, if it was.
+  String? get completedDate =>
+      completedAt == null ? null : WibClock.dateIdOf(completedAt!);
 }

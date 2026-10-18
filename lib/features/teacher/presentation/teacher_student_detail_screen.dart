@@ -256,10 +256,17 @@ class _Body extends ConsumerWidget {
                                   .onSurfaceVariant,
                             ),
                           ),
-                          if (book.overdue)
-                            const Padding(
-                              padding: EdgeInsets.only(top: 6),
-                              child: OverdueLabel(),
+                          if (book.extended || book.overdue)
+                            Padding(
+                              padding: const EdgeInsets.only(top: 6),
+                              child: Wrap(
+                                spacing: 6,
+                                runSpacing: 6,
+                                children: [
+                                  if (book.extended) const _ExtendedLabel(),
+                                  if (book.overdue) const OverdueLabel(),
+                                ],
+                              ),
                             ),
                         ],
                       ),
@@ -509,6 +516,37 @@ class _TypedConfirmDialogState extends State<_TypedConfirmDialog> {
           child: const Text('Hapus permanen'),
         ),
       ],
+    );
+  }
+}
+
+/// The student has used the one target extension (PRD BR-9).
+class _ExtendedLabel extends StatelessWidget {
+  const _ExtendedLabel();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: context.palette.infoTint,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.event_repeat, size: 14, color: context.palette.info),
+          const SizedBox(width: 4),
+          Text(
+            'Diperpanjang',
+            style: TextStyle(
+              color: context.palette.info,
+              fontWeight: FontWeight.w600,
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

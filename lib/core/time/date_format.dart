@@ -16,6 +16,10 @@ String formatDateShort(String dateId) =>
 String formatDayMonth(String dateId) =>
     DateFormat('d MMM', _locale).format(DateId.parse(dateId));
 
+/// "6 Oktober"
+String formatDayMonthLong(String dateId) =>
+    DateFormat('d MMMM', _locale).format(DateId.parse(dateId));
+
 /// "Oktober 2026" from `yyyy-MM` or `yyyy-MM-dd`.
 String formatMonth(String monthOrDateId) {
   final id = monthOrDateId.length == 7 ? '$monthOrDateId-01' : monthOrDateId;

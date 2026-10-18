@@ -300,7 +300,8 @@ as String?,
 /// @nodoc
 mixin _$Program {
 
- String get id; String get studentId; String? get classId; Book get book; String get startDate; String get targetDate; bool get extended; ProgramStatus get status; String? get finalReflection; int get currentPage; int get journalCount; String? get lastJournalDate; int get streakCurrent; int get streakBest;
+ String get id; String get studentId; String? get classId; Book get book; String get startDate; String get targetDate; bool get extended; ProgramStatus get status; String? get finalReflection;/// When the student marked the book finished.
+ DateTime? get completedAt; int get currentPage; int get journalCount; String? get lastJournalDate; int get streakCurrent; int get streakBest;
 /// Create a copy of Program
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -312,20 +313,20 @@ $ProgramCopyWith<Program> get copyWith => _$ProgramCopyWithImpl<Program>(this as
 @override
 bool operator ==(Object other) {
   final _this = this as Program;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Program&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.studentId, _this.studentId) || other.studentId == _this.studentId)&&(identical(other.classId, _this.classId) || other.classId == _this.classId)&&(identical(other.book, _this.book) || other.book == _this.book)&&(identical(other.startDate, _this.startDate) || other.startDate == _this.startDate)&&(identical(other.targetDate, _this.targetDate) || other.targetDate == _this.targetDate)&&(identical(other.extended, _this.extended) || other.extended == _this.extended)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.finalReflection, _this.finalReflection) || other.finalReflection == _this.finalReflection)&&(identical(other.currentPage, _this.currentPage) || other.currentPage == _this.currentPage)&&(identical(other.journalCount, _this.journalCount) || other.journalCount == _this.journalCount)&&(identical(other.lastJournalDate, _this.lastJournalDate) || other.lastJournalDate == _this.lastJournalDate)&&(identical(other.streakCurrent, _this.streakCurrent) || other.streakCurrent == _this.streakCurrent)&&(identical(other.streakBest, _this.streakBest) || other.streakBest == _this.streakBest));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Program&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.studentId, _this.studentId) || other.studentId == _this.studentId)&&(identical(other.classId, _this.classId) || other.classId == _this.classId)&&(identical(other.book, _this.book) || other.book == _this.book)&&(identical(other.startDate, _this.startDate) || other.startDate == _this.startDate)&&(identical(other.targetDate, _this.targetDate) || other.targetDate == _this.targetDate)&&(identical(other.extended, _this.extended) || other.extended == _this.extended)&&(identical(other.status, _this.status) || other.status == _this.status)&&(identical(other.finalReflection, _this.finalReflection) || other.finalReflection == _this.finalReflection)&&(identical(other.completedAt, _this.completedAt) || other.completedAt == _this.completedAt)&&(identical(other.currentPage, _this.currentPage) || other.currentPage == _this.currentPage)&&(identical(other.journalCount, _this.journalCount) || other.journalCount == _this.journalCount)&&(identical(other.lastJournalDate, _this.lastJournalDate) || other.lastJournalDate == _this.lastJournalDate)&&(identical(other.streakCurrent, _this.streakCurrent) || other.streakCurrent == _this.streakCurrent)&&(identical(other.streakBest, _this.streakBest) || other.streakBest == _this.streakBest));
 }
 
 
 @override
 int get hashCode {
   final _this = this as Program;
-  return Object.hash(runtimeType,_this.id,_this.studentId,_this.classId,_this.book,_this.startDate,_this.targetDate,_this.extended,_this.status,_this.finalReflection,_this.currentPage,_this.journalCount,_this.lastJournalDate,_this.streakCurrent,_this.streakBest);
+  return Object.hash(runtimeType,_this.id,_this.studentId,_this.classId,_this.book,_this.startDate,_this.targetDate,_this.extended,_this.status,_this.finalReflection,_this.completedAt,_this.currentPage,_this.journalCount,_this.lastJournalDate,_this.streakCurrent,_this.streakBest);
 }
 
 @override
 String toString() {
   final _this = this as Program;
-  return 'Program(id: ${_this.id}, studentId: ${_this.studentId}, classId: ${_this.classId}, book: ${_this.book}, startDate: ${_this.startDate}, targetDate: ${_this.targetDate}, extended: ${_this.extended}, status: ${_this.status}, finalReflection: ${_this.finalReflection}, currentPage: ${_this.currentPage}, journalCount: ${_this.journalCount}, lastJournalDate: ${_this.lastJournalDate}, streakCurrent: ${_this.streakCurrent}, streakBest: ${_this.streakBest})';
+  return 'Program(id: ${_this.id}, studentId: ${_this.studentId}, classId: ${_this.classId}, book: ${_this.book}, startDate: ${_this.startDate}, targetDate: ${_this.targetDate}, extended: ${_this.extended}, status: ${_this.status}, finalReflection: ${_this.finalReflection}, completedAt: ${_this.completedAt}, currentPage: ${_this.currentPage}, journalCount: ${_this.journalCount}, lastJournalDate: ${_this.lastJournalDate}, streakCurrent: ${_this.streakCurrent}, streakBest: ${_this.streakBest})';
 }
 
 
@@ -336,7 +337,7 @@ abstract mixin class $ProgramCopyWith<$Res>  {
   factory $ProgramCopyWith(Program value, $Res Function(Program) _then) = _$ProgramCopyWithImpl;
 @useResult
 $Res call({
- String id, String studentId, String? classId, Book book, String startDate, String targetDate, bool extended, ProgramStatus status, String? finalReflection, int currentPage, int journalCount, String? lastJournalDate, int streakCurrent, int streakBest
+ String id, String studentId, String? classId, Book book, String startDate, String targetDate, bool extended, ProgramStatus status, String? finalReflection, DateTime? completedAt, int currentPage, int journalCount, String? lastJournalDate, int streakCurrent, int streakBest
 });
 
 
@@ -353,7 +354,7 @@ class _$ProgramCopyWithImpl<$Res>
 
 /// Create a copy of Program
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? studentId = null,Object? classId = freezed,Object? book = null,Object? startDate = null,Object? targetDate = null,Object? extended = null,Object? status = null,Object? finalReflection = freezed,Object? currentPage = null,Object? journalCount = null,Object? lastJournalDate = freezed,Object? streakCurrent = null,Object? streakBest = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? studentId = null,Object? classId = freezed,Object? book = null,Object? startDate = null,Object? targetDate = null,Object? extended = null,Object? status = null,Object? finalReflection = freezed,Object? completedAt = freezed,Object? currentPage = null,Object? journalCount = null,Object? lastJournalDate = freezed,Object? streakCurrent = null,Object? streakBest = null,}) {
   return _then(Program(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,studentId: null == studentId ? _self.studentId : studentId // ignore: cast_nullable_to_non_nullable
@@ -364,7 +365,8 @@ as String,targetDate: null == targetDate ? _self.targetDate : targetDate // igno
 as String,extended: null == extended ? _self.extended : extended // ignore: cast_nullable_to_non_nullable
 as bool,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as ProgramStatus,finalReflection: freezed == finalReflection ? _self.finalReflection : finalReflection // ignore: cast_nullable_to_non_nullable
-as String?,currentPage: null == currentPage ? _self.currentPage : currentPage // ignore: cast_nullable_to_non_nullable
+as String?,completedAt: freezed == completedAt ? _self.completedAt : completedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,currentPage: null == currentPage ? _self.currentPage : currentPage // ignore: cast_nullable_to_non_nullable
 as int,journalCount: null == journalCount ? _self.journalCount : journalCount // ignore: cast_nullable_to_non_nullable
 as int,lastJournalDate: freezed == lastJournalDate ? _self.lastJournalDate : lastJournalDate // ignore: cast_nullable_to_non_nullable
 as String?,streakCurrent: null == streakCurrent ? _self.streakCurrent : streakCurrent // ignore: cast_nullable_to_non_nullable
@@ -463,10 +465,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String studentId,  String? classId,  Book book,  String startDate,  String targetDate,  bool extended,  ProgramStatus status,  String? finalReflection,  int currentPage,  int journalCount,  String? lastJournalDate,  int streakCurrent,  int streakBest)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String studentId,  String? classId,  Book book,  String startDate,  String targetDate,  bool extended,  ProgramStatus status,  String? finalReflection,  DateTime? completedAt,  int currentPage,  int journalCount,  String? lastJournalDate,  int streakCurrent,  int streakBest)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Program() when $default != null:
-return $default(_that.id,_that.studentId,_that.classId,_that.book,_that.startDate,_that.targetDate,_that.extended,_that.status,_that.finalReflection,_that.currentPage,_that.journalCount,_that.lastJournalDate,_that.streakCurrent,_that.streakBest);case _:
+return $default(_that.id,_that.studentId,_that.classId,_that.book,_that.startDate,_that.targetDate,_that.extended,_that.status,_that.finalReflection,_that.completedAt,_that.currentPage,_that.journalCount,_that.lastJournalDate,_that.streakCurrent,_that.streakBest);case _:
   return orElse();
 
 }
@@ -484,10 +486,10 @@ return $default(_that.id,_that.studentId,_that.classId,_that.book,_that.startDat
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String studentId,  String? classId,  Book book,  String startDate,  String targetDate,  bool extended,  ProgramStatus status,  String? finalReflection,  int currentPage,  int journalCount,  String? lastJournalDate,  int streakCurrent,  int streakBest)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String studentId,  String? classId,  Book book,  String startDate,  String targetDate,  bool extended,  ProgramStatus status,  String? finalReflection,  DateTime? completedAt,  int currentPage,  int journalCount,  String? lastJournalDate,  int streakCurrent,  int streakBest)  $default,) {final _that = this;
 switch (_that) {
 case _Program():
-return $default(_that.id,_that.studentId,_that.classId,_that.book,_that.startDate,_that.targetDate,_that.extended,_that.status,_that.finalReflection,_that.currentPage,_that.journalCount,_that.lastJournalDate,_that.streakCurrent,_that.streakBest);case _:
+return $default(_that.id,_that.studentId,_that.classId,_that.book,_that.startDate,_that.targetDate,_that.extended,_that.status,_that.finalReflection,_that.completedAt,_that.currentPage,_that.journalCount,_that.lastJournalDate,_that.streakCurrent,_that.streakBest);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -504,10 +506,10 @@ return $default(_that.id,_that.studentId,_that.classId,_that.book,_that.startDat
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String studentId,  String? classId,  Book book,  String startDate,  String targetDate,  bool extended,  ProgramStatus status,  String? finalReflection,  int currentPage,  int journalCount,  String? lastJournalDate,  int streakCurrent,  int streakBest)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String studentId,  String? classId,  Book book,  String startDate,  String targetDate,  bool extended,  ProgramStatus status,  String? finalReflection,  DateTime? completedAt,  int currentPage,  int journalCount,  String? lastJournalDate,  int streakCurrent,  int streakBest)?  $default,) {final _that = this;
 switch (_that) {
 case _Program() when $default != null:
-return $default(_that.id,_that.studentId,_that.classId,_that.book,_that.startDate,_that.targetDate,_that.extended,_that.status,_that.finalReflection,_that.currentPage,_that.journalCount,_that.lastJournalDate,_that.streakCurrent,_that.streakBest);case _:
+return $default(_that.id,_that.studentId,_that.classId,_that.book,_that.startDate,_that.targetDate,_that.extended,_that.status,_that.finalReflection,_that.completedAt,_that.currentPage,_that.journalCount,_that.lastJournalDate,_that.streakCurrent,_that.streakBest);case _:
   return null;
 
 }
@@ -519,7 +521,7 @@ return $default(_that.id,_that.studentId,_that.classId,_that.book,_that.startDat
 
 
 class _Program extends Program {
-  const _Program({required this.id, required this.studentId, this.classId, required this.book, required this.startDate, required this.targetDate, this.extended = false, this.status = ProgramStatus.active, this.finalReflection, this.currentPage = 0, this.journalCount = 0, this.lastJournalDate, this.streakCurrent = 0, this.streakBest = 0}): super._();
+  const _Program({required this.id, required this.studentId, this.classId, required this.book, required this.startDate, required this.targetDate, this.extended = false, this.status = ProgramStatus.active, this.finalReflection, this.completedAt, this.currentPage = 0, this.journalCount = 0, this.lastJournalDate, this.streakCurrent = 0, this.streakBest = 0}): super._();
   
 
 @override final  String id;
@@ -531,6 +533,8 @@ class _Program extends Program {
 @override@JsonKey() final  bool extended;
 @override@JsonKey() final  ProgramStatus status;
 @override final  String? finalReflection;
+/// When the student marked the book finished.
+@override final  DateTime? completedAt;
 @override@JsonKey() final  int currentPage;
 @override@JsonKey() final  int journalCount;
 @override final  String? lastJournalDate;
@@ -547,18 +551,18 @@ _$ProgramCopyWith<_Program> get copyWith => __$ProgramCopyWithImpl<_Program>(thi
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Program&&(identical(other.id, id) || other.id == id)&&(identical(other.studentId, studentId) || other.studentId == studentId)&&(identical(other.classId, classId) || other.classId == classId)&&(identical(other.book, book) || other.book == book)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.targetDate, targetDate) || other.targetDate == targetDate)&&(identical(other.extended, extended) || other.extended == extended)&&(identical(other.status, status) || other.status == status)&&(identical(other.finalReflection, finalReflection) || other.finalReflection == finalReflection)&&(identical(other.currentPage, currentPage) || other.currentPage == currentPage)&&(identical(other.journalCount, journalCount) || other.journalCount == journalCount)&&(identical(other.lastJournalDate, lastJournalDate) || other.lastJournalDate == lastJournalDate)&&(identical(other.streakCurrent, streakCurrent) || other.streakCurrent == streakCurrent)&&(identical(other.streakBest, streakBest) || other.streakBest == streakBest));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Program&&(identical(other.id, id) || other.id == id)&&(identical(other.studentId, studentId) || other.studentId == studentId)&&(identical(other.classId, classId) || other.classId == classId)&&(identical(other.book, book) || other.book == book)&&(identical(other.startDate, startDate) || other.startDate == startDate)&&(identical(other.targetDate, targetDate) || other.targetDate == targetDate)&&(identical(other.extended, extended) || other.extended == extended)&&(identical(other.status, status) || other.status == status)&&(identical(other.finalReflection, finalReflection) || other.finalReflection == finalReflection)&&(identical(other.completedAt, completedAt) || other.completedAt == completedAt)&&(identical(other.currentPage, currentPage) || other.currentPage == currentPage)&&(identical(other.journalCount, journalCount) || other.journalCount == journalCount)&&(identical(other.lastJournalDate, lastJournalDate) || other.lastJournalDate == lastJournalDate)&&(identical(other.streakCurrent, streakCurrent) || other.streakCurrent == streakCurrent)&&(identical(other.streakBest, streakBest) || other.streakBest == streakBest));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,studentId,classId,book,startDate,targetDate,extended,status,finalReflection,currentPage,journalCount,lastJournalDate,streakCurrent,streakBest);
+    return Object.hash(runtimeType,id,studentId,classId,book,startDate,targetDate,extended,status,finalReflection,completedAt,currentPage,journalCount,lastJournalDate,streakCurrent,streakBest);
 }
 
 @override
 String toString() {
-    return 'Program(id: $id, studentId: $studentId, classId: $classId, book: $book, startDate: $startDate, targetDate: $targetDate, extended: $extended, status: $status, finalReflection: $finalReflection, currentPage: $currentPage, journalCount: $journalCount, lastJournalDate: $lastJournalDate, streakCurrent: $streakCurrent, streakBest: $streakBest)';
+    return 'Program(id: $id, studentId: $studentId, classId: $classId, book: $book, startDate: $startDate, targetDate: $targetDate, extended: $extended, status: $status, finalReflection: $finalReflection, completedAt: $completedAt, currentPage: $currentPage, journalCount: $journalCount, lastJournalDate: $lastJournalDate, streakCurrent: $streakCurrent, streakBest: $streakBest)';
 }
 
 
@@ -569,7 +573,7 @@ abstract mixin class _$ProgramCopyWith<$Res> implements $ProgramCopyWith<$Res> {
   factory _$ProgramCopyWith(_Program value, $Res Function(_Program) _then) = __$ProgramCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String studentId, String? classId, Book book, String startDate, String targetDate, bool extended, ProgramStatus status, String? finalReflection, int currentPage, int journalCount, String? lastJournalDate, int streakCurrent, int streakBest
+ String id, String studentId, String? classId, Book book, String startDate, String targetDate, bool extended, ProgramStatus status, String? finalReflection, DateTime? completedAt, int currentPage, int journalCount, String? lastJournalDate, int streakCurrent, int streakBest
 });
 
 
@@ -586,7 +590,7 @@ class __$ProgramCopyWithImpl<$Res>
 
 /// Create a copy of Program
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? studentId = null,Object? classId = freezed,Object? book = null,Object? startDate = null,Object? targetDate = null,Object? extended = null,Object? status = null,Object? finalReflection = freezed,Object? currentPage = null,Object? journalCount = null,Object? lastJournalDate = freezed,Object? streakCurrent = null,Object? streakBest = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? studentId = null,Object? classId = freezed,Object? book = null,Object? startDate = null,Object? targetDate = null,Object? extended = null,Object? status = null,Object? finalReflection = freezed,Object? completedAt = freezed,Object? currentPage = null,Object? journalCount = null,Object? lastJournalDate = freezed,Object? streakCurrent = null,Object? streakBest = null,}) {
   return _then(_Program(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,studentId: null == studentId ? _self.studentId : studentId // ignore: cast_nullable_to_non_nullable
@@ -597,7 +601,8 @@ as String,targetDate: null == targetDate ? _self.targetDate : targetDate // igno
 as String,extended: null == extended ? _self.extended : extended // ignore: cast_nullable_to_non_nullable
 as bool,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as ProgramStatus,finalReflection: freezed == finalReflection ? _self.finalReflection : finalReflection // ignore: cast_nullable_to_non_nullable
-as String?,currentPage: null == currentPage ? _self.currentPage : currentPage // ignore: cast_nullable_to_non_nullable
+as String?,completedAt: freezed == completedAt ? _self.completedAt : completedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,currentPage: null == currentPage ? _self.currentPage : currentPage // ignore: cast_nullable_to_non_nullable
 as int,journalCount: null == journalCount ? _self.journalCount : journalCount // ignore: cast_nullable_to_non_nullable
 as int,lastJournalDate: freezed == lastJournalDate ? _self.lastJournalDate : lastJournalDate // ignore: cast_nullable_to_non_nullable
 as String?,streakCurrent: null == streakCurrent ? _self.streakCurrent : streakCurrent // ignore: cast_nullable_to_non_nullable

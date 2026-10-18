@@ -117,5 +117,11 @@ void main() {
       // A mid-month target would otherwise jump more than the rules allow.
       expect(extendedTargetDate('2026-10-15'), '2026-11-15');
     });
+
+    test('reading days count both the start and the end date', () {
+      expect(readingDays(startDate: '2026-10-01', endDate: '2026-10-01'), 1);
+      expect(readingDays(startDate: '2026-10-01', endDate: '2026-10-12'), 12);
+      expect(readingDays(startDate: '2026-10-25', endDate: '2026-12-05'), 42);
+    });
   });
 }

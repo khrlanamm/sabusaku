@@ -14,6 +14,7 @@ import '../../auth/presentation/account_section.dart';
 import '../../auth/presentation/label_pickers.dart';
 import '../../notifications/notification_prompt.dart';
 import '../data/student_repository.dart';
+import '../domain/reading_rules.dart';
 
 /// Statistics, past books and account actions (PRD §4: Profil merges the
 /// former Refleksi tab).
@@ -224,6 +225,7 @@ class ProgramHistoryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final completedDate = program.completedDate;
     final (color, tint) = switch (program.status) {
       ProgramStatus.active => (
         Theme.of(context).colorScheme.primary,
@@ -271,23 +273,42 @@ class ProgramHistoryTile extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 6),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: tint,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        program.status.label,
-                        style: TextStyle(
-                          color: color,
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.w600,
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: tint,
+                            borderRadius: BorderRadius.circular(999),
+                          ),
+                          child: Text(
+                            program.status.label,
+                            style: TextStyle(
+                              color: color,
+                              fontSize: 11.5,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
                         ),
-                      ),
+                        // Read as one phrase with the "Selesai" chip.
+                        if (program.status == ProgramStatus.completed &&
+                            completedDate != null)
+                          Text(
+                            '${formatDayMonthLong(completedDate)} · '
+                            'Lama membaca: ${readingDays(startDate: program.startDate, endDate: completedDate)} hari',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                          ),
+                      ],
                     ),
                   ],
                 ),
