@@ -65,9 +65,11 @@ Data buku tetap disalin ke `programs.book`, sehingga jurnal tidak bergantung pad
 | `classes` | string[] | Label kelas, format `^(X\|XI\|XII)-[A-Z]{1,2}[0-9]{0,2}$` (mis. `XII-A1`, `X-G2`), maks 200 |
 | `extracurriculars` | string[] | Label ekstrakurikuler 2–40 karakter, maks 50. Awal: `Masis-KIR`, `Paskibra`, `Pala`, `PMR` |
 | `recommendedBooks` | string[] | ID buku katalog yang direkomendasikan sekolah, unik, maks 200. Tampil paling atas saat siswa mencari |
+| `staff.homerooms` | map label kelas → string[] | Nama wali kelas per kelas, urut abjad. Ditulis trigger `onTeacherWritten` |
+| `staff.supervisors` | map label ekskul → string[] | Nama pembina per ekstrakurikuler, urut abjad. Ditulis trigger `onTeacherWritten` |
 | `createdAt` | timestamp | |
 
-Tulis: developer (skrip) dan penanggung jawab (hanya `settings`, `classes`, `extracurriculars`, `recommendedBooks`, divalidasi rules). Baca: seluruh anggota sekolah.
+Tulis: developer (skrip), Functions (`staff`), dan penanggung jawab (hanya `settings`, `classes`, `extracurriculars`, `recommendedBooks`, divalidasi rules). Baca: seluruh anggota sekolah. `staff` ada karena siswa tidak boleh membaca profil guru, tetapi profil siswa menampilkan wali kelas dan pembina ekskulnya.
 
 Masukan kelas yang diketik bebas (`12  A1`, `XIIC2`, `Xll-A1`, `XD`) dinormalkan ke label baku oleh `normalizeClassLabel` (`lib/core/utils/labels.dart` dan `functions/src/domain/labels.ts`, harus sama).
 
@@ -80,11 +82,12 @@ Masukan kelas yang diketik bebas (`12  A1`, `XIIC2`, `Xll-A1`, `XD`) dinormalkan
 | `name` | string | Boleh kosong; diisi siswa di Lengkapi akun |
 | `classId` | string? | Label kelas (siswa) |
 | `extracurriculars` | string[] | Label ekstrakurikuler (siswa; untuk guru = yang dibina) |
+| `homeroomClass` | string? | Guru saja: kelas perwaliannya (wali kelas). Disalin ke `users/{uid}` saat klaim |
 | `uid` | string? | Terisi saat akun mengklaim keanggotaan |
 | `addedBy` | string | UID penanggung jawab, atau `developer` |
 | `createdAt`, `updatedAt` | timestamp | |
 
-ID dokumen = email, sehingga satu email otomatis hanya terdaftar di satu sekolah. Dibuat dan dihapus hanya oleh Functions/skrip (`addStudents`, `removeStudent`, `eraseStudent`, `add-guru`). Penanggung jawab boleh membaca entri sekolahnya dan mengubah `name`/`classId`/`extracurriculars` siswa yang belum pernah masuk (`uid == null`). Siswa yang sudah masuk diubah lewat `users/{uid}`.
+ID dokumen = email, sehingga satu email otomatis hanya terdaftar di satu sekolah. Dibuat dan dihapus hanya oleh Functions/skrip (`addStudents`, `removeStudent`, `eraseStudent`, `addTeacher`, `removeTeacher`, `add-guru`). Penanggung jawab boleh membaca entri sekolahnya dan, selama orangnya belum pernah masuk (`uid == null`), mengubah `name`/`classId`/`extracurriculars` siswa atau `name`/`homeroomClass`/`extracurriculars` guru. Yang sudah masuk diubah lewat `users/{uid}`.
 
 ### 3.2 `schools/{schoolId}/users/{uid}`
 | Field | Tipe | Keterangan |
@@ -93,14 +96,15 @@ ID dokumen = email, sehingga satu email otomatis hanya terdaftar di satu sekolah
 | `name` | string | Nama lengkap; kosong sampai Lengkapi akun |
 | `email` | string | Email akun (huruf kecil) |
 | `classId` | string? | Siswa: label kelas, mis. `XII-A1`. Guru: selalu `null` |
-| `extracurriculars` | string[] | Label ekstrakurikuler, maks 10, harus ada di daftar sekolah |
+| `extracurriculars` | string[] | Label ekstrakurikuler, maks 10, harus ada di daftar sekolah. Guru: ekskul yang dibina |
+| `homeroomClass` | string? | Guru saja: satu kelas yang diwalikan, harus ada di daftar sekolah, atau `null` |
 | `photoUrl` | string? | Foto profil: URL Cloud Storage atau foto Google. Bila kosong dan akun masuk dengan Google, `claimAccount` mengisinya dengan foto Google; foto yang sudah ada tidak ditimpa |
 | `status` | string | `active` · `removed` (dikeluarkan dari sekolah) |
 | `termsVersion` | int? | Versi Ketentuan penggunaan (https://sabusaku.web.app/ketentuan) yang disetujui. Tidak ada = 0 (belum setuju). Saat ini `CURRENT_TERMS_VERSION = 1` (`functions/src/domain/terms.ts`, `lib/core/policy/terms.dart`) |
 | `termsAcceptedAt` | timestamp? | Waktu server saat versi itu disetujui. Menyetujui versi yang sama lagi tidak mengubahnya |
 | `createdAt`, `updatedAt` | timestamp | |
 
-Dibuat oleh `claimAccount` saat pengguna pertama kali masuk dengan email yang terdaftar. Pemilik boleh mengubah `name`, `classId`, `extracurriculars`, `photoUrl`; penanggung jawab boleh mengubah `name`, `classId`, `extracurriculars` siswa. `role`, `email`, `status`, `termsVersion`, `termsAcceptedAt` hanya lewat Functions (`termsVersion`/`termsAcceptedAt` lewat callable `acceptTerms`). Selama `termsVersion < CURRENT_TERMS_VERSION`, aplikasi hanya membuka layar ketentuan. Field v1 `username`, `nis`, `classIds`, `mustChangePassword` dihapus.
+Dibuat oleh `claimAccount` saat pengguna pertama kali masuk dengan email yang terdaftar. Pemilik boleh mengubah `name`, `classId` (siswa), `extracurriculars`, `homeroomClass` (guru), `photoUrl`; penanggung jawab boleh mengubah `name`, `classId`, `extracurriculars` siswa. `role`, `email`, `status`, `termsVersion`, `termsAcceptedAt` hanya lewat Functions (`termsVersion`/`termsAcceptedAt` lewat callable `acceptTerms`). Selama `termsVersion < CURRENT_TERMS_VERSION`, aplikasi hanya membuka layar ketentuan. Field v1 `username`, `nis`, `classIds`, `mustChangePassword` dihapus.
 
 ### 3.3 `schools/{schoolId}/users/{uid}/devices/{tokenHash}`
 `token`, `platform` (`android`), `updatedAt`. Ditulis pemilik akun. Dibaca server untuk mengirim FCM; token tidak valid dibersihkan server.
@@ -170,9 +174,10 @@ Rules memeriksa tanggal terhadap waktu server (BR-3, BR-4) dan konsistensi halam
 | `journalCountTotal` | int |
 | `booksCompleted` | int |
 | `recentDates` | string[] (5 tanggal jurnal terakhir, untuk "Aktivitas Terakhir") |
+| `statusChangedAt` | timestamp? (kapan `status` terakhir berubah; dipertahankan selama status sama. Dipakai `teacherDigest`) |
 | `updatedAt` | timestamp |
 
-Dibaca: siswa pemilik dan semua penanggung jawab sekolah. Dashboard dan daftar siswa = **satu query `studentStats orderBy name`**; filter kelas, ekstrakurikuler, dan status dilakukan di klien.
+Dibaca: siswa pemilik dan semua penanggung jawab sekolah. Dashboard, halaman Buku aktif dan Jurnal bulan ini, serta daftar siswa = **satu query `studentStats orderBy name`**; filter Binaan saya, kelas, ekstrakurikuler, dan status dilakukan di klien.
 
 ### 3.9 `schools/{schoolId}/activePrograms/{studentId}`
 Dokumen kunci `{ programId }`. Dibuat siswa dalam **batch yang sama** dengan dokumen program baru, dan dihapus dalam batch yang sama saat program selesai/dihentikan. Karena ID = `studentId`, pembuatan kedua otomatis gagal, sehingga BR-1 (satu buku aktif) dijamin database tanpa transaksi server. Sekaligus menjadi cara 1-baca untuk menemukan buku aktif siswa.
@@ -284,9 +289,9 @@ Penghapusan (`forgetReports`, dipanggil `eraseStudentData` dan `deleteMyAccount`
 
 | Data | Siswa | Penanggung jawab | Functions / skrip developer |
 |---|---|---|---|
-| `schools` | — | `settings`, `classes`, `extracurriculars`, `recommendedBooks` | buat sekolah, `status` |
-| `members` | — | ubah nama/kelas/ekskul siswa yang belum masuk | buat, hapus, `uid` |
-| `users` | `name`, `classId`, `extracurriculars`, `photoUrl` miliknya | `name`, `classId`, `extracurriculars` siswa | buat (klaim), `status`, `email`, claims, `termsVersion`/`termsAcceptedAt` (`acceptTerms`) |
+| `schools` | — | `settings`, `classes`, `extracurriculars`, `recommendedBooks` | buat sekolah, `status`, `staff` (trigger) |
+| `members` | — | ubah nama/kelas/ekskul siswa dan nama/wali kelas/ekskul guru yang belum masuk; tambah/keluarkan guru lain lewat `addTeacher`/`removeTeacher` | buat, hapus, `uid` |
+| `users` | `name`, `classId`, `extracurriculars`, `photoUrl` miliknya | miliknya: `name`, `extracurriculars`, `homeroomClass`, `photoUrl`; siswa: `name`, `classId`, `extracurriculars` | buat (klaim), `status`, `email`, claims, `termsVersion`/`termsAcceptedAt` (`acceptTerms`) |
 | `programs` (isi buku, target, status) | buat + ubah terbatas | — | field turunan, `classId`, `book.bookId`/`book.coverUrl` saat usulan diterima |
 | `activePrograms` | buat/hapus bersama program | — | — |
 | `journals` | CRUD dalam jendela BR-3/4 | — | `hasUnreadTeacherComment`, `lastCommentAt` |

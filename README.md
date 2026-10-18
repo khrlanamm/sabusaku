@@ -1,6 +1,6 @@
 # Sabu Saku
 
-**Satu Bulan Satu Buku**: aplikasi Android jurnal membaca untuk siswa SMA. Siswa membaca satu buku per bulan dan mencatat bacaannya setiap hari; penanggung jawab (guru atau pembina ekstrakurikuler) memantau semua siswa sekolahnya, memberi komentar, dan menambah siswa lewat email. Satu aplikasi melayani banyak sekolah; sekolah dan penanggung jawab didaftarkan developer.
+**Satu Bulan Satu Buku**: aplikasi Android jurnal membaca untuk siswa SMA. Siswa membaca satu buku per bulan dan mencatat bacaannya setiap hari; penanggung jawab (guru, wali kelas, atau pembina ekstrakurikuler) memantau semua siswa sekolahnya, memberi komentar, dan menambah siswa serta penanggung jawab lain lewat email. Satu aplikasi melayani banyak sekolah; sekolah dan penanggung jawab pertamanya didaftarkan developer.
 
 ## Masuk
 
@@ -17,14 +17,17 @@ lib/
   features/
     auth/         login email/Google, daftar + verifikasi, Lengkapi akun, profil, sesi dari claims
     student/      beranda, buku, jurnal (dengan outbox offline), profil
-    teacher/      penanggung jawab: dashboard, siswa (tambah, impor, belum masuk), komentar,
-                  sekolah (label kelas/ekskul, pengaturan)
-    notifications/ FCM: token perangkat, notifikasi komentar, deep link
+    teacher/      penanggung jawab: dashboard (filter Binaan saya/kelas/ekskul, Buku aktif,
+                  Jurnal bulan ini), siswa (tambah, impor, belum masuk), komentar, sekolah
+                  (label kelas/ekskul, penanggung jawab, pengaturan), peran wali kelas/pembina
+    notifications/ FCM: token perangkat, notifikasi komentar dan siswa binaan, deep link
 functions/
   src/domain/     aturan streak dan status (fungsi murni)
-  src/callables/  claimAccount, addStudents, removeStudent, eraseStudent, deleteMyAccount
-  src/triggers/   hitung ulang progres dan ringkasan siswa, notifikasi komentar
-  src/scheduled/  dailyRefresh (00:10 WIB)
+  src/callables/  claimAccount, addStudents, removeStudent, eraseStudent, addTeacher,
+                  removeTeacher, deleteMyAccount, …
+  src/triggers/   hitung ulang progres dan ringkasan siswa, notifikasi komentar, nama
+                  wali kelas/pembina di dokumen sekolah (onTeacherWritten)
+  src/scheduled/  dailyRefresh (00:10 WIB), teacherDigest (06:30 WIB, siswa binaan)
   tools/          skrip developer (lihat di bawah)
   test/           domain (unit), rules, integration (emulator)
 firestore.rules   aturan keamanan; setiap kasus di docs/03 §6 diuji otomatis
@@ -69,13 +72,14 @@ CI (GitHub Actions) menjalankan tiga baris pertama pada setiap push.
 
 ## Skrip developer
 
-Dijalankan dari `functions/`. Tanpa `--emulator`, skrip bekerja di **produksi** memakai service account di `secret/`. Hanya skrip ini yang bisa menambah sekolah dan penanggung jawab.
+Dijalankan dari `functions/`. Tanpa `--emulator`, skrip bekerja di **produksi** memakai service account di `secret/`. Hanya skrip ini yang bisa menambah sekolah dan penanggung jawab pertamanya; penanggung jawab lain ditambahkan di aplikasi (tab Sekolah).
 
 | Skrip | Fungsi |
 |---|---|
 | `npx tsx tools/create-school.ts --code sman1 --name "SMA Negeri 1 …"` | Mendaftarkan sekolah dengan label ekstrakurikuler awal (Masis-KIR, Paskibra, Pala, PMR) |
-| `npx tsx tools/add-guru.ts --school sman1 --email … --name "…"` | Mendaftarkan penanggung jawab |
+| `npx tsx tools/add-guru.ts --school sman1 --email … --name "…" [--ekskul …] [--wali XII-A1]` | Mendaftarkan penanggung jawab, opsional dengan ekskul binaan dan kelas perwalian |
 | `npx tsx tools/remove-guru.ts --email …` | Mengeluarkan penanggung jawab |
+| `npx tsx tools/refresh-staff.ts [--school sman1]` | Membangun ulang nama wali kelas dan pembina yang dilihat siswa (`schools.staff`); trigger menjaganya sesudah itu |
 | `npx tsx tools/import-students.ts --school sman1 --file secret/siswa.csv` | Impor siswa dari CSV `email,nama,kelas,ekskul` (ekskul dipisah `;`). Simpan berkas berisi data siswa di `secret/` |
 | `npx tsx tools/set-school-status.ts --code sman1 --status suspended` | Menangguhkan atau mengaktifkan sekolah |
 | `npx tsx tools/export-school.ts --code sman1` | Ekspor seluruh data sekolah ke `secret/exports/` |

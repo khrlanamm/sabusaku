@@ -40,13 +40,14 @@ Ketentuan: https://sabusaku.web.app/ketentuan (`hosting/ketentuan.html`). Versi 
 
 | Data | Siswa | Penanggung jawab (guru) |
 |---|---|---|
-| Profil sendiri | baca; ubah nama, kelas, ekskul, foto | baca; ubah nama, foto |
+| Profil sendiri | baca; ubah nama, kelas, ekskul, foto | baca; ubah nama, foto, wali kelas (`homeroomClass`, satu kelas terdaftar atau kosong), ekskul yang dibina |
 | Profil siswa sekolahnya | — | baca semua; ubah nama, kelas, ekskul |
-| `members` sekolahnya | — | baca; ubah siswa yang belum masuk |
+| `members` sekolahnya | — | baca; ubah siswa dan guru yang belum masuk; tambah/keluarkan guru lain lewat `addTeacher`/`removeTeacher` (bukan diri sendiri) |
 | `studentStats` | miliknya | semua di sekolahnya |
 | `programs`, `journals` | miliknya (tulis dalam aturan BR) | baca semua di sekolahnya |
 | `comments` | baca miliknya | buat/ubah/hapus miliknya |
 | `schools` (`settings`, `classes`, `extracurriculars`, `recommendedBooks`) | baca | ubah |
+| `schools.staff` (nama wali kelas dan pembina) | baca | baca; hanya Functions yang menulis |
 | Ketentuan (`termsVersion`, `termsAcceptedAt`) | lewat `acceptTerms` | lewat `acceptTerms` |
 | Katalog `books`, `books/*/history`, `catalog` (semua sekolah) | baca | baca; ubah lewat callable (`saveBook`, `deleteBook`, `restoreBook`, `setBookCover`) |
 | `bookSuggestions` (semua sekolah) | — (usulan dibuat server dari program barunya) | baca; tinjau lewat `reviewSuggestion` |
@@ -56,7 +57,7 @@ Ketentuan: https://sabusaku.web.app/ketentuan (`hosting/ketentuan.html`). Versi 
 | Cover milik siswa `programCovers/{uid}/` (Storage) | tulis miliknya, baca sekolahnya | baca sekolahnya |
 | Cover katalog `books/{bookId}/` (Storage) | baca | baca; unggah (tidak bisa menghapus) |
 
-Peran admin sekolah dihapus. Menambah sekolah dan penanggung jawab hanya lewat skrip developer. Menambah, mengeluarkan, dan menghapus data siswa lewat callable (`addStudents`, `removeStudent`, `eraseStudent`). Claims, `status`, `email`, dan angka turunan **hanya** ditulis Functions.
+Peran admin sekolah dihapus. Menambah sekolah dan penanggung jawab pertamanya hanya lewat skrip developer; sesudahnya penanggung jawab menambah dan mengeluarkan penanggung jawab lain sekolahnya lewat callable (`addTeacher`, `removeTeacher`), tidak pernah dirinya sendiri. Wali kelas dan ekskul binaan tidak memberi hak akses tambahan: setiap penanggung jawab tetap melihat dan mengelola semua siswa sekolahnya. Menambah, mengeluarkan, dan menghapus data siswa lewat callable (`addStudents`, `removeStudent`, `eraseStudent`). Claims, `status`, `email`, dan angka turunan **hanya** ditulis Functions.
 
 ## 3. Cara rules menegakkan aturan bisnis
 
@@ -137,7 +138,7 @@ Gunakan `@firebase/rules-unit-testing` dengan Firebase Emulator. Minimal:
 16. Penanggung jawab sekolah siswa membuat komentar: lolos. Penanggung jawab sekolah lain: ditolak. Siswa membuat komentar: ditolak.
 17. Guru mengubah komentar guru lain: ditolak.
 18. Pengguna mengubah `role`, `email`, `status`: ditolak. Siswa mengubah `classId` ke label yang ada: lolos; ke label yang tidak ada: ditolak. Ekskul di luar daftar sekolah: ditolak.
-19. Penanggung jawab mengubah nama/kelas siswa: lolos; mengubah profil penanggung jawab lain: ditolak.
+19. Penanggung jawab mengubah nama/kelas siswa: lolos; mengubah profil penanggung jawab lain: ditolak. Penanggung jawab mengisi `homeroomClass` miliknya dengan kelas terdaftar atau `null`: lolos; kelas tak terdaftar, siswa, atau milik orang lain: ditolak. Undangan guru yang belum masuk: nama/wali kelas/ekskul boleh diubah guru sekolahnya; `classId`, nama kosong, dan guru sekolah lain ditolak. `schools.staff` tidak bisa ditulis klien.
 20. `claimAccount` dengan email belum terverifikasi: ditolak; email tidak terdaftar: `not-found`.
 21. `addStudents` dengan email yang sudah terdaftar di sekolah lain: baris ditolak tanpa menyebut sekolah lain.
 22. Siswa yang dikeluarkan: claims hilang, akun Auth tetap ada, data jurnal tetap ada.
@@ -152,7 +153,7 @@ Gunakan `@firebase/rules-unit-testing` dengan Firebase Emulator. Minimal:
 29. Klien tidak bisa menulis `termsVersion` atau `termsAcceptedAt` (pemilik maupun penanggung jawab).
 30. `reports`: guru membaca laporan yang `schools`-nya memuat sekolahnya; guru sekolah lain dan semua siswa (termasuk pelapornya) ditolak; klien tidak bisa membuat, mengubah, atau menghapus laporan.
 
-Alur callable (`reportContent`, `resolveReport`, `acceptTerms`, `forgetReports`) diuji di `functions/test/integration/reports_flow.test.ts`.
+Alur callable (`reportContent`, `resolveReport`, `acceptTerms`, `forgetReports`) diuji di `functions/test/integration/reports_flow.test.ts`; `addTeacher`/`removeTeacher` dan `schools.staff` di `members_flow.test.ts`; `statusChangedAt` dan `teacherDigest` di `digest_flow.test.ts`.
 
 Catatan teknis untuk pengujian: simulasikan waktu server dengan mengatur jam pada test (atau menulis jurnal dengan ID tanggal relatif terhadap tanggal sistem saat tes berjalan) dan uji khusus batas tengah malam WIB (23:59 vs 00:01).
 

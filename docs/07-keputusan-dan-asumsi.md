@@ -31,7 +31,7 @@ Bagian ini mengalahkan baris di atas dan dokumen 01–06 bila berbeda.
 | Lupa password | Minta admin/guru mereset | Email reset Firebase (template Indonesia, pengirim "Sabu Saku") |
 | Simpan password | — | `AutofillGroup` + `finishAutofillContext()` memicu tawaran simpan password Android |
 | Peran | admin, guru, siswa | **guru** (penanggung jawab) dan **siswa**. Admin dihapus |
-| Sekolah dan penanggung jawab | `create-school` membuat admin pertama | Hanya developer, lewat `create-school`, `add-guru`, `remove-guru`. Guru tidak bisa menambah guru lain |
+| Sekolah dan penanggung jawab | `create-school` membuat admin pertama | Hanya developer, lewat `create-school`, `add-guru`, `remove-guru`. Guru tidak bisa menambah guru lain (diubah 18 Oktober 2026, lihat di bawah) |
 | Akses guru | Kelas yang ditugaskan (claim `classIds`) | Semua siswa di sekolahnya. Claims hanya `{role, schoolId}` |
 | Kelas | Dokumen `classes/{id}` dikelola admin | **Label** di `schools.classes` (format `XII-A1`, `X-G2`), ditambah guru. Satu siswa tepat satu kelas; siswa boleh ganti sendiri |
 | Ekstrakurikuler | — | **Label** di `schools.extracurriculars` (awal Masis-KIR, Paskibra, Pala, PMR). Siswa ikut nol atau lebih, boleh ganti sendiri |
@@ -45,6 +45,19 @@ Bagian ini mengalahkan baris di atas dan dokumen 01–06 bila berbeda.
 | SHA Android | Debug + upload | Ditambah SHA-1 dan SHA-256 kunci **Play App Signing**, sehingga Masuk dengan Google bekerja di build dari Google Play |
 | Pendaftaran sekolah | Email di halaman utama | Halaman `daftar-sekolah` dengan formulir yang membuka aplikasi email (mailto) ke komunitaskertaskosong9@gmail.com. Pengiriman lewat server menyusul |
 | Aturan password | Minimal 8 karakter | Minimal 8 karakter, huruf besar dan kecil, angka, dan karakter khusus. Form menampilkan tiap syarat yang langsung hijau saat terpenuhi (hanya di kolom password, tidak di Ulangi password). Kebijakan yang sama dipaksakan Firebase Auth (Identity Platform, `ENFORCE`); password lama tetap bisa dipakai masuk |
+
+### 18 Oktober 2026: wali kelas, pembina ekskul, Binaan saya, guru menambah guru
+
+Bagian ini mengalahkan baris di atas dan dokumen 01–06 bila berbeda.
+
+| Topik | Sebelumnya | Yang dipakai |
+|---|---|---|
+| Peran guru | "Ekskul yang dibina" hanya label tampilan, diisi developer | Setiap guru mengatur sendiri di Profil: **wali kelas** (satu kelas, `users.homeroomClass`) dan/atau **pembina ekskul** (`users.extracurriculars`), atau tidak keduanya |
+| Pengaruh peran | — | (1) Filter **Binaan saya** = siswa di kelas perwalian ATAU di ekskul yang dibina, di dashboard, halaman Buku aktif/Jurnal bulan ini, dan daftar siswa; dashboard dibuka pada Binaan saya bila guru punya peran. (2) Tampil di header akun dan daftar penanggung jawab. (3) Notifikasi pagi `teacherDigest` (06:30 WIB) tentang siswa binaan yang baru menjadi perlu perhatian/tidak aktif. (4) Profil siswa menampilkan nama wali kelas dan pembina ekskulnya (`schools.staff`) |
+| Akses guru | Semua siswa sekolahnya | Tetap. Peran tidak memberi atau membatasi akses |
+| Filter dashboard | Semua siswa atau satu ekskul | Satu pilihan aktif: Semua siswa, Binaan saya, satu kelas, atau satu ekskul. Ikut ke halaman yang dibuka kartu ringkasan |
+| Kartu ringkasan dashboard | Tidak bisa dibuka; "Jurnal bulan ini" | Siswa → daftar siswa (filter terbawa); Buku aktif → halaman buku yang sedang dibaca (lewat target dulu); "Jurnal Oktober 2026" (nama bulan berjalan) → peringkat siswa menurut jurnal bulan ini, dari `studentStats` tanpa query tambahan |
+| Sekolah dan penanggung jawab | Hanya developer. Guru tidak bisa menambah guru lain | Developer membuat sekolah dan penanggung jawab pertama. Guru menambah guru lain sekolahnya (email, nama, wali kelas dan ekskul opsional) lewat `addTeacher`, dan mengeluarkan guru lain atau membatalkan undangan lewat `removeTeacher`, tetapi tidak dirinya sendiri. Isian peran guru baru bisa diubah guru lain selama belum masuk; sesudahnya hanya guru itu sendiri |
 
 ## 1. Keputusan yang sudah Anda tetapkan
 

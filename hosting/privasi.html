@@ -11,18 +11,18 @@
 <main>
   <header><a href="/"><img src="/logo.png" alt="Sabu Saku"></a></header>
   <h1>Kebijakan privasi</h1>
-  <p class="muted">Berlaku sejak 7 Oktober 2026, diperbarui 17 Oktober 2026</p>
+  <p class="muted">Berlaku sejak 7 Oktober 2026, diperbarui 18 Oktober 2026</p>
 
   <p>Halaman ini menjelaskan data apa yang dikumpulkan aplikasi Sabu Saku, untuk apa data itu dipakai, siapa yang bisa melihatnya, dan cara menghapusnya. Sabu Saku dikembangkan oleh Kertas Kosong.</p>
 
   <h2>Siapa yang memakai Sabu Saku</h2>
-  <p>Sabu Saku dipakai oleh sekolah. Ada dua peran: <strong>siswa</strong> dan <strong>penanggung jawab</strong> (misalnya guru atau pembina ekstrakurikuler). Sekolah dan penanggung jawabnya didaftarkan oleh pengembang. Penanggung jawab menentukan siswa mana yang boleh memakai aplikasi dengan menambahkan email mereka.</p>
+  <p>Sabu Saku dipakai oleh sekolah. Ada dua peran: <strong>siswa</strong> dan <strong>penanggung jawab</strong> (misalnya guru, wali kelas, atau pembina ekstrakurikuler). Sekolah dan penanggung jawab pertamanya didaftarkan oleh pengembang. Penanggung jawab menentukan siswa dan penanggung jawab lain mana yang boleh memakai aplikasi di sekolahnya dengan menambahkan email mereka.</p>
   <p>Pengguna membuat akunnya sendiri, dengan akun Google atau dengan email dan password. Akun itu baru bisa membuka data sekolah bila emailnya sudah didaftarkan oleh sekolah. Sekolah bertanggung jawab atas izin orang tua atau wali untuk siswa di bawah umur. Kami mengolah data sekolah atas nama sekolah.</p>
   <p>Sebelum memakai aplikasi, setiap pengguna diminta menyetujui <a href="/ketentuan">Ketentuan penggunaan</a>. Ketentuan itu mengatur konten apa yang boleh dibuat dan cara melaporkan pelanggaran.</p>
 
   <h2>Data yang kami kumpulkan</h2>
   <ul>
-    <li><strong>Data akun.</strong> Nama lengkap, alamat email, kelas, ekstrakurikuler yang diikuti, peran (siswa atau penanggung jawab), dan sekolah. Password disimpan dalam bentuk teracak oleh Firebase Authentication. Kami tidak bisa melihatnya.</li>
+    <li><strong>Data akun.</strong> Nama lengkap, alamat email, kelas, ekstrakurikuler yang diikuti, peran (siswa atau penanggung jawab), dan sekolah. Penanggung jawab boleh mengisi kelas yang diwalikannya dan ekstrakurikuler yang dibinanya. Password disimpan dalam bentuk teracak oleh Firebase Authentication. Kami tidak bisa melihatnya.</li>
     <li><strong>Data dari akun Google</strong>, bila Anda masuk dengan Google: nama, alamat email, dan foto profil Google. Kami tidak mendapat akses ke Gmail, kontak, atau data Google lainnya.</li>
     <li><strong>Persetujuan ketentuan.</strong> Versi <a href="/ketentuan">Ketentuan penggunaan</a> yang Anda setujui dan waktunya.</li>
     <li><strong>Foto profil</strong> (opsional). Foto yang Anda pilih sendiri di aplikasi, atau foto akun Google Anda. Bisa diganti atau dihapus kapan saja di menu Profil.</li>
@@ -43,7 +43,7 @@
     <li>Menjalankan fitur aplikasi: masuk, jurnal, progres, streak, dashboard penanggung jawab, dan komentar.</li>
     <li>Menjalankan katalog buku bersama: pencarian buku, rekomendasi sekolah, buku populer, dan peninjauan usulan siswa oleh penanggung jawab.</li>
     <li>Mengirim email verifikasi alamat email dan email reset password saat Anda memintanya.</li>
-    <li>Mengirim notifikasi komentar penanggung jawab kepada siswa.</li>
+    <li>Mengirim notifikasi komentar penanggung jawab kepada siswa, dan notifikasi pagi kepada wali kelas atau pembina saat siswa binaannya mulai perlu perhatian. Notifikasi itu memuat nama siswa yang bersangkutan.</li>
     <li>Mencatat persetujuan Anda atas Ketentuan penggunaan, menerima dan meninjau laporan, serta menindak pelanggaran.</li>
     <li>Menjaga aplikasi tetap berjalan baik dan memperbaiki galat.</li>
   </ul>
@@ -51,8 +51,8 @@
 
   <h2>Siapa yang bisa melihat data</h2>
   <ul>
-    <li><strong>Siswa</strong> melihat profil, buku, jurnal, dan komentar miliknya sendiri.</li>
-    <li><strong>Penanggung jawab</strong> di sekolah yang sama melihat nama, email, kelas, ekstrakurikuler, foto profil, ringkasan, buku, dan jurnal semua siswa sekolah itu. Penanggung jawab bisa mengubah nama, kelas, dan ekstrakurikuler siswa serta mengeluarkan siswa dari sekolah.</li>
+    <li><strong>Siswa</strong> melihat profil, buku, jurnal, dan komentar miliknya sendiri, serta nama wali kelas dan pembina ekstrakurikulernya.</li>
+    <li><strong>Penanggung jawab</strong> di sekolah yang sama melihat nama, email, kelas, ekstrakurikuler, foto profil, ringkasan, buku, dan jurnal semua siswa sekolah itu. Penanggung jawab bisa mengubah nama, kelas, dan ekstrakurikuler siswa serta mengeluarkan siswa dari sekolah. Penanggung jawab juga melihat nama, email, dan peran penanggung jawab lain di sekolahnya, dan bisa menambah atau mengeluarkan mereka.</li>
     <li><strong>Foto cover</strong> yang diunggah siswa untuk bukunya sendiri bisa dibuka pengguna di sekolah yang sama. Bila buku itu menjadi usulan, penanggung jawab dari semua sekolah bisa melihat usulan itu beserta foto cover-nya. Bila penanggung jawab menerapkan usulan itu, foto cover disalin ke katalog dan bisa dilihat semua pengguna.</li>
     <li><strong>Sekolah lain</strong> tidak bisa melihat data sekolah Anda. Data tiap sekolah dipisahkan, kecuali katalog buku bersama dan usulan buku di bawah ini.</li>
     <li><strong>Katalog buku bersama.</strong> Pengguna dari semua sekolah melihat data buku katalog, cover-nya, jumlah pembacanya (angka tanpa nama), dan riwayat perubahannya, termasuk nama penanggung jawab dan sekolah yang mengubah. Usulan dari siswa dilihat penanggung jawab semua sekolah, tanpa nama siswa. Bila penanggung jawab menerima usulan, data buku dan foto cover-nya disalin ke katalog dan bisa dilihat semua pengguna.</li>

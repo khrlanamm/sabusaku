@@ -10,6 +10,8 @@ Semua callable: wajib login, periksa `role` dan `schoolId` dari token, validasi 
 |---|---|---|
 | `claimAccount` | siapa pun yang login | Mensyaratkan `email_verified`. Mencari `members/{email}`: tidak ada → `not-found` (`details.reason = not-registered`). Ada → pasang claims `{role, schoolId}`, buat/perbarui `users/{uid}` (profil baru diisi nama, kelas, ekskul dari `members`; profil lama dipertahankan, `status` kembali `active`; bila `photoUrl` kosong dan akun masuk dengan Google, diisi foto Google ukuran 400 px, foto yang sudah ada tidak pernah ditimpa), isi `members.uid` (pindahkan bila sebelumnya menunjuk UID lain), hitung ulang `studentStats` untuk siswa. Idempoten. Aplikasi memanggilnya setelah setiap login Google |
 | `addStudents` | guru | 1–100 baris `{email, name?, classId?, extracurriculars?}`. Email dinormalkan dan divalidasi; kelas dinormalkan dengan `normalizeClassLabel` (label valid yang belum ada ditambahkan ke `schools.classes`); ekskul harus ada di daftar sekolah. `members` dibuat dengan `create()`, sehingga email yang sudah terdaftar di mana pun ditolak per baris ("Email sudah terdaftar.") tanpa menyebut sekolahnya |
+| `addTeacher` | guru | Satu guru lain `{email, name, homeroomClass?, extracurriculars?}` untuk sekolah pemanggil. Nama wajib (≥ 2 karakter); wali kelas harus label yang sudah ada (tidak ditambahkan otomatis); ekskul harus ada di daftar sekolah. Email yang sudah terdaftar di mana pun → `already-exists`. Bila email itu sudah punya akun terverifikasi, langsung diklaim (`joined: true`) |
+| `removeTeacher` | guru | Mengeluarkan guru lain dari sekolahnya, atau membatalkan undangan guru yang belum masuk: hapus `members`, cabut claims, `status = removed`. Menolak mengeluarkan diri sendiri (`failed-precondition`), sehingga sekolah selalu punya penanggung jawab |
 | `removeStudent` | guru | Mengeluarkan siswa sekolahnya: hapus `members`, cabut claims, `revokeRefreshTokens`, `users.status = removed` (trigger menghapus `studentStats`). Jurnal tetap ada; menambahkan lagi memulihkannya |
 | `eraseStudent` | guru | Menghapus `members`, profil, `studentStats`, `activePrograms`, semua program beserta jurnal dan komentar, dan foto profil siswa; mencabut claims. **Tidak** menghapus akun Auth. Konfirmasi dua langkah di UI |
 | `deleteMyAccount` | siapa pun yang login | Hapus akun dari aplikasi (kebijakan Google Play). Siswa: data sama seperti `eraseStudent`. Guru: profil dan `members`. Lalu foto profil dan akun Auth |
@@ -37,11 +39,15 @@ Bila `classId` berubah (siswa): sinkronkan ke `programs`. Bila `name`, `classId`
 
 `onClassUpdated` dihapus bersama koleksi `classes`.
 
+### 2.5 `onTeacherWritten` — `users/{uid}` (create/update/delete)
+Hanya untuk guru. Bila guru bergabung, keluar, atau `name`, `homeroomClass`, `extracurriculars`, `status` berubah: bangun ulang `schools/{schoolId}.staff` (nama wali kelas per kelas dan pembina per ekskul, dari semua guru aktif) agar profil siswa bisa menampilkannya. `onSchoolUpdated` hanya bereaksi pada `settings`, jadi tidak ada putaran.
+
 ## 3. Terjadwal
 
 | Fungsi | Jadwal | Isi |
 |---|---|---|
 | `dailyRefresh` | Setiap hari 00:10 WIB | Untuk semua sekolah aktif: hitung ulang `status`, `daysSinceLastJournal`, `streakCurrent` (streak bisa putus tanpa ada penulisan jurnal), `journalCountMonth` (reset awal bulan), `overdue`. Diproses per sekolah/per kelas dengan `BulkWriter` agar tahan skala |
+| `teacherDigest` | Setiap hari 06:30 WIB | Untuk tiap sekolah aktif: siswa yang `statusChangedAt` dalam 24 jam terakhir dan kini `perlu_perhatian`/`tidak_aktif`. Tiap guru dengan siswa binaan (kelas perwalian atau ekskul yang dibina) di antaranya menerima satu notifikasi "N siswa binaan perlu perhatian" (kanal Android `siswa_binaan`, payload `type=attention`, membuka dashboard pada Binaan saya). Tanpa retry agar tidak terkirim dua kali |
 
 Dijalankan juga satu kali sehari setelah tengah malam saja pada V1; pengingat harian ke siswa masuk daftar *Could*.
 
@@ -76,7 +82,7 @@ Tanggal selalu diproses sebagai string `yyyy-MM-dd` dalam WIB (tanpa konversi zo
 **Tabel uji unit minimal:** streak melewati Minggu; streak melewati hari libur; streak putus karena Rabu kosong; jurnal diisi mundur mengisi celah; jurnal di hari Minggu; awal bulan; siswa tanpa jurnal sama sekali; program baru dimulai hari ini; hari ini belum menulis tetapi kemarin menulis (streak tetap hidup); batas `d = 3/4/7/8`.
 
 ## 5. `refreshStudentStats(studentId)`
-Satu fungsi yang membangun dokumen `studentStats` utuh dari: profil siswa, `activePrograms` → program aktif, hitungan program `completed`, 5 tanggal jurnal terakhir, `journalCountMonth`. Ditulis dengan `set` (menimpa penuh) agar tidak ada field basi.
+Satu fungsi yang membangun dokumen `studentStats` utuh dari: profil siswa, `activePrograms` → program aktif, hitungan program `completed`, 5 tanggal jurnal terakhir, `journalCountMonth`. Ditulis dengan `set` (menimpa penuh) agar tidak ada field basi. Satu pengecualian: `statusChangedAt` dibaca dari dokumen lama dalam transaksi yang sama dan dipertahankan selama `status` tidak berubah; bila berubah, diisi waktu server.
 
 ## 6. Alat developer (skrip CLI, di luar aplikasi)
 
@@ -85,8 +91,9 @@ Folder `functions/tools/` (Node/TypeScript, Admin SDK, service account lokal di 
 | Skrip | Fungsi |
 |---|---|
 | `create-school --code sman1 --name "SMA Negeri 1 ..."` | Membuat `schools/sman1` dengan pengaturan default, `classes` kosong (atau dari `--classes`), dan ekstrakurikuler awal Masis-KIR, Paskibra, Pala, PMR |
-| `add-guru --school sman1 --email … --name "…" [--ekskul Masis-KIR]` | Mendaftarkan penanggung jawab (`members`, role `guru`). Satu-satunya jalan menambah guru |
+| `add-guru --school sman1 --email … --name "…" [--ekskul Masis-KIR] [--wali XII-A1]` | Mendaftarkan penanggung jawab (`members`, role `guru`). Dipakai untuk penanggung jawab pertama sekolah; selanjutnya guru bisa menambah guru lain di aplikasi (`addTeacher`) |
 | `remove-guru --email …` | Mengeluarkan penanggung jawab: hapus `members`, cabut claims, `status = removed` |
+| `refresh-staff [--school sman1]` | Membangun ulang `schools.staff` (nama wali kelas dan pembina). Trigger `onTeacherWritten` menjaganya; skrip ini untuk guru yang sudah ada sebelum trigger dipasang |
 | `import-students --school sman1 --file secret/….csv` | Impor massal siswa dari CSV `email,nama,kelas,ekskul` (ekskul dipisah `;`); kelas dinormalkan dan ditambahkan ke label sekolah |
 | `set-school-status --code sman1 --status suspended` | Menangguhkan sekolah: menonaktifkan seluruh akun anggotanya dan mencabut sesi |
 | `export-school --code sman1` | Ekspor data sekolah (untuk permintaan sekolah/penghapusan) |
@@ -98,9 +105,9 @@ Folder `functions/tools/` (Node/TypeScript, Admin SDK, service account lokal di 
 functions/
   src/
     index.ts                 # ekspor semua fungsi
-    callables/               # claimAccount, addStudents, removeStudent, ...
-    triggers/                # onJournalWritten, onCommentCreated, ...
-    scheduled/               # dailyRefresh
+    callables/               # claimAccount, addStudents, removeStudent, addTeacher, ...
+    triggers/                # onJournalWritten, onCommentCreated, onTeacherWritten, ...
+    scheduled/               # dailyRefresh, teacherDigest
     domain/                  # computeStreak, computeStatus, dateUtils (WIB), labels — tanpa dependensi Firebase
     infra/                   # akses Firestore/Auth/FCM, auth guard, validasi
   test/                      # unit domain + integrasi dengan emulator
