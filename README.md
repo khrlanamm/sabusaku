@@ -22,12 +22,13 @@ lib/
                   (label kelas/ekskul, penanggung jawab, pengaturan), peran wali kelas/pembina
     notifications/ FCM: token perangkat, notifikasi komentar dan siswa binaan, deep link
 functions/
-  src/domain/     aturan streak dan status (fungsi murni)
+  src/domain/     aturan streak, status, periode dan peringkat (fungsi murni)
   src/callables/  claimAccount, addStudents, removeStudent, eraseStudent, addTeacher,
                   removeTeacher, deleteMyAccount, …
   src/triggers/   hitung ulang progres dan ringkasan siswa, notifikasi komentar, nama
                   wali kelas/pembina di dokumen sekolah (onTeacherWritten)
-  src/scheduled/  dailyRefresh (00:10 WIB), teacherDigest (06:30 WIB, siswa binaan)
+  src/scheduled/  dailyRefresh (00:10 WIB, juga peringkat), teacherDigest (06:30 WIB, siswa binaan),
+                  monthlyRecap (tanggal 1, 07:00 WIB, rekap bulanan siswa)
   tools/          skrip developer (lihat di bawah)
   test/           domain (unit), rules, integration (emulator)
 firestore.rules   aturan keamanan; setiap kasus di docs/03 §6 diuji otomatis

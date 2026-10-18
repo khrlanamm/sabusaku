@@ -158,7 +158,7 @@ Gunakan `@firebase/rules-unit-testing` dengan Firebase Emulator. Minimal:
 **Peringkat**
 31. `leaderboards`: siswa dan guru sekolahnya membaca satu periode (juga periode yang belum ada); sekolah lain, tanpa claim, dan peran salah ditolak; `list` ditolak; tidak ada klien yang menulis atau menghapus.
 
-Alur callable (`reportContent`, `resolveReport`, `acceptTerms`, `forgetReports`) diuji di `functions/test/integration/reports_flow.test.ts`; `addTeacher`/`removeTeacher` dan `schools.staff` di `members_flow.test.ts`; `statusChangedAt` dan `teacherDigest` di `digest_flow.test.ts`; baris `leaderboards` (jurnal, buku selesai, siswa dikeluarkan, refresh harian) di `reading_flow.test.ts`.
+Alur callable (`reportContent`, `resolveReport`, `acceptTerms`, `forgetReports`) diuji di `functions/test/integration/reports_flow.test.ts`; `addTeacher`/`removeTeacher` dan `schools.staff` di `members_flow.test.ts`; `statusChangedAt` dan `teacherDigest` di `digest_flow.test.ts`; baris `leaderboards` (jurnal, buku selesai, siswa dikeluarkan, refresh harian) di `reading_flow.test.ts`; `monthlyRecap` di `recap_flow.test.ts`.
 
 Catatan teknis untuk pengujian: simulasikan waktu server dengan mengatur jam pada test (atau menulis jurnal dengan ID tanggal relatif terhadap tanggal sistem saat tes berjalan) dan uji khusus batas tengah malam WIB (23:59 vs 00:01).
 

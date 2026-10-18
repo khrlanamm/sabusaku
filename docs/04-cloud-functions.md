@@ -48,6 +48,7 @@ Hanya untuk guru. Bila guru bergabung, keluar, atau `name`, `homeroomClass`, `ex
 |---|---|---|
 | `dailyRefresh` | Setiap hari 00:10 WIB | Untuk semua sekolah aktif: hitung ulang `status`, `daysSinceLastJournal`, `streakCurrent` (streak bisa putus tanpa ada penulisan jurnal), `journalCountMonth` (reset awal bulan), `overdue`. Sepuluh siswa sekaligus per sekolah; baris peringkat dikumpulkan lalu tiap dokumen `leaderboards` periode hidup ditulis utuh sekali (menghindari rebutan tulis pada dokumen yang sama dan membersihkan baris basi) |
 | `teacherDigest` | Setiap hari 06:30 WIB | Untuk tiap sekolah aktif: siswa yang `statusChangedAt` dalam 24 jam terakhir dan kini `perlu_perhatian`/`tidak_aktif`. Tiap guru dengan siswa binaan (kelas perwalian atau ekskul yang dibina) di antaranya menerima satu notifikasi "N siswa binaan perlu perhatian" (kanal Android `siswa_binaan`, payload `type=attention`, membuka dashboard pada Binaan saya). Tanpa retry agar tidak terkirim dua kali |
+| `monthlyRecap` | Tanggal 1 setiap bulan, 07:00 WIB | Untuk tiap sekolah aktif: baca `leaderboards/month-{bulan lalu}`, lalu kirim ke setiap siswa di dalamnya "Rekap membaca Oktober 2026: 1 buku selesai, 22 hari membaca, streak terbaik 12 hari. Peringkat #4 dari 120 siswa di sekolahmu." (peringkat menurut buku selesai, urutan bawaan aplikasi; `domain/recap.ts`). Kanal Android `rekap_bulanan`, payload `type=recap`, `period=month-2026-10`, membuka peringkat bulan itu. Siswa tanpa jurnal dan buku selesai bulan itu tidak dikirimi. Tanpa retry |
 
 Dijalankan juga satu kali sehari setelah tengah malam saja pada V1; pengingat harian ke siswa masuk daftar *Could*.
 
@@ -119,7 +120,7 @@ functions/
     index.ts                 # ekspor semua fungsi
     callables/               # claimAccount, addStudents, removeStudent, addTeacher, ...
     triggers/                # onJournalWritten, onCommentCreated, onTeacherWritten, ...
-    scheduled/               # dailyRefresh, teacherDigest
+    scheduled/               # dailyRefresh, teacherDigest, monthlyRecap
     domain/                  # computeStreak, computeStatus, ranking, dateUtils (WIB), labels — tanpa dependensi Firebase
     infra/                   # akses Firestore/Auth/FCM, auth guard, validasi
   test/                      # unit domain + integrasi dengan emulator
