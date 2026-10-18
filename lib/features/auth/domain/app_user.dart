@@ -39,6 +39,9 @@ abstract class AppUser with _$AppUser {
     /// Extracurricular labels, e.g. `Masis-KIR`. Teachers: the ones they
     /// supervise.
     @Default(<String>[]) List<String> extracurriculars,
+
+    /// Teachers: the class they are the homeroom teacher (wali kelas) of.
+    String? homeroomClass,
     String? photoUrl,
 
     /// False once a teacher removed the student from the school.
@@ -58,6 +61,7 @@ abstract class AppUser with _$AppUser {
     extracurriculars: List<String>.from(
       data['extracurriculars'] as List? ?? const [],
     ),
+    homeroomClass: data['homeroomClass'] as String?,
     photoUrl: data['photoUrl'] as String?,
     active: data['status'] != 'removed',
     termsVersion: (data['termsVersion'] as num?)?.toInt() ?? 0,
@@ -66,4 +70,14 @@ abstract class AppUser with _$AppUser {
   /// Name and, for a student, class are required before using the app.
   bool get profileComplete =>
       name.trim().length >= 2 && (role != UserRole.siswa || classId != null);
+
+  /// Teachers: whether they have a homeroom class or supervise an
+  /// extracurricular, i.e. students of their own ("Binaan saya").
+  bool get hasGroup => homeroomClass != null || extracurriculars.isNotEmpty;
+
+  /// Whether a student with these labels is in this teacher's group: in their
+  /// homeroom class or in one of the extracurriculars they supervise.
+  bool inGroup(String? classId, List<String> studentExtracurriculars) =>
+      (homeroomClass != null && classId == homeroomClass) ||
+      studentExtracurriculars.any(extracurriculars.contains);
 }

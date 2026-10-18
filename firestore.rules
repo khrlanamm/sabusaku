@@ -182,7 +182,8 @@ service cloud.firestore {
 
       // ---------- users ----------
       match /users/{uid} {
-        // name, class and extracurriculars a user or teacher may write
+        // name, class, extracurriculars and homeroom class a user or teacher
+        // may write
         function validProfileChange() {
           let before = resource.data;
           let after = request.resource.data;
@@ -191,6 +192,10 @@ service cloud.firestore {
                 || (before.role == 'siswa' && knownClass(schoolId, after.classId)))
             && (after.get('extracurriculars', []) == before.get('extracurriculars', [])
                 || knownExtracurriculars(schoolId, after.extracurriculars))
+            // A teacher is the homeroom teacher (wali kelas) of at most one class.
+            && (after.get('homeroomClass', null) == before.get('homeroomClass', null)
+                || (before.role == 'guru'
+                    && (after.homeroomClass == null || knownClass(schoolId, after.homeroomClass))))
             && after.updatedAt == request.time;
         }
 
@@ -199,12 +204,14 @@ service cloud.firestore {
         allow create, delete: if false; // Cloud Functions only
 
         // Users complete and edit their own profile; a student may change
-        // class and extracurriculars at any time. A teacher edits a student.
+        // class and extracurriculars at any time, a teacher their homeroom
+        // class and the extracurriculars they supervise. A teacher edits a
+        // student.
         allow update: if
           (inSchool(schoolId) && request.auth.uid == uid
             && resource.data.status == 'active'
             && request.resource.data.diff(resource.data).affectedKeys()
-                 .hasOnly(['name', 'classId', 'extracurriculars', 'photoUrl', 'updatedAt'])
+                 .hasOnly(['name', 'classId', 'extracurriculars', 'homeroomClass', 'photoUrl', 'updatedAt'])
             && validProfileChange()
             && validPhotoUrl(request.resource.data.get('photoUrl', null)))
           || (isTeacher(schoolId) && resource.data.role == 'siswa'

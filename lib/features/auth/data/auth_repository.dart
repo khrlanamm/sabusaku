@@ -505,6 +505,20 @@ class AuthRepository {
     );
   }
 
+  /// A teacher's homeroom class and supervised extracurriculars. Both are
+  /// written as given, so either can be cleared.
+  Future<void> updateTeacherGroup(
+    Session session, {
+    required String? homeroomClass,
+    required List<String> extracurriculars,
+  }) => _guard(
+    () => _userDoc(session.schoolId, session.uid).update({
+      'homeroomClass': homeroomClass,
+      'extracurriculars': extracurriculars,
+      'updatedAt': FieldValue.serverTimestamp(),
+    }),
+  );
+
   /// Uploads a new profile photo (already resized by the picker).
   Future<void> uploadPhoto(
     Session session,

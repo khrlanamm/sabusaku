@@ -16,6 +16,7 @@ import {afterAll, beforeAll, beforeEach, describe, it} from "vitest";
 
 import {
   actors,
+  CLASS_1,
   CLASS_2,
   createEnv,
   Db,
@@ -186,6 +187,18 @@ describe("users", () => {
     const me = doc(a.teacher1, `${school}/users/guru1`);
     await assertSucceeds(updateDoc(me, {name: "Guru Satu, S.Pd.", extracurriculars: ["Masis-KIR"], ...now()}));
     await assertFails(updateDoc(me, {classId: CLASS_2, ...now()}));
+  });
+
+  it("guru mengatur kelas perwaliannya sendiri: satu kelas terdaftar atau kosong", async () => {
+    const me = doc(a.teacher1, `${school}/users/guru1`);
+    await assertSucceeds(updateDoc(me, {homeroomClass: CLASS_2, extracurriculars: ["PMR"], ...now()}));
+    await assertSucceeds(updateDoc(me, {homeroomClass: null, ...now()}));
+    await assertFails(updateDoc(me, {homeroomClass: "XII-Z9", ...now()})); // unlisted
+    await assertFails(updateDoc(me, {homeroomClass: [CLASS_1, CLASS_2], ...now()}));
+    // not for a student, and not for someone else
+    await assertFails(updateDoc(doc(a.student, `${school}/users/siswa1`), {homeroomClass: CLASS_1, ...now()}));
+    await assertFails(updateDoc(doc(a.teacher1, `${school}/users/guru2`), {homeroomClass: CLASS_1, ...now()}));
+    await assertFails(updateDoc(doc(a.teacher1, `${school}/users/siswa1`), {homeroomClass: CLASS_1, ...now()}));
   });
 
   it("siswa yang dikeluarkan tidak bisa mengubah profilnya", async () => {
