@@ -10,7 +10,10 @@
 //                then the student starts a catalog book and writes today's
 //                journal (skipped if a book is active)
 //   guru         the teacher comments on that journal once, then the
-//                teacher screens
+//                teacher screens. Run it as the superadmin, who sees no
+//                school but the one opened here and is left out of what
+//                students see, so the supervised extracurricular set below
+//                stays invisible to them
 //   siswa        the student screens, including the comment
 //
 // Report sheets are opened for the pictures but never sent: no real report
@@ -31,6 +34,7 @@ import 'package:sabusaku/app/theme/theme_preference.dart';
 import 'package:sabusaku/bootstrap.dart';
 import 'package:sabusaku/core/storage/prefs.dart';
 import 'package:sabusaku/features/auth/data/auth_repository.dart';
+import 'package:sabusaku/features/teacher/data/superadmin_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'support.dart'
@@ -39,6 +43,12 @@ import 'support.dart'
 const _phase = String.fromEnvironment('SHOT_PHASE');
 const _token = String.fromEnvironment('SHOT_TOKEN');
 const _studentEmail = String.fromEnvironment('SHOT_STUDENT');
+
+/// The school the screenshots are taken in.
+const _schoolId = 'sman1sukodadi';
+
+/// The extracurricular the teacher supervises, so "Binaan saya" has students.
+const _supervised = 'Masis-KIR';
 
 /// The catalog book the student reads in the screenshots.
 const _bookQuery = 'laskar pelangi';
@@ -178,6 +188,41 @@ void main() {
     return journals.docs.isEmpty ? null : journals.docs.first.id;
   }
 
+  /// The program and date of the student's journal that carries [_comment],
+  /// or null before the first run commented. The student keeps reading and
+  /// writing after it, so it need not be the latest journal or book.
+  Future<({String programId, String date})?> commentedJournal(
+    String studentId,
+  ) async {
+    final programs = await FirebaseFirestore.instance
+        .collection('schools/${schoolId()}/programs')
+        .where('studentId', isEqualTo: studentId)
+        .get();
+    for (final program in programs.docs) {
+      final journals = await program.reference.collection('journals').get();
+      for (final journal in journals.docs) {
+        final comments = await journal.reference.collection('comments').get();
+        if (comments.docs.any((c) => c.data()['text'] == _comment)) {
+          return (programId: program.id, date: journal.id);
+        }
+      }
+    }
+    return null;
+  }
+
+  /// Scrolls the screen's list until [finder] sits at its top.
+  Future<void> scrollToTop(WidgetTester tester, Finder finder) async {
+    if (finder.evaluate().isEmpty) {
+      await tester.scrollUntilVisible(
+        finder,
+        300,
+        scrollable: find.byType(Scrollable).first,
+      );
+    }
+    await tester.ensureVisible(finder);
+    await settle(tester, 800);
+  }
+
   testWidgets('screenshots: $_phase', (tester) async {
     await startApp(tester);
 
@@ -269,25 +314,41 @@ void main() {
 
       case 'guru':
         await signIn(tester);
+        if (schoolId() != _schoolId) {
+          await container
+              .read(superadminRepositoryProvider)
+              .switchSchool(_schoolId);
+        }
+        final session = container.read(currentSessionProvider);
+        if (!session.profile.extracurriculars.contains(_supervised)) {
+          await container
+              .read(authRepositoryProvider)
+              .updateTeacherGroup(
+                session,
+                homeroomClass: session.profile.homeroomClass,
+                extracurriculars: [
+                  ...session.profile.extracurriculars,
+                  _supervised,
+                ],
+              );
+        }
         final students = await FirebaseFirestore.instance
             .collection('schools/${schoolId()}/users')
             .where('email', isEqualTo: _studentEmail)
             .get();
         final studentId = students.docs.single.id;
         final programId = (await activeProgramOf(studentId))!;
-        final date = (await latestJournalDate(programId))!;
-        final comments = await FirebaseFirestore.instance
-            .collection(
-              'schools/${schoolId()}/programs/$programId/journals/$date/comments',
-            )
-            .get();
+        final commented = await commentedJournal(studentId);
+        final journal =
+            commented ??
+            (programId: programId, date: (await latestJournalDate(programId))!);
 
         await go(
           tester,
-          Routes.teacherJournal(studentId, programId, date),
+          Routes.teacherJournal(studentId, journal.programId, journal.date),
           find.byKey(const Key('comment-input')),
         );
-        if (comments.docs.isEmpty) {
+        if (commented == null) {
           await tester.enterText(
             find.byKey(const Key('comment-input')),
             _comment,
@@ -299,6 +360,25 @@ void main() {
 
         await go(tester, Routes.teacherDashboard, find.text('Status siswa'));
         await shot(tester, 'guru-dashboard', wait: 4000);
+        // The lists the dashboard cards open follow its scope.
+        await waitFor(tester, find.byKey(const Key('scope-mine')));
+        await tapVisible(tester, find.byKey(const Key('scope-mine')));
+        await go(
+          tester,
+          Routes.teacherActiveBooks,
+          find.byKey(const Key('active-books-summary')),
+        );
+        await shot(tester, 'guru-buku-aktif', wait: 4000);
+        await go(
+          tester,
+          Routes.teacherMonthJournals,
+          find.byKey(const Key('month-journals-total')),
+        );
+        await shot(tester, 'guru-jurnal-bulan-ini', wait: 4000);
+        await go(tester, Routes.teacherRanking, find.text('Peringkat'));
+        await shot(tester, 'guru-peringkat', wait: 5000);
+        await go(tester, Routes.teacherDashboard, find.text('Status siswa'));
+        await tapVisible(tester, find.byKey(const Key('scope-all')));
         await go(
           tester,
           Routes.teacherStudents,
@@ -321,12 +401,20 @@ void main() {
         await shot(tester, 'guru-detail-siswa', wait: 4000);
         await go(
           tester,
-          Routes.teacherProgram(studentId, programId),
+          Routes.teacherProgram(studentId, journal.programId),
           find.textContaining('Hal. '),
         );
         await shot(tester, 'guru-jurnal-siswa');
         await go(tester, Routes.teacherSchool, find.textContaining('Kelas ('));
         await shot(tester, 'guru-sekolah', wait: 3000);
+        await scrollToTop(tester, find.text('Penanggung jawab'));
+        await shot(tester, 'guru-penanggung-jawab', wait: 3000);
+        await go(
+          tester,
+          Routes.teacherAddTeacher,
+          find.byKey(const Key('add-teacher-email')),
+        );
+        await shot(tester, 'guru-tambah-pj');
         await go(tester, Routes.teacherSettings, find.byType(Scaffold));
         await shot(tester, 'guru-pengaturan-sekolah', wait: 3000);
         await go(
@@ -364,8 +452,18 @@ void main() {
         await shot(tester, 'guru-saran', wait: 3000);
         await go(tester, Routes.teacherDeletedBooks, find.byType(Scaffold));
         await shot(tester, 'guru-buku-terhapus', wait: 3000);
-        await go(tester, Routes.teacherProfile, find.byType(Scaffold));
+        await go(
+          tester,
+          Routes.teacherProfile,
+          find.byKey(const Key('profile-homeroom')),
+        );
         await shot(tester, 'guru-profil', wait: 3000);
+        // The sheet is only looked at; nothing is saved from it.
+        await tapVisible(tester, find.byKey(const Key('profile-homeroom')));
+        await waitFor(tester, find.byKey(const Key('roles-save')));
+        await shot(tester, 'guru-peran');
+        Navigator.of(tester.element(find.byKey(const Key('roles-save')))).pop();
+        await settle(tester, 600);
         await container
             .read(themePreferenceControllerProvider.notifier)
             .set(ThemePreference.gelap);
@@ -382,11 +480,38 @@ void main() {
         await signIn(tester);
         await dismissNotificationPrompt(tester);
         final uid = container.read(currentSessionProvider).uid;
-        final programId = (await activeProgramId(uid))!;
-        final date = (await latestJournalDate(programId))!;
+        final journal = (await commentedJournal(uid))!;
+        final finished = await FirebaseFirestore.instance
+            .collection('schools/${schoolId()}/programs')
+            .where('studentId', isEqualTo: uid)
+            .where('status', isEqualTo: 'completed')
+            .limit(1)
+            .get();
 
         await go(tester, Routes.studentHome, find.text('Buku bulan ini'));
         await shot(tester, 'siswa-beranda', wait: 4000);
+        await scrollToTop(tester, find.text('Statistik'));
+        await shot(tester, 'siswa-beranda-statistik', wait: 3000);
+        await go(tester, Routes.studentStreak, find.text('Cara menghitung'));
+        await shot(tester, 'siswa-streak', wait: 4000);
+        await go(tester, Routes.studentRanking, find.text('Peringkat'));
+        await shot(tester, 'siswa-peringkat', wait: 5000);
+        await go(tester, Routes.studentBadges, find.text('Lencana'));
+        await shot(tester, 'siswa-lencana', wait: 4000);
+        await go(
+          tester,
+          Routes.studentBookHistory,
+          find.byKey(const Key('book-history-search')),
+        );
+        await shot(tester, 'siswa-riwayat-buku', wait: 4000);
+        if (finished.docs.isNotEmpty) {
+          await go(
+            tester,
+            Routes.studentProgramJournals(finished.docs.first.id),
+            find.textContaining('Hal. '),
+          );
+          await shot(tester, 'siswa-buku-lama', wait: 4000);
+        }
         await go(
           tester,
           Routes.studentBook,
@@ -395,9 +520,12 @@ void main() {
         await shot(tester, 'siswa-buku-saya', wait: 4000);
         await go(tester, Routes.studentJournals, find.textContaining('Hal. '));
         await shot(tester, 'siswa-riwayat-jurnal');
+        await tapVisible(tester, find.text('Kalender'));
+        await shot(tester, 'siswa-jurnal-kalender', wait: 3000);
+        await tapVisible(tester, find.text('Daftar'));
         await go(
           tester,
-          Routes.studentJournal(programId, date),
+          Routes.studentJournal(journal.programId, journal.date),
           find.text(_comment),
         );
         await shot(tester, 'siswa-jurnal-komentar');
