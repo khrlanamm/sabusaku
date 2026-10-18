@@ -70,7 +70,11 @@ class _BookBody extends ConsumerWidget {
   }
 
   Future<void> _delete(BuildContext context, WidgetRef ref) async {
-    final choice = await showDeleteBookDialog(context, bookId: book.id);
+    final choice = await showDeleteBookDialog(
+      context,
+      bookId: book.id,
+      readerCount: book.readerCount,
+    );
     if (choice == null || !context.mounted) return;
     final ok = await runWithProgress(context, () async {
       await ref
@@ -83,7 +87,13 @@ class _BookBody extends ConsumerWidget {
       return true;
     });
     if (ok == true && context.mounted) {
-      showSnack(context, '"${book.title}" dipindah ke Buku terhapus.');
+      final original = choice.duplicateOf;
+      showSnack(
+        context,
+        original == null
+            ? '"${book.title}" dipindah ke Buku terhapus.'
+            : '"${book.title}" digabungkan ke "${original.title}".',
+      );
     }
   }
 
@@ -361,7 +371,12 @@ class _DeletedBanner extends ConsumerWidget {
           ),
           if (book.deleteReason != null && book.deleteReason!.isNotEmpty)
             Text('Alasan: ${book.deleteReason}', style: text),
-          if (book.duplicateOf != null)
+          if (book.duplicateOf != null) ...[
+            Text(
+              'Digabungkan ke buku aslinya. Pembacanya tetap di sana walau '
+              'buku ini diaktifkan kembali.',
+              style: text,
+            ),
             Align(
               alignment: Alignment.centerLeft,
               child: TextButton(
@@ -374,6 +389,7 @@ class _DeletedBanner extends ConsumerWidget {
                 child: const Text('Lihat buku aslinya'),
               ),
             ),
+          ],
           const SizedBox(height: 8),
           Align(
             alignment: Alignment.centerLeft,

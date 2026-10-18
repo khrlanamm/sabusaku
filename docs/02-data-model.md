@@ -197,7 +197,7 @@ Dipakai semua sekolah. Ditulis **hanya** oleh Cloud Functions (`saveBook`, `dele
 | `coverSource` | map? | `{provider: google\|openlibrary\|upload\|suggestion, url?, sourceId?}` |
 | `searchKey` | string | `judul\|penulis pertama`, dinormalkan (`bookKey`). Buku baru ditolak (`already-exists`) bila ada buku aktif dengan `searchKey` atau `isbn13` yang sama |
 | `status` | string | `active` · `deleted` (hapus lunak; bisa dipulihkan penanggung jawab sekolah mana pun) |
-| `deletedAt`, `deletedBy`, `deleteReason`, `duplicateOf` | | Hanya selama `status == deleted`. `duplicateOf` = ID buku aslinya bila dihapus sebagai duplikat |
+| `deletedAt`, `deletedBy`, `deleteReason`, `duplicateOf` | | Hanya selama `status == deleted`. `duplicateOf` = ID buku aslinya bila dihapus sebagai duplikat. Saat itu `deleteBook` menggabungkannya: program siswa di semua sekolah (`book.bookId`, dan `book.coverUrl` bila bukan foto siswa sendiri) dan `schools/{s}.recommendedBooks` pindah ke buku aslinya; hitungan pembaca ikut lewat `onProgramWritten`. Mengaktifkan kembali tidak memindahkannya balik |
 | `readerCount` | int | Jumlah program (semua sekolah) yang menunjuk buku ini. Server (`onProgramWritten`) |
 | `createdAt`, `createdBy`, `updatedAt`, `updatedBy` | | `*By` = Actor |
 | `version` | int | Naik 1 setiap perubahan |
@@ -207,7 +207,7 @@ Dipakai semua sekolah. Ditulis **hanya** oleh Cloud Functions (`saveBook`, `dele
 ### 3.11 `books/{bookId}/history/{entryId}`
 | Field | Tipe | Keterangan |
 |---|---|---|
-| `type` | string | `created` · `updated` · `deleted` · `restored` · `cover_changed` · `suggestion_applied` · `suggestion_rejected` |
+| `type` | string | `created` · `updated` · `deleted` · `restored` · `cover_changed` · `suggestion_applied` · `suggestion_rejected` · `merged` (di buku asli, saat duplikatnya digabungkan) |
 | `changes` | map | `{field: {from, to}}` |
 | `by` | map | Actor |
 | `at` | timestamp | Waktu server |

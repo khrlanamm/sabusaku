@@ -153,7 +153,8 @@ export type HistoryType =
   | "restored"
   | "cover_changed"
   | "suggestion_applied"
-  | "suggestion_rejected";
+  | "suggestion_rejected"
+  | "merged";
 
 export interface HistoryEntry {
   type: HistoryType;
@@ -447,6 +448,48 @@ export async function linkSuggestionPrograms(
     linked++;
   }
   return linked;
+}
+
+/**
+ * Moves everything that points at a duplicate catalog book to the original,
+ * in every school: the students' programs (their journals live under them,
+ * and onProgramWritten moves the reader counts) and the schools' recommended
+ * books. A program keeps the title and pages the student read; its cover
+ * becomes the original's unless the student set their own. Safe to run again.
+ * Returns how many programs moved.
+ */
+export async function mergeBookInto(duplicateId: string, originalId: string): Promise<number> {
+  const [duplicate, original] = await Promise.all([
+    booksCol().doc(duplicateId).get(),
+    booksCol().doc(originalId).get(),
+  ]);
+  const duplicateCover = (duplicate.get("coverUrl") as string | null | undefined) ?? null;
+  const originalCover = (original.get("coverUrl") as string | null | undefined) ?? null;
+
+  let moved = 0;
+  const schools = await db.collection("schools").select("recommendedBooks").get();
+  for (const school of schools.docs) {
+    const programs = await programsCol(school.id).where("book.bookId", "==", duplicateId).get();
+    await Promise.all(
+      programs.docs.map((program) => {
+        const cover = (program.get("book.coverUrl") as string | null | undefined) ?? null;
+        const ownCover = cover !== null && cover !== duplicateCover;
+        return program.ref.update({
+          "book.bookId": originalId,
+          ...(ownCover || originalCover === null ? {} : {"book.coverUrl": originalCover}),
+        });
+      }),
+    );
+    moved += programs.size;
+
+    const recommended = (school.get("recommendedBooks") as string[] | undefined) ?? [];
+    if (recommended.includes(duplicateId)) {
+      await school.ref.update({
+        recommendedBooks: [...new Set(recommended.map((id) => (id === duplicateId ? originalId : id)))],
+      });
+    }
+  }
+  return moved;
 }
 
 /** True when two timestamps (or both missing) are the same moment. */

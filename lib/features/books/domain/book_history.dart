@@ -12,7 +12,8 @@ enum BookHistoryType {
   restored('restored', 'Diaktifkan kembali'),
   coverChanged('cover_changed', 'Cover diganti'),
   suggestionApplied('suggestion_applied', 'Saran diterapkan'),
-  suggestionRejected('suggestion_rejected', 'Saran ditolak');
+  suggestionRejected('suggestion_rejected', 'Saran ditolak'),
+  merged('merged', 'Duplikat digabung');
 
   const BookHistoryType(this.wire, this.label);
 

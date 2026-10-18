@@ -68,7 +68,9 @@ class _DeletedBookTile extends ConsumerWidget {
     final confirmed = await showConfirmDialog(
       context,
       title: 'Aktifkan kembali?',
-      message: '"${book.title}" kembali muncul di katalog dan pencarian siswa.',
+      message:
+          '"${book.title}" kembali muncul di katalog dan pencarian siswa.'
+          '${book.duplicateOf == null ? '' : ' Pembaca yang sudah digabungkan tetap di buku aslinya.'}',
       confirmLabel: 'Aktifkan',
     );
     if (!confirmed || !context.mounted) return;
@@ -125,7 +127,7 @@ class _DeletedBookTile extends ConsumerWidget {
                       book.deleteReason!.isNotEmpty)
                     Text('Alasan: ${book.deleteReason}', style: muted),
                   if (book.duplicateOf != null)
-                    Text('Ditandai sebagai duplikat', style: muted),
+                    Text('Digabungkan ke buku lain', style: muted),
                 ],
               ),
             ),

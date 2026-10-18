@@ -9,7 +9,7 @@ import {afterAll, beforeAll, describe, expect, it} from "vitest";
 import {shardOf} from "../../src/domain/search";
 import {downloadUrlOf} from "../../src/infra/books";
 import {catalogShardRef, rebuildCatalog} from "../../src/infra/catalog";
-import {booksCol, bookStatsCol, bookSuggestionsCol, programsCol, statsCol} from "../../src/infra/firebase";
+import {booksCol, bookStatsCol, bookSuggestionsCol, programsCol, schoolRef, statsCol} from "../../src/infra/firebase";
 import {
   addJoined,
   addSchool,
@@ -327,6 +327,82 @@ describe("program siswa dan saran", () => {
     expect(await codeOf(teacherA.call("reviewSuggestion", {id: "s-reject", action: "apply"}))).toBe(
       "failed-precondition",
     );
+  });
+});
+
+describe("gabung duplikat", () => {
+  /** A program written past the rules, so no BR-1 lock is needed. */
+  const program = (schoolId: string, id: string, bookId: string, status: string, coverUrl: string | null) => {
+    const today = wibDate();
+    return programsCol(schoolId).doc(id).set({
+      studentId: `siswa-${id}`,
+      classId: "XII-A1",
+      book: {title: "Sang Pemimpi", author: "Andrea Hirata", totalPages: 292, bookId, coverUrl},
+      month: today.slice(0, 7),
+      startDate: today,
+      targetDate: wibDate(20),
+      extended: false,
+      status,
+      currentPage: 0,
+      journalCount: 0,
+      lastJournalDate: null,
+      streakCurrent: 0,
+      streakBest: 0,
+    });
+  };
+
+  it("hapus sebagai duplikat memindahkan program, pembaca, dan rekomendasi ke buku asli", async () => {
+    const pemimpi = {...laskar, title: "Sang Pemimpi", isbn13: null, pageCount: 292};
+    const {bookId: originalId} = await teacherA.call<{bookId: string}>("saveBook", {fields: pemimpi});
+    const {bookId: duplicateId} = await teacherB.call<{bookId: string}>("saveBook", {
+      fields: {...pemimpi, title: "Sang Pemimpi (Cetakan Ulang)"},
+    });
+    await booksCol().doc(originalId).update({coverUrl: "https://example.test/asli.jpg"});
+    await booksCol().doc(duplicateId).update({coverUrl: "https://example.test/duplikat.jpg"});
+
+    await program(A, "p-dup-a", duplicateId, "active", "https://example.test/duplikat.jpg");
+    await program(B, "p-dup-b", duplicateId, "completed", "https://example.test/foto-siswa.jpg");
+    await eventually(async () => (await book(duplicateId))?.readerCount === 2);
+    await schoolRef(A).update({recommendedBooks: [duplicateId, originalId]});
+    await schoolRef(B).update({recommendedBooks: [duplicateId]});
+
+    const result = await teacherB.call("deleteBook", {bookId: duplicateId, duplicateOf: originalId});
+    expect(result).toEqual({ok: true, moved: 2});
+    expect(await book(duplicateId)).toMatchObject({status: "deleted", duplicateOf: originalId});
+
+    // The program's own title and pages stay; the catalog cover follows the
+    // original, a student's own photo does not.
+    expect((await programsCol(A).doc("p-dup-a").get()).get("book")).toEqual({
+      title: "Sang Pemimpi",
+      author: "Andrea Hirata",
+      totalPages: 292,
+      bookId: originalId,
+      coverUrl: "https://example.test/asli.jpg",
+    });
+    expect((await programsCol(B).doc("p-dup-b").get()).get("book")).toMatchObject({
+      bookId: originalId,
+      coverUrl: "https://example.test/foto-siswa.jpg",
+    });
+
+    await eventually(async () => (await book(originalId))?.readerCount === 2);
+    await eventually(async () => (await book(duplicateId))?.readerCount === 0);
+    await eventually(async () => (await bookStatsCol(A).doc(originalId).get()).get("active") === 1);
+    expect((await bookStatsCol(A).doc(originalId).get()).data()).toMatchObject({readers: 1, active: 1});
+    await eventually(async () => (await bookStatsCol(B).doc(originalId).get()).get("readers") === 1);
+    await eventually(async () => (await bookStatsCol(A).doc(duplicateId).get()).get("readers") === 0);
+
+    expect((await schoolRef(A).get()).get("recommendedBooks")).toEqual([originalId]);
+    expect((await schoolRef(B).get()).get("recommendedBooks")).toEqual([originalId]);
+
+    const merged = (await history(originalId)).find((e) => e.type === "merged");
+    expect(merged).toMatchObject({by: {schoolId: B}});
+    expect(merged?.note).toContain("Sang Pemimpi (Cetakan Ulang)");
+    expect(merged?.note).toContain("2 pembaca");
+
+    // Restoring the duplicate leaves the readers with the original.
+    await teacherA.call("restoreBook", {bookId: duplicateId});
+    expect((await programsCol(A).doc("p-dup-a").get()).get("book.bookId")).toBe(originalId);
+    expect((await book(originalId))?.readerCount).toBe(2);
   });
 });
 

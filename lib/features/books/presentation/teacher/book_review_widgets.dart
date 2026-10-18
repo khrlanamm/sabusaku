@@ -322,6 +322,7 @@ class HistoryTile extends StatelessWidget {
     BookHistoryType.coverChanged => Icons.image_outlined,
     BookHistoryType.suggestionApplied => Icons.task_alt,
     BookHistoryType.suggestionRejected => Icons.block,
+    BookHistoryType.merged => Icons.call_merge,
   };
 
   @override
@@ -389,20 +390,24 @@ class HistoryTile extends StatelessWidget {
 
 typedef DeleteChoice = ({String? reason, CatalogEntry? duplicateOf});
 
-/// Asks why the book is deleted and, optionally, which book it duplicates.
-/// Null when cancelled.
+/// Asks why the book is deleted and, optionally, which book it duplicates;
+/// the server then merges it into that book. Null when cancelled.
 Future<DeleteChoice?> showDeleteBookDialog(
   BuildContext context, {
   required String bookId,
+  required int readerCount,
 }) => showDialog<DeleteChoice>(
   context: context,
-  builder: (_) => _DeleteBookDialog(bookId: bookId),
+  builder: (_) => _DeleteBookDialog(bookId: bookId, readerCount: readerCount),
 );
 
 class _DeleteBookDialog extends StatefulWidget {
-  const _DeleteBookDialog({required this.bookId});
+  const _DeleteBookDialog({required this.bookId, required this.readerCount});
 
   final String bookId;
+
+  /// Readers in all schools, who move along when the book is merged.
+  final int readerCount;
 
   @override
   State<_DeleteBookDialog> createState() => _DeleteBookDialogState();
@@ -421,7 +426,7 @@ class _DeleteBookDialogState extends State<_DeleteBookDialog> {
   Future<void> _pickOriginal() async {
     final picked = await showBookPicker(
       context,
-      title: 'Buku ini duplikat dari…',
+      title: 'Pilih buku aslinya',
       excludeId: widget.bookId,
     );
     if (picked != null) setState(() => _duplicateOf = picked);
@@ -430,17 +435,28 @@ class _DeleteBookDialogState extends State<_DeleteBookDialog> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final merge = _duplicateOf != null;
+    final readers = widget.readerCount == 0
+        ? 'Buku ini belum punya pembaca. '
+        : '${widget.readerCount} pembacanya di semua sekolah, beserta '
+              'jurnal mereka, pindah ke buku aslinya. ';
     return AlertDialog(
-      title: const Text('Hapus buku?'),
+      title: Text(merge ? 'Gabungkan buku?' : 'Hapus buku?'),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              'Buku pindah ke "Buku terhapus" dan tidak muncul di pencarian '
-              'siswa. Penanggung jawab sekolah mana pun bisa mengaktifkannya '
-              'kembali. Siswa yang sudah membacanya tidak terpengaruh.',
+              merge
+                  ? 'Buku ini pindah ke "Buku terhapus". '
+                        '$readers'
+                        'Rekomendasi sekolah juga pindah. Penggabungan tetap '
+                        'berlaku walau buku ini diaktifkan kembali.'
+                  : 'Buku pindah ke "Buku terhapus" dan tidak muncul di '
+                        'pencarian siswa. Penanggung jawab sekolah mana pun '
+                        'bisa mengaktifkannya kembali. Siswa yang sudah '
+                        'membacanya tidak terpengaruh.',
               style: theme.textTheme.bodyMedium,
             ),
             const SizedBox(height: 16),
@@ -458,8 +474,8 @@ class _DeleteBookDialogState extends State<_DeleteBookDialog> {
               OutlinedButton.icon(
                 key: const Key('delete-pick-original'),
                 onPressed: _pickOriginal,
-                icon: const Icon(Icons.content_copy_outlined),
-                label: const Text('Duplikat dari…'),
+                icon: const Icon(Icons.call_merge),
+                label: const Text('Gabungkan ke buku asli…'),
               )
             else
               Card(
@@ -471,7 +487,7 @@ class _DeleteBookDialogState extends State<_DeleteBookDialog> {
                     coverUrl: _duplicateOf!.coverUrl,
                   ),
                   title: Text(
-                    'Duplikat dari ${_duplicateOf!.title}',
+                    'Gabungkan ke ${_duplicateOf!.title}',
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -501,7 +517,7 @@ class _DeleteBookDialogState extends State<_DeleteBookDialog> {
             reason: _reason.text.trim().isEmpty ? null : _reason.text.trim(),
             duplicateOf: _duplicateOf,
           )),
-          child: const Text('Hapus'),
+          child: Text(merge ? 'Gabungkan' : 'Hapus'),
         ),
       ],
     );
