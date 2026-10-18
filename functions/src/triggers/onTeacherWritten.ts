@@ -1,5 +1,7 @@
 import {onDocumentWritten} from "firebase-functions/v2/firestore";
 
+import {BACKGROUND_OPTIONS} from "../config";
+
 import {refreshSchoolStaff} from "../infra/staff";
 
 /** Teacher profile fields that the school's staff map is built from. */
@@ -11,7 +13,7 @@ const STAFF_FIELDS = ["name", "homeroomClass", "extracurriculars", "status"];
  * extracurriculars rebuilds it. Student profiles are ignored.
  */
 export const onTeacherWritten = onDocumentWritten(
-  "schools/{schoolId}/users/{uid}",
+  {document: "schools/{schoolId}/users/{uid}", ...BACKGROUND_OPTIONS},
   async (event) => {
     const before = event.data?.before;
     const after = event.data?.after;

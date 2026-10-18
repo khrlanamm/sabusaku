@@ -1,6 +1,8 @@
 import {onDocumentUpdated} from "firebase-functions/v2/firestore";
 import {logger} from "firebase-functions/v2";
 
+import {BACKGROUND_OPTIONS} from "../config";
+
 import {refreshSchool} from "../infra/stats";
 
 /**
@@ -9,7 +11,7 @@ import {refreshSchool} from "../infra/stats";
  * of waiting for the nightly refresh.
  */
 export const onSchoolUpdated = onDocumentUpdated(
-  {document: "schools/{schoolId}", timeoutSeconds: 540, memory: "512MiB"},
+  {document: "schools/{schoolId}", timeoutSeconds: 540, memory: "512MiB", ...BACKGROUND_OPTIONS},
   async (event) => {
     const before = JSON.stringify(event.data?.before.get("settings") ?? null);
     const after = JSON.stringify(event.data?.after.get("settings") ?? null);

@@ -1,5 +1,7 @@
 import {onDocumentWritten} from "firebase-functions/v2/firestore";
 
+import {BACKGROUND_OPTIONS} from "../config";
+
 import {computeProgramAggregates} from "../domain/activity";
 import {wibToday} from "../domain/dates";
 import {db, programsCol} from "../infra/firebase";
@@ -12,7 +14,7 @@ import {loadSettings, refreshStudentStats} from "../infra/stats";
  * the right numbers.
  */
 export const onJournalWritten = onDocumentWritten(
-  "schools/{schoolId}/programs/{programId}/journals/{date}",
+  {document: "schools/{schoolId}/programs/{programId}/journals/{date}", ...BACKGROUND_OPTIONS},
   async (event) => {
     const {schoolId, programId} = event.params;
     const before = event.data?.before;

@@ -1,5 +1,7 @@
 import {onDocumentWritten} from "firebase-functions/v2/firestore";
 
+import {BACKGROUND_OPTIONS} from "../config";
+
 import {sameTime} from "../infra/books";
 import {catalogEntry, isIndexed, upsertCatalogEntry} from "../infra/catalog";
 
@@ -10,7 +12,7 @@ import {catalogEntry, isIndexed, upsertCatalogEntry} from "../infra/catalog";
  * Writes made by the bulk import are skipped (it rebuilds the index once at
  * the end); a later reader-count change of an imported book still counts.
  */
-export const onBookWritten = onDocumentWritten("books/{bookId}", async (event) => {
+export const onBookWritten = onDocumentWritten({document: "books/{bookId}", ...BACKGROUND_OPTIONS}, async (event) => {
   const before = event.data?.before?.exists ? event.data.before.data()! : null;
   const after = event.data?.after?.exists ? event.data.after.data()! : null;
 

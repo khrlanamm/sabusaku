@@ -1,6 +1,8 @@
 import {FieldValue} from "firebase-admin/firestore";
 import {onDocumentWritten} from "firebase-functions/v2/firestore";
 
+import {BACKGROUND_OPTIONS} from "../config";
+
 import {
   editProposal,
   newProposal,
@@ -24,7 +26,7 @@ type Data = FirebaseFirestore.DocumentData;
  *     or a book the catalog does not have (`new`).
  */
 export const onProgramWritten = onDocumentWritten(
-  "schools/{schoolId}/programs/{programId}",
+  {document: "schools/{schoolId}/programs/{programId}", ...BACKGROUND_OPTIONS},
   async (event) => {
     const before = event.data?.before?.exists ? event.data.before.data()! : null;
     const after = event.data?.after?.exists ? event.data.after.data()! : null;

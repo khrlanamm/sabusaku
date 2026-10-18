@@ -1,6 +1,8 @@
 import {logger} from "firebase-functions/v2";
 import {onSchedule} from "firebase-functions/v2/scheduler";
 
+import {BACKGROUND_OPTIONS} from "../config";
+
 import {wibToday} from "../domain/dates";
 import {db} from "../infra/firebase";
 import {refreshSchool} from "../infra/stats";
@@ -23,6 +25,8 @@ export async function refreshAllSchools(today = wibToday()): Promise<number> {
  */
 export const dailyRefresh = onSchedule(
   {
+    ...BACKGROUND_OPTIONS,
+    maxInstances: 1,
     schedule: "10 0 * * *",
     timeZone: "Asia/Jakarta",
     timeoutSeconds: 540,

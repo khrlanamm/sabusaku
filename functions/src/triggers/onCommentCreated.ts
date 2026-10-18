@@ -1,6 +1,8 @@
 import {FieldValue} from "firebase-admin/firestore";
 import {onDocumentCreated} from "firebase-functions/v2/firestore";
 
+import {BACKGROUND_OPTIONS} from "../config";
+
 import {db} from "../infra/firebase";
 import {sendToUser} from "../infra/notify";
 
@@ -17,7 +19,10 @@ const BODY_MAX = 80;
  * and does not notify twice.
  */
 export const onCommentCreated = onDocumentCreated(
-  "schools/{schoolId}/programs/{programId}/journals/{date}/comments/{commentId}",
+  {
+    document: "schools/{schoolId}/programs/{programId}/journals/{date}/comments/{commentId}",
+    ...BACKGROUND_OPTIONS,
+  },
   async (event) => {
     const comment = event.data;
     if (!comment) return;

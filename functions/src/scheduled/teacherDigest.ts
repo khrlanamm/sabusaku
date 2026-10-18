@@ -2,6 +2,8 @@ import {Timestamp} from "firebase-admin/firestore";
 import {logger} from "firebase-functions/v2";
 import {onSchedule} from "firebase-functions/v2/scheduler";
 
+import {BACKGROUND_OPTIONS} from "../config";
+
 import {attentionFor, DigestStudent, digestMessage} from "../domain/digest";
 import {StudentStatus} from "../domain/types";
 import {db, statsCol, usersCol} from "../infra/firebase";
@@ -65,6 +67,8 @@ export async function sendTeacherDigests(now = Date.now()): Promise<number> {
  */
 export const teacherDigest = onSchedule(
   {
+    ...BACKGROUND_OPTIONS,
+    maxInstances: 1,
     schedule: "30 6 * * *",
     timeZone: "Asia/Jakarta",
     timeoutSeconds: 300,

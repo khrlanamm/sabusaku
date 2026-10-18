@@ -98,9 +98,12 @@ Teks, letak nomor pada gambar, dan susunan halaman ada di skrip itu. Tangkapan l
 ## Deploy
 
 ```sh
-firebase deploy --only firestore,storage,functions --project sabusaku
+firebase deploy --only firestore,storage --project sabusaku
+tool/deploy-functions.sh                                     # Cloud Functions, per batch
 firebase deploy --only hosting --project sabusaku            # situs, daftar sekolah, privasi, hapus data
 ```
+
+Kuota CPU Cloud Run di `asia-southeast2` hanya 20 vCPU untuk semua instance yang menyala, dan deploy menyalakan satu instance per function. Karena itu functions di-deploy per batch (`tool/deploy-functions.sh [nama …]`), dan trigger serta jadwal memakai CPU pecahan (`BACKGROUND_OPTIONS` di `functions/src/config.ts`). Trigger yang gagal dibuat pertama kali tertinggal sebagai function HTTPS dan harus dihapus (`firebase functions:delete <nama> --region asia-southeast2 --project sabusaku`) sebelum di-deploy ulang.
 
 ## Rilis Android
 

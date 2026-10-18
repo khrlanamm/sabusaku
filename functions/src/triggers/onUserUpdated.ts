@@ -1,5 +1,7 @@
 import {onDocumentUpdated} from "firebase-functions/v2/firestore";
 
+import {BACKGROUND_OPTIONS} from "../config";
+
 import {db, programsCol} from "../infra/firebase";
 import {refreshStudentStats} from "../infra/stats";
 
@@ -14,7 +16,7 @@ const SUMMARY_FIELDS = ["name", "email", "classId", "extracurriculars", "photoUr
  *     school, rebuilds (or drops) the summary.
  */
 export const onUserUpdated = onDocumentUpdated(
-  "schools/{schoolId}/users/{uid}",
+  {document: "schools/{schoolId}/users/{uid}", ...BACKGROUND_OPTIONS},
   async (event) => {
     const before = event.data?.before;
     const after = event.data?.after;
