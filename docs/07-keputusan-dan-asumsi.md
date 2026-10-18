@@ -73,6 +73,18 @@ Bagian ini mengalahkan baris di atas dan dokumen 01–06 bila berbeda. Gamifikas
 | Riwayat jurnal | Satu buku (aktif atau terakhir) | Semua buku, per bulan, dengan filter buku, rentang tanggal, dan urutan; tampilan kalender |
 | Tambahan | — | Kalender membaca, halaman Streak, **lencana** (dihitung di aplikasi dari ringkasan dan program, juga terlihat penanggung jawab), dan **rekap bulanan** lewat notifikasi tanggal 1 pukul 07.00 WIB |
 
+### 18 Oktober 2026 (lanjutan): superadmin
+
+Bagian ini mengalahkan baris di atas dan dokumen 01–06 bila berbeda.
+
+| Topik | Sebelumnya | Yang dipakai |
+|---|---|---|
+| Sekolah baru dan penanggung jawab pertama | Hanya developer, lewat `create-school` dan `add-guru` | Juga **superadmin**, di aplikasi: tab Sekolah → **Tambah sekolah** (kode, nama, email dan nama penanggung jawab pertama), callable `createSchool`. Skrip tetap bisa dipakai |
+| Siapa superadmin | — | Email di `SUPERADMIN_EMAILS` (`functions/src/config.ts`): saat ini `benevology@gmail.com`. Diperiksa dari email terverifikasi di token, tidak bisa diangkat dari aplikasi. Claims mendapat `superadmin: true` |
+| Cara superadmin bekerja | — | Tanpa layar admin terpisah: superadmin adalah **penanggung jawab satu sekolah pada satu waktu** dan memakai semua layar guru. **Ganti sekolah** (`switchSchool`) memindahkan `members/{email}` ke sekolah tujuan, menandai profilnya di sekolah lama `removed`, lalu memasang claims baru; kembali ke sekolah lama mengaktifkan profil itu lagi. Rules tidak berubah |
+| Masuk pertama superadmin | — | Belum ada di daftar mana pun → otomatis menjadi penanggung jawab sekolah aktif pertama (menurut kode) |
+| Mengeluarkan superadmin | — | `removeTeacher` menolak (`failed-precondition`); superadmin meninggalkan sekolah dengan pindah ke sekolah lain |
+
 ## 1. Keputusan yang sudah Anda tetapkan
 
 | # | Topik | Keputusan |

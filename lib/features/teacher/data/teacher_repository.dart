@@ -312,12 +312,14 @@ typedef StudentFilter = ({
 
 /// Filter of the student list. Shared so the dashboard can open the list
 /// already filtered, and kept while the list is not built yet (a tab opens
-/// only when first visited). Cleared for each account.
+/// only when first visited). Cleared for each account and school.
 @Riverpod(keepAlive: true)
 class StudentListFilter extends _$StudentListFilter {
   @override
   StudentFilter build() {
-    ref.watch(sessionProvider.select((session) => session?.uid));
+    ref.watch(
+      sessionProvider.select((session) => (session?.uid, session?.schoolId)),
+    );
     return (mine: false, classId: null, extracurricular: null, status: null);
   }
 

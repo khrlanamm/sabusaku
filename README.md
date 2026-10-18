@@ -1,6 +1,6 @@
 # Sabu Saku
 
-**Satu Bulan Satu Buku**: aplikasi Android jurnal membaca untuk siswa SMA. Siswa membaca satu buku per bulan dan mencatat bacaannya setiap hari; penanggung jawab (guru, wali kelas, atau pembina ekstrakurikuler) memantau semua siswa sekolahnya, memberi komentar, dan menambah siswa serta penanggung jawab lain lewat email. Satu aplikasi melayani banyak sekolah; sekolah dan penanggung jawab pertamanya didaftarkan developer.
+**Satu Bulan Satu Buku**: aplikasi Android jurnal membaca untuk siswa SMA. Siswa membaca satu buku per bulan dan mencatat bacaannya setiap hari; penanggung jawab (guru, wali kelas, atau pembina ekstrakurikuler) memantau semua siswa sekolahnya, memberi komentar, dan menambah siswa serta penanggung jawab lain lewat email. Satu aplikasi melayani banyak sekolah; sekolah dan penanggung jawab pertamanya didaftarkan developer atau **superadmin** (`benevology@gmail.com`, daftar di `SUPERADMIN_EMAILS` pada `functions/src/config.ts`). Superadmin adalah penanggung jawab satu sekolah pada satu waktu; di tab Sekolah ia bisa **Ganti sekolah** ke sekolah mana pun dan **Tambah sekolah** beserta penanggung jawab pertamanya.
 
 ## Masuk
 
@@ -26,7 +26,7 @@ lib/
 functions/
   src/domain/     aturan streak, status, periode dan peringkat (fungsi murni)
   src/callables/  claimAccount, addStudents, removeStudent, eraseStudent, addTeacher,
-                  removeTeacher, deleteMyAccount, …
+                  removeTeacher, deleteMyAccount, listSchools, switchSchool, createSchool, …
   src/triggers/   hitung ulang progres dan ringkasan siswa, notifikasi komentar, nama
                   wali kelas/pembina di dokumen sekolah (onTeacherWritten)
   src/scheduled/  dailyRefresh (00:10 WIB, juga peringkat), teacherDigest (06:30 WIB, siswa binaan),
@@ -75,7 +75,7 @@ CI (GitHub Actions) menjalankan tiga baris pertama pada setiap push.
 
 ## Skrip developer
 
-Dijalankan dari `functions/`. Tanpa `--emulator`, skrip bekerja di **produksi** memakai service account di `secret/`. Hanya skrip ini yang bisa menambah sekolah dan penanggung jawab pertamanya; penanggung jawab lain ditambahkan di aplikasi (tab Sekolah).
+Dijalankan dari `functions/`. Tanpa `--emulator`, skrip bekerja di **produksi** memakai service account di `secret/`. Selain superadmin di aplikasi, hanya skrip ini yang bisa menambah sekolah dan penanggung jawab pertamanya; penanggung jawab lain ditambahkan di aplikasi (tab Sekolah).
 
 | Skrip | Fungsi |
 |---|---|

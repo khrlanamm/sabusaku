@@ -11,10 +11,12 @@ import '../../../core/widgets/dialogs.dart';
 import '../../../core/widgets/states.dart';
 import '../../auth/data/school_repository.dart';
 import '../data/teacher_repository.dart';
+import 'superadmin_section.dart';
 import 'teachers_section.dart';
 
 /// The school: reports to review, class and extracurricular labels, the
-/// penanggung jawab, and the way to the status settings.
+/// penanggung jawab, and the way to the status settings. A superadmin also
+/// switches and adds schools here.
 class SchoolScreen extends ConsumerWidget {
   const SchoolScreen({super.key});
 
@@ -143,6 +145,7 @@ class _Body extends ConsumerWidget {
           ),
         ),
         const SizedBox(height: 12),
+        const SuperadminSection(),
         const _ReportsTile(),
         const SizedBox(height: 24),
         _SectionHeader(

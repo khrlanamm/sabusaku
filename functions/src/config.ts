@@ -17,3 +17,14 @@ export const CALLABLE_OPTIONS = {enforceAppCheck: false} as const;
  * keeps a full deploy inside it.
  */
 export const BACKGROUND_OPTIONS = {cpu: "gcf_gen1", maxInstances: 20} as const;
+
+/**
+ * Accounts that may create schools with their first teacher and move
+ * between schools as a teacher (penanggung jawab). Checked against the
+ * verified email of the ID token, so no one can be promoted from the app.
+ */
+export const SUPERADMIN_EMAILS: readonly string[] = ["benevology@gmail.com"];
+
+export function isSuperadmin(email: string | null | undefined): boolean {
+  return !!email && SUPERADMIN_EMAILS.includes(email.trim().toLowerCase());
+}

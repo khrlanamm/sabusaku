@@ -673,6 +673,7 @@ Future<void> _pumpCase(
   final prefs = await SharedPreferences.getInstance();
   final auth = _MockAuthRepository();
   when(() => auth.signOut()).thenAnswer((_) async {});
+  when(() => auth.isSuperadmin()).thenAnswer((_) async => false);
   final notifications = _MockNotifications();
   when(() => notifications.shouldExplainPermission(any()))
       .thenAnswer((_) async => false);

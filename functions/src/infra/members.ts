@@ -1,5 +1,6 @@
 import {FieldValue} from "firebase-admin/firestore";
 
+import {isSuperadmin} from "../config";
 import {
   compareClassLabels,
   isValidEmail,
@@ -270,8 +271,14 @@ export async function claimMembership(
   });
 
   const claims = record.customClaims ?? {};
-  const claimsChanged = claims.role !== role || claims.schoolId !== schoolId;
-  if (claimsChanged) await auth.setCustomUserClaims(uid, {role, schoolId});
+  const superadmin = isSuperadmin(email);
+  const claimsChanged =
+    claims.role !== role ||
+    claims.schoolId !== schoolId ||
+    (claims.superadmin === true) !== superadmin;
+  if (claimsChanged) {
+    await auth.setCustomUserClaims(uid, superadmin ? {role, schoolId, superadmin} : {role, schoolId});
+  }
   if (role === "siswa" && (profileChanged || claimsChanged)) {
     await refreshStudentStats(schoolId, uid);
   }
@@ -332,4 +339,53 @@ export async function eraseStudentData(schoolId: string, uid: string): Promise<n
   await forgetStudentCovers(schoolId, uid);
   await forgetReports(uid);
   return programs.size;
+}
+
+/**
+ * Makes a superadmin a teacher of `schoolId`: their roster entry moves there
+ * (or is created on their first sign-in) and their profile in the school they
+ * leave is marked `removed`, so they never show up in two schools. Their
+ * roles there are kept for a later return; in the new school they start
+ * without any.
+ */
+export async function moveSuperadmin(
+  uid: string,
+  rawEmail: string,
+  name: string,
+  schoolId: string,
+  tokenPicture: string | null,
+): Promise<ClaimResult> {
+  const email = normalizeEmail(rawEmail);
+  const memberRef = membersCol().doc(email);
+  const member = await memberRef.get();
+  const now = FieldValue.serverTimestamp();
+
+  if (!member.exists) {
+    const added = await addMember(
+      schoolId,
+      {email, name, classId: null, extracurriculars: [], homeroomClass: null},
+      "guru",
+      "superadmin",
+    );
+    if (!added.ok) throw new MemberError(added.reason);
+  } else if (member.get("schoolId") !== schoolId) {
+    const from = member.get("schoolId") as string;
+    const previousUid = (member.get("uid") as string | null) ?? null;
+    await memberRef.update({
+      schoolId,
+      role: "guru",
+      classId: null,
+      extracurriculars: [],
+      homeroomClass: null,
+      updatedAt: now,
+    });
+    if (previousUid) {
+      const left = usersCol(from).doc(previousUid);
+      if ((await left.get()).exists) await left.update({status: "removed", updatedAt: now});
+    }
+  }
+
+  const result = await claimMembership(uid, email, tokenPicture);
+  if (!result) throw new MemberError("Anggota tidak ditemukan.");
+  return result;
 }

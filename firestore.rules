@@ -9,7 +9,10 @@ rules_version = '2';
 //
 // Every teacher of a school sees and manages every student of that school.
 // Schools and their first teacher are created by the developer through
-// scripts; teachers add students and other teachers through callables. The
+// scripts or by a superadmin through callables; teachers add students and
+// other teachers through callables. A superadmin is a teacher of one school
+// at a time (claim `superadmin` too, unused here) and switches schools
+// through a callable, so no rule knows about it. The
 // roster lives in the top-level `members/{email}` collection.
 //
 // Deny by default. Clients never write derived numbers (progress, streak,

@@ -1,7 +1,7 @@
 import {HttpsError, onCall} from "firebase-functions/v2/https";
 import {z} from "zod";
 
-import {CALLABLE_OPTIONS} from "../config";
+import {CALLABLE_OPTIONS, isSuperadmin} from "../config";
 import {normalizeEmail} from "../domain/labels";
 import {audit} from "../infra/audit";
 import {membersCol} from "../infra/firebase";
@@ -14,7 +14,8 @@ const inputSchema = z.object({email: z.string().min(3).max(320)});
 /**
  * Takes another teacher out of the caller's school, or withdraws the
  * invitation of one who has not signed in yet. Their own account stays. A
- * teacher cannot remove themselves, so a school always keeps at least one.
+ * teacher cannot remove themselves, so a school always keeps at least one,
+ * nor a superadmin, who leaves a school by switching to another.
  */
 export const removeTeacher = onCall(CALLABLE_OPTIONS, async (request): Promise<{ok: true}> => {
   const caller = await requireCaller(request, ["guru"]);
@@ -26,6 +27,9 @@ export const removeTeacher = onCall(CALLABLE_OPTIONS, async (request): Promise<{
   }
   if (member.get("uid") === caller.uid) {
     throw new HttpsError("failed-precondition", "Tidak bisa mengeluarkan diri sendiri.");
+  }
+  if (isSuperadmin(email)) {
+    throw new HttpsError("failed-precondition", "Superadmin tidak bisa dikeluarkan.");
   }
 
   try {

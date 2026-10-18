@@ -57,6 +57,10 @@ class AuthRepository {
   /// sign-in both ask for it right after signing in.
   Future<_ClaimResult>? _claimInFlight;
 
+  /// The school a superadmin is moving to, until its token arrives. The
+  /// profile left behind turns `removed` meanwhile, which is not a removal.
+  String? _switchingTo;
+
   static String _claimsKey(String uid) => 'auth.claims.$uid';
 
   DocumentReference<Map<String, dynamic>> _userDoc(
@@ -143,6 +147,7 @@ class AuthRepository {
         return;
       }
       claimedFor = null;
+      if (claims.schoolId == _switchingTo) _switchingTo = null;
 
       final googleInfo = user.providerData
           .where((info) => info.providerId == _googleProvider)
@@ -158,6 +163,7 @@ class AuthRepository {
           }
           final profile = AppUser.fromMap(snapshot.id, data);
           if (!profile.active) {
+            if (_switchingTo != null) return;
             // Removed from the school: the server cleared the claims and the
             // membership, so this email no longer belongs to a school.
             controller.add(AuthNotRegistered(user.email ?? ''));
@@ -248,6 +254,34 @@ class AuthRepository {
       await _auth.currentUser?.getIdToken(true);
     } on FirebaseAuthException {
       // Offline or signed out: the next successful refresh picks them up.
+    }
+  }
+
+  /// The account is a superadmin: it may create schools and switch between
+  /// them (claim `superadmin`, set by the server for its listed emails).
+  Future<bool> isSuperadmin() async {
+    final user = _auth.currentUser;
+    if (user == null) return false;
+    try {
+      final token = await user.getIdTokenResult();
+      return token.claims?['superadmin'] == true;
+    } on FirebaseAuthException {
+      return false;
+    }
+  }
+
+  /// Makes the superadmin a teacher of [schoolId]; the session then reloads
+  /// for that school.
+  Future<void> switchSchool(String schoolId) async {
+    _switchingTo = schoolId;
+    try {
+      await _functions.httpsCallable('switchSchool').call<Object?>({
+        'schoolId': schoolId,
+      });
+      await refreshClaims();
+    } catch (error) {
+      _switchingTo = null;
+      throw mapError(error);
     }
   }
 

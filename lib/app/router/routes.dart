@@ -57,6 +57,7 @@ abstract final class Routes {
   static const teacherSettings = '/guru/sekolah/pengaturan';
   static const teacherReports = '/guru/sekolah/laporan';
   static const teacherAddTeacher = '/guru/sekolah/tambah-pj';
+  static const teacherAddSchool = '/guru/sekolah/tambah-sekolah';
 
   // Guru: katalog buku (shared by every school)
   static const teacherBooks = '/guru/buku';

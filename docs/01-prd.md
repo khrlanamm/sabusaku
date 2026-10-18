@@ -23,6 +23,7 @@ AI, rekomendasi buku, upload foto selain foto profil, chat siswa–guru, analisi
 | Peran | Didaftarkan oleh | Dipakai lewat | Ringkasan hak |
 |---|---|---|---|
 | **Developer** | — | Skrip CLI (di luar aplikasi) | Membuat sekolah, menambah dan mengeluarkan penanggung jawab, menangguhkan sekolah |
+| **Superadmin** | Developer (`SUPERADMIN_EMAILS`) | Aplikasi (menu guru, tab Sekolah) | Penanggung jawab satu sekolah pada satu waktu dengan semua hak penanggung jawab; bisa **ganti sekolah** ke sekolah mana pun dan **menambah sekolah** beserta penanggung jawab pertamanya |
 | **Penanggung jawab** (`guru`) | Developer | Aplikasi (menu guru) | Melihat **semua siswa sekolahnya** beserta jurnal, memberi komentar, menambah siswa lewat email, mengubah nama/kelas/ekstrakurikuler siswa, mengeluarkan siswa dari sekolah, menghapus data siswa, mengelola label kelas dan ekstrakurikuler serta pengaturan sekolah. **Tidak bisa** menambah penanggung jawab lain |
 | **Siswa** | Penanggung jawab (email) | Aplikasi (menu siswa) | Memilih buku bebas, mengisi dan melihat jurnal sendiri, membaca komentar, mengubah nama, kelas, ekstrakurikuler, dan foto profil sendiri |
 
@@ -31,6 +32,8 @@ Akun Firebase Auth dibuat pengguna sendiri (Google, atau daftar email + verifika
 Satu email = satu peran, terikat ke paling banyak satu sekolah. Data antar sekolah terisolasi total (lihat dokumen 03).
 
 ## 3. Alur utama
+
+**Onboarding sekolah (superadmin):** tab Sekolah → **Tambah sekolah** → kode, nama, email dan nama penanggung jawab pertama. Penanggung jawab itu masuk, lalu menambah kelas, siswa, dan penanggung jawab lain.
 
 **Onboarding sekolah (developer):** `create-school` → sekolah dengan label kelas dan ekstrakurikuler awal → `add-guru` untuk tiap penanggung jawab → (opsional) `import-students` dari CSV `email,nama,kelas,ekskul`. Penanggung jawab lalu menambah siswa sendiri di aplikasi.
 

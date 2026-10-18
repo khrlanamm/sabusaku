@@ -24,9 +24,12 @@ class _SabuSakuAppState extends ConsumerState<SabuSakuApp> {
   void initState() {
     super.initState();
     final notifications = ref.read(notificationServiceProvider)..start();
-    // Re-register the device token whenever a different account signs in.
+    // Re-register the device token whenever a different account signs in,
+    // or a superadmin switches school.
     ref.listenManual(sessionProvider, (previous, next) {
-      if (previous?.uid != next?.uid) notifications.onSession(next);
+      if (previous?.uid != next?.uid || previous?.schoolId != next?.schoolId) {
+        notifications.onSession(next);
+      }
     }, fireImmediately: true);
   }
 

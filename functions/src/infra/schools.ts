@@ -6,10 +6,14 @@ import {auth, membersCol, schoolRef, usersCol} from "./firebase";
 
 export type SchoolStatus = "active" | "suspended";
 
+/** School codes, also the `schools/{schoolId}` document ID. */
+export const SCHOOL_ID_RE = /^[a-z0-9]{3,30}$/;
+
 /**
  * Creates the school with default settings, the given class labels and the
- * default extracurriculars. Teachers (penanggung jawab) are added separately
- * by the developer with tools/add-guru.ts.
+ * default extracurriculars. Teachers (penanggung jawab) are added separately:
+ * by the developer with tools/add-guru.ts, or by a superadmin together with
+ * the school (callable `createSchool`).
  */
 export async function createSchool(
   schoolId: string,

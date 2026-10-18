@@ -1,7 +1,8 @@
 import {HttpsError, onCall} from "firebase-functions/v2/https";
 
-import {CALLABLE_OPTIONS} from "../config";
-import {claimMembership, ClaimResult} from "../infra/members";
+import {CALLABLE_OPTIONS, isSuperadmin} from "../config";
+import {db} from "../infra/firebase";
+import {claimMembership, ClaimResult, moveSuperadmin} from "../infra/members";
 
 /**
  * Joins a signed-in account to the school whose roster lists its email
@@ -24,11 +25,10 @@ export const claimAccount = onCall(CALLABLE_OPTIONS, async (request): Promise<Cl
     });
   }
 
-  const result = await claimMembership(
-    request.auth.uid,
-    token.email,
-    typeof token.picture === "string" ? token.picture : null,
-  );
+  const picture = typeof token.picture === "string" ? token.picture : null;
+  const result =
+    (await claimMembership(request.auth.uid, token.email, picture)) ??
+    (await joinFirstSchool(request.auth.uid, token.email, token.name, picture));
   if (!result) {
     throw new HttpsError("not-found", "Email belum terdaftar di sekolah mana pun.", {
       reason: "not-registered",
@@ -36,3 +36,20 @@ export const claimAccount = onCall(CALLABLE_OPTIONS, async (request): Promise<Cl
   }
   return result;
 });
+
+/**
+ * A superadmin on no roster yet (their first sign-in) starts as a teacher of
+ * the first active school; from there they switch or create schools.
+ */
+async function joinFirstSchool(
+  uid: string,
+  email: string,
+  name: unknown,
+  picture: string | null,
+): Promise<ClaimResult | null> {
+  if (!isSuperadmin(email)) return null;
+  const first = await db.collection("schools").where("status", "==", "active").limit(1).get();
+  if (first.empty) return null;
+  const displayName = typeof name === "string" && name.trim().length >= 2 ? name.trim() : "Superadmin";
+  return moveSuperadmin(uid, email, displayName, first.docs[0].id, picture);
+}

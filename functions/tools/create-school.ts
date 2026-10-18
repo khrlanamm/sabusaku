@@ -10,9 +10,7 @@
 import {listArg, requireArg, run, target} from "./_env";
 
 import {DEFAULT_EXTRACURRICULARS} from "../src/domain/labels";
-import {createSchool} from "../src/infra/schools";
-
-const SCHOOL_ID_RE = /^[a-z0-9]{3,30}$/;
+import {createSchool, SCHOOL_ID_RE} from "../src/infra/schools";
 
 run(async () => {
   const code = requireArg("code").toLowerCase();
