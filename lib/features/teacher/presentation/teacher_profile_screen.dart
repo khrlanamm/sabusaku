@@ -5,22 +5,34 @@ import '../../../core/widgets/dialogs.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/presentation/account_section.dart';
 import '../../auth/presentation/label_pickers.dart';
+import '../../notifications/notification_prompt.dart';
 
 class TeacherProfileScreen extends ConsumerWidget {
   const TeacherProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // The morning digest only concerns a teacher with students of their own.
+    final hasGroup = ref.watch(
+      currentSessionProvider.select((s) => s.profile.hasGroup),
+    );
     return Scaffold(
       appBar: AppBar(title: const Text('Profil')),
       body: ListView(
         padding: const EdgeInsets.all(16),
-        children: const [
-          AccountHeader(),
-          SizedBox(height: 20),
-          TeacherRolesCard(),
-          SizedBox(height: 20),
-          AccountSettings(),
+        children: [
+          // Asks once, right after the teacher first sets a role.
+          if (hasGroup) const NotificationPermissionPrompt(),
+          const AccountHeader(),
+          const SizedBox(height: 20),
+          const TeacherRolesCard(),
+          const SizedBox(height: 20),
+          AccountSettings(
+            extraSettings: [
+              if (hasGroup)
+                const NotificationSettingTile(title: 'Notifikasi siswa binaan'),
+            ],
+          ),
         ],
       ),
     );

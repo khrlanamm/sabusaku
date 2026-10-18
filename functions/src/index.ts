@@ -21,6 +21,7 @@ export {saveBook} from "./callables/saveBook";
 export {setBookCover} from "./callables/setBookCover";
 
 export {dailyRefresh} from "./scheduled/dailyRefresh";
+export {teacherDigest} from "./scheduled/teacherDigest";
 
 export {onBookWritten} from "./triggers/onBookWritten";
 export {onCommentCreated} from "./triggers/onCommentCreated";

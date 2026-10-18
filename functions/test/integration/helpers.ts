@@ -49,6 +49,7 @@ export interface Person {
   name?: string;
   classId?: string | null;
   extracurriculars?: string[];
+  homeroomClass?: string | null;
 }
 
 /** Puts someone on a school roster, the way the developer tools do. */

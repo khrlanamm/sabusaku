@@ -1,4 +1,4 @@
-import {FieldValue} from "firebase-admin/firestore";
+import {FieldValue, Timestamp} from "firebase-admin/firestore";
 
 import {computeStatus, computeStreak, isOverdue, percentOf} from "../domain/activity";
 import {monthOf, wibToday} from "../domain/dates";
@@ -212,9 +212,19 @@ export async function refreshStudentStats(
   // The student can be erased or deactivated while this refresh is running
   // (the reads above take a moment). Re-checking the profile in the same
   // transaction as the write means a summary can never outlive its student.
+  // `statusChangedAt` survives the overwrite while the status stays; the
+  // morning digest to teachers picks the students whose status just changed.
   await db.runTransaction(async (transaction) => {
-    if (isActiveStudent(await transaction.get(userRef))) {
-      transaction.set(statsRef, summary);
+    const current = await transaction.get(userRef);
+    const previous = await transaction.get(statsRef);
+    if (isActiveStudent(current)) {
+      const unchanged = previous.exists && previous.get("status") === status;
+      transaction.set(statsRef, {
+        ...summary,
+        statusChangedAt: unchanged
+          ? ((previous.get("statusChangedAt") as Timestamp | undefined) ?? null)
+          : FieldValue.serverTimestamp(),
+      });
     } else {
       transaction.delete(statsRef);
     }

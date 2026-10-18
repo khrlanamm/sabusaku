@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:sabusaku/app/router/routes.dart';
 import 'package:sabusaku/core/models/school.dart';
 import 'package:sabusaku/core/models/student_stats.dart';
@@ -12,10 +13,13 @@ import 'package:sabusaku/features/auth/data/auth_repository.dart';
 import 'package:sabusaku/features/auth/data/school_repository.dart';
 import 'package:sabusaku/features/auth/domain/app_user.dart';
 import 'package:sabusaku/features/auth/domain/session.dart';
+import 'package:sabusaku/features/notifications/notification_service.dart';
 import 'package:sabusaku/features/teacher/data/teacher_repository.dart';
 import 'package:sabusaku/features/teacher/presentation/teacher_active_books_screen.dart';
 import 'package:sabusaku/features/teacher/presentation/teacher_dashboard_screen.dart';
 import 'package:sabusaku/features/teacher/presentation/teacher_month_journals_screen.dart';
+
+class _MockNotifications extends Mock implements NotificationService {}
 
 const _teacher = Session(
   uid: 'guru1',
@@ -107,8 +111,12 @@ void main() {
         ),
       ],
     );
+    final notifications = _MockNotifications();
+    when(() => notifications.shouldExplainPermission(session))
+        .thenAnswer((_) async => false);
     container = ProviderContainer(
       overrides: [
+        notificationServiceProvider.overrideWithValue(notifications),
         sessionProvider.overrideWithValue(session),
         currentSessionProvider.overrideWithValue(session),
         wibClockProvider.overrideWithValue(

@@ -13,6 +13,7 @@ import '../../../core/widgets/states.dart';
 import '../../../core/widgets/status_chip.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/data/school_repository.dart';
+import '../../notifications/notification_prompt.dart';
 import '../data/teacher_repository.dart';
 import '../domain/student_scope.dart';
 import 'scope_filter_bar.dart';
@@ -52,6 +53,7 @@ class TeacherDashboardScreen extends ConsumerWidget {
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              if (me.hasGroup) const NotificationPermissionPrompt(),
               Text('Halo, ${me.name}', style: theme.textTheme.titleLarge),
               if (school != null)
                 Text(

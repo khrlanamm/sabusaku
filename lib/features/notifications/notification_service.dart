@@ -14,6 +14,8 @@ import '../../core/storage/prefs.dart';
 import '../auth/data/auth_repository.dart';
 import '../auth/domain/app_user.dart';
 import '../auth/domain/session.dart';
+import '../teacher/data/teacher_repository.dart';
+import '../teacher/domain/student_scope.dart';
 
 part 'notification_service.g.dart';
 
@@ -21,8 +23,9 @@ part 'notification_service.g.dart';
 final scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
 /// FCM for the app (docs/05 §6): keeps this device's token under the signed-in
-/// user, shows teacher-comment messages, opens the journal a notification
-/// points at, and refreshes the ID token when the server says claims changed.
+/// user, shows teacher-comment messages and teachers' morning digest, opens
+/// what a notification points at, and refreshes the ID token when the server
+/// says claims changed.
 class NotificationService {
   NotificationService(this._ref);
 
@@ -35,7 +38,7 @@ class NotificationService {
 
   bool _started = false;
   StreamSubscription<String>? _tokenSub;
-  String? _pendingLink;
+  _Link? _pendingLink;
 
   /// Wires the message listeners. Safe to call more than once.
   Future<void> start() async {
@@ -128,10 +131,13 @@ class NotificationService {
 
   // ---------- Permission (Android 13+) ----------
 
-  /// Whether the student should be shown the explanation before the system
-  /// permission dialog. Asked once per account on this device.
+  /// Whether the explanation should be shown before the system permission
+  /// dialog: to a student, and to a teacher with students of their own (the
+  /// morning digest). Asked once per account on this device.
   Future<bool> shouldExplainPermission(Session session) async {
-    if (session.role != UserRole.siswa) return false;
+    if (session.role == UserRole.guru && !session.profile.hasGroup) {
+      return false;
+    }
     final prefs = _ref.read(sharedPreferencesProvider);
     if (prefs.getBool(_askedKey(session.uid)) ?? false) return false;
     final settings = await _messaging.getNotificationSettings();
@@ -155,14 +161,34 @@ class NotificationService {
 
   // ---------- Messages ----------
 
-  static String? _linkOf(RemoteMessage message) {
+  /// Where a notification leads, and which role it is meant for.
+  static _Link? _linkOf(RemoteMessage message) {
     final data = message.data;
-    final programId = data['programId'];
-    final date = data['date'];
-    if (data['type'] != 'comment' || programId == null || date == null) {
-      return null;
+    switch (data['type']) {
+      case 'comment':
+        final programId = data['programId'];
+        final date = data['date'];
+        if (programId == null || date == null) return null;
+        return (
+          location: Routes.studentJournal(programId as String, date as String),
+          role: UserRole.siswa,
+        );
+      case 'attention':
+        return (location: Routes.teacherDashboard, role: UserRole.guru);
     }
-    return Routes.studentJournal(programId as String, date as String);
+    return null;
+  }
+
+  /// A teacher's digest opens the dashboard (a tab) on "Binaan saya"; a
+  /// comment opens the journal on top of the student's shell.
+  void _open(_Link link) {
+    final router = _ref.read(appRouterProvider);
+    if (link.role == UserRole.guru) {
+      _ref.read(dashboardScopeProvider.notifier).set(const MyStudents());
+      router.go(link.location);
+    } else {
+      router.push(link.location);
+    }
   }
 
   void _onForegroundMessage(RemoteMessage message) {
@@ -181,15 +207,12 @@ class NotificationService {
           persist: false,
           duration: const Duration(seconds: 6),
           content: Text(
-            '${notification.title ?? 'Komentar baru'}\n'
+            '${notification.title ?? 'Pemberitahuan baru'}\n'
             '${notification.body ?? ''}',
             maxLines: 3,
             overflow: TextOverflow.ellipsis,
           ),
-          action: SnackBarAction(
-            label: 'Lihat',
-            onPressed: () => _ref.read(appRouterProvider).push(link),
-          ),
+          action: SnackBarAction(label: 'Lihat', onPressed: () => _open(link)),
         ),
       );
   }
@@ -202,23 +225,25 @@ class NotificationService {
     if (session != null) _openPendingLink(session);
   }
 
-  /// Deep links wait until a student session exists: at a cold start the
-  /// router is still on the splash when the tap is reported.
+  /// Deep links wait until a session of the right role exists: at a cold
+  /// start the router is still on the splash when the tap is reported.
   void _openPendingLink(Session session) {
     final link = _pendingLink;
     if (link == null) return;
-    if (session.role != UserRole.siswa || session.needsCompletion) {
+    if (session.role != link.role || session.needsCompletion) {
       // Not this account's notification, or not allowed in yet: drop it.
-      if (session.role != UserRole.siswa) _pendingLink = null;
+      if (session.role != link.role) _pendingLink = null;
       return;
     }
     _pendingLink = null;
-    // After the redirect to the student shell has settled.
+    // After the redirect to the role's shell has settled.
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_ref.mounted) _ref.read(appRouterProvider).push(link);
+      if (_ref.mounted) _open(link);
     });
   }
 }
+
+typedef _Link = ({String location, UserRole role});
 
 @Riverpod(keepAlive: true)
 NotificationService notificationService(Ref ref) => NotificationService(ref);

@@ -9,6 +9,7 @@ class MainActivity : FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         createCommentChannel()
+        createAttentionChannel()
     }
 
     // The channel FCM posts teacher-comment notifications to. Its ID is also
@@ -21,6 +22,19 @@ class MainActivity : FlutterActivity() {
             NotificationManager.IMPORTANCE_HIGH,
         ).apply {
             description = "Pemberitahuan saat guru mengomentari jurnalmu"
+        }
+        getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+    }
+
+    // The channel of the teachers' morning digest about their own students
+    // who need attention (Cloud Functions: teacherDigest).
+    private fun createAttentionChannel() {
+        val channel = NotificationChannel(
+            "siswa_binaan",
+            "Siswa binaan",
+            NotificationManager.IMPORTANCE_DEFAULT,
+        ).apply {
+            description = "Pemberitahuan pagi saat siswa binaan Anda perlu perhatian"
         }
         getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
     }

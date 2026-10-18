@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../auth/data/auth_repository.dart';
+import '../auth/domain/app_user.dart';
 import 'notification_service.dart';
 
 /// Explains why notifications are useful before Android shows its own
-/// permission dialog (docs/05 §6). Shown once per account on a device; the
-/// student can still turn notifications on later from the profile.
+/// permission dialog (docs/05 §6): comments for a student, the morning digest
+/// for a teacher with students of their own. Shown once per account on a
+/// device; notifications can still be turned on later from the profile.
 class NotificationPermissionPrompt extends ConsumerStatefulWidget {
   const NotificationPermissionPrompt({super.key});
 
@@ -34,9 +36,12 @@ class _NotificationPermissionPromptState
       builder: (context) => AlertDialog(
         icon: const Icon(Icons.notifications_active_outlined),
         title: const Text('Aktifkan notifikasi?'),
-        content: const Text(
-          'Kami memberi tahu saat guru mengomentari jurnalmu. Tidak ada '
-          'notifikasi lain.',
+        content: Text(
+          session.role == UserRole.guru
+              ? 'Setiap pagi kami memberi tahu bila ada siswa binaan Anda '
+                    'yang mulai perlu perhatian. Tidak ada notifikasi lain.'
+              : 'Kami memberi tahu saat guru mengomentari jurnalmu. Tidak ada '
+                    'notifikasi lain.',
         ),
         actions: [
           TextButton(
@@ -60,10 +65,15 @@ class _NotificationPermissionPromptState
   Widget build(BuildContext context) => const SizedBox.shrink();
 }
 
-/// Profile row that shows whether comment notifications are on and lets the
-/// student turn them on.
+/// Profile row that shows whether notifications are on and lets the user
+/// turn them on.
 class NotificationSettingTile extends ConsumerStatefulWidget {
-  const NotificationSettingTile({super.key});
+  const NotificationSettingTile({
+    super.key,
+    this.title = 'Notifikasi komentar guru',
+  });
+
+  final String title;
 
   @override
   ConsumerState<NotificationSettingTile> createState() =>
@@ -116,7 +126,7 @@ class _NotificationSettingTileState
             ? Icons.notifications_active_outlined
             : Icons.notifications_off_outlined,
       ),
-      title: const Text('Notifikasi komentar guru'),
+      title: Text(widget.title),
       subtitle: Text(switch (granted) {
         true => 'Aktif',
         false => 'Belum aktif',
