@@ -215,6 +215,8 @@ void main() {
     await startApp(tester);
     await signIn(tester, email: e2eTeacherEmail, password: e2eInitialPassword);
     await waitFor(tester, find.text('Status siswa'));
+    // She supervises Masis-KIR, so she is asked about the morning digest.
+    await dismissNotificationPrompt(tester);
     expect(navTab('Sekolah'), findsOneWidget);
 
     // Student list → detail → active book → journal → comment.
@@ -277,6 +279,7 @@ void main() {
     await startApp(tester);
     await signIn(tester, email: e2eTeacherEmail, password: e2eInitialPassword);
     await waitFor(tester, navTab('Buku'));
+    await dismissNotificationPrompt(tester);
     await tester.tap(navTab('Buku'));
     await waitFor(tester, find.byKey(const Key('books-suggestions')));
     await tester.tap(find.byKey(const Key('books-suggestions')));
@@ -311,6 +314,89 @@ void main() {
     await waitFor(tester, find.byKey(const Key('books-search')));
     await tester.enterText(find.byKey(const Key('books-search')), 'ronggeng');
     await waitFor(tester, find.text(e2eNewBook));
+  });
+
+  testWidgets(
+    'guru sets her homeroom class, scopes the dashboard, adds a guru',
+    (tester) async {
+      await startApp(tester);
+      await signIn(
+        tester,
+        email: e2eTeacherEmail,
+        password: e2eInitialPassword,
+      );
+      await waitFor(tester, find.text('Status siswa'));
+      await dismissNotificationPrompt(tester);
+      // She supervises Masis-KIR: the dashboard opens on her own students.
+      expect(find.byKey(const Key('scope-mine')), findsOneWidget);
+
+      // Profil: she becomes the homeroom teacher of XII-A1.
+      await tester.tap(navTab('Profil'));
+      await waitFor(tester, find.byKey(const Key('profile-homeroom')));
+      await tester.tap(find.byKey(const Key('profile-homeroom')));
+      await waitFor(tester, find.byKey(const Key('roles-save')));
+      await pickClass(tester, e2eClass);
+      await tapVisible(tester, find.byKey(const Key('roles-save')));
+      await waitForGone(tester, find.byKey(const Key('roles-save')));
+      await waitFor(
+        tester,
+        find.descendant(
+          of: find.byKey(const Key('profile-homeroom')),
+          matching: find.text(e2eClass),
+        ),
+      );
+
+      // Sekolah: she adds another teacher, who waits under "Belum masuk".
+      await tester.tap(navTab('Sekolah'));
+      await waitFor(tester, find.byKey(const Key('school-add-class')));
+      // Further down a lazy list; tapVisible scrolls to it.
+      await tapVisible(tester, find.byKey(const Key('school-add-teacher')));
+      await waitFor(tester, find.byKey(const Key('add-teacher-email')));
+      await tester.enterText(
+        find.byKey(const Key('add-teacher-email')),
+        'Guru.Baru@E2E.test',
+      );
+      await tester.enterText(
+        find.byKey(const Key('add-teacher-name')),
+        'Bambang Sutejo, S.Pd.',
+      );
+      await tapVisible(tester, find.byKey(const Key('add-teacher-submit')));
+      await waitFor(tester, find.byKey(const Key('school-add-teacher')));
+      await tapVisible(
+        tester,
+        find.byKey(const Key('school-pending-teachers')),
+      );
+      await waitFor(tester, find.text('Bambang Sutejo, S.Pd.'));
+
+      // Dashboard: narrowed to XII-A1, the active-book card keeps the scope.
+      await tester.tap(navTab('Dashboard'));
+      await waitFor(tester, find.byKey(const Key('scope-class')));
+      await tester.tap(find.byKey(const Key('scope-class')));
+      await waitFor(tester, find.text(e2eClass).last);
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.tap(find.text(e2eClass).last);
+      await waitFor(tester, find.text('Kelas $e2eClass'));
+      await tester.tap(find.byKey(const Key('dashboard-card-books')));
+      await waitFor(tester, find.byKey(const Key('active-books-summary')));
+      expect(find.text('Kelas $e2eClass'), findsOneWidget);
+      await waitFor(tester, find.text(e2eStudentName));
+      expect(find.text(e2eBook), findsOneWidget);
+      await tester.tap(find.byType(BackButton));
+      await waitFor(tester, find.text('Status siswa'));
+    },
+  );
+
+  testWidgets('siswa sees the homeroom teacher on the profile', (tester) async {
+    await startApp(tester);
+    await signIn(tester, email: e2eStudentEmail, password: e2eInitialPassword);
+    await waitFor(tester, navTab('Profil'));
+    await dismissNotificationPrompt(tester);
+    await tester.tap(navTab('Profil'));
+    await waitFor(tester, find.textContaining('Wali kelas: $e2eTeacherName'));
+    expect(
+      find.textContaining('Masis-KIR (pembina: $e2eTeacherName)'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('removed siswa is told to contact the school', (tester) async {
@@ -396,6 +482,7 @@ void main() {
     await startApp(tester);
     await signIn(tester, email: e2eTeacherEmail, password: e2eInitialPassword);
     await waitFor(tester, find.text('Status siswa'));
+    await dismissNotificationPrompt(tester);
 
     // The student's journal, from the student list.
     await tester.tap(navTab('Siswa'));

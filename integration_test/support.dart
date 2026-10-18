@@ -192,19 +192,34 @@ Future<void> pickClass(WidgetTester tester, String label) async {
 Future<void> verifyEmailOnEmulator(String email) async {
   final client = HttpClient();
   try {
-    final codes = await _getJson(
-      client,
-      Uri.parse(
-        'http://$_emulatorHost:9099/emulator/v1/projects/sabusaku/oobCodes',
-      ),
-    );
-    final link =
-        (codes['oobCodes'] as List).cast<Map<String, dynamic>>().lastWhere(
-              (code) =>
-                  code['email'] == email &&
-                  code['requestType'] == 'VERIFY_EMAIL',
-            )['oobLink']
-            as String;
+    // The app asks for the email right after sign-up; it can reach the
+    // emulator a moment after the verification screen shows.
+    String? link;
+    final end = DateTime.now().add(const Duration(seconds: 15));
+    while (link == null) {
+      final codes = await _getJson(
+        client,
+        Uri.parse(
+          'http://$_emulatorHost:9099/emulator/v1/projects/sabusaku/oobCodes',
+        ),
+      );
+      link =
+          (codes['oobCodes'] as List)
+                  .cast<Map<String, dynamic>>()
+                  .where(
+                    (code) =>
+                        code['email'] == email &&
+                        code['requestType'] == 'VERIFY_EMAIL',
+                  )
+                  .lastOrNull?['oobLink']
+              as String?;
+      if (link == null) {
+        if (DateTime.now().isAfter(end)) {
+          fail('No verification email for $email');
+        }
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+      }
+    }
     // The link points at localhost; the device reaches the host elsewhere.
     final uri = Uri.parse(link).replace(host: _emulatorHost);
     final request = await client.getUrl(uri);
