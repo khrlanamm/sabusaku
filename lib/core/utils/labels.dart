@@ -97,3 +97,13 @@ String? validateNewPassword(String? value) {
   final missing = passwordRules.where((rule) => !rule.isMet(password));
   return missing.isEmpty ? null : 'Password belum memenuhi semua syarat';
 }
+
+/// A teacher's roles on one line, e.g. `Wali kelas XII-A1 · Pembina
+/// Masis-KIR, PMR`. Null when they have none.
+String? teacherRoleLine(String? homeroomClass, List<String> extracurriculars) {
+  final parts = [
+    if (homeroomClass != null) 'Wali kelas $homeroomClass',
+    if (extracurriculars.isNotEmpty) 'Pembina ${extracurriculars.join(', ')}',
+  ];
+  return parts.isEmpty ? null : parts.join(' · ');
+}

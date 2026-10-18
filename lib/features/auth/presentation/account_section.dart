@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../app/router/routes.dart';
 import '../../../core/policy/terms.dart';
+import '../../../core/utils/labels.dart';
 import '../../../core/widgets/dialogs.dart';
 import '../../../core/widgets/theme_controls.dart';
 import '../../../core/widgets/user_avatar.dart';
@@ -90,12 +91,13 @@ class AccountHeader extends ConsumerWidget {
                     ].join(' · '),
                     style: muted,
                   ),
-                  if (session.role == UserRole.guru &&
-                      profile.extracurriculars.isNotEmpty)
-                    Text(
-                      'Pembina ${profile.extracurriculars.join(', ')}',
-                      style: muted,
-                    ),
+                  if (session.role == UserRole.guru)
+                    if (teacherRoleLine(
+                          profile.homeroomClass,
+                          profile.extracurriculars,
+                        )
+                        case final roles?)
+                      Text(roles, style: muted),
                 ],
               ),
             ),

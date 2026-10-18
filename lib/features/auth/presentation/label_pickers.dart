@@ -15,6 +15,9 @@ class ClassLabelField extends ConsumerWidget {
     this.options,
     this.required = true,
     this.label = 'Kelas',
+    this.noneLabel = 'Belum ditentukan',
+    this.emptyHelper =
+        'Belum ada daftar kelas. Hubungi penanggung jawab sekolah.',
   });
 
   final String? value;
@@ -22,6 +25,12 @@ class ClassLabelField extends ConsumerWidget {
   final List<String>? options;
   final bool required;
   final String label;
+
+  /// The choice that clears the value when not [required].
+  final String noneLabel;
+
+  /// Shown when the school lists no classes.
+  final String emptyHelper;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -42,13 +51,11 @@ class ClassLabelField extends ConsumerWidget {
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: const Icon(Icons.class_outlined),
-        helperText: empty
-            ? 'Belum ada daftar kelas. Hubungi penanggung jawab sekolah.'
-            : null,
+        helperText: empty ? emptyHelper : null,
       ),
       items: [
         if (!required)
-          const DropdownMenuItem<String>(child: Text('Belum ditentukan')),
+          DropdownMenuItem<String>(child: Text(noneLabel)),
         for (final item in labels)
           DropdownMenuItem<String>(value: item, child: Text(item)),
       ],
@@ -68,11 +75,13 @@ class ExtracurricularChips extends ConsumerWidget {
     required this.value,
     required this.onChanged,
     this.options,
+    this.title = 'Ekstrakurikuler',
   });
 
   final List<String> value;
   final ValueChanged<List<String>> onChanged;
   final List<String>? options;
+  final String title;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -85,7 +94,7 @@ class ExtracurricularChips extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Ekstrakurikuler', style: theme.textTheme.labelLarge),
+        Text(title, style: theme.textTheme.labelLarge),
         const SizedBox(height: 4),
         Text(
           'Boleh lebih dari satu, boleh juga tidak ada.',

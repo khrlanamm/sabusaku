@@ -330,18 +330,17 @@ class _TeacherTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final roles = teacherRoleLine(
+      teacher.homeroomClass,
+      teacher.extracurriculars,
+    );
     return ListTile(
       leading: UserAvatar(photoUrl: teacher.photoUrl, name: teacher.name),
       title: Text(teacher.name.isEmpty ? teacher.email : teacher.name),
       subtitle: Text(
-        [
-          if (teacher.name.isNotEmpty) teacher.email,
-          if (teacher.extracurriculars.isNotEmpty)
-            'Pembina ${teacher.extracurriculars.join(', ')}',
-        ].join('\n'),
+        [if (teacher.name.isNotEmpty) teacher.email, ?roles].join('\n'),
       ),
-      isThreeLine:
-          teacher.name.isNotEmpty && teacher.extracurriculars.isNotEmpty,
+      isThreeLine: teacher.name.isNotEmpty && roles != null,
     );
   }
 }
