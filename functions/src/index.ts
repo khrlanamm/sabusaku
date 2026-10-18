@@ -2,7 +2,10 @@ import {setGlobalOptions} from "firebase-functions/v2";
 
 import {REGION} from "./config";
 
-setGlobalOptions({region: REGION, maxInstances: 10});
+// Cloud Run reserves maxInstances × 1 vCPU per function against a regional
+// quota; at 10 the project ran out of it with 24 functions. Five instances
+// of 80 concurrent requests each are far above what the schools need.
+setGlobalOptions({region: REGION, maxInstances: 5});
 
 export {acceptTerms} from "./callables/acceptTerms";
 export {addStudents} from "./callables/addStudents";
