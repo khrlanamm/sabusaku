@@ -188,6 +188,14 @@ service cloud.firestore {
         allow write: if false;
       }
 
+      // ---------- leaderboards (per period; server-written) ----------
+      // Name, class, extracurriculars and reading numbers of every student,
+      // for the whole school. Read one period at a time; never listed.
+      match /leaderboards/{periodId} {
+        allow get: if isStudent(schoolId) || isTeacher(schoolId);
+        allow list, write: if false;
+      }
+
       // ---------- users ----------
       match /users/{uid} {
         // name, class, extracurriculars and homeroom class a user or teacher

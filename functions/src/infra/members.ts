@@ -20,6 +20,7 @@ import {
   usersCol,
 } from "./firebase";
 import {forgetReports} from "./reports";
+import {removeFromBoards} from "./rankings";
 import {refreshStudentStats} from "./stats";
 
 /** `members/{email}`: who may join which school, before and after sign-in. */
@@ -311,8 +312,9 @@ export async function removeMember(schoolId: string, email: string): Promise<str
 }
 
 /**
- * Permanently deletes a student's data in a school: profile, summary, lock,
- * every program with its journals and comments, and the photo. Reports they
+ * Permanently deletes a student's data in a school: profile, summary,
+ * leaderboard rows, lock, every program with its journals and comments, and
+ * the photo. Reports they
  * filed go too, and reports about them lose their copy of the content. The
  * Auth account is not touched here. Returns the number of programs removed.
  */
@@ -322,6 +324,7 @@ export async function eraseStudentData(schoolId: string, uid: string): Promise<n
   await db.recursiveDelete(usersCol(schoolId).doc(uid));
   await activeProgramsCol(schoolId).doc(uid).delete();
   await statsCol(schoolId).doc(uid).delete();
+  await removeFromBoards(schoolId, uid);
 
   const programs = await programsCol(schoolId).where("studentId", "==", uid).get();
   for (const program of programs.docs) await db.recursiveDelete(program.ref);

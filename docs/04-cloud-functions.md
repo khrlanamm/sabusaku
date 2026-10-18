@@ -22,7 +22,7 @@ Dihapus dari v1: `createUsers`, `resetPassword`, `setUserActive`, `setTeacherCla
 
 ### 2.1 `onJournalWritten` — `programs/{pid}/journals/{date}` (create/update/delete)
 1. Muat semua jurnal program (≤ sekitar 60 dokumen) dan data sekolah (`settings`).
-2. Hitung: `currentPage` (maks `pageEnd`), `journalCount`, `lastJournalDate`, `streakCurrent`, `streakBest` (fungsi `computeStreak`).
+2. Hitung: `currentPage` (maks `pageEnd`), `journalCount`, `lastJournalDate`, `streakCurrent`, `streakBest` (fungsi `computeStreak`, streak buku ini saja), `journalDates` (semua tanggal jurnal, urut naik).
 3. Tulis ke `programs/{pid}` (field turunan saja) dan panggil `refreshStudentStats(studentId)`.
 
 Idempoten: menghitung ulang dari seluruh jurnal, sehingga jurnal offline yang datang tidak berurutan tetap menghasilkan angka benar. Abaikan perubahan yang hanya mengubah `hasUnreadTeacherComment` agar tidak memicu hitung ulang yang sia-sia.
@@ -46,7 +46,7 @@ Hanya untuk guru. Bila guru bergabung, keluar, atau `name`, `homeroomClass`, `ex
 
 | Fungsi | Jadwal | Isi |
 |---|---|---|
-| `dailyRefresh` | Setiap hari 00:10 WIB | Untuk semua sekolah aktif: hitung ulang `status`, `daysSinceLastJournal`, `streakCurrent` (streak bisa putus tanpa ada penulisan jurnal), `journalCountMonth` (reset awal bulan), `overdue`. Diproses per sekolah/per kelas dengan `BulkWriter` agar tahan skala |
+| `dailyRefresh` | Setiap hari 00:10 WIB | Untuk semua sekolah aktif: hitung ulang `status`, `daysSinceLastJournal`, `streakCurrent` (streak bisa putus tanpa ada penulisan jurnal), `journalCountMonth` (reset awal bulan), `overdue`. Sepuluh siswa sekaligus per sekolah; baris peringkat dikumpulkan lalu tiap dokumen `leaderboards` periode hidup ditulis utuh sekali (menghindari rebutan tulis pada dokumen yang sama dan membersihkan baris basi) |
 | `teacherDigest` | Setiap hari 06:30 WIB | Untuk tiap sekolah aktif: siswa yang `statusChangedAt` dalam 24 jam terakhir dan kini `perlu_perhatian`/`tidak_aktif`. Tiap guru dengan siswa binaan (kelas perwalian atau ekskul yang dibina) di antaranya menerima satu notifikasi "N siswa binaan perlu perhatian" (kanal Android `siswa_binaan`, payload `type=attention`, membuka dashboard pada Binaan saya). Tanpa retry agar tidak terkirim dua kali |
 
 Dijalankan juga satu kali sehari setelah tengah malam saja pada V1; pengingat harian ke siswa masuk daftar *Could*.
@@ -84,6 +84,17 @@ Tanggal selalu diproses sebagai string `yyyy-MM-dd` dalam WIB (tanpa konversi zo
 ## 5. `refreshStudentStats(studentId)`
 Satu fungsi yang membangun dokumen `studentStats` utuh dari: profil siswa, `activePrograms` → program aktif, hitungan program `completed`, 5 tanggal jurnal terakhir, `journalCountMonth`. Ditulis dengan `set` (menimpa penuh) agar tidak ada field basi. Satu pengecualian: `statusChangedAt` dibaca dari dokumen lama dalam transaksi yang sama dan dipertahankan selama `status` tidak berubah; bila berubah, diisi waktu server.
 
+Tanggal jurnal diambil dari `programs.journalDates` (program lama tanpa field itu: dari ID jurnalnya). **Streak siswa lintas buku** (sejak 18 Okt 2026): `streakCurrent` dan `streakBest` dihitung `computeStreak` atas gabungan tanggal jurnal semua program, jadi selesai satu buku lalu mulai buku baru besoknya tidak memutus streak. Streak per buku tetap di dokumen program. `status` tetap mengikuti program aktif.
+
+Sesudah ringkasan ditulis, baris siswa di `leaderboards` (docs/02 §3.17) diperbarui untuk periode hari ini dan periode dua hari lalu (set merge; baris dihapus bila semua angka nol). Siswa yang tidak aktif lagi dikeluarkan dari semua dokumen peringkat (`removeFromBoards`); `eraseStudentData` juga memanggilnya.
+
+## 5a. Peringkat (`domain/ranking.ts`, murni)
+- Periode: bulan (`yyyy-MM`), tahun, tahun ajaran (1 Juli–30 Juni, dinamai tahun pertamanya), sepanjang waktu. ID dokumen `month-2026-10`, `year-2026`, `schoolYear-2026`, `all`.
+- `metricsFor(input, period)`: `books` = buku dengan tanggal selesai (WIB dari `completedAt`) di dalam periode; `streak` = `computeStreak(...).best` atas tanggal jurnal yang dipotong ke periode; `days` = hari berjurnal di periode.
+- `livePeriods(today)`: periode hari ini ditambah periode dua hari lalu (BR-3).
+- `rankOf(entries, metric)`: peringkat kompetisi (1, 2, 2, 4) dengan pemecah seri; aplikasi memakai urutan yang sama (`lib/features/ranking/domain/ranking.dart`).
+- Tabel uji: batas tahun ajaran (30 Juni/1 Juli), Februari kabisat, periode hidup di 2 Januari dan 1 Juli, streak dipotong di awal periode, streak terbaik bukan yang berjalan, tanggal ganda dari dua buku, peringkat dengan seri.
+
 ## 6. Alat developer (skrip CLI, di luar aplikasi)
 
 Folder `functions/tools/` (Node/TypeScript, Admin SDK, service account lokal di `secret/`). Tanpa `--emulator`, skrip bekerja langsung di **produksi**; tidak ada project dev dan tidak ada sekolah demo.
@@ -93,6 +104,7 @@ Folder `functions/tools/` (Node/TypeScript, Admin SDK, service account lokal di 
 | `create-school --code sman1 --name "SMA Negeri 1 ..."` | Membuat `schools/sman1` dengan pengaturan default, `classes` kosong (atau dari `--classes`), dan ekstrakurikuler awal Masis-KIR, Paskibra, Pala, PMR |
 | `add-guru --school sman1 --email … --name "…" [--ekskul Masis-KIR] [--wali XII-A1]` | Mendaftarkan penanggung jawab (`members`, role `guru`). Dipakai untuk penanggung jawab pertama sekolah; selanjutnya guru bisa menambah guru lain di aplikasi (`addTeacher`) |
 | `remove-guru --email …` | Mengeluarkan penanggung jawab: hapus `members`, cabut claims, `status = removed` |
+| `rebuild-rankings [--school sman1] [--dry-run]` | Mengisi `journalDates` semua program, membangun ulang semua dokumen `leaderboards` dari riwayat (setiap bulan, tahun, dan tahun ajaran yang punya data, plus `all`), menghapus dokumen periode tanpa data, lalu menghitung ulang semua ringkasan. Dijalankan sekali setelah fitur peringkat dipasang, atau setelah data diperbaiki manual |
 | `refresh-staff [--school sman1]` | Membangun ulang `schools.staff` (nama wali kelas dan pembina). Trigger `onTeacherWritten` menjaganya; skrip ini untuk guru yang sudah ada sebelum trigger dipasang |
 | `import-students --school sman1 --file secret/….csv` | Impor massal siswa dari CSV `email,nama,kelas,ekskul` (ekskul dipisah `;`); kelas dinormalkan dan ditambahkan ke label sekolah |
 | `set-school-status --code sman1 --status suspended` | Menangguhkan sekolah: menonaktifkan seluruh akun anggotanya dan mencabut sesi |
@@ -108,7 +120,7 @@ functions/
     callables/               # claimAccount, addStudents, removeStudent, addTeacher, ...
     triggers/                # onJournalWritten, onCommentCreated, onTeacherWritten, ...
     scheduled/               # dailyRefresh, teacherDigest
-    domain/                  # computeStreak, computeStatus, dateUtils (WIB), labels — tanpa dependensi Firebase
+    domain/                  # computeStreak, computeStatus, ranking, dateUtils (WIB), labels — tanpa dependensi Firebase
     infra/                   # akses Firestore/Auth/FCM, auth guard, validasi
   test/                      # unit domain + integrasi dengan emulator
   tools/                     # skrip developer

@@ -31,6 +31,7 @@ schools/{schoolId}                              ← schoolId = kode sekolah (hur
 ├── studentStats/{studentId}                    ← ringkasan (ditulis server)
 ├── activePrograms/{studentId}                  ← kunci "satu buku aktif per siswa" (BR-1)
 ├── bookStats/{bookId}                          ← jumlah pembaca buku katalog di sekolah ini (ditulis server)
+├── leaderboards/{periodId}                     ← peringkat per bulan/tahun/tahun ajaran/sepanjang waktu (ditulis server)
 ├── auditLogs/{logId}                           ← log audit (server saja, tanpa rules)
 └── programs/{programId}                        ← satu buku yang dibaca satu siswa
     └── journals/{yyyy-MM-dd}
@@ -135,10 +136,11 @@ Koleksi `classes` v1 tidak dipakai lagi. Kelas adalah label `schools/{schoolId}.
 | `currentPage` | int | **server** | Halaman tertinggi dari semua jurnal |
 | `journalCount` | int | **server** | |
 | `lastJournalDate` | string? | **server** | |
-| `streakCurrent`, `streakBest` | int | **server** | |
+| `streakCurrent`, `streakBest` | int | **server** | Streak buku ini saja; streak siswa (lintas buku) ada di `studentStats` |
+| `journalDates` | string[] | **server** | Semua tanggal jurnal buku ini, urut naik (maks sekitar 62). Dipakai ringkasan, peringkat, dan kalender membaca tanpa membaca jurnal. Program yang dibuat sebelum 18 Okt 2026 diisi `tools/rebuild-rankings.ts`; sebelum itu server membaca ID jurnalnya |
 | `createdAt`, `updatedAt` | timestamp | | |
 
-Saat dibuat, semua field server wajib `0`/`null` (dipaksa rules).
+Saat dibuat, semua field server wajib `0`/`null` (dipaksa rules); `journalDates` belum ada.
 
 ### 3.6 `.../programs/{programId}/journals/{yyyy-MM-dd}`
 | Field | Tipe | Keterangan |
@@ -168,9 +170,9 @@ Rules memeriksa tanggal terhadap waktu server (BR-3, BR-4) dan konsistensi halam
 | `status` | `aktif` · `perlu_perhatian` · `tidak_aktif` · `belum_mulai` |
 | `daysSinceLastJournal` | int (hari efektif, BR-13) |
 | `activeProgram` | map: `programId`, `title`, `author`, `totalPages`, `currentPage`, `percent`, `targetDate`, `overdue` |
-| `streakCurrent`, `streakBest` | int |
+| `streakCurrent`, `streakBest` | int (lintas buku: dihitung dari tanggal jurnal semua program siswa, jadi tidak putus saat ganti buku) |
 | `lastJournalDate` | string? |
-| `journalCountMonth` | int (jurnal bulan berjalan) |
+| `journalCountMonth` | int (hari berjurnal di bulan berjalan, semua buku) |
 | `journalCountTotal` | int |
 | `booksCompleted` | int |
 | `recentDates` | string[] (5 tanggal jurnal terakhir, untuk "Aktivitas Terakhir") |
@@ -285,6 +287,24 @@ Penghapusan (`forgetReports`, dipanggil `eraseStudentData` dan `deleteMyAccount`
 ### 3.16 `schools/{schoolId}/auditLogs/{logId}`
 `action`, `actorUid`, `details` (ID dan jumlah, tanpa teks jurnal), `at`. Ditulis `audit()` di Functions; tidak ada rules yang membukanya ke klien.
 
+### 3.17 `schools/{schoolId}/leaderboards/{periodId}` — peringkat, ditulis server
+`periodId`: `month-2026-10`, `year-2026`, `schoolYear-2026` (tahun ajaran 2026/2027, 1 Juli–30 Juni), atau `all`.
+
+| Field | Tipe | Keterangan |
+|---|---|---|
+| `kind` | string | `month` · `year` · `schoolYear` · `all` |
+| `key` | string? | `yyyy-MM`, `yyyy`, tahun pertama tahun ajaran; `null` untuk `all` |
+| `from`, `to` | string? | Hari pertama dan terakhir periode; `null` untuk `all` |
+| `entries` | map | `uid → {name, classId, extracurriculars, books, streak, days}` |
+| `updatedAt` | timestamp | |
+
+- `books`: buku yang ditandai selesai (tanggal WIB `completedAt`) dalam periode. `streak`: streak terpanjang di dalam periode (run yang mulai sebelumnya dihitung dari hari pertama periode), dengan aturan hari efektif yang sama. `days`: hari berjurnal dalam periode.
+- Hanya siswa aktif dengan angka bukan nol yang masuk. **Tanpa email, foto, atau status**: dokumen ini dibaca seluruh sekolah.
+- Peringkat (1, 2, 2, 4) dihitung di klien dari `entries`, dengan pemecah seri: buku → hari → streak; streak → hari → buku; hari → streak → buku.
+- Ditulis `refreshStudentStats` (baris satu siswa, set merge) untuk periode hari ini dan periode dua hari lalu (jurnal boleh mundur dua hari). `refreshSchool` (refresh harian dan perubahan pengaturan) menulis ulang periode itu utuh sekali per dokumen. Periode lama tidak berubah lagi, kecuali dibangun ulang dengan `tools/rebuild-rankings.ts`.
+- Siswa yang dikeluarkan atau dihapus dihapus dari **semua** dokumen, termasuk periode lama (`removeFromBoards`).
+- Dibaca siswa dan penanggung jawab sekolah itu, satu dokumen per baca (`get`); `list` ditolak.
+
 ## 4. Matriks kepemilikan tulis
 
 | Data | Siswa | Penanggung jawab | Functions / skrip developer |
@@ -301,6 +321,7 @@ Penghapusan (`forgetReports`, dipanggil `eraseStudentData` dan `deleteMyAccount`
 | `books`, `books/*/history`, `catalog` | — | lewat callable (`saveBook`, `deleteBook`, `restoreBook`, `setBookCover`, `reviewSuggestion`) | semua; impor lewat `tools/books` |
 | `bookSuggestions` | tidak langsung: program baru memicu usulan | tinjau lewat `reviewSuggestion` | buat (trigger), tutup |
 | `bookStats` | — | — | semua (trigger) |
+| `leaderboards` | — | — | semua (trigger, refresh harian, `tools/rebuild-rankings.ts`) |
 | `reports` | kirim lewat `reportContent` | kirim lewat `reportContent`, selesaikan lewat `resolveReport` | semua; pengembang menyelesaikan lewat `tools/reports.ts` |
 | `auditLogs` | — | — | semua |
 | Storage `avatars/{uid}.jpg` | miliknya | miliknya | hapus saat akun/data dihapus |
@@ -315,6 +336,8 @@ Query utama dan kebutuhan indeks (detail JSON ada di `firestore.indexes.json` di
 | Daftar siswa: `studentStats` `orderBy name` (seluruh sekolah) | Field tunggal (otomatis) |
 | Anggota sekolah: `members` `where schoolId == S` `where role == siswa` | Komposit `schoolId` + `role` |
 | Riwayat jurnal satu buku: `journals` `orderBy date desc` | Field tunggal (otomatis) |
+| Jurnal satu bulan atau rentang (siswa): per program yang `journalDates`-nya beririsan, `journals` `where date >= A` `where date <= B` `orderBy date` | Field tunggal (otomatis) |
+| Peringkat: `get` `leaderboards/{periodId}` | Tidak perlu query |
 | Riwayat buku siswa (siswa): `programs` `where studentId == me` `orderBy startDate desc` | Komposit `studentId` + `startDate` |
 | Riwayat buku siswa (penanggung jawab): `programs` `where studentId == X` `orderBy startDate desc` | Komposit `studentId` + `startDate` (sama dengan di atas) |
 | Komentar baru pada Beranda: `journals` (dalam satu program) `where hasUnreadTeacherComment == true` `orderBy date desc` | Komposit `hasUnreadTeacherComment` + `date` |

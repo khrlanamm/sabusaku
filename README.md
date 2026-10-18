@@ -79,6 +79,7 @@ Dijalankan dari `functions/`. Tanpa `--emulator`, skrip bekerja di **produksi** 
 | `npx tsx tools/create-school.ts --code sman1 --name "SMA Negeri 1 …"` | Mendaftarkan sekolah dengan label ekstrakurikuler awal (Masis-KIR, Paskibra, Pala, PMR) |
 | `npx tsx tools/add-guru.ts --school sman1 --email … --name "…" [--ekskul …] [--wali XII-A1]` | Mendaftarkan penanggung jawab, opsional dengan ekskul binaan dan kelas perwalian |
 | `npx tsx tools/remove-guru.ts --email …` | Mengeluarkan penanggung jawab |
+| `npx tsx tools/rebuild-rankings.ts [--school sman1] [--dry-run]` | Membangun ulang semua peringkat (`leaderboards`) dari riwayat dan mengisi `journalDates` program; dijalankan sekali setelah fitur peringkat dipasang. Trigger dan refresh harian menjaganya sesudah itu |
 | `npx tsx tools/refresh-staff.ts [--school sman1]` | Membangun ulang nama wali kelas dan pembina yang dilihat siswa (`schools.staff`); trigger menjaganya sesudah itu |
 | `npx tsx tools/import-students.ts --school sman1 --file secret/siswa.csv` | Impor siswa dari CSV `email,nama,kelas,ekskul` (ekskul dipisah `;`). Simpan berkas berisi data siswa di `secret/` |
 | `npx tsx tools/set-school-status.ts --code sman1 --status suspended` | Menangguhkan atau mengaktifkan sekolah |

@@ -114,6 +114,11 @@ export interface ProgramAggregates {
   lastJournalDate: string | null;
   streakCurrent: number;
   streakBest: number;
+  /**
+   * Every journal date, oldest first, so the student's summary and calendar
+   * need no read of the journals themselves.
+   */
+  journalDates: string[];
 }
 
 /**
@@ -134,6 +139,7 @@ export function computeProgramAggregates(
     lastJournalDate: dates.length ? dates.reduce((a, b) => (a > b ? a : b)) : null,
     streakCurrent: streak.current,
     streakBest: streak.best,
+    journalDates: [...dates].sort(),
   };
 }
 

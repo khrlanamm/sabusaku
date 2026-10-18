@@ -181,13 +181,15 @@ describe("computeProgramAggregates", () => {
       lastJournalDate: null,
       streakCurrent: 0,
       streakBest: 0,
+      journalDates: [],
     });
   });
 
   it("progres adalah halaman tertinggi, membaca ulang tidak menurunkannya", () => {
+    // Offline journals can arrive out of order.
     const journals = [
-      {date: "2026-10-05", pageEnd: 40},
       {date: "2026-10-06", pageEnd: 90},
+      {date: "2026-10-05", pageEnd: 40},
       {date: "2026-10-07", pageEnd: 60},
     ];
     expect(computeProgramAggregates(journals, "2026-10-07", settings)).toEqual({
@@ -196,6 +198,7 @@ describe("computeProgramAggregates", () => {
       lastJournalDate: "2026-10-07",
       streakCurrent: 3,
       streakBest: 3,
+      journalDates: ["2026-10-05", "2026-10-06", "2026-10-07"],
     });
   });
 });

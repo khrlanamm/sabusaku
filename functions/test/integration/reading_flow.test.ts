@@ -12,7 +12,14 @@ import {
 } from "firebase/firestore";
 import {afterAll, beforeAll, describe, expect, it} from "vitest";
 
-import {auth, membersCol, programsCol, schoolRef, statsCol} from "../../src/infra/firebase";
+import {
+  auth,
+  leaderboardsCol,
+  membersCol,
+  programsCol,
+  schoolRef,
+  statsCol,
+} from "../../src/infra/firebase";
 import {refreshAllSchools} from "../../src/scheduled/dailyRefresh";
 import {
   addJoined,
@@ -43,6 +50,18 @@ const statsWhere = (check: (data: FirebaseFirestore.DocumentData) => boolean) =>
     const data = await stats();
     return data && check(data) ? data : undefined;
   });
+
+/** The student's row on a board, or undefined. */
+const entry = async (periodId: string) =>
+  (await leaderboardsCol(SCHOOL).doc(periodId).get()).get(`entries.${studentUid}`) as
+    | FirebaseFirestore.DocumentData
+    | undefined;
+const entryWhere = (periodId: string, check: (data: FirebaseFirestore.DocumentData) => boolean) =>
+  eventually(async () => {
+    const data = await entry(periodId);
+    return data && check(data) ? data : undefined;
+  });
+const thisMonth = () => `month-${wibDate().slice(0, 7)}`;
 
 function journal(date: string, pageStart: number, pageEnd: number) {
   return setDoc(doc(student.db, `${school}/programs/${PROGRAM}/journals/${date}`), {
@@ -147,7 +166,20 @@ describe("alur membaca", () => {
       lastJournalDate: wibDate(),
       streakCurrent: 1,
       streakBest: 1,
+      journalDates: [wibDate()],
     });
+  });
+
+  it("jurnal masuk ke papan peringkat periode ini dan sepanjang waktu", async () => {
+    const row = {name: "Raka Pratama", classId: "XII-A1", books: 0, streak: 1, days: 1};
+    expect(await entryWhere(thisMonth(), (e) => e.days === 1)).toMatchObject(row);
+    expect(await entryWhere("all", (e) => e.days === 1)).toMatchObject(row);
+    const board = (await leaderboardsCol(SCHOOL).doc(thisMonth()).get()).data();
+    expect(board).toMatchObject({kind: "month", key: wibDate().slice(0, 7)});
+    // Only what the whole school may see.
+    expect(Object.keys(board?.entries[studentUid]).sort()).toEqual(
+      ["books", "classId", "days", "extracurriculars", "name", "streak"],
+    );
   });
 
   it("membaca ulang tidak menurunkan progres; mengubah halaman dihitung ulang", async () => {
@@ -169,6 +201,7 @@ describe("alur membaca", () => {
       lastJournalDate: null,
       activeProgram: {currentPage: 0, percent: 0},
     });
+    await eventually(async () => (await entry(thisMonth())) === undefined);
   });
 
   it("menyelesaikan buku melepas buku aktif dan menambah buku selesai", async () => {
@@ -189,11 +222,14 @@ describe("alur membaca", () => {
     expect(data).toMatchObject({
       status: "belum_mulai",
       activeProgram: null,
-      streakCurrent: 0,
+      // The streak runs on across books: today's journal still counts.
+      streakCurrent: 1,
       streakBest: 1,
       journalCountTotal: 1,
       journalCountMonth: 1,
     });
+    expect(await entryWhere("all", (e) => e.books === 1)).toMatchObject({streak: 1, days: 1});
+    expect(await entry(thisMonth())).toMatchObject({books: 1});
   });
 });
 
@@ -223,8 +259,16 @@ describe("perubahan profil dan pengaturan", () => {
   });
 
   it("siswa dikeluarkan: hilang dari ringkasan, akun tetap; kembali saat ditambah lagi", async () => {
+    // A past board the nightly refresh no longer touches.
+    await leaderboardsCol(SCHOOL)
+      .doc("month-2020-01")
+      .set({kind: "month", key: "2020-01", entries: {[studentUid]: {name: "Raka", books: 1}}});
+
     await teacher.call("removeStudent", {email: STUDENT_EMAIL});
     await eventually(async () => !(await statsCol(SCHOOL).doc(studentUid).get()).exists);
+    for (const periodId of ["all", thisMonth(), "month-2020-01"]) {
+      await eventually(async () => (await entry(periodId)) === undefined);
+    }
     expect((await membersCol().doc(STUDENT_EMAIL).get()).exists).toBe(false);
     expect((await auth.getUser(studentUid)).customClaims ?? {}).not.toHaveProperty("schoolId");
 
@@ -237,6 +281,7 @@ describe("perubahan profil dan pengaturan", () => {
     const data = await statsWhere((s) => s.studentId === studentUid);
     // The profile and the history come back.
     expect(data).toMatchObject({booksCompleted: 1, name: "Raka P.", classId: "XII-A2"});
+    expect(await entryWhere("all", (e) => e.books === 1)).toMatchObject({name: "Raka P."});
     student = again;
   });
 
@@ -268,9 +313,15 @@ describe("perubahan profil dan pengaturan", () => {
     expect(data).toMatchObject({
       status: "tidak_aktif",
       daysSinceLastJournal: 10,
-      streakCurrent: 0,
+      // Today's journal on the finished book keeps the student's streak.
+      streakCurrent: 1,
       streakBest: 1,
+      journalCountTotal: 2,
       activeProgram: {overdue: true},
+    });
+    expect((await programsCol(SCHOOL).doc("buku2").get()).data()).toMatchObject({
+      streakCurrent: 0,
+      journalDates: [wibDate(-10)],
     });
 
     // Looser thresholds apply as soon as a teacher saves them.
@@ -282,6 +333,12 @@ describe("perubahan profil dan pengaturan", () => {
     // The nightly job computes against the given day.
     await refreshAllSchools(wibDate(21));
     const later = await stats();
-    expect(later).toMatchObject({status: "tidak_aktif", daysSinceLastJournal: 31});
+    expect(later).toMatchObject({
+      status: "tidak_aktif",
+      daysSinceLastJournal: 31,
+      streakCurrent: 0,
+    });
+    // ... and rewrites the boards of that day in one go.
+    expect(await entry("all")).toMatchObject({books: 1, days: 2, streak: 1});
   });
 });

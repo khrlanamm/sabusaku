@@ -52,6 +52,7 @@ Ketentuan: https://sabusaku.web.app/ketentuan (`hosting/ketentuan.html`). Versi 
 | Katalog `books`, `books/*/history`, `catalog` (semua sekolah) | baca | baca; ubah lewat callable (`saveBook`, `deleteBook`, `restoreBook`, `setBookCover`) |
 | `bookSuggestions` (semua sekolah) | — (usulan dibuat server dari program barunya) | baca; tinjau lewat `reviewSuggestion` |
 | `bookStats` sekolahnya | baca | baca |
+| `leaderboards` sekolahnya (nama, kelas, ekskul, dan angka membaca semua siswa per periode) | baca satu periode (`get`) | baca satu periode (`get`); hanya Functions yang menulis |
 | `reports` | kirim lewat `reportContent` (komentar pada jurnalnya, penulis komentar, buku); tidak bisa membaca | kirim (juga jurnal, usulan, siswa); baca laporan yang `schools`-nya memuat sekolahnya; selesaikan lewat `resolveReport` |
 | Foto profil (Storage) | tulis miliknya, baca sekolahnya | tulis miliknya, baca sekolahnya |
 | Cover milik siswa `programCovers/{uid}/` (Storage) | tulis miliknya, baca sekolahnya | baca sekolahnya |
@@ -103,9 +104,10 @@ Jurnal ditulis offline akan dikirim saat online. Bila tanggal jurnal sudah melew
 Ini bukan nasihat hukum; konfirmasikan dengan pihak sekolah/konsultan hukum sebelum rilis.
 
 - Posisi yang disarankan: **sekolah sebagai pengendali data, aplikasi sebagai pemroses**. Persetujuan orang tua/wali ditangani sekolah (mis. lewat formulir sekolah), dan sekolah yang mendaftarkan email siswa.
+- **Peringkat:** siswa melihat nama, kelas, ekstrakurikuler, serta jumlah buku selesai, streak, dan hari membaca teman sesekolahnya (keputusan 18 Okt 2026). Dokumen `leaderboards` sengaja tidak memuat email, foto, status, atau isi jurnal; profil dan `studentStats` siswa lain tetap tertutup.
 - **Minimisasi data:** nama, email, kelas, ekstrakurikuler, foto profil dan foto cover opsional, isi jurnal, dan laporan. Tidak ada NIS, lokasi (juga perkiraan), kontak, statistik pemakaian, atau pelacak iklan. Laporan kerusakan Crashlytics tidak boleh menyertakan nama, email, atau isi jurnal (jangan memanggil `setUserIdentifier`/`log` dengan data itu).
 - Penanggung jawab hanya melihat siswa sekolahnya sendiri.
-- **Penghapusan data:** `eraseStudent` (penanggung jawab) menghapus keanggotaan, profil, `studentStats`, `programs` beserta jurnal dan komentarnya, foto profil, dan foto cover milik siswa beserta rujukannya di usulan (`forgetStudentCovers`), tanpa menghapus akun Auth milik siswa. `deleteMyAccount` (Profil → Hapus akun, wajib Google Play karena akun dibuat di aplikasi) menghapus data yang sama lalu akun Auth. Keduanya memanggil `forgetReports`: laporan yang dikirim orang itu dihapus, laporan tentang dia tinggal tanpa salinan konten (`snapshot = {}`, `targetDeleted = true`). `removeStudent` hanya mencabut akses. Buku dan cover yang sudah diterima ke katalog, serta riwayat katalog yang memuat nama penanggung jawab, tetap ada (dijelaskan di `/hapus-data`).
+- **Penghapusan data:** `eraseStudent` (penanggung jawab) menghapus keanggotaan, profil, `studentStats`, baris siswa di semua `leaderboards`, `programs` beserta jurnal dan komentarnya, foto profil, dan foto cover milik siswa beserta rujukannya di usulan (`forgetStudentCovers`), tanpa menghapus akun Auth milik siswa. `deleteMyAccount` (Profil → Hapus akun, wajib Google Play karena akun dibuat di aplikasi) menghapus data yang sama lalu akun Auth. Keduanya memanggil `forgetReports`: laporan yang dikirim orang itu dihapus, laporan tentang dia tinggal tanpa salinan konten (`snapshot = {}`, `targetDeleted = true`). `removeStudent` mencabut akses dan mengeluarkan siswa dari semua `leaderboards`; jurnalnya tetap. Buku dan cover yang sudah diterima ke katalog, serta riwayat katalog yang memuat nama penanggung jawab, tetap ada (dijelaskan di `/hapus-data`).
 - **Retensi:** tentukan bersama sekolah (usulan: data siswa dihapus/diarsipkan 1 tahun setelah lulus).
 - **Dokumen publik** (`hosting/`, https://sabusaku.web.app): `/privasi` (kebijakan privasi), `/ketentuan` (ketentuan penggunaan), `/hapus-data` (penghapusan akun dan data untuk formulir *Data safety*). Ubah halaman itu bersama perubahan data yang dikumpulkan; jawaban Play Console ada di `store/listing.md`. Periksa kebijakan Google Play terbaru untuk aplikasi yang melibatkan remaja.
 
@@ -153,7 +155,10 @@ Gunakan `@firebase/rules-unit-testing` dengan Firebase Emulator. Minimal:
 29. Klien tidak bisa menulis `termsVersion` atau `termsAcceptedAt` (pemilik maupun penanggung jawab).
 30. `reports`: guru membaca laporan yang `schools`-nya memuat sekolahnya; guru sekolah lain dan semua siswa (termasuk pelapornya) ditolak; klien tidak bisa membuat, mengubah, atau menghapus laporan.
 
-Alur callable (`reportContent`, `resolveReport`, `acceptTerms`, `forgetReports`) diuji di `functions/test/integration/reports_flow.test.ts`; `addTeacher`/`removeTeacher` dan `schools.staff` di `members_flow.test.ts`; `statusChangedAt` dan `teacherDigest` di `digest_flow.test.ts`.
+**Peringkat**
+31. `leaderboards`: siswa dan guru sekolahnya membaca satu periode (juga periode yang belum ada); sekolah lain, tanpa claim, dan peran salah ditolak; `list` ditolak; tidak ada klien yang menulis atau menghapus.
+
+Alur callable (`reportContent`, `resolveReport`, `acceptTerms`, `forgetReports`) diuji di `functions/test/integration/reports_flow.test.ts`; `addTeacher`/`removeTeacher` dan `schools.staff` di `members_flow.test.ts`; `statusChangedAt` dan `teacherDigest` di `digest_flow.test.ts`; baris `leaderboards` (jurnal, buku selesai, siswa dikeluarkan, refresh harian) di `reading_flow.test.ts`.
 
 Catatan teknis untuk pengujian: simulasikan waktu server dengan mengatur jam pada test (atau menulis jurnal dengan ID tanggal relatif terhadap tanggal sistem saat tes berjalan) dan uji khusus batas tengah malam WIB (23:59 vs 00:01).
 

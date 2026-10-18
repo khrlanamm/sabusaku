@@ -59,6 +59,20 @@ Bagian ini mengalahkan baris di atas dan dokumen 01–06 bila berbeda.
 | Kartu ringkasan dashboard | Tidak bisa dibuka; "Jurnal bulan ini" | Siswa → daftar siswa (filter terbawa); Buku aktif → halaman buku yang sedang dibaca (lewat target dulu); "Jurnal Oktober 2026" (nama bulan berjalan) → peringkat siswa menurut jurnal bulan ini, dari `studentStats` tanpa query tambahan |
 | Sekolah dan penanggung jawab | Hanya developer. Guru tidak bisa menambah guru lain | Developer membuat sekolah dan penanggung jawab pertama. Guru menambah guru lain sekolahnya (email, nama, wali kelas dan ekskul opsional) lewat `addTeacher`, dan mengeluarkan guru lain atau membatalkan undangan lewat `removeTeacher`, tetapi tidak dirinya sendiri. Isian peran guru baru bisa diubah guru lain selama belum masuk; sesudahnya hanya guru itu sendiri |
 
+### 18 Oktober 2026 (lanjutan): beranda siswa, riwayat, peringkat, lencana
+
+Bagian ini mengalahkan baris di atas dan dokumen 01–06 bila berbeda. Gamifikasi ringan (06 §5) dikerjakan sekarang, bukan menunggu data uji coba.
+
+| Topik | Sebelumnya | Yang dipakai |
+|---|---|---|
+| Streak siswa | Per buku: selesai buku lalu mulai buku baru, streak mulai lagi dari 1; tanpa buku aktif streak 0 | **Lintas buku**: dihitung dari tanggal jurnal semua buku, aturan hari efektif sama (BR-11/12). Streak per buku tetap di dokumen program dan tampil di detail buku |
+| Peringkat | Bukan tujuan V1; hanya "Jurnal bulan ini" untuk guru | Peringkat sekolah per **bulan, tahun, tahun ajaran, sepanjang waktu**, menurut **buku selesai**, **streak terpanjang dalam periode**, atau **hari membaca**. Dilihat siswa dan penanggung jawab, bisa disaring kelas/ekskul (guru juga Binaan saya). Data: `schools/{s}/leaderboards/{periodId}` (docs/02 §3.17) |
+| Yang terlihat siswa di peringkat | Siswa tidak melihat data siswa lain | Nama, kelas, ekskul, dan tiga angka itu untuk semua siswa sekolahnya. Tanpa foto, email, status, atau isi jurnal. Halaman privasi diperbarui |
+| Tahun ajaran (Q7) | Tidak didefinisikan | Tetap **1 Juli–30 Juni**, dinamai "2026/2027", sama untuk semua sekolah. Naik kelas massal tetap ditunda |
+| Riwayat buku dan statistik siswa | Di Profil, semua buku sekaligus | Di **Beranda**: kartu statistik yang semuanya bisa diketuk dan tiga buku terakhir; halaman Riwayat buku dengan pencarian, filter status dan rentang tanggal, buku unik, dan urutan |
+| Riwayat jurnal | Satu buku (aktif atau terakhir) | Semua buku, per bulan, dengan filter buku, rentang tanggal, dan urutan; tampilan kalender |
+| Tambahan | — | Kalender membaca, halaman Streak, **lencana** (dihitung di aplikasi dari ringkasan dan program, juga terlihat penanggung jawab), dan **rekap bulanan** lewat notifikasi tanggal 1 pukul 07.00 WIB |
+
 ## 1. Keputusan yang sudah Anda tetapkan
 
 | # | Topik | Keputusan |
@@ -111,7 +125,7 @@ Jawab singkat saja; tulis "ikut usulan" bila setuju.
 | Q4 | Format **CSV impor**: kolom yang tersedia di sekolah (mis. NIS, nama, kelas)? Apakah NIS selalu unik dalam satu sekolah? | Kolom: `peran,nama,username,kelas`; untuk siswa username = NIS |
 | Q5 | **Retensi data** setelah siswa lulus | Hapus/arsip 1 tahun setelah lulus (sesuaikan dengan sekolah) |
 | Q6 | Apakah guru boleh **reset password siswa** di kelasnya (saya asumsikan ya)? | Ya |
-| Q7 | **Tahun ajaran**: apakah perlu "ganti tahun ajaran" massal (arsipkan kelas lama, naikkan siswa)? | Tunda sampai setelah uji coba |
+| Q7 | **Tahun ajaran**: apakah perlu "ganti tahun ajaran" massal (arsipkan kelas lama, naikkan siswa)? | Tunda sampai setelah uji coba. Batas tahun ajaran untuk peringkat: 1 Juli–30 Juni (18 Okt 2026) |
 | Q8 | Nama/domain untuk **kebijakan privasi** dan halaman penghapusan data (diperlukan Play Console) | Halaman statis sederhana, dapat saya buatkan |
 | Q9 | **Mode gelap** di V1? | Tidak (Could) |
 | Q10 | Perlu **ekspor rekap** (CSV/PDF) di V1 atau setelah uji coba? | CSV di M6 bila waktu; PDF setelah V1 |

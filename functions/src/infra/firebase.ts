@@ -17,6 +17,8 @@ export const programsCol = (schoolId: string) => schoolRef(schoolId).collection(
 export const activeProgramsCol = (schoolId: string) =>
   schoolRef(schoolId).collection("activePrograms");
 export const auditCol = (schoolId: string) => schoolRef(schoolId).collection("auditLogs");
+/** Per school and period: what every student read, readable by the whole school. */
+export const leaderboardsCol = (schoolId: string) => schoolRef(schoolId).collection("leaderboards");
 
 /** Top-level roster: `members/{email}`. The ID makes an email belong to one school. */
 export const membersCol = () => db.collection("members");

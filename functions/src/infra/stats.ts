@@ -2,8 +2,17 @@ import {FieldValue, Timestamp} from "firebase-admin/firestore";
 
 import {computeStatus, computeStreak, isOverdue, percentOf} from "../domain/activity";
 import {monthOf, wibToday} from "../domain/dates";
+import {isEmpty, livePeriods, metricsFor} from "../domain/ranking";
 import {DEFAULT_SETTINGS, SchoolSettings, StudentStatus} from "../domain/types";
 import {db, programsCol, schoolRef, statsCol, usersCol} from "./firebase";
+import {
+  Boards,
+  rankInputOf,
+  RankEntry,
+  removeFromBoards,
+  writeBoards,
+  writeStudentEntries,
+} from "./rankings";
 
 export interface StudentProfile {
   uid: string;
@@ -93,13 +102,29 @@ interface RefreshOptions {
   /** Pass when refreshing many students of one school to avoid re-reading it. */
   settings?: SchoolSettings;
   today?: string;
+  /**
+   * Collects the student's leaderboard rows here instead of writing them, so
+   * a refresh of the whole school writes each board once.
+   */
+  boards?: Boards;
+}
+
+/** A program's journal dates: the server-written list, or the journals themselves. */
+async function journalDatesOf(program: FirebaseFirestore.QueryDocumentSnapshot): Promise<string[]> {
+  const dates = program.get("journalDates") as string[] | undefined;
+  if (dates) return dates;
+  // Written before `journalDates` existed and not rebuilt yet. Journal IDs
+  // are their dates, so an empty projection is enough.
+  const journals = await program.ref.collection("journals").select().get();
+  return journals.docs.map((doc) => doc.id);
 }
 
 /**
  * Rebuilds a student's whole summary from the profile, programs and journal
  * dates, and overwrites the document so no field can go stale (docs/04 §5).
- * A student who is gone or removed from the school has no summary, which removes them
- * from teacher dashboards.
+ * Also updates the student's rows on the boards a write today can change.
+ * A student who is gone or removed from the school has no summary and no
+ * rows, which removes them from teacher dashboards and every leaderboard.
  */
 export async function refreshStudentStats(
   schoolId: string,
@@ -113,6 +138,7 @@ export async function refreshStudentStats(
   const user = await userRef.get();
   if (!isActiveStudent(user)) {
     await statsRef.delete();
+    await removeFromBoards(schoolId, studentId);
     return;
   }
 
@@ -123,37 +149,24 @@ export async function refreshStudentStats(
   const programs = programsSnapshot.docs;
   const active = programs.find((program) => program.get("status") === "active") ?? null;
 
-  // Journal dates are only needed from programs that can still matter: the
-  // active one, the two most recent, and any with journals this month.
-  const monthStart = `${monthOf(today)}-01`;
-  const byRecency = programs
-    .filter((program) => program.get("lastJournalDate"))
-    .sort((a, b) =>
-      (b.get("lastJournalDate") as string).localeCompare(a.get("lastJournalDate") as string),
-    );
-  const relevant = byRecency.filter(
-    (program, index) =>
-      index < 2 || program.id === active?.id || program.get("lastJournalDate") >= monthStart,
+  const withDates = await Promise.all(
+    programs.map(async (program) => ({program, dates: await journalDatesOf(program)})),
   );
-  const datesByProgram = new Map<string, string[]>();
-  await Promise.all(
-    relevant.map(async (program) => {
-      // Journal IDs are their dates, so an empty projection is enough.
-      const journals = await program.ref.collection("journals").select().get();
-      datesByProgram.set(program.id, journals.docs.map((doc) => doc.id));
-    }),
-  );
-  const allDates = [...datesByProgram.values()].flat();
-  const recentDates = [...new Set(allDates)].sort().reverse().slice(0, 5);
+  const rankInput = rankInputOf(withDates.map(({program, dates}) => ({data: program.data(), dates})));
+  // The streak runs on across books: every journal of the student counts.
+  const allDates = rankInput.journalDates;
+  const recentDates = [...allDates].reverse().slice(0, 5);
+  const streak = computeStreak(allDates, today, settings);
 
   let activeProgram: ActiveProgramSummary | null = null;
-  let streakCurrent = 0;
   if (active) {
-    // A streak can die without any write, so it is recomputed against today.
-    streakCurrent = computeStreak(datesByProgram.get(active.id) ?? [], today, settings).current;
-    if (active.get("streakCurrent") !== streakCurrent) {
+    // The book's own streak can die without any write, so it is recomputed
+    // against today.
+    const activeDates = withDates.find(({program}) => program.id === active.id)?.dates ?? [];
+    const bookStreak = computeStreak(activeDates, today, settings).current;
+    if (active.get("streakCurrent") !== bookStreak) {
       // The program may have been erased since it was read.
-      await active.ref.update({streakCurrent}).catch(ignoreNotFound);
+      await active.ref.update({streakCurrent: bookStreak}).catch(ignoreNotFound);
     }
     const totalPages = active.get("book.totalPages") as number;
     const currentPage = (active.get("currentPage") as number | undefined) ?? 0;
@@ -187,21 +200,22 @@ export async function refreshStudentStats(
   const sum = (field: string) =>
     programs.reduce((total, program) => total + ((program.get(field) as number) ?? 0), 0);
 
-  const summary = withTimestamp({
-    studentId,
+  const profile = {
     name: (user.get("name") as string | undefined) ?? "",
-    email: (user.get("email") as string | undefined) ?? "",
-    photoUrl: (user.get("photoUrl") as string | null | undefined) ?? null,
     classId: (user.get("classId") as string | null | undefined) ?? null,
     extracurriculars: (user.get("extracurriculars") as string[] | undefined) ?? [],
+  };
+
+  const summary = withTimestamp({
+    studentId,
+    ...profile,
+    email: (user.get("email") as string | undefined) ?? "",
+    photoUrl: (user.get("photoUrl") as string | null | undefined) ?? null,
     status,
     daysSinceLastJournal,
     activeProgram,
-    streakCurrent,
-    streakBest: programs.reduce(
-      (best, program) => Math.max(best, (program.get("streakBest") as number) ?? 0),
-      0,
-    ),
+    streakCurrent: streak.current,
+    streakBest: streak.best,
     lastJournalDate: recentDates[0] ?? null,
     journalCountMonth: allDates.filter((date) => monthOf(date) === monthOf(today)).length,
     journalCountTotal: sum("journalCount"),
@@ -214,38 +228,63 @@ export async function refreshStudentStats(
   // transaction as the write means a summary can never outlive its student.
   // `statusChangedAt` survives the overwrite while the status stays; the
   // morning digest to teachers picks the students whose status just changed.
-  await db.runTransaction(async (transaction) => {
+  const stillActive = await db.runTransaction(async (transaction) => {
     const current = await transaction.get(userRef);
     const previous = await transaction.get(statsRef);
-    if (isActiveStudent(current)) {
-      const unchanged = previous.exists && previous.get("status") === status;
-      transaction.set(statsRef, {
-        ...summary,
-        statusChangedAt: unchanged
-          ? ((previous.get("statusChangedAt") as Timestamp | undefined) ?? null)
-          : FieldValue.serverTimestamp(),
-      });
-    } else {
+    if (!isActiveStudent(current)) {
       transaction.delete(statsRef);
+      return false;
     }
+    const unchanged = previous.exists && previous.get("status") === status;
+    transaction.set(statsRef, {
+      ...summary,
+      statusChangedAt: unchanged
+        ? ((previous.get("statusChangedAt") as Timestamp | undefined) ?? null)
+        : FieldValue.serverTimestamp(),
+    });
+    return true;
   });
+  if (!stillActive) {
+    await removeFromBoards(schoolId, studentId);
+    return;
+  }
+
+  const entries = new Map<string, RankEntry | null>();
+  for (const period of livePeriods(today)) {
+    const metrics = metricsFor(rankInput, period, today, settings);
+    entries.set(period.id, isEmpty(metrics) ? null : {...profile, ...metrics});
+  }
+  if (options.boards) {
+    for (const [id, entry] of entries) {
+      if (!entry) continue;
+      if (!options.boards.has(id)) options.boards.set(id, new Map());
+      options.boards.get(id)!.set(studentId, entry);
+    }
+  } else {
+    await writeStudentEntries(schoolId, studentId, entries);
+  }
 }
 
 const REFRESH_CONCURRENCY = 10;
 
-/** Refreshes every active student of a school. Returns how many. */
+/**
+ * Refreshes every active student of a school, then rewrites the boards a
+ * write today can change. Returns how many students.
+ */
 export async function refreshSchool(schoolId: string, today = wibToday()): Promise<number> {
   const [settings, students] = await Promise.all([
     loadSettings(schoolId),
     usersCol(schoolId).where("role", "==", "siswa").where("status", "==", "active").select().get(),
   ]);
   const ids = students.docs.map((doc) => doc.id);
+  const boards: Boards = new Map();
   let next = 0;
   const worker = async () => {
     while (next < ids.length) {
-      await refreshStudentStats(schoolId, ids[next++], {settings, today});
+      await refreshStudentStats(schoolId, ids[next++], {settings, today, boards});
     }
   };
   await Promise.all(Array.from({length: REFRESH_CONCURRENCY}, worker));
+  await writeBoards(schoolId, livePeriods(today), boards);
   return ids.length;
 }
