@@ -26,6 +26,7 @@ import '../../features/student/presentation/journal_history_screen.dart';
 import '../../features/student/presentation/student_home_screen.dart';
 import '../../features/student/presentation/student_profile_screen.dart';
 import '../../features/teacher/presentation/add_students_screen.dart';
+import '../../features/teacher/presentation/add_teacher_screen.dart';
 import '../../features/teacher/presentation/import_students_screen.dart';
 import '../../features/teacher/presentation/pending_member_screen.dart';
 import '../../features/teacher/presentation/reports_screen.dart';
@@ -174,6 +175,10 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: Routes.teacherReports,
         builder: (_, _) => const ReportsScreen(),
+      ),
+      GoRoute(
+        path: Routes.teacherAddTeacher,
+        builder: (_, _) => const AddTeacherScreen(),
       ),
       GoRoute(
         path: '/guru/anggota/:email',

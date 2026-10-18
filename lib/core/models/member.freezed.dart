@@ -16,7 +16,8 @@ T _$identity<T>(T value) => value;
 mixin _$Member {
 
  String get email; String get schoolId; UserRole get role; String get name;/// Class label, e.g. `XII-A1`.
- String? get classId; List<String> get extracurriculars;/// Set once the account signed in and claimed this entry.
+ String? get classId; List<String> get extracurriculars;/// Teachers: the class they are the homeroom teacher of.
+ String? get homeroomClass;/// Set once the account signed in and claimed this entry.
  String? get uid;
 /// Create a copy of Member
 /// with the given fields replaced by the non-null parameter values.
@@ -29,20 +30,20 @@ $MemberCopyWith<Member> get copyWith => _$MemberCopyWithImpl<Member>(this as Mem
 @override
 bool operator ==(Object other) {
   final _this = this as Member;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Member&&(identical(other.email, _this.email) || other.email == _this.email)&&(identical(other.schoolId, _this.schoolId) || other.schoolId == _this.schoolId)&&(identical(other.role, _this.role) || other.role == _this.role)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.classId, _this.classId) || other.classId == _this.classId)&&const DeepCollectionEquality().equals(other.extracurriculars, _this.extracurriculars)&&(identical(other.uid, _this.uid) || other.uid == _this.uid));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Member&&(identical(other.email, _this.email) || other.email == _this.email)&&(identical(other.schoolId, _this.schoolId) || other.schoolId == _this.schoolId)&&(identical(other.role, _this.role) || other.role == _this.role)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.classId, _this.classId) || other.classId == _this.classId)&&const DeepCollectionEquality().equals(other.extracurriculars, _this.extracurriculars)&&(identical(other.homeroomClass, _this.homeroomClass) || other.homeroomClass == _this.homeroomClass)&&(identical(other.uid, _this.uid) || other.uid == _this.uid));
 }
 
 
 @override
 int get hashCode {
   final _this = this as Member;
-  return Object.hash(runtimeType,_this.email,_this.schoolId,_this.role,_this.name,_this.classId,const DeepCollectionEquality().hash(_this.extracurriculars),_this.uid);
+  return Object.hash(runtimeType,_this.email,_this.schoolId,_this.role,_this.name,_this.classId,const DeepCollectionEquality().hash(_this.extracurriculars),_this.homeroomClass,_this.uid);
 }
 
 @override
 String toString() {
   final _this = this as Member;
-  return 'Member(email: ${_this.email}, schoolId: ${_this.schoolId}, role: ${_this.role}, name: ${_this.name}, classId: ${_this.classId}, extracurriculars: ${_this.extracurriculars}, uid: ${_this.uid})';
+  return 'Member(email: ${_this.email}, schoolId: ${_this.schoolId}, role: ${_this.role}, name: ${_this.name}, classId: ${_this.classId}, extracurriculars: ${_this.extracurriculars}, homeroomClass: ${_this.homeroomClass}, uid: ${_this.uid})';
 }
 
 
@@ -53,7 +54,7 @@ abstract mixin class $MemberCopyWith<$Res>  {
   factory $MemberCopyWith(Member value, $Res Function(Member) _then) = _$MemberCopyWithImpl;
 @useResult
 $Res call({
- String email, String schoolId, UserRole role, String name, String? classId, List<String> extracurriculars, String? uid
+ String email, String schoolId, UserRole role, String name, String? classId, List<String> extracurriculars, String? homeroomClass, String? uid
 });
 
 
@@ -70,7 +71,7 @@ class _$MemberCopyWithImpl<$Res>
 
 /// Create a copy of Member
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? email = null,Object? schoolId = null,Object? role = null,Object? name = null,Object? classId = freezed,Object? extracurriculars = null,Object? uid = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? email = null,Object? schoolId = null,Object? role = null,Object? name = null,Object? classId = freezed,Object? extracurriculars = null,Object? homeroomClass = freezed,Object? uid = freezed,}) {
   return _then(Member(
 email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,schoolId: null == schoolId ? _self.schoolId : schoolId // ignore: cast_nullable_to_non_nullable
@@ -78,7 +79,8 @@ as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non
 as UserRole,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,classId: freezed == classId ? _self.classId : classId // ignore: cast_nullable_to_non_nullable
 as String?,extracurriculars: null == extracurriculars ? _self.extracurriculars : extracurriculars // ignore: cast_nullable_to_non_nullable
-as List<String>,uid: freezed == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
+as List<String>,homeroomClass: freezed == homeroomClass ? _self.homeroomClass : homeroomClass // ignore: cast_nullable_to_non_nullable
+as String?,uid: freezed == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -164,10 +166,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String email,  String schoolId,  UserRole role,  String name,  String? classId,  List<String> extracurriculars,  String? uid)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String email,  String schoolId,  UserRole role,  String name,  String? classId,  List<String> extracurriculars,  String? homeroomClass,  String? uid)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Member() when $default != null:
-return $default(_that.email,_that.schoolId,_that.role,_that.name,_that.classId,_that.extracurriculars,_that.uid);case _:
+return $default(_that.email,_that.schoolId,_that.role,_that.name,_that.classId,_that.extracurriculars,_that.homeroomClass,_that.uid);case _:
   return orElse();
 
 }
@@ -185,10 +187,10 @@ return $default(_that.email,_that.schoolId,_that.role,_that.name,_that.classId,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String email,  String schoolId,  UserRole role,  String name,  String? classId,  List<String> extracurriculars,  String? uid)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String email,  String schoolId,  UserRole role,  String name,  String? classId,  List<String> extracurriculars,  String? homeroomClass,  String? uid)  $default,) {final _that = this;
 switch (_that) {
 case _Member():
-return $default(_that.email,_that.schoolId,_that.role,_that.name,_that.classId,_that.extracurriculars,_that.uid);case _:
+return $default(_that.email,_that.schoolId,_that.role,_that.name,_that.classId,_that.extracurriculars,_that.homeroomClass,_that.uid);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -205,10 +207,10 @@ return $default(_that.email,_that.schoolId,_that.role,_that.name,_that.classId,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String email,  String schoolId,  UserRole role,  String name,  String? classId,  List<String> extracurriculars,  String? uid)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String email,  String schoolId,  UserRole role,  String name,  String? classId,  List<String> extracurriculars,  String? homeroomClass,  String? uid)?  $default,) {final _that = this;
 switch (_that) {
 case _Member() when $default != null:
-return $default(_that.email,_that.schoolId,_that.role,_that.name,_that.classId,_that.extracurriculars,_that.uid);case _:
+return $default(_that.email,_that.schoolId,_that.role,_that.name,_that.classId,_that.extracurriculars,_that.homeroomClass,_that.uid);case _:
   return null;
 
 }
@@ -220,7 +222,7 @@ return $default(_that.email,_that.schoolId,_that.role,_that.name,_that.classId,_
 
 
 class _Member extends Member {
-  const _Member({required this.email, required this.schoolId, required this.role, this.name = '', this.classId,  List<String> extracurriculars = const <String>[], this.uid}): _extracurriculars = extracurriculars,super._();
+  const _Member({required this.email, required this.schoolId, required this.role, this.name = '', this.classId,  List<String> extracurriculars = const <String>[], this.homeroomClass, this.uid}): _extracurriculars = extracurriculars,super._();
   
 
 @override final  String email;
@@ -236,6 +238,8 @@ class _Member extends Member {
   return EqualUnmodifiableListView(_extracurriculars);
 }
 
+/// Teachers: the class they are the homeroom teacher of.
+@override final  String? homeroomClass;
 /// Set once the account signed in and claimed this entry.
 @override final  String? uid;
 
@@ -249,18 +253,18 @@ _$MemberCopyWith<_Member> get copyWith => __$MemberCopyWithImpl<_Member>(this, _
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Member&&(identical(other.email, email) || other.email == email)&&(identical(other.schoolId, schoolId) || other.schoolId == schoolId)&&(identical(other.role, role) || other.role == role)&&(identical(other.name, name) || other.name == name)&&(identical(other.classId, classId) || other.classId == classId)&&const DeepCollectionEquality().equals(other.extracurriculars, _extracurriculars)&&(identical(other.uid, uid) || other.uid == uid));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Member&&(identical(other.email, email) || other.email == email)&&(identical(other.schoolId, schoolId) || other.schoolId == schoolId)&&(identical(other.role, role) || other.role == role)&&(identical(other.name, name) || other.name == name)&&(identical(other.classId, classId) || other.classId == classId)&&const DeepCollectionEquality().equals(other.extracurriculars, _extracurriculars)&&(identical(other.homeroomClass, homeroomClass) || other.homeroomClass == homeroomClass)&&(identical(other.uid, uid) || other.uid == uid));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,email,schoolId,role,name,classId,const DeepCollectionEquality().hash(_extracurriculars),uid);
+    return Object.hash(runtimeType,email,schoolId,role,name,classId,const DeepCollectionEquality().hash(_extracurriculars),homeroomClass,uid);
 }
 
 @override
 String toString() {
-    return 'Member(email: $email, schoolId: $schoolId, role: $role, name: $name, classId: $classId, extracurriculars: $extracurriculars, uid: $uid)';
+    return 'Member(email: $email, schoolId: $schoolId, role: $role, name: $name, classId: $classId, extracurriculars: $extracurriculars, homeroomClass: $homeroomClass, uid: $uid)';
 }
 
 
@@ -271,7 +275,7 @@ abstract mixin class _$MemberCopyWith<$Res> implements $MemberCopyWith<$Res> {
   factory _$MemberCopyWith(_Member value, $Res Function(_Member) _then) = __$MemberCopyWithImpl;
 @override @useResult
 $Res call({
- String email, String schoolId, UserRole role, String name, String? classId, List<String> extracurriculars, String? uid
+ String email, String schoolId, UserRole role, String name, String? classId, List<String> extracurriculars, String? homeroomClass, String? uid
 });
 
 
@@ -288,7 +292,7 @@ class __$MemberCopyWithImpl<$Res>
 
 /// Create a copy of Member
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? email = null,Object? schoolId = null,Object? role = null,Object? name = null,Object? classId = freezed,Object? extracurriculars = null,Object? uid = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? email = null,Object? schoolId = null,Object? role = null,Object? name = null,Object? classId = freezed,Object? extracurriculars = null,Object? homeroomClass = freezed,Object? uid = freezed,}) {
   return _then(_Member(
 email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,schoolId: null == schoolId ? _self.schoolId : schoolId // ignore: cast_nullable_to_non_nullable
@@ -296,7 +300,8 @@ as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non
 as UserRole,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,classId: freezed == classId ? _self.classId : classId // ignore: cast_nullable_to_non_nullable
 as String?,extracurriculars: null == extracurriculars ? _self._extracurriculars : extracurriculars // ignore: cast_nullable_to_non_nullable
-as List<String>,uid: freezed == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
+as List<String>,homeroomClass: freezed == homeroomClass ? _self.homeroomClass : homeroomClass // ignore: cast_nullable_to_non_nullable
+as String?,uid: freezed == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

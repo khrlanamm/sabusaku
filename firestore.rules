@@ -8,8 +8,9 @@ rules_version = '2';
 //   schoolId : school code, equal to the schools/{schoolId} document ID
 //
 // Every teacher of a school sees and manages every student of that school.
-// Schools and teachers are created by the developer through scripts; the
-// roster of students lives in the top-level `members/{email}` collection.
+// Schools and their first teacher are created by the developer through
+// scripts; teachers add students and other teachers through callables. The
+// roster lives in the top-level `members/{email}` collection.
 //
 // Deny by default. Clients never write derived numbers (progress, streak,
 // status); only Cloud Functions do, through the Admin SDK, which bypasses
@@ -135,18 +136,25 @@ service cloud.firestore {
       // Teachers see the roster of their own school (query: schoolId == theirs).
       allow get, list: if isTeacher(resource.data.schoolId);
       allow create, delete: if false;
-      // Before the student first signs in, a teacher may fix the details.
+      // Before a student or another teacher first signs in, a teacher may fix
+      // the details. Afterwards a teacher's roles are theirs to change.
       allow update: if isTeacher(resource.data.schoolId)
-        && resource.data.role == 'siswa'
         && resource.data.uid == null
-        && request.resource.data.diff(resource.data).affectedKeys()
-             .hasOnly(['name', 'classId', 'extracurriculars', 'updatedAt'])
-        && (request.resource.data.name == ''
-            || validStr(request.resource.data.name, 2, 80))
-        && (request.resource.data.classId == null
-            || knownClass(resource.data.schoolId, request.resource.data.classId))
         && knownExtracurriculars(resource.data.schoolId, request.resource.data.extracurriculars)
-        && request.resource.data.updatedAt == request.time;
+        && request.resource.data.updatedAt == request.time
+        && ((resource.data.role == 'siswa'
+              && request.resource.data.diff(resource.data).affectedKeys()
+                   .hasOnly(['name', 'classId', 'extracurriculars', 'updatedAt'])
+              && (request.resource.data.name == ''
+                  || validStr(request.resource.data.name, 2, 80))
+              && (request.resource.data.classId == null
+                  || knownClass(resource.data.schoolId, request.resource.data.classId)))
+            || (resource.data.role == 'guru'
+              && request.resource.data.diff(resource.data).affectedKeys()
+                   .hasOnly(['name', 'homeroomClass', 'extracurriculars', 'updatedAt'])
+              && validStr(request.resource.data.name, 2, 80)
+              && (request.resource.data.get('homeroomClass', null) == null
+                  || knownClass(resource.data.schoolId, request.resource.data.homeroomClass))));
     }
 
     match /schools/{schoolId} {

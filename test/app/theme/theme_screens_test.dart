@@ -339,6 +339,18 @@ List<Override> _data() => [
         role: UserRole.guru,
         name: 'Khoirul Anam, S.Kom.',
         email: 'khoirul@sekolah.test',
+        homeroomClass: 'XII-A1',
+      ),
+    ]),
+  ),
+  pendingTeachersProvider.overrideWith(
+    (_) => Stream.value([
+      const Member(
+        email: 'dewi@sekolah.test',
+        schoolId: 'sman1',
+        role: UserRole.guru,
+        name: 'Dewi Lestari, S.Pd.',
+        extracurriculars: ['PMR'],
       ),
     ]),
   ),

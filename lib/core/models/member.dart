@@ -6,8 +6,8 @@ part 'member.freezed.dart';
 
 /// `members/{email}` (docs/02): who belongs to which school. The document ID
 /// is the lower-case email, so one email belongs to at most one school.
-/// Written by Cloud Functions; a teacher may edit a student entry until the
-/// student signs in for the first time.
+/// Written by Cloud Functions; a teacher may edit a student or teacher entry
+/// until that person signs in for the first time.
 @freezed
 abstract class Member with _$Member {
   const Member._();
@@ -22,6 +22,9 @@ abstract class Member with _$Member {
     String? classId,
     @Default(<String>[]) List<String> extracurriculars,
 
+    /// Teachers: the class they are the homeroom teacher of.
+    String? homeroomClass,
+
     /// Set once the account signed in and claimed this entry.
     String? uid,
   }) = _Member;
@@ -35,10 +38,11 @@ abstract class Member with _$Member {
     extracurriculars: List<String>.from(
       data['extracurriculars'] as List? ?? const [],
     ),
+    homeroomClass: data['homeroomClass'] as String?,
     uid: data['uid'] as String?,
   );
 
-  /// Added by a teacher, but the student has not signed in yet.
+  /// Added by a teacher, but the person has not signed in yet.
   bool get pending => uid == null;
 }
 

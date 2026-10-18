@@ -2,13 +2,15 @@
 // does this; teachers cannot add or remove each other.
 //
 //   npx tsx tools/add-guru.ts --school sman1sukodadi --email guru@gmail.com
-//       --name "Sugito, S.T., M.Pd." [--ekskul "Masis-KIR"] [--emulator]
+//       --name "Sugito, S.T., M.Pd." [--ekskul "Masis-KIR"] [--wali XII-A1] [--emulator]
 //
 // No account or password is created. The teacher signs in with Google (or
 // signs up with this email) and the app joins them to the school. `--ekskul`
-// records the extracurriculars they supervise.
+// records the extracurriculars they supervise and `--wali` the class they are
+// the homeroom teacher of. Teachers can change both in the app, and add or
+// remove other teachers of their school there too.
 
-import {listArg, requireArg, run, target} from "./_env";
+import {arg, listArg, requireArg, run, target} from "./_env";
 
 import {
   addMember,
@@ -27,6 +29,7 @@ run(async () => {
       role: "guru",
       name: requireArg("name"),
       extracurriculars: listArg("ekskul"),
+      homeroomClass: arg("wali") ?? null,
     },
     labels,
   );

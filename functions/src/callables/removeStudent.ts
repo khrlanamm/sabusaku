@@ -25,7 +25,7 @@ export const removeStudent = onCall(CALLABLE_OPTIONS, async (request): Promise<{
     throw new HttpsError("not-found", "Siswa tidak ditemukan.");
   }
   if (member.get("role") !== "siswa") {
-    throw new HttpsError("permission-denied", "Penanggung jawab hanya bisa diatur developer.");
+    throw new HttpsError("permission-denied", "Keluarkan penanggung jawab dari tab Sekolah.");
   }
 
   try {

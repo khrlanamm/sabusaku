@@ -21,6 +21,7 @@ import {
   createEnv,
   Db,
   EKSKUL,
+  memberDoc,
   OTHER_SCHOOL,
   SCHOOL,
   seedSchool,
@@ -133,6 +134,29 @@ describe("members (daftar anggota)", () => {
     // claimed entries and teachers are changed through the profile or the developer
     await assertFails(updateDoc(doc(a.teacher1, "members/siswa.satu@sekolah.test"), {name: "X Y", ...now()}));
     await assertFails(updateDoc(doc(a.teacher1, "members/guru.satu@sekolah.test"), {name: "X Y", ...now()}));
+  });
+
+  it("guru mengubah undangan guru lain yang belum masuk", async () => {
+    await env.withSecurityRulesDisabled(async (context) => {
+      await setDoc(
+        doc(context.firestore() as unknown as Db, "members/guru.baru@sekolah.test"),
+        memberDoc("guru.baru@sekolah.test", SCHOOL, "guru", {name: "Guru Baru", homeroomClass: null}),
+      );
+    });
+    const invite = doc(a.teacher1, "members/guru.baru@sekolah.test");
+    await assertSucceeds(
+      updateDoc(invite, {name: "Guru Baru, S.Pd.", homeroomClass: CLASS_1, extracurriculars: ["PMR"], ...now()}),
+    );
+    await assertSucceeds(updateDoc(invite, {homeroomClass: null, ...now()}));
+    await assertFails(updateDoc(invite, {homeroomClass: "XII-Z9", ...now()})); // unlisted
+    await assertFails(updateDoc(invite, {extracurriculars: ["Catur"], ...now()}));
+    await assertFails(updateDoc(invite, {name: "", ...now()})); // a teacher always has a name
+    await assertFails(updateDoc(invite, {classId: CLASS_1, ...now()})); // a teacher has no class
+    await assertFails(updateDoc(invite, {role: "siswa", ...now()}));
+    await assertFails(updateDoc(doc(a.otherTeacher, "members/guru.baru@sekolah.test"), {name: "Guru Lain", ...now()}));
+    await assertFails(updateDoc(doc(a.student, "members/guru.baru@sekolah.test"), {name: "Guru Lain", ...now()}));
+    // a student invitation has no homeroom class
+    await assertFails(updateDoc(doc(a.teacher1, "members/calon@sekolah.test"), {homeroomClass: CLASS_1, ...now()}));
   });
 });
 

@@ -30,6 +30,8 @@ export interface MemberInput {
   /** Raw class text; normalised to a label such as `XII-A1`. */
   classId?: string | null;
   extracurriculars?: string[];
+  /** Teachers: raw text of the class they are the homeroom teacher of. */
+  homeroomClass?: string | null;
 }
 
 export type AddMemberResult =
@@ -56,6 +58,7 @@ export function cleanMember(
       name: string;
       classId: string | null;
       extracurriculars: string[];
+      homeroomClass: string | null;
       newClass: string | null;
     }
   | {ok: false; email: string; reason: string} {
@@ -77,6 +80,17 @@ export function cleanMember(
     if (!school.classes.includes(classId)) newClass = classId;
   }
 
+  // A homeroom class must already be listed: unlike a student's class, it
+  // is picked from the school's list and never adds a label.
+  let homeroomClass: string | null = null;
+  const rawHomeroom = (input.homeroomClass ?? "").trim();
+  if (rawHomeroom && input.role === "guru") {
+    homeroomClass = normalizeClassLabel(rawHomeroom);
+    if (!homeroomClass || !school.classes.includes(homeroomClass)) {
+      return {ok: false, email, reason: `Kelas "${rawHomeroom}" belum ada di sekolah.`};
+    }
+  }
+
   const wanted = [...new Set((input.extracurriculars ?? []).map((item) => item.trim()).filter(Boolean))];
   const known = new Map(school.extracurriculars.map((item) => [item.toLowerCase(), item]));
   const extracurriculars: string[] = [];
@@ -89,7 +103,7 @@ export function cleanMember(
     return {ok: false, email, reason: `Maksimal ${MAX_MEMBER_EXTRACURRICULARS} ekskul.`};
   }
 
-  return {ok: true, email, name, classId, extracurriculars, newClass};
+  return {ok: true, email, name, classId, extracurriculars, homeroomClass, newClass};
 }
 
 export async function loadSchoolLabels(schoolId: string) {
@@ -123,7 +137,13 @@ export async function addSchoolClasses(schoolId: string, labels: string[]): Prom
  */
 export async function addMember(
   schoolId: string,
-  cleaned: {email: string; name: string; classId: string | null; extracurriculars: string[]},
+  cleaned: {
+    email: string;
+    name: string;
+    classId: string | null;
+    extracurriculars: string[];
+    homeroomClass?: string | null;
+  },
   role: Role,
   addedBy: string,
 ): Promise<AddMemberResult> {
@@ -136,6 +156,7 @@ export async function addMember(
       name: cleaned.name,
       classId: role === "siswa" ? cleaned.classId : null,
       extracurriculars: cleaned.extracurriculars,
+      ...(role === "guru" ? {homeroomClass: cleaned.homeroomClass ?? null} : {}),
       uid: null,
       addedBy,
       createdAt: FieldValue.serverTimestamp(),
@@ -218,6 +239,9 @@ export async function claimMembership(
         email,
         classId: role === "siswa" ? ((member.get("classId") as string | null) ?? null) : null,
         extracurriculars: (member.get("extracurriculars") as string[] | undefined) ?? [],
+        ...(role === "guru"
+          ? {homeroomClass: (member.get("homeroomClass") as string | null | undefined) ?? null}
+          : {}),
         photoUrl: photo,
         status: "active",
         createdAt: now,
@@ -234,6 +258,9 @@ export async function claimMembership(
     if (!user.get("name") && member.get("name")) patch.name = member.get("name");
     if (role === "siswa" && !user.get("classId") && member.get("classId")) {
       patch.classId = member.get("classId");
+    }
+    if (role === "guru" && !user.get("homeroomClass") && member.get("homeroomClass")) {
+      patch.homeroomClass = member.get("homeroomClass");
     }
     if (!user.get("photoUrl") && photo) patch.photoUrl = photo;
     if (Object.keys(patch).length === 0) return false;

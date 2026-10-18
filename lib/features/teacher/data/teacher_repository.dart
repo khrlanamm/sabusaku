@@ -17,11 +17,12 @@ import '../../auth/domain/session.dart';
 part 'teacher_repository.g.dart';
 
 /// What a teacher (penanggung jawab) reads and writes: every student of the
-/// school, the students added but not signed in yet, the school's class and
-/// extracurricular labels and settings, and comments on journals.
+/// school, the students and teachers added but not signed in yet, the
+/// school's class and extracurricular labels and settings, and comments on
+/// journals.
 ///
-/// Adding, removing and erasing students go through callables; edits the
-/// rules allow (names, labels, settings) are written directly.
+/// Adding, removing and erasing students and teachers go through callables;
+/// edits the rules allow (names, labels, settings) are written directly.
 class TeacherRepository {
   TeacherRepository(
     this._firestore,
@@ -56,9 +57,14 @@ class TeacherRepository {
       );
 
   /// Students added by a teacher who have not signed in yet.
-  Stream<List<Member>> watchPendingStudents() => _members
+  Stream<List<Member>> watchPendingStudents() => _watchPending(UserRole.siswa);
+
+  /// Teachers added by another teacher who have not signed in yet.
+  Stream<List<Member>> watchPendingTeachers() => _watchPending(UserRole.guru);
+
+  Stream<List<Member>> _watchPending(UserRole role) => _members
       .where('schoolId', isEqualTo: _session.schoolId)
-      .where('role', isEqualTo: UserRole.siswa.wire)
+      .where('role', isEqualTo: role.wire)
       .snapshots()
       .map(
         (snapshot) =>
@@ -137,6 +143,46 @@ class TeacherRepository {
     () => _members.doc(email).update({
       'name': name,
       'classId': classId,
+      'extracurriculars': extracurriculars,
+      'updatedAt': FieldValue.serverTimestamp(),
+    }),
+  );
+
+  // ---------- Teachers ----------
+
+  /// Puts another teacher on the school roster. Returns whether they joined
+  /// right away (they already had a verified account with that email).
+  Future<bool> addTeacher({
+    required String email,
+    required String name,
+    String? homeroomClass,
+    List<String> extracurriculars = const [],
+  }) async {
+    final data = await _call('addTeacher', {
+      'email': email,
+      'name': name,
+      'homeroomClass': ?homeroomClass,
+      if (extracurriculars.isNotEmpty) 'extracurriculars': extracurriculars,
+    });
+    return data['joined'] == true;
+  }
+
+  /// Takes another teacher out of the school, or withdraws the invitation of
+  /// one who has not signed in yet. Their account stays.
+  Future<void> removeTeacher(String email) =>
+      _call('removeTeacher', {'email': email});
+
+  /// Edits a teacher who has not signed in yet. Afterwards their roles are
+  /// theirs to change.
+  Future<void> updatePendingTeacher(
+    String email, {
+    required String name,
+    required String? homeroomClass,
+    required List<String> extracurriculars,
+  }) => _guard(
+    () => _members.doc(email).update({
+      'name': name,
+      'homeroomClass': homeroomClass,
       'extracurriculars': extracurriculars,
       'updatedAt': FieldValue.serverTimestamp(),
     }),
@@ -230,6 +276,10 @@ Stream<List<StudentStats>> teacherStudents(Ref ref) =>
 @riverpod
 Stream<List<Member>> pendingStudents(Ref ref) =>
     ref.watch(teacherRepositoryProvider).watchPendingStudents();
+
+@riverpod
+Stream<List<Member>> pendingTeachers(Ref ref) =>
+    ref.watch(teacherRepositoryProvider).watchPendingTeachers();
 
 @riverpod
 Stream<Member?> member(Ref ref, String email) =>

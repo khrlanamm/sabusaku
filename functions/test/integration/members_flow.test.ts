@@ -1,6 +1,6 @@
-// Roster and sign-in: claimAccount, addStudents, removeStudent, eraseStudent
-// and deleteMyAccount against the Auth, Firestore, Functions and Storage
-// emulators.
+// Roster and sign-in: claimAccount, addStudents, removeStudent, eraseStudent,
+// addTeacher, removeTeacher and deleteMyAccount against the Auth, Firestore,
+// Functions and Storage emulators.
 
 import {getStorage} from "firebase-admin/storage";
 import {doc, serverTimestamp, updateDoc} from "firebase/firestore";
@@ -42,6 +42,16 @@ async function reasonOf(promise: Promise<unknown>): Promise<string | undefined> 
     return undefined;
   } catch (error) {
     return (error as {details?: {reason?: string}}).details?.reason;
+  }
+}
+
+/** The message a callable failed with. */
+async function messageOf(promise: Promise<unknown>): Promise<string | undefined> {
+  try {
+    await promise;
+    return undefined;
+  } catch (error) {
+    return (error as {message?: string}).message;
   }
 }
 
@@ -231,6 +241,88 @@ describe("removeStudent dan eraseStudent", () => {
         updatedAt: serverTimestamp(),
       }),
     ).rejects.toThrow();
+  });
+});
+
+describe("addTeacher dan removeTeacher", () => {
+  it("guru menambah guru lain dengan wali kelas dan ekskul; klaim menyalinnya", async () => {
+    const result = await teacherA.call<{joined: boolean}>("addTeacher", {
+      email: " Wali@Sekolah.test ",
+      name: "Bu Wali",
+      homeroomClass: "12 a1",
+      extracurriculars: ["pmr"],
+    });
+    expect(result.joined).toBe(false);
+    expect((await membersCol().doc("wali@sekolah.test").get()).data()).toMatchObject({
+      schoolId: A,
+      role: "guru",
+      name: "Bu Wali",
+      classId: null,
+      homeroomClass: "XII-A1",
+      extracurriculars: ["PMR"],
+      uid: null,
+      addedBy: teacherA.uid,
+    });
+
+    await addPasswordAccount("wali@sekolah.test");
+    const wali = await signIn("wali@sekolah.test");
+    expect(await wali.join()).toEqual({role: "guru", schoolId: A});
+    expect((await usersCol(A).doc(wali.uid).get()).data()).toMatchObject({
+      role: "guru",
+      name: "Bu Wali",
+      homeroomClass: "XII-A1",
+      extracurriculars: ["PMR"],
+    });
+  });
+
+  it("akun yang sudah ada langsung bergabung", async () => {
+    const uid = await addPasswordAccount("langsung@sekolah.test");
+    const result = await teacherA.call<{joined: boolean}>("addTeacher", {
+      email: "langsung@sekolah.test",
+      name: "Pak Langsung",
+    });
+    expect(result.joined).toBe(true);
+    expect((await auth.getUser(uid)).customClaims).toMatchObject({role: "guru", schoolId: A});
+    expect((await usersCol(A).doc(uid).get()).get("homeroomClass")).toBeNull();
+  });
+
+  it("menolak kelas tak terdaftar, email terdaftar, nama kosong, dan siswa", async () => {
+    expect(
+      await messageOf(teacherA.call("addTeacher", {email: "z@sekolah.test", name: "Guru Z", homeroomClass: "XII-Z9"})),
+    ).toContain('Kelas "XII-Z9" belum ada di sekolah.');
+    expect(await codeOf(teacherA.call("addTeacher", {email: "guru.b@sekolah.test", name: "Guru B"}))).toBe(
+      "already-exists",
+    );
+    expect(await codeOf(teacherA.call("addTeacher", {email: "wali@sekolah.test", name: "Bu Wali"}))).toBe(
+      "already-exists",
+    );
+    expect(await codeOf(teacherA.call("addTeacher", {email: "tanpa.nama@sekolah.test", name: " "}))).toBe(
+      "invalid-argument",
+    );
+    const student = await addJoined(A, {email: "siswa.pj@sekolah.test", role: "siswa", name: "Siswa", classId: "XII-A1"});
+    expect(await codeOf(student.call("addTeacher", {email: "x@sekolah.test", name: "Guru X"}))).toBe(
+      "permission-denied",
+    );
+    expect(await codeOf(student.call("removeTeacher", {email: "wali@sekolah.test"}))).toBe("permission-denied");
+    expect((await membersCol().doc("z@sekolah.test").get()).exists).toBe(false);
+  });
+
+  it("guru mengeluarkan guru lain atau membatalkan undangan, bukan dirinya sendiri", async () => {
+    expect(await codeOf(teacherA.call("removeTeacher", {email: "guru.a@sekolah.test"}))).toBe(
+      "failed-precondition",
+    );
+    expect(await codeOf(teacherB.call("removeTeacher", {email: "wali@sekolah.test"}))).toBe("not-found");
+    expect(await codeOf(teacherA.call("removeTeacher", {email: "siswa.pj@sekolah.test"}))).toBe("not-found");
+
+    await teacherA.call("addTeacher", {email: "batal@sekolah.test", name: "Guru Batal"});
+    await teacherA.call("removeTeacher", {email: "batal@sekolah.test"});
+    expect((await membersCol().doc("batal@sekolah.test").get()).exists).toBe(false);
+
+    const waliUid = (await membersCol().doc("wali@sekolah.test").get()).get("uid") as string;
+    await teacherA.call("removeTeacher", {email: "wali@sekolah.test"});
+    expect((await membersCol().doc("wali@sekolah.test").get()).exists).toBe(false);
+    expect((await usersCol(A).doc(waliUid).get()).get("status")).toBe("removed");
+    expect((await auth.getUser(waliUid)).customClaims ?? {}).not.toHaveProperty("schoolId");
   });
 });
 

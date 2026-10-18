@@ -9,13 +9,9 @@ import '../../../core/models/school.dart';
 import '../../../core/utils/labels.dart';
 import '../../../core/widgets/dialogs.dart';
 import '../../../core/widgets/states.dart';
-import '../../../core/widgets/user_avatar.dart';
 import '../../auth/data/school_repository.dart';
-import '../../auth/domain/app_user.dart';
 import '../data/teacher_repository.dart';
-
-/// Where penanggung jawab are added or changed (by the developer).
-const developerEmail = 'komunitaskertaskosong9@gmail.com';
+import 'teachers_section.dart';
 
 /// The school: reports to review, class and extracurricular labels, the
 /// penanggung jawab, and the way to the status settings.
@@ -133,7 +129,6 @@ class _Body extends ConsumerWidget {
     final muted = theme.textTheme.bodySmall?.copyWith(
       color: Theme.of(context).colorScheme.onSurfaceVariant,
     );
-    final teachers = ref.watch(schoolTeachersProvider);
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -183,27 +178,7 @@ class _Body extends ConsumerWidget {
           onRemove: (label) => _removeExtracurricular(context, ref, label),
         ),
         const SizedBox(height: 24),
-        Text('Penanggung jawab', style: theme.textTheme.titleMedium),
-        Text(
-          'Penanggung jawab ditambahkan oleh pengembang Sabu Saku. Untuk '
-          'menambah atau mengganti, kirim email ke $developerEmail.',
-          style: muted,
-        ),
-        const SizedBox(height: 8),
-        switch (teachers) {
-          AsyncData(:final value) => Card(
-            child: Column(
-              children: [
-                for (final (index, teacher) in value.indexed) ...[
-                  if (index > 0) const Divider(),
-                  _TeacherTile(teacher: teacher),
-                ],
-              ],
-            ),
-          ),
-          AsyncError(:final error) => ErrorState(error: error),
-          _ => const SkeletonList(items: 2, itemHeight: 64),
-        },
+        const TeachersSection(),
         const SizedBox(height: 24),
         Card(
           clipBehavior: Clip.antiAlias,
@@ -319,28 +294,6 @@ class _LabelWrap extends StatelessWidget {
             onDeleted: () => onRemove(label),
           ),
       ],
-    );
-  }
-}
-
-class _TeacherTile extends StatelessWidget {
-  const _TeacherTile({required this.teacher});
-
-  final AppUser teacher;
-
-  @override
-  Widget build(BuildContext context) {
-    final roles = teacherRoleLine(
-      teacher.homeroomClass,
-      teacher.extracurriculars,
-    );
-    return ListTile(
-      leading: UserAvatar(photoUrl: teacher.photoUrl, name: teacher.name),
-      title: Text(teacher.name.isEmpty ? teacher.email : teacher.name),
-      subtitle: Text(
-        [if (teacher.name.isNotEmpty) teacher.email, ?roles].join('\n'),
-      ),
-      isThreeLine: teacher.name.isNotEmpty && roles != null,
     );
   }
 }

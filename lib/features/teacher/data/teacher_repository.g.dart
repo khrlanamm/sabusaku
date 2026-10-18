@@ -136,6 +136,45 @@ final class PendingStudentsProvider
 
 String _$pendingStudentsHash() => r'fcf6eaa4ca666393edfa1841e8d2d8d7df00f54e';
 
+@ProviderFor(pendingTeachers)
+final pendingTeachersProvider = PendingTeachersProvider._();
+
+final class PendingTeachersProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Member>>,
+          List<Member>,
+          Stream<List<Member>>
+        >
+    with $FutureModifier<List<Member>>, $StreamProvider<List<Member>> {
+  PendingTeachersProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'pendingTeachersProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$pendingTeachersHash();
+
+  @$internal
+  @override
+  $StreamProviderElement<List<Member>> $createElement(
+    $ProviderPointer pointer,
+  ) => $StreamProviderElement(pointer);
+
+  @override
+  Stream<List<Member>> create(Ref ref) {
+    return pendingTeachers(ref);
+  }
+}
+
+String _$pendingTeachersHash() => r'd3217d186075ed17b68a0b8b3b5d26406401bd26';
+
 @ProviderFor(member)
 final memberProvider = MemberFamily._();
 
