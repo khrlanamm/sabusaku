@@ -87,7 +87,8 @@ class TeacherRepository {
       .snapshots()
       .map((doc) => doc.exists ? Member.fromMap(doc.id, doc.data()!) : null);
 
-  /// The school's penanggung jawab, sorted by name.
+  /// The school's penanggung jawab, sorted by name. The superadmin is left
+  /// out.
   Stream<List<AppUser>> watchTeachers() => _users
       .where('role', isEqualTo: UserRole.guru.wire)
       .snapshots()
@@ -96,7 +97,7 @@ class TeacherRepository {
             [
               for (final doc in snapshot.docs)
                 AppUser.fromMap(doc.id, doc.data()),
-            ].where((user) => user.active).toList()..sort(
+            ].where((user) => user.active && !user.superadmin).toList()..sort(
               (a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()),
             ),
       );
@@ -312,12 +313,14 @@ typedef StudentFilter = ({
 
 /// Filter of the student list. Shared so the dashboard can open the list
 /// already filtered, and kept while the list is not built yet (a tab opens
-/// only when first visited). Cleared for each account.
+/// only when first visited). Cleared for each account and school.
 @Riverpod(keepAlive: true)
 class StudentListFilter extends _$StudentListFilter {
   @override
   StudentFilter build() {
-    ref.watch(sessionProvider.select((session) => session?.uid));
+    ref.watch(
+      sessionProvider.select((session) => (session?.uid, session?.schoolId)),
+    );
     return (mine: false, classId: null, extracurricular: null, status: null);
   }
 
@@ -376,12 +379,15 @@ bool matchesLabels(
         extracurriculars.contains(filter.extracurricular));
 
 /// The scope of the dashboard and of the pages its cards open. Starts on the
-/// teacher's own students when they have a group, and again for each account.
+/// teacher's own students when they have a group, and again for each account
+/// and school.
 @Riverpod(keepAlive: true)
 class DashboardScope extends _$DashboardScope {
   @override
   StudentScope build() {
-    ref.watch(sessionProvider.select((session) => session?.uid));
+    ref.watch(
+      sessionProvider.select((session) => (session?.uid, session?.schoolId)),
+    );
     final hasGroup = ref.read(sessionProvider)?.profile.hasGroup ?? false;
     return hasGroup ? const MyStudents() : const AllStudents();
   }

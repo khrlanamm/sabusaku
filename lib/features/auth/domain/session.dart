@@ -26,6 +26,10 @@ abstract class Session with _$Session {
 
     /// The photo of the linked Google account, if any.
     String? googlePhotoUrl,
+
+    /// The superadmin (`superadmin` claim): a teacher of the school they
+    /// have open, who can switch to any school and add schools.
+    @Default(false) bool superadmin,
   }) = _Session;
 
   /// Sent to the terms of use before anything else, even "Lengkapi akun":

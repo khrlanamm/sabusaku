@@ -9,12 +9,15 @@ import '../../../core/models/school.dart';
 import '../../../core/utils/labels.dart';
 import '../../../core/widgets/dialogs.dart';
 import '../../../core/widgets/states.dart';
+import '../../auth/data/auth_repository.dart';
 import '../../auth/data/school_repository.dart';
 import '../data/teacher_repository.dart';
+import 'school_picker_sheet.dart';
 import 'teachers_section.dart';
 
 /// The school: reports to review, class and extracurricular labels, the
-/// penanggung jawab, and the way to the status settings.
+/// penanggung jawab, and the way to the status settings. The superadmin
+/// switches schools and adds one from the school card.
 class SchoolScreen extends ConsumerWidget {
   const SchoolScreen({super.key});
 
@@ -129,6 +132,9 @@ class _Body extends ConsumerWidget {
     final muted = theme.textTheme.bodySmall?.copyWith(
       color: Theme.of(context).colorScheme.onSurfaceVariant,
     );
+    final superadmin = ref.watch(
+      currentSessionProvider.select((session) => session.superadmin),
+    );
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -140,6 +146,14 @@ class _Body extends ConsumerWidget {
               color: Theme.of(context).colorScheme.primary,
             ),
             title: Text(school.name, style: theme.textTheme.titleMedium),
+            subtitle: superadmin ? Text('Kode: ${school.id}') : null,
+            trailing: superadmin
+                ? TextButton(
+                    key: const Key('school-switch'),
+                    onPressed: () => showSchoolPicker(context, ref),
+                    child: const Text('Ganti'),
+                  )
+                : null,
           ),
         ),
         const SizedBox(height: 12),

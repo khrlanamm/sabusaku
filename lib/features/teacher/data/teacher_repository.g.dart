@@ -453,19 +453,19 @@ final class StudentProgramsFamily extends $Family
 
 /// Filter of the student list. Shared so the dashboard can open the list
 /// already filtered, and kept while the list is not built yet (a tab opens
-/// only when first visited). Cleared for each account.
+/// only when first visited). Cleared for each account and school.
 
 @ProviderFor(StudentListFilter)
 final studentListFilterProvider = StudentListFilterProvider._();
 
 /// Filter of the student list. Shared so the dashboard can open the list
 /// already filtered, and kept while the list is not built yet (a tab opens
-/// only when first visited). Cleared for each account.
+/// only when first visited). Cleared for each account and school.
 final class StudentListFilterProvider
     extends $NotifierProvider<StudentListFilter, StudentFilter> {
   /// Filter of the student list. Shared so the dashboard can open the list
   /// already filtered, and kept while the list is not built yet (a tab opens
-  /// only when first visited). Cleared for each account.
+  /// only when first visited). Cleared for each account and school.
   StudentListFilterProvider._()
     : super(
         from: null,
@@ -493,11 +493,11 @@ final class StudentListFilterProvider
   }
 }
 
-String _$studentListFilterHash() => r'3f997d304003c495ecaa9a7859ab52b37db71944';
+String _$studentListFilterHash() => r'ca3f1f713d0ae20b7ef854a657ae9e3ec3756205';
 
 /// Filter of the student list. Shared so the dashboard can open the list
 /// already filtered, and kept while the list is not built yet (a tab opens
-/// only when first visited). Cleared for each account.
+/// only when first visited). Cleared for each account and school.
 
 abstract class _$StudentListFilter extends $Notifier<StudentFilter> {
   StudentFilter build();
@@ -518,17 +518,20 @@ abstract class _$StudentListFilter extends $Notifier<StudentFilter> {
 }
 
 /// The scope of the dashboard and of the pages its cards open. Starts on the
-/// teacher's own students when they have a group, and again for each account.
+/// teacher's own students when they have a group, and again for each account
+/// and school.
 
 @ProviderFor(DashboardScope)
 final dashboardScopeProvider = DashboardScopeProvider._();
 
 /// The scope of the dashboard and of the pages its cards open. Starts on the
-/// teacher's own students when they have a group, and again for each account.
+/// teacher's own students when they have a group, and again for each account
+/// and school.
 final class DashboardScopeProvider
     extends $NotifierProvider<DashboardScope, StudentScope> {
   /// The scope of the dashboard and of the pages its cards open. Starts on the
-  /// teacher's own students when they have a group, and again for each account.
+  /// teacher's own students when they have a group, and again for each account
+  /// and school.
   DashboardScopeProvider._()
     : super(
         from: null,
@@ -556,10 +559,11 @@ final class DashboardScopeProvider
   }
 }
 
-String _$dashboardScopeHash() => r'3aaf924c64b47ed2b2d90d2424b771a9319b0485';
+String _$dashboardScopeHash() => r'bcf4fde2010a0b20bbe4abc084d1f3b5841c5dbb';
 
 /// The scope of the dashboard and of the pages its cards open. Starts on the
-/// teacher's own students when they have a group, and again for each account.
+/// teacher's own students when they have a group, and again for each account
+/// and school.
 
 abstract class _$DashboardScope extends $Notifier<StudentScope> {
   StudentScope build();

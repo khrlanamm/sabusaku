@@ -86,7 +86,7 @@ class AccountHeader extends ConsumerWidget {
                   Text(profile.email, style: muted),
                   Text(
                     [
-                      session.role.label,
+                      session.superadmin ? 'Superadmin' : session.role.label,
                       if (school != null) school.name,
                     ].join(' · '),
                     style: muted,

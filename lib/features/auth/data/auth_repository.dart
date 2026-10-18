@@ -21,7 +21,7 @@ import '../domain/session.dart';
 
 part 'auth_repository.g.dart';
 
-typedef _Claims = ({UserRole role, String schoolId});
+typedef _Claims = ({UserRole role, String schoolId, bool superadmin});
 
 /// Outcome of asking the server to attach the account to its school.
 enum _ClaimResult { claimed, notRegistered, notVerified }
@@ -173,6 +173,7 @@ class AuthRepository {
                 hasPassword: providers.contains(_passwordProvider),
                 hasGoogle: hasGoogle,
                 googlePhotoUrl: upsizeGooglePhoto(googleInfo?.photoURL),
+                superadmin: claims.superadmin,
               ),
             ),
           );
@@ -221,7 +222,11 @@ class AuthRepository {
       if (claims != null) {
         await _prefs.setString(
           _claimsKey(user.uid),
-          jsonEncode({'role': claims.role.wire, 'schoolId': claims.schoolId}),
+          jsonEncode({
+            'role': claims.role.wire,
+            'schoolId': claims.schoolId,
+            'superadmin': claims.superadmin,
+          }),
         );
       } else {
         await _prefs.remove(_claimsKey(user.uid));
@@ -239,7 +244,11 @@ class AuthRepository {
     final role = UserRole.fromWire(claims?['role']);
     final schoolId = claims?['schoolId'];
     if (role == null || schoolId is! String || schoolId.isEmpty) return null;
-    return (role: role, schoolId: schoolId);
+    return (
+      role: role,
+      schoolId: schoolId,
+      superadmin: claims?['superadmin'] == true,
+    );
   }
 
   /// Forces a token refresh so changed claims take effect.

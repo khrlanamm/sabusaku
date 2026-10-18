@@ -58,6 +58,9 @@ abstract final class Routes {
   static const teacherReports = '/guru/sekolah/laporan';
   static const teacherAddTeacher = '/guru/sekolah/tambah-pj';
 
+  /// Superadmin only; the server refuses anyone else.
+  static const teacherAddSchool = '/guru/sekolah/tambah-sekolah';
+
   // Guru: katalog buku (shared by every school)
   static const teacherBooks = '/guru/buku';
   static const teacherAddBook = '/guru/buku/tambah';

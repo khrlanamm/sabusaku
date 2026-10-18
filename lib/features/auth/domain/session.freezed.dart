@@ -19,7 +19,9 @@ mixin _$Session {
 /// accounts must add a password first.
  bool get hasPassword;/// The account is linked to Google (offers "Pakai foto Google").
  bool get hasGoogle;/// The photo of the linked Google account, if any.
- String? get googlePhotoUrl;
+ String? get googlePhotoUrl;/// The superadmin (`superadmin` claim): a teacher of the school they
+/// have open, who can switch to any school and add schools.
+ bool get superadmin;
 /// Create a copy of Session
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -31,20 +33,20 @@ $SessionCopyWith<Session> get copyWith => _$SessionCopyWithImpl<Session>(this as
 @override
 bool operator ==(Object other) {
   final _this = this as Session;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Session&&(identical(other.uid, _this.uid) || other.uid == _this.uid)&&(identical(other.role, _this.role) || other.role == _this.role)&&(identical(other.schoolId, _this.schoolId) || other.schoolId == _this.schoolId)&&(identical(other.profile, _this.profile) || other.profile == _this.profile)&&(identical(other.hasPassword, _this.hasPassword) || other.hasPassword == _this.hasPassword)&&(identical(other.hasGoogle, _this.hasGoogle) || other.hasGoogle == _this.hasGoogle)&&(identical(other.googlePhotoUrl, _this.googlePhotoUrl) || other.googlePhotoUrl == _this.googlePhotoUrl));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Session&&(identical(other.uid, _this.uid) || other.uid == _this.uid)&&(identical(other.role, _this.role) || other.role == _this.role)&&(identical(other.schoolId, _this.schoolId) || other.schoolId == _this.schoolId)&&(identical(other.profile, _this.profile) || other.profile == _this.profile)&&(identical(other.hasPassword, _this.hasPassword) || other.hasPassword == _this.hasPassword)&&(identical(other.hasGoogle, _this.hasGoogle) || other.hasGoogle == _this.hasGoogle)&&(identical(other.googlePhotoUrl, _this.googlePhotoUrl) || other.googlePhotoUrl == _this.googlePhotoUrl)&&(identical(other.superadmin, _this.superadmin) || other.superadmin == _this.superadmin));
 }
 
 
 @override
 int get hashCode {
   final _this = this as Session;
-  return Object.hash(runtimeType,_this.uid,_this.role,_this.schoolId,_this.profile,_this.hasPassword,_this.hasGoogle,_this.googlePhotoUrl);
+  return Object.hash(runtimeType,_this.uid,_this.role,_this.schoolId,_this.profile,_this.hasPassword,_this.hasGoogle,_this.googlePhotoUrl,_this.superadmin);
 }
 
 @override
 String toString() {
   final _this = this as Session;
-  return 'Session(uid: ${_this.uid}, role: ${_this.role}, schoolId: ${_this.schoolId}, profile: ${_this.profile}, hasPassword: ${_this.hasPassword}, hasGoogle: ${_this.hasGoogle}, googlePhotoUrl: ${_this.googlePhotoUrl})';
+  return 'Session(uid: ${_this.uid}, role: ${_this.role}, schoolId: ${_this.schoolId}, profile: ${_this.profile}, hasPassword: ${_this.hasPassword}, hasGoogle: ${_this.hasGoogle}, googlePhotoUrl: ${_this.googlePhotoUrl}, superadmin: ${_this.superadmin})';
 }
 
 
@@ -55,7 +57,7 @@ abstract mixin class $SessionCopyWith<$Res>  {
   factory $SessionCopyWith(Session value, $Res Function(Session) _then) = _$SessionCopyWithImpl;
 @useResult
 $Res call({
- String uid, UserRole role, String schoolId, AppUser profile, bool hasPassword, bool hasGoogle, String? googlePhotoUrl
+ String uid, UserRole role, String schoolId, AppUser profile, bool hasPassword, bool hasGoogle, String? googlePhotoUrl, bool superadmin
 });
 
 
@@ -72,7 +74,7 @@ class _$SessionCopyWithImpl<$Res>
 
 /// Create a copy of Session
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? uid = null,Object? role = null,Object? schoolId = null,Object? profile = null,Object? hasPassword = null,Object? hasGoogle = null,Object? googlePhotoUrl = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? uid = null,Object? role = null,Object? schoolId = null,Object? profile = null,Object? hasPassword = null,Object? hasGoogle = null,Object? googlePhotoUrl = freezed,Object? superadmin = null,}) {
   return _then(Session(
 uid: null == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
@@ -81,7 +83,8 @@ as String,profile: null == profile ? _self.profile : profile // ignore: cast_nul
 as AppUser,hasPassword: null == hasPassword ? _self.hasPassword : hasPassword // ignore: cast_nullable_to_non_nullable
 as bool,hasGoogle: null == hasGoogle ? _self.hasGoogle : hasGoogle // ignore: cast_nullable_to_non_nullable
 as bool,googlePhotoUrl: freezed == googlePhotoUrl ? _self.googlePhotoUrl : googlePhotoUrl // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,superadmin: null == superadmin ? _self.superadmin : superadmin // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 /// Create a copy of Session
@@ -175,10 +178,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uid,  UserRole role,  String schoolId,  AppUser profile,  bool hasPassword,  bool hasGoogle,  String? googlePhotoUrl)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String uid,  UserRole role,  String schoolId,  AppUser profile,  bool hasPassword,  bool hasGoogle,  String? googlePhotoUrl,  bool superadmin)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Session() when $default != null:
-return $default(_that.uid,_that.role,_that.schoolId,_that.profile,_that.hasPassword,_that.hasGoogle,_that.googlePhotoUrl);case _:
+return $default(_that.uid,_that.role,_that.schoolId,_that.profile,_that.hasPassword,_that.hasGoogle,_that.googlePhotoUrl,_that.superadmin);case _:
   return orElse();
 
 }
@@ -196,10 +199,10 @@ return $default(_that.uid,_that.role,_that.schoolId,_that.profile,_that.hasPassw
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uid,  UserRole role,  String schoolId,  AppUser profile,  bool hasPassword,  bool hasGoogle,  String? googlePhotoUrl)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String uid,  UserRole role,  String schoolId,  AppUser profile,  bool hasPassword,  bool hasGoogle,  String? googlePhotoUrl,  bool superadmin)  $default,) {final _that = this;
 switch (_that) {
 case _Session():
-return $default(_that.uid,_that.role,_that.schoolId,_that.profile,_that.hasPassword,_that.hasGoogle,_that.googlePhotoUrl);case _:
+return $default(_that.uid,_that.role,_that.schoolId,_that.profile,_that.hasPassword,_that.hasGoogle,_that.googlePhotoUrl,_that.superadmin);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -216,10 +219,10 @@ return $default(_that.uid,_that.role,_that.schoolId,_that.profile,_that.hasPassw
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uid,  UserRole role,  String schoolId,  AppUser profile,  bool hasPassword,  bool hasGoogle,  String? googlePhotoUrl)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String uid,  UserRole role,  String schoolId,  AppUser profile,  bool hasPassword,  bool hasGoogle,  String? googlePhotoUrl,  bool superadmin)?  $default,) {final _that = this;
 switch (_that) {
 case _Session() when $default != null:
-return $default(_that.uid,_that.role,_that.schoolId,_that.profile,_that.hasPassword,_that.hasGoogle,_that.googlePhotoUrl);case _:
+return $default(_that.uid,_that.role,_that.schoolId,_that.profile,_that.hasPassword,_that.hasGoogle,_that.googlePhotoUrl,_that.superadmin);case _:
   return null;
 
 }
@@ -231,7 +234,7 @@ return $default(_that.uid,_that.role,_that.schoolId,_that.profile,_that.hasPassw
 
 
 class _Session extends Session {
-  const _Session({required this.uid, required this.role, required this.schoolId, required this.profile, this.hasPassword = true, this.hasGoogle = false, this.googlePhotoUrl}): super._();
+  const _Session({required this.uid, required this.role, required this.schoolId, required this.profile, this.hasPassword = true, this.hasGoogle = false, this.googlePhotoUrl, this.superadmin = false}): super._();
   
 
 @override final  String uid;
@@ -245,6 +248,9 @@ class _Session extends Session {
 @override@JsonKey() final  bool hasGoogle;
 /// The photo of the linked Google account, if any.
 @override final  String? googlePhotoUrl;
+/// The superadmin (`superadmin` claim): a teacher of the school they
+/// have open, who can switch to any school and add schools.
+@override@JsonKey() final  bool superadmin;
 
 /// Create a copy of Session
 /// with the given fields replaced by the non-null parameter values.
@@ -256,18 +262,18 @@ _$SessionCopyWith<_Session> get copyWith => __$SessionCopyWithImpl<_Session>(thi
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Session&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.role, role) || other.role == role)&&(identical(other.schoolId, schoolId) || other.schoolId == schoolId)&&(identical(other.profile, profile) || other.profile == profile)&&(identical(other.hasPassword, hasPassword) || other.hasPassword == hasPassword)&&(identical(other.hasGoogle, hasGoogle) || other.hasGoogle == hasGoogle)&&(identical(other.googlePhotoUrl, googlePhotoUrl) || other.googlePhotoUrl == googlePhotoUrl));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Session&&(identical(other.uid, uid) || other.uid == uid)&&(identical(other.role, role) || other.role == role)&&(identical(other.schoolId, schoolId) || other.schoolId == schoolId)&&(identical(other.profile, profile) || other.profile == profile)&&(identical(other.hasPassword, hasPassword) || other.hasPassword == hasPassword)&&(identical(other.hasGoogle, hasGoogle) || other.hasGoogle == hasGoogle)&&(identical(other.googlePhotoUrl, googlePhotoUrl) || other.googlePhotoUrl == googlePhotoUrl)&&(identical(other.superadmin, superadmin) || other.superadmin == superadmin));
 }
 
 
 @override
 int get hashCode {
-    return Object.hash(runtimeType,uid,role,schoolId,profile,hasPassword,hasGoogle,googlePhotoUrl);
+    return Object.hash(runtimeType,uid,role,schoolId,profile,hasPassword,hasGoogle,googlePhotoUrl,superadmin);
 }
 
 @override
 String toString() {
-    return 'Session(uid: $uid, role: $role, schoolId: $schoolId, profile: $profile, hasPassword: $hasPassword, hasGoogle: $hasGoogle, googlePhotoUrl: $googlePhotoUrl)';
+    return 'Session(uid: $uid, role: $role, schoolId: $schoolId, profile: $profile, hasPassword: $hasPassword, hasGoogle: $hasGoogle, googlePhotoUrl: $googlePhotoUrl, superadmin: $superadmin)';
 }
 
 
@@ -278,7 +284,7 @@ abstract mixin class _$SessionCopyWith<$Res> implements $SessionCopyWith<$Res> {
   factory _$SessionCopyWith(_Session value, $Res Function(_Session) _then) = __$SessionCopyWithImpl;
 @override @useResult
 $Res call({
- String uid, UserRole role, String schoolId, AppUser profile, bool hasPassword, bool hasGoogle, String? googlePhotoUrl
+ String uid, UserRole role, String schoolId, AppUser profile, bool hasPassword, bool hasGoogle, String? googlePhotoUrl, bool superadmin
 });
 
 
@@ -295,7 +301,7 @@ class __$SessionCopyWithImpl<$Res>
 
 /// Create a copy of Session
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? uid = null,Object? role = null,Object? schoolId = null,Object? profile = null,Object? hasPassword = null,Object? hasGoogle = null,Object? googlePhotoUrl = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? uid = null,Object? role = null,Object? schoolId = null,Object? profile = null,Object? hasPassword = null,Object? hasGoogle = null,Object? googlePhotoUrl = freezed,Object? superadmin = null,}) {
   return _then(_Session(
 uid: null == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
 as String,role: null == role ? _self.role : role // ignore: cast_nullable_to_non_nullable
@@ -304,7 +310,8 @@ as String,profile: null == profile ? _self.profile : profile // ignore: cast_nul
 as AppUser,hasPassword: null == hasPassword ? _self.hasPassword : hasPassword // ignore: cast_nullable_to_non_nullable
 as bool,hasGoogle: null == hasGoogle ? _self.hasGoogle : hasGoogle // ignore: cast_nullable_to_non_nullable
 as bool,googlePhotoUrl: freezed == googlePhotoUrl ? _self.googlePhotoUrl : googlePhotoUrl // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,superadmin: null == superadmin ? _self.superadmin : superadmin // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

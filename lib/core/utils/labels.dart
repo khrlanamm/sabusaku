@@ -66,6 +66,12 @@ String? normalizeExtracurricular(String raw) {
   return label;
 }
 
+/// A school code, also the `schools/{schoolId}` document ID: 3–30 lower-case
+/// letters and digits, e.g. `sman1sukodadi`.
+final _schoolIdPattern = RegExp(r'^[a-z0-9]{3,30}$');
+
+bool isValidSchoolId(String code) => _schoolIdPattern.hasMatch(code);
+
 /// Lower-case, trimmed address. Also the `members/{email}` document ID.
 String normalizeEmail(String raw) => raw.trim().toLowerCase();
 
