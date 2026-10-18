@@ -18,9 +18,16 @@ final _separated = RegExp(
 final _joined = RegExp('^$_gradePart([A-HJKM-Z][A-Z]?)([0-9]{0,2})\$');
 
 const _grades = {
-  'XII': 'XII', 'XLL': 'XII', 'XIL': 'XII', 'XLI': 'XII', '12': 'XII',
-  'XI': 'XI', 'XL': 'XI', '11': 'XI',
-  'X': 'X', '10': 'X',
+  'XII': 'XII',
+  'XLL': 'XII',
+  'XIL': 'XII',
+  'XLI': 'XII',
+  '12': 'XII',
+  'XI': 'XI',
+  'XL': 'XI',
+  '11': 'XI',
+  'X': 'X',
+  '10': 'X',
 };
 
 /// Turns what people type (`12  A1`, `XIIC2`, `Xll-A1`, `XI A4`, `XD`) into

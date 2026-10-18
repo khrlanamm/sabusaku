@@ -17,6 +17,7 @@ import '../../../core/utils/streams.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/domain/session.dart';
 import '../domain/journal_draft.dart';
+import '../domain/journal_filter.dart';
 import '../domain/reading_rules.dart';
 
 part 'student_repository.g.dart';
@@ -327,11 +328,25 @@ Stream<List<Journal>> myJournalsBetween(
         reading.watchJournalsBetween(program.id, from, to),
   ];
   yield* combineLatest(streams).map(
-    (lists) => [for (final list in lists) ...list]
-      ..sort((a, b) => b.date.compareTo(a.date)),
+    (lists) =>
+        [for (final list in lists) ...list]
+          ..sort((a, b) => b.date.compareTo(a.date)),
   );
 }
 
 @riverpod
 Stream<List<Journal>> unreadJournals(Ref ref, String programId) =>
     ref.watch(studentRepositoryProvider).watchUnreadJournals(programId);
+
+/// The filter of the Jurnal tab. Kept while the student moves between tabs,
+/// so cards on Beranda can set it before opening the tab; reset per account.
+@Riverpod(keepAlive: true)
+class JournalFilterState extends _$JournalFilterState {
+  @override
+  JournalFilter build() {
+    ref.watch(sessionProvider.select((session) => session?.uid));
+    return const JournalFilter();
+  }
+
+  void set(JournalFilter filter) => state = filter;
+}

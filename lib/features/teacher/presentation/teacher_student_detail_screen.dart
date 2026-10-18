@@ -18,9 +18,10 @@ import '../../../core/widgets/stat_card.dart';
 import '../../../core/widgets/states.dart';
 import '../../../core/widgets/status_chip.dart';
 import '../../../core/widgets/user_avatar.dart';
+import '../../ranking/domain/badges.dart';
+import '../../ranking/presentation/badges.dart';
+import '../../student/presentation/program_history_tile.dart';
 import '../../student/presentation/student_home_screen.dart' show OverdueLabel;
-import '../../student/presentation/student_profile_screen.dart'
-    show ProgramHistoryTile;
 import '../data/teacher_repository.dart';
 import 'student_form.dart';
 import 'student_tile.dart' show labelLine;
@@ -284,6 +285,7 @@ class _Body extends ConsumerWidget {
               child: StatCard(
                 label: 'Streak',
                 value: '${stats.streakCurrent}',
+                caption: 'Terbaik ${stats.streakBest}',
                 icon: Icons.local_fire_department,
                 color: context.palette.streak,
               ),
@@ -356,6 +358,31 @@ class _Body extends ConsumerWidget {
                 ),
               ),
             ),
+        ],
+        if (programs.value case final value?) ...[
+          const SizedBox(height: 20),
+          Text('Lencana', style: theme.textTheme.titleMedium),
+          const SizedBox(height: 8),
+          Builder(
+            builder: (context) {
+              final badges = badgesFor(
+                programs: value,
+                bestStreak: stats.streakBest,
+              );
+              return BadgeSummary(
+                badges: badges,
+                onTap: () => showModalBottomSheet<void>(
+                  context: context,
+                  isScrollControlled: true,
+                  showDragHandle: true,
+                  builder: (_) => FractionallySizedBox(
+                    heightFactor: 0.85,
+                    child: BadgeGrid(badges: badges),
+                  ),
+                ),
+              );
+            },
+          ),
         ],
         const SizedBox(height: 20),
         Text('Riwayat buku', style: theme.textTheme.titleMedium),

@@ -7,11 +7,18 @@ import '../../../core/time/periods.dart';
 enum RankMetric {
   books('Buku', 'buku', 'Buku selesai'),
   streak('Streak', 'streak', 'Streak terpanjang'),
-  days('Hari membaca', 'hari', 'Hari berjurnal');
+  days('Hari baca', 'hari', 'Hari berjurnal');
 
   const RankMetric(this.label, this.wire, this.description);
 
   final String label;
+
+  /// "3 buku", "streak 12 hari", "22 hari baca".
+  String describe(int value) => switch (this) {
+    books => '$value buku',
+    streak => 'streak $value hari',
+    days => '$value hari baca',
+  };
 
   /// Its name in links (`?metrik=`).
   final String wire;

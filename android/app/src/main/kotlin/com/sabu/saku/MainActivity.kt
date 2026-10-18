@@ -10,6 +10,7 @@ class MainActivity : FlutterActivity() {
         super.onCreate(savedInstanceState)
         createCommentChannel()
         createAttentionChannel()
+        createRecapChannel()
     }
 
     // The channel FCM posts teacher-comment notifications to. Its ID is also
@@ -35,6 +36,19 @@ class MainActivity : FlutterActivity() {
             NotificationManager.IMPORTANCE_DEFAULT,
         ).apply {
             description = "Pemberitahuan pagi saat siswa binaan Anda perlu perhatian"
+        }
+        getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+    }
+
+    // The students' reading recap on the first of each month (Cloud
+    // Functions: monthlyRecap).
+    private fun createRecapChannel() {
+        val channel = NotificationChannel(
+            "rekap_bulanan",
+            "Rekap bulanan",
+            NotificationManager.IMPORTANCE_DEFAULT,
+        ).apply {
+            description = "Rekap membaca dan peringkatmu setiap awal bulan"
         }
         getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
     }

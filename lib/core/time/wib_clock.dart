@@ -20,8 +20,11 @@ class WibClock {
   /// Today's date in WIB as `yyyy-MM-dd`.
   String today() => dateIdOf(_now());
 
-  static String dateIdOf(DateTime instant) =>
-      DateId.format(instant.toUtc().add(_offset));
+  static String dateIdOf(DateTime instant) => DateId.format(wibOf(instant));
+
+  /// The instant as WIB wall-clock time (a UTC value shifted by 7 hours),
+  /// for formatting a time of day.
+  static DateTime wibOf(DateTime instant) => instant.toUtc().add(_offset);
 }
 
 @Riverpod(keepAlive: true)

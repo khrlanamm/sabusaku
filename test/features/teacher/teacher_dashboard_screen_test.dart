@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:sabusaku/core/time/periods.dart';
+import 'package:sabusaku/features/ranking/data/ranking_repository.dart';
+import 'package:sabusaku/features/ranking/domain/ranking.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:mocktail/mocktail.dart';
@@ -125,6 +128,11 @@ void main() {
         schoolProvider.overrideWith((_) => Stream.value(_school)),
         teacherStudentsProvider.overrideWith((_) => Stream.value(_students)),
         pendingStudentsProvider.overrideWith((_) => Stream.value(const [])),
+        leaderboardProvider('month-2026-10').overrideWith(
+          (_) => Stream.value(
+            const Leaderboard(period: RankPeriod.month('2026-10')),
+          ),
+        ),
       ],
     );
     addTearDown(container.dispose);

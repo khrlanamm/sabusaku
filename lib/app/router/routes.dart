@@ -24,6 +24,23 @@ abstract final class Routes {
   static String studentProgramJournals(String programId) =>
       '/siswa/profil/buku/$programId';
   static const studentExplore = '/siswa/buku/jelajahi';
+  static const studentBookHistory = '/siswa/beranda/riwayat-buku';
+  static const studentStreak = '/siswa/beranda/streak';
+  static const studentRanking = '/siswa/beranda/peringkat';
+  static const studentBadges = '/siswa/profil/lencana';
+
+  /// Riwayat buku narrowed to one status (`aktif`, `selesai`, `dihentikan`).
+  static String studentBookHistoryWith({String? status}) => Uri(
+    path: studentBookHistory,
+    queryParameters: {'status': ?status},
+  ).toString();
+
+  /// The leaderboard on one period (a `leaderboards` document ID) and
+  /// metric (`buku`, `streak`, `hari`).
+  static String studentRankingWith({String? period, String? metric}) => Uri(
+    path: studentRanking,
+    queryParameters: {'periode': ?period, 'metrik': ?metric},
+  ).toString();
   static String studentCatalogBook(String bookId) =>
       '/siswa/buku/katalog/$bookId';
 
@@ -31,6 +48,7 @@ abstract final class Routes {
   static const teacherDashboard = '/guru/dashboard';
   static const teacherActiveBooks = '/guru/dashboard/buku-aktif';
   static const teacherMonthJournals = '/guru/dashboard/jurnal';
+  static const teacherRanking = '/guru/dashboard/peringkat';
   static const teacherStudents = '/guru/siswa';
   static const teacherSchool = '/guru/sekolah';
   static const teacherProfile = '/guru/profil';

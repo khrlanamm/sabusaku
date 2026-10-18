@@ -7,6 +7,7 @@ import '../../../app/theme/palette.dart';
 import '../../../core/models/student_stats.dart';
 import '../../../core/models/student_status.dart';
 import '../../../core/time/date_format.dart';
+import '../../../core/time/periods.dart';
 import '../../../core/time/wib_clock.dart';
 import '../../../core/widgets/stat_card.dart';
 import '../../../core/widgets/states.dart';
@@ -14,6 +15,8 @@ import '../../../core/widgets/status_chip.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/data/school_repository.dart';
 import '../../notifications/notification_prompt.dart';
+import '../../ranking/data/ranking_repository.dart';
+import '../../ranking/domain/ranking.dart';
 import '../data/teacher_repository.dart';
 import '../domain/student_scope.dart';
 import 'scope_filter_bar.dart';
@@ -70,6 +73,8 @@ class TeacherDashboardScreen extends ConsumerWidget {
                 const SizedBox(height: 12),
                 _PendingNotice(count: pendingInScope, scope: scope),
               ],
+              const SizedBox(height: 12),
+              _RankingCard(scope: scope),
               const SizedBox(height: 20),
               _StatusBreakdown(students: inScope, scope: scope),
               const SizedBox(height: 20),
@@ -112,6 +117,43 @@ class _PendingNotice extends ConsumerWidget {
           ref.read(studentListFilterProvider.notifier).showScope(scope);
           context.go(Routes.teacherStudents);
         },
+      ),
+    );
+  }
+}
+
+/// This month's leader in scope, and the way to the whole leaderboard.
+class _RankingCard extends ConsumerWidget {
+  const _RankingCard({required this.scope});
+
+  final StudentScope scope;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final today = ref.watch(wibClockProvider).today();
+    final month = RankPeriod.of(PeriodKind.month, today);
+    final me = ref.watch(currentSessionProvider.select((s) => s.profile));
+    final board = ref.watch(leaderboardProvider(month.id)).value;
+    final top = rankEntries(
+      (board?.entries ?? const <RankEntry>[]).where(
+        (entry) => scope.matches(entry.classId, entry.extracurriculars, me),
+      ),
+      RankMetric.books,
+    ).firstOrNull;
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        key: const Key('dashboard-ranking'),
+        leading: Icon(Icons.leaderboard, color: context.palette.goldText),
+        title: const Text('Peringkat siswa'),
+        subtitle: Text(
+          top == null
+              ? 'Buku selesai, streak, dan hari membaca per periode.'
+              : 'Teratas ${month.label}: ${top.entry.name} · '
+                    '${top.entry.books} buku, ${top.entry.days} hari membaca',
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => context.push(Routes.teacherRanking),
       ),
     );
   }

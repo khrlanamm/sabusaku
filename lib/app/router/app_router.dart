@@ -19,11 +19,16 @@ import '../../features/books/presentation/teacher/deleted_books_screen.dart';
 import '../../features/books/presentation/teacher/suggestions_screen.dart';
 import '../../features/books/presentation/teacher/teacher_book_screen.dart';
 import '../../features/books/presentation/teacher/teacher_books_screen.dart';
+import '../../features/ranking/domain/ranking.dart';
+import '../../features/ranking/presentation/badges.dart';
+import '../../features/ranking/presentation/leaderboard_screen.dart';
+import '../../features/student/presentation/book_history_screen.dart';
 import '../../features/student/presentation/book_screen.dart';
 import '../../features/student/presentation/journal_detail_screen.dart';
 import '../../features/student/presentation/journal_form_screen.dart';
 import '../../features/student/presentation/journal_history_screen.dart';
 import '../../features/student/presentation/student_home_screen.dart';
+import '../../features/student/presentation/streak_screen.dart';
 import '../../features/student/presentation/student_profile_screen.dart';
 import '../../features/teacher/presentation/add_students_screen.dart';
 import '../../features/teacher/presentation/add_teacher_screen.dart';
@@ -140,6 +145,30 @@ GoRouter appRouter(Ref ref) {
         ),
       ),
       GoRoute(
+        path: Routes.studentBookHistory,
+        builder: (_, state) => BookHistoryScreen(
+          initialStatus: state.uri.queryParameters['status'],
+        ),
+      ),
+      GoRoute(
+        path: Routes.studentStreak,
+        builder: (_, _) => const StreakScreen(),
+      ),
+      GoRoute(
+        path: Routes.studentRanking,
+        builder: (_, state) => LeaderboardScreen(
+          periodId: state.uri.queryParameters['periode'],
+          metric: switch (state.uri.queryParameters['metrik']) {
+            final wire? => RankMetric.fromWire(wire),
+            null => null,
+          },
+        ),
+      ),
+      GoRoute(
+        path: Routes.studentBadges,
+        builder: (_, _) => const BadgesScreen(),
+      ),
+      GoRoute(
         path: Routes.studentExplore,
         builder: (_, _) => const BookExploreScreen(),
       ),
@@ -168,6 +197,10 @@ GoRouter appRouter(Ref ref) {
       GoRoute(
         path: Routes.teacherMonthJournals,
         builder: (_, _) => const TeacherMonthJournalsScreen(),
+      ),
+      GoRoute(
+        path: Routes.teacherRanking,
+        builder: (_, _) => const LeaderboardScreen(),
       ),
       // Before '/guru/siswa/:studentId', which would match them too.
       GoRoute(

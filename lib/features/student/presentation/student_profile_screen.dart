@@ -3,29 +3,26 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/router/routes.dart';
-import '../../../app/theme/palette.dart';
 import '../../../core/models/program.dart';
-import '../../../core/time/date_format.dart';
 import '../../../core/widgets/dialogs.dart';
-import '../../../core/widgets/book_cover.dart';
-import '../../../core/widgets/stat_card.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/data/school_repository.dart';
 import '../../auth/presentation/account_section.dart';
 import '../../auth/presentation/label_pickers.dart';
 import '../../notifications/notification_prompt.dart';
+import '../../ranking/domain/badges.dart';
+import '../../ranking/presentation/badges.dart';
 import '../data/student_repository.dart';
-import '../domain/reading_rules.dart';
 
-/// Statistics, past books and account actions (PRD §4: Profil merges the
-/// former Refleksi tab).
+/// The student's account: labels, badges and settings. Statistics and the
+/// reading history live on Beranda (docs/07, 18 Oct 2026).
 class StudentProfileScreen extends ConsumerWidget {
   const StudentProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final stats = ref.watch(myStatsProvider).value;
     final programs = ref.watch(myProgramsProvider).value ?? const <Program>[];
+    final bestStreak = ref.watch(myStatsProvider).value?.streakBest ?? 0;
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -37,54 +34,12 @@ class StudentProfileScreen extends ConsumerWidget {
           const SizedBox(height: 12),
           const StudentLabelsCard(),
           const SizedBox(height: 20),
-          Text('Statistik membaca', style: theme.textTheme.titleMedium),
+          Text('Lencana', style: theme.textTheme.titleMedium),
           const SizedBox(height: 10),
-          StatCardRow(
-            children: [
-              Expanded(
-                child: StatCard(
-                  label: 'Total jurnal',
-                  value: '${stats?.journalCountTotal ?? 0}',
-                  icon: Icons.edit_note,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: StatCard(
-                  label: 'Buku selesai',
-                  value: '${stats?.booksCompleted ?? 0}',
-                  icon: Icons.menu_book,
-                  color: context.palette.success,
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: StatCard(
-                  label: 'Streak terbaik',
-                  value: '${stats?.streakBest ?? 0}',
-                  icon: Icons.local_fire_department,
-                  color: context.palette.streak,
-                ),
-              ),
-            ],
+          BadgeSummary(
+            badges: badgesFor(programs: programs, bestStreak: bestStreak),
+            onTap: () => context.push(Routes.studentBadges),
           ),
-          const SizedBox(height: 20),
-          Text('Riwayat buku', style: theme.textTheme.titleMedium),
-          const SizedBox(height: 10),
-          if (programs.isEmpty)
-            Text(
-              'Belum ada buku.',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            )
-          else
-            for (final program in programs)
-              ProgramHistoryTile(
-                program: program,
-                onTap: () =>
-                    context.push(Routes.studentProgramJournals(program.id)),
-              ),
           const SizedBox(height: 20),
           const AccountSettings(extraSettings: [NotificationSettingTile()]),
         ],
@@ -217,117 +172,6 @@ class _LabelsSheetState extends ConsumerState<_LabelsSheet> {
               child: const Text('Simpan'),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-/// One book in a reading history, with its month, status and progress.
-class ProgramHistoryTile extends StatelessWidget {
-  const ProgramHistoryTile({
-    super.key,
-    required this.program,
-    required this.onTap,
-  });
-
-  final Program program;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final completedDate = program.completedDate;
-    final (color, tint) = switch (program.status) {
-      ProgramStatus.active => (
-        Theme.of(context).colorScheme.primary,
-        context.palette.infoTint,
-      ),
-      ProgramStatus.completed => (
-        context.palette.activeText,
-        context.palette.activeTint,
-      ),
-      ProgramStatus.stopped => (
-        context.palette.neutralText,
-        context.palette.neutralTint,
-      ),
-    };
-    return Card(
-      margin: const EdgeInsets.only(bottom: 10),
-      clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              BookCover(
-                title: program.book.title,
-                coverUrl: program.book.coverUrl,
-                width: 44,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      program.book.title,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: theme.textTheme.titleSmall,
-                    ),
-                    Text(
-                      '${formatMonth(program.startDate)} · '
-                      '${program.journalCount} jurnal · ${program.percent}%',
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 4,
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: tint,
-                            borderRadius: BorderRadius.circular(999),
-                          ),
-                          child: Text(
-                            program.status.label,
-                            style: TextStyle(
-                              color: color,
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                        // Read as one phrase with the "Selesai" chip.
-                        if (program.status == ProgramStatus.completed &&
-                            completedDate != null)
-                          Text(
-                            '${formatDayMonthLong(completedDate)} · '
-                            'Lama membaca: ${readingDays(startDate: program.startDate, endDate: completedDate)} hari',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurfaceVariant,
-                            ),
-                          ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(Icons.chevron_right),
-            ],
-          ),
         ),
       ),
     );

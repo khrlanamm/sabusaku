@@ -13,13 +13,19 @@ import '../../../core/time/date_id.dart';
 import '../../../core/time/wib_clock.dart';
 import '../../../core/widgets/app_progress_bar.dart';
 import '../../../core/widgets/book_cover.dart';
+import '../../../core/time/periods.dart';
 import '../../../core/widgets/stat_card.dart';
 import '../../../core/widgets/states.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../notifications/notification_prompt.dart';
+import '../../ranking/data/ranking_repository.dart';
+import '../../ranking/domain/badges.dart';
+import '../../ranking/domain/ranking.dart';
 import '../data/journal_outbox.dart';
 import '../data/student_repository.dart';
+import '../domain/journal_filter.dart';
 import 'outbox_notice.dart';
+import 'program_history_tile.dart';
 
 class StudentHomeScreen extends ConsumerWidget {
   const StudentHomeScreen({super.key});
@@ -56,12 +62,16 @@ class StudentHomeScreen extends ConsumerWidget {
                   ? const _NoBookCard()
                   : _BookCard(program: active, today: today),
             ),
-            const SizedBox(height: 16),
-            _StatsRow(stats: stats, today: today),
             if (program.value case final active?) ...[
               const SizedBox(height: 20),
               _NewComments(programId: active.id),
             ],
+            const SizedBox(height: 20),
+            Text('Statistik', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 10),
+            _Stats(stats: stats, today: today),
+            const SizedBox(height: 20),
+            const _RecentBooks(),
           ],
         ),
       ),
@@ -250,8 +260,9 @@ class OverdueLabel extends StatelessWidget {
   }
 }
 
-class _StatsRow extends ConsumerWidget {
-  const _StatsRow({required this.stats, required this.today});
+/// Six cards, each opening the page behind its number.
+class _Stats extends ConsumerWidget {
+  const _Stats({required this.stats, required this.today});
 
   final StudentStats? stats;
   final String today;
@@ -263,6 +274,24 @@ class _StatsRow extends ConsumerWidget {
         .watch(journalOutboxProvider)
         .where((entry) => entry.status == OutboxStatus.pending)
         .length;
+    final programs = ref.watch(myProgramsProvider).value ?? const <Program>[];
+    final badges = badgesFor(
+      programs: programs,
+      bestStreak: stats?.streakBest ?? 0,
+    );
+    final month = RankPeriod.of(PeriodKind.month, today);
+    final board = ref.watch(leaderboardProvider(month.id)).value;
+    final uid = ref.watch(currentSessionProvider.select((s) => s.uid));
+    final ranked = rankEntries(board?.entries ?? const [], RankMetric.books);
+    final mine = ranked.where((row) => row.entry.studentId == uid).firstOrNull;
+
+    void openJournals(JournalRange range) {
+      ref
+          .read(journalFilterStateProvider.notifier)
+          .set(JournalFilter(range: range));
+      context.go(Routes.studentJournals);
+    }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -270,18 +299,87 @@ class _StatsRow extends ConsumerWidget {
           children: [
             Expanded(
               child: StatCard(
+                compact: true,
+                key: const Key('home-stat-month'),
                 label: 'Jurnal bulan ini',
                 value: '${stats?.journalCountMonth ?? 0}/$daysInMonth',
                 icon: Icons.edit_note,
+                onTap: () => openJournals(MonthJournals(DateId.monthOf(today))),
               ),
             ),
             const SizedBox(width: 10),
             Expanded(
               child: StatCard(
+                compact: true,
+                key: const Key('home-stat-streak'),
                 label: 'Streak',
                 value: '${stats?.streakCurrent ?? 0} hari',
+                caption: 'Terbaik ${stats?.streakBest ?? 0} hari',
                 icon: Icons.local_fire_department,
                 color: context.palette.streak,
+                onTap: () => context.push(Routes.studentStreak),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        StatCardRow(
+          children: [
+            Expanded(
+              child: StatCard(
+                compact: true,
+                key: const Key('home-stat-books'),
+                label: 'Buku selesai',
+                value: '${stats?.booksCompleted ?? 0}',
+                icon: Icons.menu_book,
+                color: context.palette.success,
+                onTap: () => context.push(
+                  Routes.studentBookHistoryWith(status: 'selesai'),
+                ),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: StatCard(
+                compact: true,
+                key: const Key('home-stat-journals'),
+                label: 'Total jurnal',
+                value: '${stats?.journalCountTotal ?? 0}',
+                icon: Icons.history_edu,
+                onTap: () => openJournals(const AllJournals()),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        StatCardRow(
+          children: [
+            Expanded(
+              child: StatCard(
+                compact: true,
+                key: const Key('home-stat-rank'),
+                label: 'Peringkat',
+                value: mine == null ? '–' : '#${mine.rank}',
+                caption: mine == null
+                    ? 'Bulan ini, belum masuk'
+                    : 'Bulan ini, dari ${ranked.length}',
+                icon: Icons.leaderboard,
+                color: context.palette.goldText,
+                onTap: () => context.push(Routes.studentRanking),
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: StatCard(
+                compact: true,
+                key: const Key('home-stat-badges'),
+                label: 'Lencana',
+                value:
+                    '${badges.where((progress) => progress.earned).length}'
+                    '/${badges.length}',
+                icon: Icons.workspace_premium,
+                color: context.palette.info,
+                onTap: () => context.push(Routes.studentBadges),
               ),
             ),
           ],
@@ -306,6 +404,52 @@ class _StatsRow extends ConsumerWidget {
               ],
             ),
           ),
+      ],
+    );
+  }
+}
+
+/// The three most recent books, and the way to all of them.
+class _RecentBooks extends ConsumerWidget {
+  const _RecentBooks();
+
+  static const _shown = 3;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final programs = ref.watch(myProgramsProvider).value ?? const <Program>[];
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text('Riwayat buku', style: theme.textTheme.titleMedium),
+            ),
+            if (programs.isNotEmpty)
+              TextButton(
+                key: const Key('home-book-history'),
+                onPressed: () => context.push(Routes.studentBookHistory),
+                child: Text('Lihat semua (${programs.length})'),
+              ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        if (programs.isEmpty)
+          Text(
+            'Buku yang kamu mulai tampil di sini.',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          )
+        else
+          for (final program in programs.take(_shown))
+            ProgramHistoryTile(
+              program: program,
+              onTap: () =>
+                  context.push(Routes.studentProgramJournals(program.id)),
+            ),
       ],
     );
   }

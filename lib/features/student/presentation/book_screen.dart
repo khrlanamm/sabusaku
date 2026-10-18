@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../app/router/routes.dart';
 import '../../../core/models/program.dart';
 import '../../../core/time/date_format.dart';
 import '../../../core/time/wib_clock.dart';
@@ -10,6 +12,7 @@ import '../../../core/widgets/dialogs.dart';
 import '../../../core/widgets/states.dart';
 import '../data/student_repository.dart';
 import '../domain/reading_rules.dart';
+import 'program_history_tile.dart';
 import 'start_book_form.dart';
 import 'student_home_screen.dart';
 
@@ -21,7 +24,17 @@ class BookScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final program = ref.watch(activeProgramProvider);
     return Scaffold(
-      appBar: AppBar(title: const Text('Buku Saya')),
+      appBar: AppBar(
+        title: const Text('Buku Saya'),
+        actions: [
+          IconButton(
+            key: const Key('book-history'),
+            tooltip: 'Riwayat buku',
+            onPressed: () => context.push(Routes.studentBookHistory),
+            icon: const Icon(Icons.history),
+          ),
+        ],
+      ),
       body: AsyncView<Program?>(
         value: program,
         onRetry: () => ref.invalidate(activeProgramProvider),
@@ -210,6 +223,49 @@ class _ActiveBook extends ConsumerWidget {
           icon: const Icon(Icons.stop_circle_outlined),
           label: const Text('Hentikan buku'),
         ),
+        const SizedBox(height: 16),
+        const _PreviousBooks(),
+      ],
+    );
+  }
+}
+
+/// The three most recent finished or stopped books.
+class _PreviousBooks extends ConsumerWidget {
+  const _PreviousBooks();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final previous = [
+      for (final program in ref.watch(myProgramsProvider).value ?? const [])
+        if (!program.isActive) program,
+    ];
+    if (previous.isEmpty) return const SizedBox.shrink();
+    final theme = Theme.of(context);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Buku sebelumnya',
+                style: theme.textTheme.titleMedium,
+              ),
+            ),
+            TextButton(
+              onPressed: () => context.push(Routes.studentBookHistory),
+              child: Text('Lihat semua (${previous.length})'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 6),
+        for (final program in previous.take(3))
+          ProgramHistoryTile(
+            program: program,
+            onTap: () =>
+                context.push(Routes.studentProgramJournals(program.id)),
+          ),
       ],
     );
   }

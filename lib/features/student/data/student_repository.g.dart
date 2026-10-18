@@ -358,3 +358,66 @@ final class UnreadJournalsFamily extends $Family
   @override
   String toString() => r'unreadJournalsProvider';
 }
+
+/// The filter of the Jurnal tab. Kept while the student moves between tabs,
+/// so cards on Beranda can set it before opening the tab; reset per account.
+
+@ProviderFor(JournalFilterState)
+final journalFilterStateProvider = JournalFilterStateProvider._();
+
+/// The filter of the Jurnal tab. Kept while the student moves between tabs,
+/// so cards on Beranda can set it before opening the tab; reset per account.
+final class JournalFilterStateProvider
+    extends $NotifierProvider<JournalFilterState, JournalFilter> {
+  /// The filter of the Jurnal tab. Kept while the student moves between tabs,
+  /// so cards on Beranda can set it before opening the tab; reset per account.
+  JournalFilterStateProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'journalFilterStateProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$journalFilterStateHash();
+
+  @$internal
+  @override
+  JournalFilterState create() => JournalFilterState();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(JournalFilter value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<JournalFilter>(value),
+    );
+  }
+}
+
+String _$journalFilterStateHash() =>
+    r'1d02849187a4055b098c7137a23a336ccf8ca88f';
+
+/// The filter of the Jurnal tab. Kept while the student moves between tabs,
+/// so cards on Beranda can set it before opening the tab; reset per account.
+
+abstract class _$JournalFilterState extends $Notifier<JournalFilter> {
+  JournalFilter build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<JournalFilter, JournalFilter>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<JournalFilter, JournalFilter>,
+              JournalFilter,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}

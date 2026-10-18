@@ -175,6 +175,13 @@ class NotificationService {
         );
       case 'attention':
         return (location: Routes.teacherDashboard, role: UserRole.guru);
+      case 'recap':
+        return (
+          location: Routes.studentRankingWith(
+            period: data['period'] as String?,
+          ),
+          role: UserRole.siswa,
+        );
     }
     return null;
   }

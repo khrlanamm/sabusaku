@@ -41,11 +41,18 @@ import 'package:sabusaku/features/auth/presentation/register_screen.dart';
 import 'package:sabusaku/features/auth/presentation/terms_screen.dart';
 import 'package:sabusaku/features/notifications/notification_service.dart';
 import 'package:sabusaku/features/student/data/student_repository.dart';
+import 'package:sabusaku/core/time/periods.dart';
+import 'package:sabusaku/features/ranking/data/ranking_repository.dart';
+import 'package:sabusaku/features/ranking/domain/ranking.dart';
+import 'package:sabusaku/features/ranking/presentation/badges.dart';
+import 'package:sabusaku/features/ranking/presentation/leaderboard_screen.dart';
+import 'package:sabusaku/features/student/presentation/book_history_screen.dart';
 import 'package:sabusaku/features/student/presentation/book_screen.dart';
 import 'package:sabusaku/features/student/presentation/journal_detail_screen.dart';
 import 'package:sabusaku/features/student/presentation/journal_form_screen.dart';
 import 'package:sabusaku/features/student/presentation/journal_history_screen.dart';
 import 'package:sabusaku/features/student/presentation/student_home_screen.dart';
+import 'package:sabusaku/features/student/presentation/streak_screen.dart';
 import 'package:sabusaku/features/student/presentation/student_profile_screen.dart';
 import 'package:sabusaku/features/teacher/data/teacher_repository.dart';
 import 'package:sabusaku/features/teacher/presentation/add_students_screen.dart';
@@ -126,6 +133,19 @@ const _program = Program(
   lastJournalDate: '2026-10-15',
   streakCurrent: 5,
   streakBest: 7,
+  journalDates: [
+    '2026-10-01',
+    '2026-10-02',
+    '2026-10-03',
+    '2026-10-05',
+    '2026-10-06',
+    '2026-10-07',
+    '2026-10-08',
+    '2026-10-09',
+    '2026-10-13',
+    '2026-10-14',
+    '2026-10-15',
+  ],
 );
 
 final _finished = Program(
@@ -142,7 +162,77 @@ final _finished = Program(
   completedAt: DateTime.utc(2026, 9, 26, 5),
   currentPage: 240,
   journalCount: 22,
+  streakBest: 7,
+  finalReflection: 'Minke membuat saya ingin belajar sejarah lebih dalam.',
+  journalDates: [
+    for (var day = 1; day <= 26; day++)
+      if (![6, 13, 20, 24].contains(day))
+        '2026-09-${day.toString().padLeft(2, '0')}',
+  ],
 );
+
+final _board = Leaderboard(
+  period: const RankPeriod.month('2026-10'),
+  updatedAt: DateTime.utc(2026, 10, 16, 1, 5),
+  entries: const [
+    RankEntry(
+      studentId: 's1',
+      name: 'Bima Saputra',
+      classId: 'XII-A1',
+      extracurriculars: ['Masis-KIR'],
+      streak: 5,
+      days: 11,
+    ),
+    RankEntry(
+      studentId: 's2',
+      name: 'Nadia Putri Lestari',
+      classId: 'XII-A2',
+      extracurriculars: ['Masis-KIR', 'PMR'],
+      books: 1,
+      streak: 9,
+      days: 14,
+    ),
+    RankEntry(
+      studentId: 's3',
+      name: 'Fajar Ramadhan',
+      classId: 'X-D',
+      extracurriculars: ['Masis-KIR'],
+      streak: 2,
+      days: 4,
+    ),
+    RankEntry(
+      studentId: 's5',
+      name: 'Gita Lestari',
+      classId: 'XI-A4',
+      books: 1,
+      streak: 6,
+      days: 12,
+    ),
+    RankEntry(
+      studentId: 's6',
+      name: 'Rizky Maulana',
+      classId: 'XII-A1',
+      extracurriculars: ['Masis-KIR'],
+      streak: 5,
+      days: 11,
+    ),
+  ],
+);
+
+final _septemberJournals = [
+  for (final date in ['2026-09-26', '2026-09-25'])
+    Journal(
+      programId: 'p0',
+      date: date,
+      studentId: 's1',
+      pageStart: 200,
+      pageEnd: 240,
+      durationRange: DurationRange.m30to60,
+      keyInformation:
+          'Minke menyadari bahwa pendidikan Eropa tidak menghapus kenyataan '
+          'pahit di tanah kelahirannya.',
+    ),
+];
 
 const _summary = ActiveProgramSummary(
   programId: 'p1',
@@ -325,6 +415,28 @@ List<Override> _data() => [
       .overrideWith((_) => Stream.value([_journals.first])),
   programProvider('p1').overrideWith((_) => Stream.value(_program)),
   programProvider('p0').overrideWith((_) => Stream.value(_finished)),
+  journalsProvider(
+    'p0',
+    20,
+  ).overrideWith((_) => Stream.value(_septemberJournals)),
+  for (final id in ['month-2026-10', 'month-2026-09', 'all'])
+    leaderboardProvider(id).overrideWith(
+      (_) => Stream.value(
+        id == 'month-2026-10'
+            ? _board
+            : Leaderboard(period: RankPeriod.fromId(id)!),
+      ),
+    ),
+  myJournalsBetweenProvider(
+    '2026-10-01',
+    '2026-10-31',
+    null,
+  ).overrideWith((_) => Stream.value(_journals)),
+  myJournalsBetweenProvider(
+    '2026-09-01',
+    '2026-09-30',
+    null,
+  ).overrideWith((_) => Stream.value(_septemberJournals)),
   journalProvider('p1', _today).overrideWith((_) => Stream.value(null)),
   journalProvider(
     'p1',
@@ -452,6 +564,24 @@ final _cases = [
     open: _openCommentReport,
   ),
   const _Case('student_profile', StudentProfileScreen(), session: _student),
+  const _Case('book_history', BookHistoryScreen(), session: _student),
+  const _Case(
+    'program_detail',
+    ProgramJournalsScreen(programId: 'p0'),
+    session: _student,
+  ),
+  const _Case('streak', StreakScreen(), session: _student),
+  const _Case('badges', BadgesScreen(), session: _student),
+  const _Case('leaderboard', LeaderboardScreen(), session: _student),
+  _Case(
+    'journal_calendar',
+    const JournalHistoryTab(),
+    session: _student,
+    open: (tester) async {
+      await tester.tap(find.text('Kalender'));
+      await tester.pumpAndSettle();
+    },
+  ),
   const _Case(
     'teacher_dashboard',
     TeacherDashboardScreen(),
@@ -469,6 +599,7 @@ final _cases = [
     session: _teacher,
   ),
   const _Case('teacher_students', TeacherStudentsScreen(), session: _teacher),
+  const _Case('teacher_leaderboard', LeaderboardScreen(), session: _teacher),
   const _Case(
     'teacher_student_detail',
     TeacherStudentDetailScreen(studentId: 's1'),
