@@ -84,8 +84,19 @@ describe("isolasi sekolah", () => {
     await assertFails(getDoc(doc(a.anonymous, school)));
   });
 
-  it("daftar sekolah tidak bisa di-list oleh siapa pun", async () => {
-    await assertFails(getDocs(collection(a.teacher1, "schools")));
+  it("daftar sekolah hanya bisa di-list oleh superadmin", async () => {
+    for (const db of [a.teacher1, a.student, a.otherTeacher, a.noClaims, a.badRole, a.anonymous]) {
+      await assertFails(getDocs(collection(db, "schools")));
+    }
+    await assertSucceeds(getDocs(collection(a.superadmin, "schools")));
+  });
+
+  it("superadmin membaca sekolah lain, tetapi hanya mengelola sekolah yang dibukanya", async () => {
+    await assertSucceeds(getDoc(doc(a.superadmin, `schools/${OTHER_SCHOOL}`)));
+    await assertFails(getDocs(collection(a.superadmin, `schools/${OTHER_SCHOOL}/users`)));
+    await assertFails(updateDoc(doc(a.superadmin, `schools/${OTHER_SCHOOL}`), {classes: [CLASS_1]}));
+    await assertSucceeds(getDocs(collection(a.superadmin, `${school}/users`)));
+    await assertSucceeds(updateDoc(doc(a.superadmin, school), {classes: [CLASS_1, CLASS_2, "X-A"]}));
   });
 });
 
@@ -207,7 +218,15 @@ describe("users", () => {
     await assertFails(updateDoc(doc(a.student, `${school}/users/siswa2`), {name: "Orang Lain", ...now()}));
   });
 
-  it("guru tidak punya kelas", async () => {
+  it("tanda superadmin hanya ditulis Functions", async () => {
+    await assertFails(updateDoc(doc(a.teacher1, `${school}/users/guru1`), {superadmin: true, ...now()}));
+    await assertFails(
+      updateDoc(doc(a.superadmin, `${school}/users/super1`), {superadmin: deleteField(), ...now()}),
+    );
+    await assertSucceeds(updateDoc(doc(a.superadmin, `${school}/users/super1`), {name: "Super Baru", ...now()}));
+  });
+
+    it("guru tidak punya kelas", async () => {
     const me = doc(a.teacher1, `${school}/users/guru1`);
     await assertSucceeds(updateDoc(me, {name: "Guru Satu, S.Pd.", extracurriculars: ["Masis-KIR"], ...now()}));
     await assertFails(updateDoc(me, {classId: CLASS_2, ...now()}));

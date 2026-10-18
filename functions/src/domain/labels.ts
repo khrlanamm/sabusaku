@@ -55,6 +55,13 @@ export function normalizeExtracurricular(raw: string): string | null {
     : null;
 }
 
+/** A school code, also the `schools/{schoolId}` document ID: `sman1sukodadi`. */
+const SCHOOL_ID_RE = /^[a-z0-9]{3,30}$/;
+
+export function isValidSchoolId(code: string): boolean {
+  return SCHOOL_ID_RE.test(code);
+}
+
 /** Lower-case, trimmed address. Also the `members/{email}` document ID. */
 export function normalizeEmail(raw: string): string {
   return raw.trim().toLowerCase();

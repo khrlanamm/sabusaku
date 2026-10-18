@@ -35,6 +35,8 @@ export function actors(env: RulesTestEnvironment) {
     classmate: as("siswa2", {role: "siswa", schoolId: SCHOOL}),
     outsider: as("siswa9", {role: "siswa", schoolId: OTHER_SCHOOL}),
     otherTeacher: as("guru9", {role: "guru", schoolId: OTHER_SCHOOL}),
+    // A teacher of whichever school they have open; lists every school.
+    superadmin: as("super1", {role: "guru", schoolId: SCHOOL, superadmin: true}),
     noClaims: as("ghost", {}),
     // The admin role no longer exists.
     badRole: as("ghost2", {role: "admin", schoolId: SCHOOL}),
@@ -92,6 +94,7 @@ export async function seedSchool(env: RulesTestEnvironment): Promise<void> {
     const users = `schools/${SCHOOL}/users`;
     await setDoc(doc(db, `${users}/guru1`), userDoc("guru", "Guru Satu"));
     await setDoc(doc(db, `${users}/guru2`), userDoc("guru", "Guru Dua"));
+    await setDoc(doc(db, `${users}/super1`), userDoc("guru", "Super Admin", {superadmin: true}));
     await setDoc(
       doc(db, `${users}/siswa1`),
       userDoc("siswa", "Siswa Satu", {classId: CLASS_1, extracurriculars: ["Masis-KIR"]}),

@@ -3,6 +3,7 @@ import {describe, expect, it} from "vitest";
 import {
   compareClassLabels,
   isValidEmail,
+  isValidSchoolId,
   normalizeClassLabel,
   normalizeEmail,
   normalizeExtracurricular,
@@ -54,5 +55,21 @@ describe("email dan ekskul", () => {
     expect(normalizeExtracurricular("  Masis   KIR ")).toBe("Masis KIR");
     expect(normalizeExtracurricular("P")).toBeNull();
     expect(normalizeExtracurricular("x".repeat(41))).toBeNull();
+  });
+});
+
+describe("kode sekolah", () => {
+  it.each([
+    ["sman1sukodadi", true],
+    ["e2e", true],
+    ["a".repeat(30), true],
+    ["ab", false],
+    ["a".repeat(31), false],
+    ["SMAN1", false],
+    ["sman-1", false],
+    ["sman 1", false],
+    ["", false],
+  ])("%j → %j", (code, expected) => {
+    expect(isValidSchoolId(code)).toBe(expected);
   });
 });

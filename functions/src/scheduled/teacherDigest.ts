@@ -40,6 +40,8 @@ export async function sendTeacherDigests(now = Date.now()): Promise<number> {
       .where("status", "==", "active")
       .get();
     for (const teacher of teachers.docs) {
+      // The superadmin only visits the school.
+      if (teacher.get("superadmin") === true) continue;
       const picked = attentionFor(
         {
           homeroomClass: (teacher.get("homeroomClass") as string | null | undefined) ?? null,

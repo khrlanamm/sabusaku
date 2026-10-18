@@ -1,5 +1,5 @@
-// Adds a teacher (penanggung jawab) to a school's roster. Only the developer
-// does this; teachers cannot add or remove each other.
+// Adds a teacher (penanggung jawab) to a school's roster. In the app, the
+// superadmin adds a school's first teacher and teachers add each other.
 //
 //   npx tsx tools/add-guru.ts --school sman1sukodadi --email guru@gmail.com
 //       --name "Sugito, S.T., M.Pd." [--ekskul "Masis-KIR"] [--wali XII-A1] [--emulator]

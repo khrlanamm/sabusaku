@@ -3,14 +3,17 @@ rules_version = '2';
 // =====================================================================
 // Sabu Saku — Firestore Security Rules
 //
-// Custom claims (set by the claimAccount Cloud Function):
-//   role     : 'guru' (penanggung jawab) | 'siswa'
-//   schoolId : school code, equal to the schools/{schoolId} document ID
+// Custom claims (set by the claimAccount and switchSchool Cloud Functions):
+//   role       : 'guru' (penanggung jawab) | 'siswa'
+//   schoolId   : school code, equal to the schools/{schoolId} document ID
+//   superadmin : true for the superadmin, a teacher of whichever school
+//                they have open
 //
 // Every teacher of a school sees and manages every student of that school.
-// Schools and their first teacher are created by the developer through
-// scripts; teachers add students and other teachers through callables. The
-// roster lives in the top-level `members/{email}` collection.
+// Schools and their first teacher are created by the superadmin (addSchool)
+// or the developer's scripts; teachers add students and other teachers
+// through callables. The roster lives in the top-level `members/{email}`
+// collection.
 //
 // Deny by default. Clients never write derived numbers (progress, streak,
 // status); only Cloud Functions do, through the Admin SDK, which bypasses
@@ -33,6 +36,8 @@ service cloud.firestore {
     // A teacher of one of the listed schools (a report concerns one or two).
     // hasAny (not `in`) lets the rules accept an array-contains query.
     function isTeacherOfAny(schools) { return isAnyTeacher() && schools.hasAny([tokenSchool()]); }
+    // Lists the schools to switch between; acts as a teacher of the open one.
+    function isSuperadmin() { return signedIn() && request.auth.token.get('superadmin', false) == true; }
 
     // ---------- Time (WIB = UTC+7, no DST) ----------
     // Dates are compared as whole-day numbers so the device clock is never
@@ -169,8 +174,8 @@ service cloud.firestore {
           && st.attentionMaxDays is int && st.attentionMaxDays >= st.activeMaxDays && st.attentionMaxDays <= 30;
       }
 
-      allow get: if inSchool(schoolId);
-      allow list: if false;
+      allow get: if inSchool(schoolId) || isSuperadmin();
+      allow list: if isSuperadmin();
       allow create, delete: if false;
       // Teachers change the settings, the class and extracurricular labels and
       // the catalog books the school recommends.

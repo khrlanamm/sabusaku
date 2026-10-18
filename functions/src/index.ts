@@ -9,6 +9,7 @@ import {REGION} from "./config";
 setGlobalOptions({region: REGION, maxInstances: 5});
 
 export {acceptTerms} from "./callables/acceptTerms";
+export {addSchool} from "./callables/addSchool";
 export {addStudents} from "./callables/addStudents";
 export {addTeacher} from "./callables/addTeacher";
 export {claimAccount} from "./callables/claimAccount";
@@ -23,6 +24,7 @@ export {restoreBook} from "./callables/restoreBook";
 export {reviewSuggestion} from "./callables/reviewSuggestion";
 export {saveBook} from "./callables/saveBook";
 export {setBookCover} from "./callables/setBookCover";
+export {switchSchool} from "./callables/switchSchool";
 
 export {dailyRefresh} from "./scheduled/dailyRefresh";
 export {monthlyRecap} from "./scheduled/monthlyRecap";

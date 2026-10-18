@@ -6,6 +6,7 @@ import {
   normalizeClassLabel,
   normalizeEmail,
 } from "../domain/labels";
+import {isSuperadminEmail} from "../domain/superadmin";
 import {MAX_CLASSES, MAX_MEMBER_EXTRACURRICULARS, Role} from "../domain/types";
 import {forgetStudentCovers} from "./books";
 import {
@@ -65,6 +66,8 @@ export function cleanMember(
   | {ok: false; email: string; reason: string} {
   const email = normalizeEmail(input.email);
   if (!isValidEmail(email)) return {ok: false, email, reason: "Format email tidak valid."};
+  // The superadmin opens schools without a roster entry.
+  if (isSuperadminEmail(email)) return {ok: false, email, reason: "Email ini tidak bisa didaftarkan."};
 
   const name = (input.name ?? "").trim().replace(/\s+/g, " ");
   if (name.length > 80) return {ok: false, email, reason: "Nama maksimal 80 karakter."};
@@ -188,7 +191,7 @@ export function upsizeGooglePhoto(url: string): string {
 }
 
 /** The photo of the account's linked Google sign-in, if any. */
-async function googlePhotoOf(uid: string, fallback: string | null) {
+export async function googlePhotoOf(uid: string, fallback: string | null) {
   const record = await auth.getUser(uid);
   const google = record.providerData.find((provider) => provider.providerId === "google.com");
   const photo = google?.photoURL ?? fallback;

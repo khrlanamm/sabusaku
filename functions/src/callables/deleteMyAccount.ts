@@ -13,12 +13,16 @@ import {forgetReports} from "../infra/reports";
  * are deleted with it; a teacher's profile and roster entry go too, while the
  * comments they wrote stay with the students' journals. Either way the
  * reports they filed go, and reports about them lose their copy of the
- * content.
+ * content. The superadmin, with a profile in every school they opened, is
+ * refused.
  */
 export const deleteMyAccount = onCall(
   {...CALLABLE_OPTIONS, timeoutSeconds: 300},
   async (request): Promise<{ok: true}> => {
     if (!request.auth) throw new HttpsError("unauthenticated", "Silakan masuk kembali.");
+    if ((request.auth.token as Record<string, unknown>).superadmin === true) {
+      throw new HttpsError("failed-precondition", "Akun superadmin tidak bisa dihapus dari aplikasi.");
+    }
     const uid = request.auth.uid;
     const email = request.auth.token.email ? normalizeEmail(request.auth.token.email) : null;
 

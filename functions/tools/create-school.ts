@@ -1,5 +1,6 @@
 // Registers a school. Teachers (penanggung jawab) are added afterwards with
 // tools/add-guru.ts and students with tools/import-students.ts or in the app.
+// The superadmin can also add a school with its first teacher in the app.
 //
 //   npx tsx tools/create-school.ts --code sman1sukodadi --name "SMA Negeri 1 Sukodadi"
 //       [--classes "XII-A1,XII-A2,X-G"] [--emulator]
@@ -9,15 +10,13 @@
 
 import {listArg, requireArg, run, target} from "./_env";
 
-import {DEFAULT_EXTRACURRICULARS} from "../src/domain/labels";
+import {DEFAULT_EXTRACURRICULARS, isValidSchoolId} from "../src/domain/labels";
 import {createSchool} from "../src/infra/schools";
-
-const SCHOOL_ID_RE = /^[a-z0-9]{3,30}$/;
 
 run(async () => {
   const code = requireArg("code").toLowerCase();
   const name = requireArg("name");
-  if (!SCHOOL_ID_RE.test(code)) {
+  if (!isValidSchoolId(code)) {
     throw new Error("Kode sekolah harus 3–30 karakter, huruf kecil dan angka saja.");
   }
 
