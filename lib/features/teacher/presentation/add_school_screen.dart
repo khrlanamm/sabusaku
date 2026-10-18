@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/models/school.dart';
 import '../../../core/utils/labels.dart';
 import '../../../core/widgets/dialogs.dart';
 import '../data/superadmin_repository.dart';
-import 'school_picker_sheet.dart';
 import 'student_form.dart';
 
 /// The superadmin registers a school with its first penanggung jawab. The
 /// school starts with the default extracurriculars and no classes; its
-/// teachers add the rest in the Sekolah tab.
+/// teachers add the rest in the Sekolah tab. Pops with the school when the
+/// superadmin wants to open it.
 class AddSchoolScreen extends ConsumerStatefulWidget {
   const AddSchoolScreen({super.key});
 
@@ -92,9 +93,8 @@ class _AddSchoolScreenState extends ConsumerState<AddSchoolScreen> {
       confirmLabel: 'Buka',
       cancelLabel: 'Nanti',
     );
-    if (!mounted) return;
-    if (open) await openSchool(context, ref, School(id: code, name: name));
-    if (mounted) Navigator.of(context).pop();
+    // The Sekolah tab opens it (see showSchoolPicker).
+    if (mounted) context.pop(open ? School(id: code, name: name) : null);
   }
 
   @override

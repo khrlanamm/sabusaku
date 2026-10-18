@@ -9,16 +9,40 @@ import '../../../core/widgets/states.dart';
 import '../../auth/data/auth_repository.dart';
 import '../data/superadmin_repository.dart';
 
+/// What the superadmin picked in [SchoolPickerSheet].
+sealed class SchoolPick {
+  const SchoolPick();
+}
+
+class OpenSchool extends SchoolPick {
+  const OpenSchool(this.school);
+
+  final School school;
+}
+
+class AddSchool extends SchoolPick {
+  const AddSchool();
+}
+
 /// The superadmin's list of schools: open another one, or add a school.
+///
+/// A school is opened from the Sekolah tab, never from a pushed page: the
+/// router rebuilds pushed pages when the session moves to another school.
 Future<void> showSchoolPicker(BuildContext context, WidgetRef ref) async {
-  final picked = await showModalBottomSheet<School>(
+  final pick = await showModalBottomSheet<SchoolPick>(
     context: context,
     isScrollControlled: true,
     showDragHandle: true,
     builder: (_) => const SchoolPickerSheet(),
   );
-  if (picked == null || !context.mounted) return;
-  await openSchool(context, ref, picked);
+  if (pick == null || !context.mounted) return;
+  final School? school = switch (pick) {
+    OpenSchool(:final school) => school,
+    // The form pops with the new school when it should be opened.
+    AddSchool() => await context.push<School>(Routes.teacherAddSchool),
+  };
+  if (school == null || !context.mounted) return;
+  await openSchool(context, ref, school);
 }
 
 /// Opens [school] for the superadmin behind a progress indicator. Returns
@@ -42,7 +66,7 @@ Future<bool> openSchool(
   return true;
 }
 
-/// Pops with the school picked; "Tambah sekolah" opens the form instead.
+/// Pops with the school picked, or with "Tambah sekolah".
 class SchoolPickerSheet extends ConsumerWidget {
   const SchoolPickerSheet({super.key});
 
@@ -89,9 +113,9 @@ class SchoolPickerSheet extends ConsumerWidget {
                                 color: theme.colorScheme.primary,
                               )
                             : null,
-                        onTap: () =>
-                            Navigator.of(context)
-                                .pop(school.id == current ? null : school),
+                        onTap: () => Navigator.of(
+                          context,
+                        ).pop(school.id == current ? null : OpenSchool(school)),
                       ),
                   ],
                 ),
@@ -109,11 +133,7 @@ class SchoolPickerSheet extends ConsumerWidget {
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
               child: FilledButton.icon(
                 key: const Key('school-add-school'),
-                onPressed: () {
-                  final router = GoRouter.of(context);
-                  Navigator.of(context).pop();
-                  router.push(Routes.teacherAddSchool);
-                },
+                onPressed: () => Navigator.of(context).pop(const AddSchool()),
                 icon: const Icon(Icons.add_business_outlined),
                 label: const Text('Tambah sekolah'),
               ),
