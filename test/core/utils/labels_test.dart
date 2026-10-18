@@ -71,4 +71,17 @@ void main() {
     ];
     expect(unmet, hasLength(3));
   });
+
+  test('teacherRoleLine names the homeroom class and supervised ekskul', () {
+    expect(teacherRoleLine(null, const []), isNull);
+    expect(teacherRoleLine('XII-A1', const []), 'Wali kelas XII-A1');
+    expect(
+      teacherRoleLine(null, const ['Masis-KIR', 'PMR']),
+      'Pembina Masis-KIR, PMR',
+    );
+    expect(
+      teacherRoleLine('X-G2', const ['PMR']),
+      'Wali kelas X-G2 · Pembina PMR',
+    );
+  });
 }

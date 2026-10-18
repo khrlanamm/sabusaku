@@ -273,6 +273,22 @@ describe("addTeacher dan removeTeacher", () => {
       homeroomClass: "XII-A1",
       extracurriculars: ["PMR"],
     });
+    // Students see her as the homeroom teacher and supervisor.
+    await eventually(async () => {
+      const staff = (await schoolRef(A).get()).get("staff");
+      return staff?.homerooms?.["XII-A1"]?.includes("Bu Wali") && staff?.supervisors?.PMR?.includes("Bu Wali");
+    });
+
+    // Changing her own roles in the profile moves her in the staff list.
+    await updateDoc(doc(wali.db, `schools/${A}/users/${wali.uid}`), {
+      homeroomClass: "XII-A2",
+      extracurriculars: [],
+      updatedAt: serverTimestamp(),
+    });
+    await eventually(async () => {
+      const staff = (await schoolRef(A).get()).get("staff");
+      return staff?.homerooms?.["XII-A2"]?.includes("Bu Wali") && !staff?.homerooms?.["XII-A1"] && !staff?.supervisors?.PMR;
+    });
   });
 
   it("akun yang sudah ada langsung bergabung", async () => {
@@ -323,6 +339,7 @@ describe("addTeacher dan removeTeacher", () => {
     expect((await membersCol().doc("wali@sekolah.test").get()).exists).toBe(false);
     expect((await usersCol(A).doc(waliUid).get()).get("status")).toBe("removed");
     expect((await auth.getUser(waliUid)).customClaims ?? {}).not.toHaveProperty("schoolId");
+    await eventually(async () => !(await schoolRef(A).get()).get("staff")?.homerooms?.["XII-A2"]);
   });
 });
 

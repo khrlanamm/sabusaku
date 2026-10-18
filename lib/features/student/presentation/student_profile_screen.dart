@@ -10,6 +10,7 @@ import '../../../core/widgets/dialogs.dart';
 import '../../../core/widgets/book_cover.dart';
 import '../../../core/widgets/stat_card.dart';
 import '../../auth/data/auth_repository.dart';
+import '../../auth/data/school_repository.dart';
 import '../../auth/presentation/account_section.dart';
 import '../../auth/presentation/label_pickers.dart';
 import '../../notifications/notification_prompt.dart';
@@ -92,18 +93,25 @@ class StudentProfileScreen extends ConsumerWidget {
   }
 }
 
-/// The student's class and extracurriculars. Students may change both any
-/// time (a class move also moves their journals to the new class label).
+/// The student's class and extracurriculars, with their homeroom teacher and
+/// supervisors. Students may change both any time (a class move also moves
+/// their journals to the new class label).
 class StudentLabelsCard extends ConsumerWidget {
   const StudentLabelsCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(currentSessionProvider.select((s) => s.profile));
+    final school = ref.watch(schoolProvider).value;
     final theme = Theme.of(context);
     final muted = theme.textTheme.bodySmall?.copyWith(
       color: theme.colorScheme.onSurfaceVariant,
     );
+    final homeroom = school?.homerooms[profile.classId];
+    String supervised(String label) => switch (school?.supervisors[label]) {
+      final names? => '$label (pembina: ${names.join(', ')})',
+      null => label,
+    };
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -112,9 +120,13 @@ class StudentLabelsCard extends ConsumerWidget {
         leading: const Icon(Icons.class_outlined),
         title: Text('Kelas ${profile.classId ?? '-'}'),
         subtitle: Text(
-          profile.extracurriculars.isEmpty
-              ? 'Belum ikut ekstrakurikuler'
-              : 'Ekskul: ${profile.extracurriculars.join(', ')}',
+          [
+            if (homeroom != null) 'Wali kelas: ${homeroom.join(', ')}',
+            if (profile.extracurriculars.isEmpty)
+              'Belum ikut ekstrakurikuler'
+            else
+              'Ekskul: ${profile.extracurriculars.map(supervised).join(', ')}',
+          ].join('\n'),
           style: muted,
         ),
         trailing: const Icon(Icons.edit_outlined),

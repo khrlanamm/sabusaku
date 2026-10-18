@@ -27,4 +27,5 @@ export {onCommentCreated} from "./triggers/onCommentCreated";
 export {onJournalWritten} from "./triggers/onJournalWritten";
 export {onProgramWritten} from "./triggers/onProgramWritten";
 export {onSchoolUpdated} from "./triggers/onSchoolChanges";
+export {onTeacherWritten} from "./triggers/onTeacherWritten";
 export {onUserUpdated} from "./triggers/onUserUpdated";

@@ -306,6 +306,10 @@ describe("schools: pengaturan dan label", () => {
     await assertFails(updateDoc(doc(a.student, school), {classes: ["X-A"]}));
     await assertFails(updateDoc(doc(a.teacher1, school), {status: "suspended"}));
     await assertFails(updateDoc(doc(a.teacher1, school), {name: "Nama Lain"}));
+    // The names of homeroom teachers and supervisors are written by Cloud Functions only.
+    await assertFails(
+      updateDoc(doc(a.teacher1, school), {staff: {homerooms: {"XII-A1": ["Guru Satu"]}, supervisors: {}}}),
+    );
   });
 
   it("label kelas dan ekskul yang tidak valid ditolak", async () => {

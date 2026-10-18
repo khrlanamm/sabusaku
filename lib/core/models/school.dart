@@ -52,6 +52,14 @@ abstract class School with _$School {
 
     /// Catalog books the school's teachers recommend (`books/{bookId}`).
     @Default(<String>[]) List<String> recommendedBooks,
+
+    /// `staff.homerooms`: teacher names per class they are the homeroom
+    /// teacher (wali kelas) of. Written by Cloud Functions.
+    @Default(<String, List<String>>{}) Map<String, List<String>> homerooms,
+
+    /// `staff.supervisors`: teacher names per extracurricular they
+    /// supervise. Written by Cloud Functions.
+    @Default(<String, List<String>>{}) Map<String, List<String>> supervisors,
   }) = _School;
 
   factory School.fromMap(String id, Map<String, dynamic> data) => School(
@@ -67,5 +75,13 @@ abstract class School with _$School {
     recommendedBooks: List<String>.from(
       data['recommendedBooks'] as List? ?? const [],
     ),
+    homerooms: _namesByLabel((data['staff'] as Map?)?['homerooms']),
+    supervisors: _namesByLabel((data['staff'] as Map?)?['supervisors']),
   );
 }
+
+Map<String, List<String>> _namesByLabel(Object? value) => {
+  if (value is Map)
+    for (final MapEntry(:key, :value) in value.entries)
+      if (key is String && value is List) key: List<String>.from(value),
+};

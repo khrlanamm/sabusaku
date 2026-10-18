@@ -76,6 +76,12 @@ const _school = School(
   name: 'SMA Negeri 1 Sukodadi',
   classes: ['X-D', 'X-G', 'XI-A4', 'XI-B2', 'XII-A1', 'XII-A2'],
   extracurriculars: ['Masis-KIR', 'Paskibra', 'Pala', 'PMR'],
+  homerooms: {
+    'XII-A1': ['Khoirul Anam, S.Kom.'],
+  },
+  supervisors: {
+    'Masis-KIR': ['Sugito, S.T., M.Pd.'],
+  },
 );
 
 const _studentProfile = AppUser(
