@@ -263,7 +263,7 @@ class _Body extends ConsumerWidget {
                                 spacing: 6,
                                 runSpacing: 6,
                                 children: [
-                                  if (book.extended) const _ExtendedLabel(),
+                                  if (book.extended) const ExtendedLabel(),
                                   if (book.overdue) const OverdueLabel(),
                                 ],
                               ),
@@ -521,8 +521,8 @@ class _TypedConfirmDialogState extends State<_TypedConfirmDialog> {
 }
 
 /// The student has used the one target extension (PRD BR-9).
-class _ExtendedLabel extends StatelessWidget {
-  const _ExtendedLabel();
+class ExtendedLabel extends StatelessWidget {
+  const ExtendedLabel({super.key});
 
   @override
   Widget build(BuildContext context) {

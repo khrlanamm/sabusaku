@@ -6,14 +6,15 @@ import '../../../app/router/routes.dart';
 import '../../../core/models/member.dart';
 import '../../../core/models/student_stats.dart';
 import '../../../core/models/student_status.dart';
-import '../../../core/utils/labels.dart';
 import '../../../core/widgets/states.dart';
-import '../../auth/data/school_repository.dart';
+import '../../auth/data/auth_repository.dart';
 import '../data/teacher_repository.dart';
+import 'scope_filter_bar.dart';
 import 'student_tile.dart';
 
-/// Every student of the school, filtered by class, extracurricular, status
-/// and name, plus the students who have not signed in yet.
+/// Every student of the school, filtered by the teacher's own group
+/// ("Binaan saya"), class, extracurricular, status and name, plus the
+/// students who have not signed in yet.
 class TeacherStudentsScreen extends ConsumerStatefulWidget {
   const TeacherStudentsScreen({super.key});
 
@@ -62,18 +63,12 @@ class _TeacherStudentsScreenState extends ConsumerState<TeacherStudentsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final school = ref.watch(schoolProvider).value;
     final students = ref.watch(teacherStudentsProvider);
     final pending = ref.watch(pendingStudentsProvider).value ?? const [];
     final filter = ref.watch(studentListFilterProvider);
     final filterNotifier = ref.read(studentListFilterProvider.notifier);
-
-    final classes = {
-      ...?school?.classes,
-      for (final stats in students.value ?? const <StudentStats>[])
-        if (stats.classId != null) stats.classId!,
-    }.toList()..sort(compareClassLabels);
-    final extracurriculars = school?.extracurriculars ?? const <String>[];
+    final options = ref.watch(scopeOptionsProvider);
+    final me = ref.watch(currentSessionProvider.select((s) => s.profile));
 
     return Scaffold(
       appBar: AppBar(title: const Text('Siswa')),
@@ -103,19 +98,35 @@ class _TeacherStudentsScreenState extends ConsumerState<TeacherStudentsScreen> {
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
-                _MenuChip(
+                if (me.hasGroup) ...[
+                  Center(
+                    child: FilterChip(
+                      key: const Key('students-mine-filter'),
+                      avatar: filter.mine
+                          ? null
+                          : const Icon(Icons.star_outline, size: 18),
+                      label: const Text('Binaan saya'),
+                      selected: filter.mine,
+                      onSelected: filterNotifier.setMine,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                FilterMenuChip(
                   key: const Key('students-class-filter'),
-                  allLabel: 'Semua kelas',
+                  label: 'Semua kelas',
+                  clearLabel: 'Semua kelas',
                   value: filter.classId,
-                  options: classes,
+                  options: options.classes,
                   onChanged: filterNotifier.setClass,
                 ),
                 const SizedBox(width: 8),
-                _MenuChip(
+                FilterMenuChip(
                   key: const Key('students-ekskul-filter'),
-                  allLabel: 'Semua ekskul',
+                  label: 'Semua ekskul',
+                  clearLabel: 'Semua ekskul',
                   value: filter.extracurricular,
-                  options: extracurriculars,
+                  options: options.extracurriculars,
                   onChanged: filterNotifier.setExtracurricular,
                 ),
               ],
@@ -160,6 +171,7 @@ class _TeacherStudentsScreenState extends ConsumerState<TeacherStudentsScreen> {
                           filter,
                           classId: stats.classId,
                           extracurriculars: stats.extracurriculars,
+                          me: me,
                         ) &&
                         (filter.status == null ||
                             stats.status == filter.status) &&
@@ -176,6 +188,7 @@ class _TeacherStudentsScreenState extends ConsumerState<TeacherStudentsScreen> {
                                 filter,
                                 classId: member.classId,
                                 extracurriculars: member.extracurriculars,
+                                me: me,
                               ) &&
                               _matchesQuery(member.name, member.email))
                             member,
@@ -252,51 +265,6 @@ class _PendingSection extends StatelessWidget {
                   context.push(Routes.teacherPendingMember(member.email)),
             ),
         ],
-      ),
-    );
-  }
-}
-
-/// A chip that opens a menu of [options]; "all" clears the filter.
-class _MenuChip extends StatelessWidget {
-  const _MenuChip({
-    super.key,
-    required this.allLabel,
-    required this.value,
-    required this.options,
-    required this.onChanged,
-  });
-
-  final String allLabel;
-  final String? value;
-  final List<String> options;
-  final ValueChanged<String?> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: PopupMenuButton<String>(
-        tooltip: allLabel,
-        initialValue: value ?? '',
-        onSelected: (selected) => onChanged(selected.isEmpty ? null : selected),
-        itemBuilder: (_) => [
-          PopupMenuItem(value: '', child: Text(allLabel)),
-          for (final option in options)
-            PopupMenuItem(value: option, child: Text(option)),
-        ],
-        child: Chip(
-          avatar: Icon(
-            Icons.filter_list,
-            size: 18,
-            color: value == null
-                ? Theme.of(context).colorScheme.onSurfaceVariant
-                : Theme.of(context).colorScheme.primary,
-          ),
-          label: Text(value ?? allLabel),
-          backgroundColor: value == null
-              ? null
-              : Theme.of(context).colorScheme.secondaryContainer,
-        ),
       ),
     );
   }

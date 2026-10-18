@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/data/reading_repository.dart';
@@ -10,9 +11,12 @@ import '../../../core/models/program.dart';
 import '../../../core/models/school.dart';
 import '../../../core/models/student_stats.dart';
 import '../../../core/models/student_status.dart';
+import '../../../core/utils/labels.dart';
 import '../../auth/data/auth_repository.dart';
+import '../../auth/data/school_repository.dart';
 import '../../auth/domain/app_user.dart';
 import '../../auth/domain/session.dart';
+import '../domain/student_scope.dart';
 
 part 'teacher_repository.g.dart';
 
@@ -300,45 +304,112 @@ Stream<List<Program>> studentPrograms(Ref ref, String studentId) =>
     ref.watch(readingRepositoryProvider).watchPrograms(studentId);
 
 typedef StudentFilter = ({
+  bool mine,
   String? classId,
   String? extracurricular,
   StudentStatus? status,
 });
 
 /// Filter of the student list. Shared so the dashboard can open the list
-/// already filtered.
-@riverpod
+/// already filtered, and kept while the list is not built yet (a tab opens
+/// only when first visited). Cleared for each account.
+@Riverpod(keepAlive: true)
 class StudentListFilter extends _$StudentListFilter {
   @override
-  StudentFilter build() => (classId: null, extracurricular: null, status: null);
+  StudentFilter build() {
+    ref.watch(sessionProvider.select((session) => session?.uid));
+    return (mine: false, classId: null, extracurricular: null, status: null);
+  }
+
+  void setMine(bool mine) => state = (
+    mine: mine,
+    classId: state.classId,
+    extracurricular: state.extracurricular,
+    status: state.status,
+  );
 
   void setClass(String? classId) => state = (
+    mine: state.mine,
     classId: classId,
     extracurricular: state.extracurricular,
     status: state.status,
   );
 
   void setExtracurricular(String? extracurricular) => state = (
+    mine: state.mine,
     classId: state.classId,
     extracurricular: extracurricular,
     status: state.status,
   );
 
   void setStatus(StudentStatus? status) => state = (
+    mine: state.mine,
     classId: state.classId,
     extracurricular: state.extracurricular,
     status: status,
   );
 
-  void reset() => state = (classId: null, extracurricular: null, status: null);
+  /// Replaces the filter with the dashboard's [scope] and, optionally, one
+  /// [status].
+  void showScope(StudentScope scope, {StudentStatus? status}) => state = (
+    mine: scope is MyStudents,
+    classId: scope is ClassScope ? scope.label : null,
+    extracurricular: scope is ExtracurricularScope ? scope.label : null,
+    status: status,
+  );
+
+  void reset() =>
+      state = (mine: false, classId: null, extracurricular: null, status: null);
 }
 
-/// Whether [filter] keeps a student with these labels.
+/// Whether [filter] keeps a student with these labels. "Binaan saya" is
+/// ignored once [me] no longer has a group.
 bool matchesLabels(
   StudentFilter filter, {
   required String? classId,
   required List<String> extracurriculars,
+  required AppUser me,
 }) =>
+    (!filter.mine || !me.hasGroup || me.inGroup(classId, extracurriculars)) &&
     (filter.classId == null || classId == filter.classId) &&
     (filter.extracurricular == null ||
         extracurriculars.contains(filter.extracurricular));
+
+/// The scope of the dashboard and of the pages its cards open. Starts on the
+/// teacher's own students when they have a group, and again for each account.
+@Riverpod(keepAlive: true)
+class DashboardScope extends _$DashboardScope {
+  @override
+  StudentScope build() {
+    ref.watch(sessionProvider.select((session) => session?.uid));
+    final hasGroup = ref.read(sessionProvider)?.profile.hasGroup ?? false;
+    return hasGroup ? const MyStudents() : const AllStudents();
+  }
+
+  void set(StudentScope scope) => state = scope;
+}
+
+/// The labels a view can be narrowed to: the school's lists plus any class a
+/// student still carries after it left the list.
+@riverpod
+ScopeOptions scopeOptions(Ref ref) {
+  final school = ref.watch(schoolProvider).value;
+  final students = ref.watch(teacherStudentsProvider).value ?? const [];
+  return (
+    classes: {
+      ...?school?.classes,
+      for (final stats in students)
+        if (stats.classId != null) stats.classId!,
+    }.toList()..sort(compareClassLabels),
+    extracurriculars: school?.extracurriculars ?? const [],
+  );
+}
+
+/// [DashboardScope] as it applies now; see [StudentScope.resolve].
+@riverpod
+StudentScope effectiveDashboardScope(Ref ref) => ref
+    .watch(dashboardScopeProvider)
+    .resolve(
+      ref.watch(currentSessionProvider.select((session) => session.profile)),
+      ref.watch(scopeOptionsProvider),
+    );

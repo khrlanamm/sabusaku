@@ -79,11 +79,12 @@ void main() {
     WidgetTester tester, {
     List<StudentStats> students = _students,
     List<Member> pending = _pending,
+    Session session = _teacher,
   }) async {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          currentSessionProvider.overrideWithValue(_teacher),
+          currentSessionProvider.overrideWithValue(session),
           schoolProvider.overrideWith((_) => Stream.value(_school)),
           teacherStudentsProvider.overrideWith((_) => Stream.value(students)),
           pendingStudentsProvider.overrideWith((_) => Stream.value(pending)),
@@ -133,6 +134,33 @@ void main() {
 
     await tester.tap(find.byKey(const Key('students-status-perlu_perhatian')));
     await tester.pumpAndSettle();
+    expect(visibleNames(tester), ['Citra']);
+  });
+
+  testWidgets('"Binaan saya" keeps the homeroom class and supervised ekskul', (
+    tester,
+  ) async {
+    await pump(tester);
+    // A teacher without a group has no such filter.
+    expect(find.byKey(const Key('students-mine-filter')), findsNothing);
+
+    await pump(
+      tester,
+      session: _teacher.copyWith(
+        profile: _teacher.profile.copyWith(
+          homeroomClass: 'XI-A1',
+          extracurriculars: ['PMR'],
+        ),
+      ),
+    );
+    await tester.tap(find.byKey(const Key('students-mine-filter')));
+    await tester.pumpAndSettle();
+    // Anisa and Bima are in XI-A1, Citra is in PMR; Eka is in neither.
+    expect(visibleNames(tester), ['Anisa', 'Bima', 'Citra']);
+    expect(find.textContaining('Belum masuk'), findsNothing);
+
+    // Combines with the other filters.
+    await pickMenu(tester, 'students-class-filter', 'XI-B1');
     expect(visibleNames(tester), ['Citra']);
   });
 

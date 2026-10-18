@@ -29,6 +29,8 @@ abstract final class Routes {
 
   // Guru (penanggung jawab)
   static const teacherDashboard = '/guru/dashboard';
+  static const teacherActiveBooks = '/guru/dashboard/buku-aktif';
+  static const teacherMonthJournals = '/guru/dashboard/jurnal';
   static const teacherStudents = '/guru/siswa';
   static const teacherSchool = '/guru/sekolah';
   static const teacherProfile = '/guru/profil';

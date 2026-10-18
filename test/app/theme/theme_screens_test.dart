@@ -51,7 +51,10 @@ import 'package:sabusaku/features/teacher/data/teacher_repository.dart';
 import 'package:sabusaku/features/teacher/presentation/add_students_screen.dart';
 import 'package:sabusaku/features/teacher/presentation/reports_screen.dart';
 import 'package:sabusaku/features/teacher/presentation/school_screen.dart';
+import 'package:sabusaku/features/teacher/presentation/add_teacher_screen.dart';
+import 'package:sabusaku/features/teacher/presentation/teacher_active_books_screen.dart';
 import 'package:sabusaku/features/teacher/presentation/teacher_dashboard_screen.dart';
+import 'package:sabusaku/features/teacher/presentation/teacher_month_journals_screen.dart';
 import 'package:sabusaku/features/teacher/presentation/teacher_journal_detail_screen.dart';
 import 'package:sabusaku/features/teacher/presentation/teacher_profile_screen.dart';
 import 'package:sabusaku/features/teacher/presentation/teacher_student_detail_screen.dart';
@@ -310,9 +313,7 @@ List<Override> _data() => [
   wibClockProvider.overrideWithValue(_clock),
   schoolProvider.overrideWith((_) => Stream.value(_school)),
   activeProgramProvider.overrideWith((_) => Stream.value(_program)),
-  myProgramsProvider.overrideWith(
-    (_) => Stream.value([_program, _finished]),
-  ),
+  myProgramsProvider.overrideWith((_) => Stream.value([_program, _finished])),
   myStatsProvider.overrideWith((_) => Stream.value(_myStats)),
   unreadJournalsProvider('p1')
       .overrideWith((_) => Stream.value([_journals.first])),
@@ -451,6 +452,16 @@ final _cases = [
     session: _teacher,
     nav: _teacherTabs,
   ),
+  const _Case(
+    'teacher_active_books',
+    TeacherActiveBooksScreen(),
+    session: _teacher,
+  ),
+  const _Case(
+    'teacher_month_journals',
+    TeacherMonthJournalsScreen(),
+    session: _teacher,
+  ),
   const _Case('teacher_students', TeacherStudentsScreen(), session: _teacher),
   const _Case(
     'teacher_student_detail',
@@ -465,6 +476,7 @@ final _cases = [
   const _Case('school', SchoolScreen(), session: _teacher),
   const _Case('reports', ReportsScreen(), session: _teacher),
   const _Case('add_students', AddStudentsScreen(), session: _teacher),
+  const _Case('add_teacher', AddTeacherScreen(), session: _teacher),
   const _Case('teacher_profile', TeacherProfileScreen(), session: _teacher),
 ];
 

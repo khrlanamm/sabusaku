@@ -54,8 +54,7 @@ class ClassLabelField extends ConsumerWidget {
         helperText: empty ? emptyHelper : null,
       ),
       items: [
-        if (!required)
-          DropdownMenuItem<String>(child: Text(noneLabel)),
+        if (!required) DropdownMenuItem<String>(child: Text(noneLabel)),
         for (final item in labels)
           DropdownMenuItem<String>(value: item, child: Text(item)),
       ],

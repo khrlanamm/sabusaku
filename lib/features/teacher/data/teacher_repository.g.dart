@@ -452,24 +452,27 @@ final class StudentProgramsFamily extends $Family
 }
 
 /// Filter of the student list. Shared so the dashboard can open the list
-/// already filtered.
+/// already filtered, and kept while the list is not built yet (a tab opens
+/// only when first visited). Cleared for each account.
 
 @ProviderFor(StudentListFilter)
 final studentListFilterProvider = StudentListFilterProvider._();
 
 /// Filter of the student list. Shared so the dashboard can open the list
-/// already filtered.
+/// already filtered, and kept while the list is not built yet (a tab opens
+/// only when first visited). Cleared for each account.
 final class StudentListFilterProvider
     extends $NotifierProvider<StudentListFilter, StudentFilter> {
   /// Filter of the student list. Shared so the dashboard can open the list
-  /// already filtered.
+  /// already filtered, and kept while the list is not built yet (a tab opens
+  /// only when first visited). Cleared for each account.
   StudentListFilterProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'studentListFilterProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -490,10 +493,11 @@ final class StudentListFilterProvider
   }
 }
 
-String _$studentListFilterHash() => r'8cbcb93fbb0c0d97a0e1b8110356e4556d807e5e';
+String _$studentListFilterHash() => r'3f997d304003c495ecaa9a7859ab52b37db71944';
 
 /// Filter of the student list. Shared so the dashboard can open the list
-/// already filtered.
+/// already filtered, and kept while the list is not built yet (a tab opens
+/// only when first visited). Cleared for each account.
 
 abstract class _$StudentListFilter extends $Notifier<StudentFilter> {
   StudentFilter build();
@@ -512,3 +516,161 @@ abstract class _$StudentListFilter extends $Notifier<StudentFilter> {
     return element.handleCreate(ref, build);
   }
 }
+
+/// The scope of the dashboard and of the pages its cards open. Starts on the
+/// teacher's own students when they have a group, and again for each account.
+
+@ProviderFor(DashboardScope)
+final dashboardScopeProvider = DashboardScopeProvider._();
+
+/// The scope of the dashboard and of the pages its cards open. Starts on the
+/// teacher's own students when they have a group, and again for each account.
+final class DashboardScopeProvider
+    extends $NotifierProvider<DashboardScope, StudentScope> {
+  /// The scope of the dashboard and of the pages its cards open. Starts on the
+  /// teacher's own students when they have a group, and again for each account.
+  DashboardScopeProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'dashboardScopeProvider',
+        isAutoDispose: false,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$dashboardScopeHash();
+
+  @$internal
+  @override
+  DashboardScope create() => DashboardScope();
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(StudentScope value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<StudentScope>(value),
+    );
+  }
+}
+
+String _$dashboardScopeHash() => r'3aaf924c64b47ed2b2d90d2424b771a9319b0485';
+
+/// The scope of the dashboard and of the pages its cards open. Starts on the
+/// teacher's own students when they have a group, and again for each account.
+
+abstract class _$DashboardScope extends $Notifier<StudentScope> {
+  StudentScope build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<StudentScope, StudentScope>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<StudentScope, StudentScope>,
+              StudentScope,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}
+
+/// The labels a view can be narrowed to: the school's lists plus any class a
+/// student still carries after it left the list.
+
+@ProviderFor(scopeOptions)
+final scopeOptionsProvider = ScopeOptionsProvider._();
+
+/// The labels a view can be narrowed to: the school's lists plus any class a
+/// student still carries after it left the list.
+
+final class ScopeOptionsProvider
+    extends $FunctionalProvider<ScopeOptions, ScopeOptions, ScopeOptions>
+    with $Provider<ScopeOptions> {
+  /// The labels a view can be narrowed to: the school's lists plus any class a
+  /// student still carries after it left the list.
+  ScopeOptionsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'scopeOptionsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$scopeOptionsHash();
+
+  @$internal
+  @override
+  $ProviderElement<ScopeOptions> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ScopeOptions create(Ref ref) {
+    return scopeOptions(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ScopeOptions value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ScopeOptions>(value),
+    );
+  }
+}
+
+String _$scopeOptionsHash() => r'13969e7484c54644bb5cada1003702222cf7dfa7';
+
+/// [DashboardScope] as it applies now; see [StudentScope.resolve].
+
+@ProviderFor(effectiveDashboardScope)
+final effectiveDashboardScopeProvider = EffectiveDashboardScopeProvider._();
+
+/// [DashboardScope] as it applies now; see [StudentScope.resolve].
+
+final class EffectiveDashboardScopeProvider
+    extends $FunctionalProvider<StudentScope, StudentScope, StudentScope>
+    with $Provider<StudentScope> {
+  /// [DashboardScope] as it applies now; see [StudentScope.resolve].
+  EffectiveDashboardScopeProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'effectiveDashboardScopeProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$effectiveDashboardScopeHash();
+
+  @$internal
+  @override
+  $ProviderElement<StudentScope> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  StudentScope create(Ref ref) {
+    return effectiveDashboardScope(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(StudentScope value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<StudentScope>(value),
+    );
+  }
+}
+
+String _$effectiveDashboardScopeHash() =>
+    r'1f460d60c4d02694e07375d6230232bd366289d3';

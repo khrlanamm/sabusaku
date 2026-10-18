@@ -32,8 +32,10 @@ import '../../features/teacher/presentation/pending_member_screen.dart';
 import '../../features/teacher/presentation/reports_screen.dart';
 import '../../features/teacher/presentation/school_screen.dart';
 import '../../features/teacher/presentation/school_settings_screen.dart';
+import '../../features/teacher/presentation/teacher_active_books_screen.dart';
 import '../../features/teacher/presentation/teacher_dashboard_screen.dart';
 import '../../features/teacher/presentation/teacher_journal_detail_screen.dart';
+import '../../features/teacher/presentation/teacher_month_journals_screen.dart';
 import '../../features/teacher/presentation/teacher_profile_screen.dart';
 import '../../features/teacher/presentation/teacher_student_detail_screen.dart';
 import '../../features/teacher/presentation/teacher_students_screen.dart';
@@ -158,6 +160,14 @@ GoRouter appRouter(Ref ref) {
           tab(Routes.teacherSchool, const SchoolScreen()),
           tab(Routes.teacherProfile, const TeacherProfileScreen()),
         ],
+      ),
+      GoRoute(
+        path: Routes.teacherActiveBooks,
+        builder: (_, _) => const TeacherActiveBooksScreen(),
+      ),
+      GoRoute(
+        path: Routes.teacherMonthJournals,
+        builder: (_, _) => const TeacherMonthJournalsScreen(),
       ),
       // Before '/guru/siswa/:studentId', which would match them too.
       GoRoute(

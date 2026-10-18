@@ -6,42 +6,34 @@ import '../../../app/router/routes.dart';
 import '../../../app/theme/palette.dart';
 import '../../../core/models/student_stats.dart';
 import '../../../core/models/student_status.dart';
+import '../../../core/time/date_format.dart';
+import '../../../core/time/wib_clock.dart';
 import '../../../core/widgets/stat_card.dart';
 import '../../../core/widgets/states.dart';
 import '../../../core/widgets/status_chip.dart';
 import '../../auth/data/auth_repository.dart';
 import '../../auth/data/school_repository.dart';
 import '../data/teacher_repository.dart';
+import '../domain/student_scope.dart';
+import 'scope_filter_bar.dart';
 import 'student_tile.dart';
 
 /// Who is active, who needs attention, without opening students one by one,
-/// for the whole school or one extracurricular.
+/// for every student, the teacher's own, one class or one extracurricular.
 /// Built from the summary documents; nothing is recomputed here beyond
 /// counting (PRD §8.5).
-class TeacherDashboardScreen extends ConsumerStatefulWidget {
+class TeacherDashboardScreen extends ConsumerWidget {
   const TeacherDashboardScreen({super.key});
 
   @override
-  ConsumerState<TeacherDashboardScreen> createState() =>
-      _TeacherDashboardScreenState();
-}
-
-class _TeacherDashboardScreenState
-    extends ConsumerState<TeacherDashboardScreen> {
-  /// Narrows the whole dashboard to one extracurricular.
-  String? _extracurricular;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final session = ref.watch(currentSessionProvider);
     final school = ref.watch(schoolProvider).value;
     final students = ref.watch(teacherStudentsProvider);
     final pending = ref.watch(pendingStudentsProvider).value ?? const [];
+    final scope = ref.watch(effectiveDashboardScopeProvider);
+    final me = session.profile;
     final theme = Theme.of(context);
-    final extracurriculars = school?.extracurriculars ?? const <String>[];
-    final scope = extracurriculars.contains(_extracurricular)
-        ? _extracurricular
-        : null;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Dashboard')),
@@ -51,19 +43,16 @@ class _TeacherDashboardScreenState
         data: (all) {
           final inScope = [
             for (final stats in all)
-              if (scope == null || stats.extracurriculars.contains(scope))
+              if (scope.matches(stats.classId, stats.extracurriculars, me))
                 stats,
           ];
           final pendingInScope = pending
-              .where((m) => scope == null || m.extracurriculars.contains(scope))
+              .where((m) => scope.matches(m.classId, m.extracurriculars, me))
               .length;
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              Text(
-                'Halo, ${session.profile.name}',
-                style: theme.textTheme.titleLarge,
-              ),
+              Text('Halo, ${me.name}', style: theme.textTheme.titleLarge),
               if (school != null)
                 Text(
                   school.name,
@@ -71,38 +60,22 @@ class _TeacherDashboardScreenState
                     color: Theme.of(context).colorScheme.onSurfaceVariant,
                   ),
                 ),
-              if (extracurriculars.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                SizedBox(
-                  height: 40,
-                  child: ListView(
-                    scrollDirection: Axis.horizontal,
-                    children: [
-                      for (final label in [null, ...extracurriculars])
-                        Padding(
-                          padding: const EdgeInsets.only(right: 8),
-                          child: ChoiceChip(
-                            key: Key('dashboard-scope-${label ?? 'all'}'),
-                            label: Text(label ?? 'Semua siswa'),
-                            selected: scope == label,
-                            onSelected: (_) =>
-                                setState(() => _extracurricular = label),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ],
-              const SizedBox(height: 16),
-              _Summary(students: inScope),
+              const SizedBox(height: 8),
+              const ScopeFilterBar(),
+              const SizedBox(height: 8),
+              _Summary(students: inScope, scope: scope),
               if (pendingInScope > 0) ...[
                 const SizedBox(height: 12),
-                _PendingNotice(count: pendingInScope, extracurricular: scope),
+                _PendingNotice(count: pendingInScope, scope: scope),
               ],
               const SizedBox(height: 20),
-              _StatusBreakdown(students: inScope, extracurricular: scope),
+              _StatusBreakdown(students: inScope, scope: scope),
               const SizedBox(height: 20),
               _NeedsAttention(students: inScope),
+              if (!me.hasGroup) ...[
+                const SizedBox(height: 20),
+                const _SetRolesHint(),
+              ],
             ],
           );
         },
@@ -113,10 +86,10 @@ class _TeacherDashboardScreenState
 
 /// How many added students have never signed in. Opens the student list.
 class _PendingNotice extends ConsumerWidget {
-  const _PendingNotice({required this.count, required this.extracurricular});
+  const _PendingNotice({required this.count, required this.scope});
 
   final int count;
-  final String? extracurricular;
+  final StudentScope scope;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -134,9 +107,7 @@ class _PendingNotice extends ConsumerWidget {
         ),
         trailing: const Icon(Icons.chevron_right),
         onTap: () {
-          ref.read(studentListFilterProvider.notifier)
-            ..reset()
-            ..setExtracurricular(extracurricular);
+          ref.read(studentListFilterProvider.notifier).showScope(scope);
           context.go(Routes.teacherStudents);
         },
       ),
@@ -144,40 +115,53 @@ class _PendingNotice extends ConsumerWidget {
   }
 }
 
-class _Summary extends StatelessWidget {
-  const _Summary({required this.students});
+/// Students, active books and this month's journals in scope. Each card
+/// opens a list in the same scope.
+class _Summary extends ConsumerWidget {
+  const _Summary({required this.students, required this.scope});
 
   final List<StudentStats> students;
+  final StudentScope scope;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final activeBooks = students.where((s) => s.activeProgram != null).length;
     final journals = students.fold(0, (sum, s) => sum + s.journalCountMonth);
+    final month = formatMonth(ref.watch(wibClockProvider).today());
     return StatCardRow(
       children: [
         Expanded(
           child: StatCard(
+            key: const Key('dashboard-card-students'),
             label: 'Siswa',
             value: '${students.length}',
             icon: Icons.groups,
+            onTap: () {
+              ref.read(studentListFilterProvider.notifier).showScope(scope);
+              context.go(Routes.teacherStudents);
+            },
           ),
         ),
         const SizedBox(width: 10),
         Expanded(
           child: StatCard(
+            key: const Key('dashboard-card-books'),
             label: 'Buku aktif',
             value: '$activeBooks',
             icon: Icons.menu_book,
             color: context.palette.success,
+            onTap: () => context.push(Routes.teacherActiveBooks),
           ),
         ),
         const SizedBox(width: 10),
         Expanded(
           child: StatCard(
-            label: 'Jurnal bulan ini',
+            key: const Key('dashboard-card-journals'),
+            label: 'Jurnal $month',
             value: '$journals',
             icon: Icons.edit_note,
             color: context.palette.heading,
+            onTap: () => context.push(Routes.teacherMonthJournals),
           ),
         ),
       ],
@@ -186,10 +170,10 @@ class _Summary extends StatelessWidget {
 }
 
 class _StatusBreakdown extends ConsumerWidget {
-  const _StatusBreakdown({required this.students, this.extracurricular});
+  const _StatusBreakdown({required this.students, required this.scope});
 
   final List<StudentStats> students;
-  final String? extracurricular;
+  final StudentScope scope;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -209,10 +193,9 @@ class _StatusBreakdown extends ConsumerWidget {
                   key: Key('dashboard-status-${status.wire}'),
                   // Opens the student list filtered by this status.
                   onTap: () {
-                    ref.read(studentListFilterProvider.notifier)
-                      ..reset()
-                      ..setExtracurricular(extracurricular)
-                      ..setStatus(status);
+                    ref
+                        .read(studentListFilterProvider.notifier)
+                        .showScope(scope, status: status);
                     context.go(Routes.teacherStudents);
                   },
                   child: Padding(
@@ -298,6 +281,32 @@ class _NeedsAttention extends StatelessWidget {
               ),
             ),
       ],
+    );
+  }
+}
+
+/// Asks a teacher without a homeroom class or supervised extracurricular to
+/// set them, which turns on "Binaan saya".
+class _SetRolesHint extends StatelessWidget {
+  const _SetRolesHint();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      clipBehavior: Clip.antiAlias,
+      child: ListTile(
+        key: const Key('dashboard-set-roles'),
+        leading: Icon(
+          Icons.star_outline,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        title: const Text('Wali kelas atau pembina ekskul?'),
+        subtitle: const Text(
+          'Atur di Profil agar siswa binaan Anda bisa dilihat sekaligus.',
+        ),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: () => context.go(Routes.teacherProfile),
+      ),
     );
   }
 }
