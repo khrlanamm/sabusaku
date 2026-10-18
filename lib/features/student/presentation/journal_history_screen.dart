@@ -386,7 +386,11 @@ class _MonthSection extends ConsumerWidget {
             ),
           ),
           AsyncView<List<Journal>>(
-            value: journals,
+            // Keep showing the month while it reloads after a book changes
+            // (a new journal updates its `journalDates`).
+            value: journals.hasValue
+                ? AsyncData(journals.requireValue)
+                : journals,
             onRetry: () => ref.invalidate(
               myJournalsBetweenProvider(month.from, month.to, filter.programId),
             ),

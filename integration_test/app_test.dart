@@ -207,6 +207,24 @@ void main() {
 
     await tester.tap(navTab('Jurnal'));
     await waitFor(tester, find.textContaining('Hal. 1–40'));
+
+    // Every card on Beranda opens its page. Once the server has counted the
+    // journal, the student is on this month's leaderboard.
+    await tester.tap(navTab('Beranda'));
+    await waitFor(tester, find.byKey(const Key('home-stat-rank')));
+    await tapVisible(tester, find.byKey(const Key('home-stat-rank')));
+    await waitFor(tester, find.byKey(const Key('rank-mine')));
+    expect(find.textContaining('$e2eStudentName (kamu)'), findsOneWidget);
+    await tester.tap(find.byType(BackButton));
+    await waitFor(tester, find.byKey(const Key('home-book-history')));
+    await tapVisible(tester, find.byKey(const Key('home-book-history')));
+    await waitFor(tester, find.byKey(const Key('book-history-search')));
+    expect(find.text(e2eBook), findsWidgets);
+    await tester.tap(find.byType(BackButton));
+    await waitFor(tester, find.byKey(const Key('home-stat-journals')));
+    await tapVisible(tester, find.byKey(const Key('home-stat-journals')));
+    await waitFor(tester, find.byKey(const Key('journals-view')));
+    expect(find.textContaining('Hal. 1–40'), findsOneWidget);
   });
 
   testWidgets('guru comments, adds a student and removes another', (
@@ -218,6 +236,12 @@ void main() {
     // She supervises Masis-KIR, so she is asked about the morning digest.
     await dismissNotificationPrompt(tester);
     expect(navTab('Sekolah'), findsOneWidget);
+
+    // Her students' leaderboard ("Binaan saya": Raka is in Masis-KIR).
+    await tapVisible(tester, find.byKey(const Key('dashboard-ranking')));
+    await waitFor(tester, find.textContaining(e2eStudentName));
+    await tester.tap(find.byType(BackButton));
+    await waitFor(tester, find.text('Status siswa'));
 
     // Student list → detail → active book → journal → comment.
     await tester.tap(navTab('Siswa'));
@@ -416,7 +440,9 @@ void main() {
     await dismissNotificationPrompt(tester);
 
     await waitFor(tester, find.byKey(const Key('home-new-comments')));
-    await tester.tap(find.textContaining('Jurnal ').last);
+    // The card of the commented journal ("Jurnal Kamis, 15 Oktober 2026"),
+    // not the "Jurnal bulan ini" statistic below it.
+    await tester.tap(find.textContaining(RegExp(r'^Jurnal \S+, ')).first);
     await waitFor(
       tester,
       find.descendant(
