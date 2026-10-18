@@ -40,7 +40,8 @@ lib/
       data/ domain/ presentation/   # login email/Google, daftar, verifikasi email, Lengkapi akun,
                                     # sesi & claims, profil (foto, password, hapus akun)
     student/
-      home/  book/  journal/  history/  profile/
+      home/  book/  journal/  history/  profile/   # beranda, riwayat buku, streak, filter jurnal
+    ranking/                    # periode, peringkat (leaderboards), lencana; dipakai siswa dan guru
     teacher/                    # penanggung jawab: dashboard, siswa (tambah, impor, belum masuk),
                                 # detail siswa, jurnal + komentar, sekolah (label kelas/ekskul, pengaturan)
     notifications/              # FCM, channel, deep link
@@ -78,10 +79,13 @@ redirect:
 
 | Layar | Sumber data | Pola |
 |---|---|---|
-| Beranda siswa | `studentStats/{uid}` (stream) | 1 dokumen berisi buku aktif, progres, streak, jumlah jurnal bulan ini |
+| Beranda siswa | `studentStats/{uid}`, `programs where studentId`, `leaderboards/month-{bulan ini}` (stream) | Ringkasan, tiga buku terakhir, peringkat sendiri; lencana dihitung di klien dari program |
 | Buku Saya | `activePrograms/{uid}` → `programs/{id}` | Stream; form Mulai Buku menulis program + kunci aktif dalam satu `WriteBatch` |
 | Isi Jurnal | program aktif + (opsional) jurnal tanggal terpilih | `pageStart` default = `currentPage + 1`; tanggal 3 pilihan (hari ini, kemarin, 2 hari lalu); jurnal tanggal itu sudah ada → mode ubah |
-| Riwayat | `journals orderBy date desc limit 20` | Paginasi dengan `startAfter` |
+| Riwayat jurnal | per bulan: `journals where date >= A, <= B` di program yang `journalDates`-nya beririsan | Bulan yang ada jurnal dan jumlahnya dari `programs.journalDates` tanpa baca; bagian bulan dimuat saat terlihat |
+| Riwayat jurnal satu buku (detail buku, guru) | `journals orderBy date desc limit 20` | "Muat lebih banyak" menambah 20 |
+| Riwayat buku | `programs where studentId` (sudah dimuat Beranda) | Cari, filter, buku unik, dan urutan di klien |
+| Peringkat | `get leaderboards/{periodId}` (stream) | Satu dokumen per periode; urutan, peringkat seri, dan filter kelas/ekskul di klien |
 | Dashboard guru | `studentStats orderBy name` (seluruh sekolah) | Hitung kartu dan filter kelas/ekskul/status di klien |
 | Detail siswa (guru) | `studentStats/{id}`, `programs where studentId`, `journals` | Baca; ubah nama/kelas/ekskul langsung ke `users`; keluarkan/hapus lewat callable |
 | Belum masuk (guru) | `members where schoolId == S where role == siswa`, saring `uid == null` | Ubah langsung (rules), hapus lewat `removeStudent` |

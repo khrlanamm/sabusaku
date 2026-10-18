@@ -16,7 +16,9 @@ lib/
   core/           model, waktu WIB, galat, widget dan repository bersama
   features/
     auth/         login email/Google, daftar + verifikasi, Lengkapi akun, profil, sesi dari claims
-    student/      beranda, buku, jurnal (dengan outbox offline), profil
+    student/      beranda (statistik, riwayat buku), buku, jurnal per bulan/kalender (dengan
+                  outbox offline), streak, profil
+    ranking/      periode, peringkat sekolah (siswa dan guru), lencana
     teacher/      penanggung jawab: dashboard (filter Binaan saya/kelas/ekskul, Buku aktif,
                   Jurnal bulan ini), siswa (tambah, impor, belum masuk), komentar, sekolah
                   (label kelas/ekskul, penanggung jawab, pengaturan), peran wali kelas/pembina

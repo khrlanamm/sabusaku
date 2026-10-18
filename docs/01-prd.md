@@ -16,7 +16,7 @@ Sabu Saku adalah aplikasi Android untuk **jurnal membaca**. Siswa SMA membaca sa
 - Bekerja baik di jaringan buruk (jurnal bisa ditulis offline).
 
 ### Bukan tujuan V1
-AI, rekomendasi buku, ranking/gamifikasi, upload foto selain foto profil, chat siswa–guru, analisis otomatis, integrasi Google Books, iOS, web, pendaftaran sekolah mandiri, pembayaran.
+AI, rekomendasi buku, upload foto selain foto profil, chat siswa–guru, analisis otomatis, integrasi Google Books, iOS, web, pendaftaran sekolah mandiri, pembayaran.
 
 ## 2. Peran dan hak akses
 
@@ -51,12 +51,14 @@ Satu email = satu peran, terikat ke paling banyak satu sekolah. Data antar sekol
 ### Siswa — navigasi bawah 4 tab: Beranda · Buku · Jurnal · Profil
 | Layar | Isi |
 |---|---|
-| Beranda | Sapaan, kartu buku bulan ini (cover, judul, halaman, persen), tombol **Isi Jurnal Hari Ini**, jurnal bulan ini (n/30), streak, badge komentar guru baru |
-| Buku Saya | Detail buku aktif: total halaman, mulai, target, progres, tombol Perpanjang / Tandai Selesai / Hentikan. Jika belum ada buku: form **Mulai Buku** (judul, penulis, total halaman, opsional ISBN) |
+| Beranda | Sapaan, kartu buku bulan ini (cover, judul, halaman, persen), tombol **Isi Jurnal Hari Ini**, komentar guru baru, **statistik** (enam kartu yang semuanya bisa dibuka: jurnal bulan ini → tab Jurnal bulan ini; streak sekarang dan terbaik → halaman Streak dengan kalender; buku selesai → Riwayat buku "Selesai"; total jurnal → tab Jurnal semua waktu; peringkat bulan ini → Peringkat; lencana → Lencana), tiga buku terakhir + **Lihat semua** (Riwayat buku: cari, status, rentang tanggal, buku unik, urutan) |
+| Buku Saya | Detail buku aktif: total halaman, mulai, target, progres, tombol Perpanjang / Tandai Selesai / Hentikan, tiga buku sebelumnya. Jika belum ada buku: form **Mulai Buku** (judul, penulis, total halaman, opsional ISBN). Ikon riwayat → Riwayat buku. Buku lama dibuka dengan tanggal, lama membaca, streak buku itu, ulasan akhir, dan jurnalnya |
 | Isi Jurnal | Tanggal, halaman dari–sampai (otomatis lanjut dari halaman terakhir), durasi (4 pilihan), informasi penting (wajib), hal menarik (opsional), pertanyaan (opsional) |
-| Riwayat Jurnal | Daftar jurnal (terbaru dulu), lencana komentar guru |
+| Riwayat Jurnal | Jurnal semua buku per bulan (terbaru atau terlama dulu), disaring per buku, bulan, atau rentang tanggal; tampilan kalender; lencana komentar guru |
+| Peringkat | Peringkat sekolah per bulan, tahun, tahun ajaran (1 Juli–30 Juni), atau sepanjang waktu, menurut buku selesai, streak terpanjang dalam periode, atau hari membaca; disaring sekolah, kelas, atau ekskul siswa; posisi sendiri selalu terlihat |
+| Lencana | Pencapaian buku, streak, jurnal, tepat waktu, dan ulasan, dengan progresnya |
 | Detail Jurnal | Isi jurnal + komentar guru; edit/hapus bila masih dalam jendela edit |
-| Profil | Foto profil (ganti, pakai foto Google, hapus), nama, kelas, ekstrakurikuler, statistik (total jurnal, buku selesai, streak terbaik), **riwayat buku bulan-bulan sebelumnya**, atur/ubah password, keluar, hapus akun |
+| Profil | Foto profil (ganti, pakai foto Google, hapus), nama, kelas, ekstrakurikuler, ringkasan lencana, atur/ubah password, keluar, hapus akun. Statistik dan riwayat buku pindah ke Beranda (18 Okt 2026) |
 
 Cover buku: tanpa upload di V1; aplikasi membuat **sampul otomatis** (warna dari judul + inisial).
 
@@ -65,7 +67,8 @@ Cover buku: tanpa upload di V1; aplikasi membuat **sampul otomatis** (warna dari
 |---|---|
 | Dashboard | Kartu ringkasan seluruh sekolah (siswa, buku aktif, jurnal bulan ini), jumlah Aktif / Perlu perhatian / Tidak aktif / Belum ada buku, daftar siswa yang perlu perhatian |
 | Daftar Siswa | Filter kelas, ekstrakurikuler, dan status; pencarian nama; progres per siswa; bagian "Belum masuk" (email terdaftar yang belum pernah login); tombol Tambah siswa dan Impor CSV |
-| Detail Siswa | Buku aktif, progres, streak, aktivitas terakhir, riwayat buku, **Lihat semua jurnal**, ubah nama/kelas/ekstrakurikuler, **Keluarkan dari sekolah**, **Hapus data permanen** |
+| Peringkat | Sama dengan peringkat siswa, disaring dengan cakupan dashboard (Semua siswa, Binaan saya, kelas, ekskul); ketuk siswa untuk membuka detailnya. Dibuka dari kartu "Peringkat siswa" di Dashboard |
+| Detail Siswa | Buku aktif, progres, streak (sekarang dan terbaik), aktivitas terakhir, lencana, riwayat buku, **Lihat semua jurnal**, ubah nama/kelas/ekstrakurikuler, **Keluarkan dari sekolah**, **Hapus data permanen** |
 | Detail Jurnal + Komentar | Isi jurnal siswa, daftar komentar, kolom tulis komentar |
 | Sekolah | Label kelas (format `XII-A1`, `X-G2`) dan ekstrakurikuler (bisa ditambah), daftar penanggung jawab (hanya baca), pengaturan: hari libur, hari netral, ambang status |
 | Profil | Sama dengan profil siswa tanpa statistik membaca |

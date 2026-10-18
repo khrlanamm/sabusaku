@@ -28,7 +28,11 @@ UNTUK SISWA
 • Jelajahi katalog: rekomendasi sekolahmu dan buku yang sedang ramai dibaca teman-temanmu.
 • Isi jurnal dalam satu menit: halaman yang dibaca, lama membaca, dan isi bacaan hari ini.
 • Tetap bisa menulis tanpa sinyal. Jurnal terkirim sendiri saat online.
-• Lihat progres buku dan streak membaca bertambah dari hari ke hari.
+• Lihat progres buku dan streak membaca bertambah dari hari ke hari. Streak tidak putus saat ganti buku.
+• Beranda penuh statistik membacamu, dan setiap kartunya bisa dibuka.
+• Peringkat sekolah per bulan, tahun, tahun ajaran, dan sepanjang waktu: buku selesai, streak, dan hari membaca. Saring per kelas atau ekstrakurikuler.
+• Kumpulkan lencana, lihat kalender membacamu, dan terima rekap setiap awal bulan.
+• Cari dan saring riwayat buku dan jurnal menurut tanggal, buku, dan urutan.
 • Dapat notifikasi saat penanggung jawab mengomentari jurnalmu.
 • Tutup buku yang selesai dengan ulasan singkat.
 • Pilih tampilan terang atau gelap.
@@ -40,6 +44,7 @@ UNTUK PENANGGUNG JAWAB
 • Saring siswa menurut kelas, ekstrakurikuler, dan status, lengkap dengan progres bukunya.
 • Tambah siswa cukup dengan email, satu per satu atau lewat berkas CSV. Nama dan kelas boleh dilengkapi siswa sendiri.
 • Buka jurnal siswa dan tulis komentar.
+• Lihat peringkat siswa dan lencana setiap siswa.
 • Atur label kelas, ekstrakurikuler, hari libur, dan ambang status.
 • Rawat katalog bersama: tambah, ubah, hapus, dan pulihkan buku, termasuk cover-nya.
 • Tinjau buku usulan siswa, lalu terapkan ke katalog atau tolak.
@@ -50,12 +55,19 @@ PRIVASI
 
 • Hanya email yang didaftarkan sekolah yang bisa membuka data sekolah.
 • Data tiap sekolah terpisah. Hanya katalog buku yang dipakai bersama.
+• Peringkat hanya menampilkan nama, kelas, ekstrakurikuler, dan angka membaca kepada teman sesekolah.
 • Tanpa iklan dan tanpa ID iklan.
 • Data sekolah disimpan di pusat data Google di Jakarta.
 • Laporkan komentar, jurnal, buku, atau pengguna yang tidak pantas langsung dari aplikasi; penanggung jawab dan pengembang meninjaunya.
 • Hapus akun kapan saja dari menu Profil.
 
 Sabu Saku dipakai lewat sekolah. Ingin sekolahmu ikut? Daftar di sabusaku.web.app/daftar-sekolah
+```
+
+## Release notes of 1.3.0 (500 characters max)
+
+```text
+Beranda baru: statistik yang bisa dibuka, riwayat buku, streak sekarang dan terbaik yang tidak putus saat ganti buku. Peringkat sekolah per bulan, tahun, tahun ajaran, dan sepanjang waktu. Lencana, kalender membaca, dan rekap bulanan. Riwayat buku dan jurnal bisa dicari dan disaring. Penanggung jawab: atur wali kelas dan pembina ekskul, filter Binaan saya, notifikasi pagi siswa binaan, dan tambah penanggung jawab lain.
 ```
 
 ## Release notes of 1.2.1 (500 characters max)
@@ -208,8 +220,26 @@ the catalog history keeps the name of the teacher who made each change.
 The terms acceptance (`termsVersion`, `termsAcceptedAt`) is part of the
 account record and needs no data type of its own.
 
+Since 1.3.0 the school leaderboard shows every student's name, class,
+extracurriculars and reading numbers (books finished, streak, days read) to
+the other users of the same school. It adds no data type: the numbers come
+from the journals and books already listed, and other users of the app are
+not third parties, so "shares data" stays no. The leaderboard rows go with
+account deletion (see hapus-data).
+
 Update this table and the Data safety form together whenever an SDK or a
 stored field changes.
+
+## Release checklist (1.3.0)
+
+- [ ] Upload the AAB of 1.3.0+5 and paste the 1.3.0 release notes above.
+- [ ] Store listing: paste the new full description (student bullets on
+      Beranda, leaderboards, badges and histories; the leaderboard privacy
+      bullet).
+- [ ] Data safety: no new data type (see the leaderboard note under the
+      table); re-read the form once.
+- [ ] Content rating: unchanged (users still interact only through teacher
+      comments; the leaderboard shows numbers, not messages).
 
 ## Release checklist (1.2.1)
 
