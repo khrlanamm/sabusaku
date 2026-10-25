@@ -1,10 +1,46 @@
 # Sabu Saku
 
+[![CI](https://github.com/khrlanamm/sabusaku/actions/workflows/ci.yml/badge.svg)](https://github.com/khrlanamm/sabusaku/actions/workflows/ci.yml)
+
 ![Sabu Saku feature graphic](https://raw.githubusercontent.com/khrlanamm/khrlanamm/main/assets/projects/sabu-saku.webp)
 
 **Satu Bulan Satu Buku** (one book a month): an Android reading journal for high school students. Students read one book a month and log their reading every day. Teachers in charge (subject teachers, homeroom teachers, or club advisors) follow every student in their school, leave comments, and add students and other teachers by email. One app serves many schools. The developer registers each school and its first teacher.
 
 [Google Play](https://play.google.com/store/apps/details?id=com.sabu.saku) | [Website](https://sabusaku.web.app) | [User guide (PDF, Indonesian)](https://sabusaku.web.app/panduan.pdf)
+
+## Screenshots
+
+| Student home | Catalog | Daily journal | Teacher dashboard |
+|---|---|---|---|
+| <img src="docs/images/home.webp" alt="Student home with the book of the month, reading progress, and streak" width="200"> | <img src="docs/images/catalog.webp" alt="Book catalog with popular books at the school" width="200"> | <img src="docs/images/journal.webp" alt="Daily journal entry with pages read, duration, and notes" width="200"> | <img src="docs/images/teacher-dashboard.webp" alt="Teacher dashboard with student status counts" width="200"> |
+
+## Architecture
+
+```mermaid
+flowchart LR
+  app["Flutter app<br>students and teachers"]
+  subgraph Firebase
+    auth["Authentication<br>claims: role, schoolId"]
+    fs[("Firestore<br>schools, members, journals")]
+    st[(Storage)]
+    call["Callables<br>claimAccount, addStudents, saveBook, ..."]
+    trig["Triggers<br>progress, summaries, comments"]
+    sched["Scheduled<br>dailyRefresh, teacherDigest, monthlyRecap"]
+    fcm[Cloud Messaging]
+  end
+  app -->|email or Google| auth
+  app -->|journals, offline outbox| fs
+  app -->|profile photos| st
+  app --> call
+  call --> auth
+  call --> fs
+  fs --> trig
+  trig -->|progress and rankings| fs
+  sched --> fs
+  trig -->|new comment| fcm
+  sched -->|digests| fcm
+  fcm --> app
+```
 
 ## Sign-in
 
