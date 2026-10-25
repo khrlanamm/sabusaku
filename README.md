@@ -17,7 +17,7 @@
 ## Architecture
 
 ```mermaid
-flowchart LR
+flowchart TB
   app["Flutter app<br>students and teachers"]
   subgraph Firebase
     auth["Authentication<br>claims: role, schoolId"]
@@ -26,7 +26,7 @@ flowchart LR
     call["Callables<br>claimAccount, addStudents, saveBook, ..."]
     trig["Triggers<br>progress, summaries, comments"]
     sched["Scheduled<br>dailyRefresh, teacherDigest, monthlyRecap"]
-    fcm[Cloud Messaging]
+    fcm["Cloud Messaging<br>push to phones"]
   end
   app -->|email or Google| auth
   app -->|journals, offline outbox| fs
@@ -39,7 +39,6 @@ flowchart LR
   sched --> fs
   trig -->|new comment| fcm
   sched -->|digests| fcm
-  fcm --> app
 ```
 
 ## Sign-in
