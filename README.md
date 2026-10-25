@@ -134,3 +134,7 @@ python3 store/make_assets.py         # output in store/out/
 The screenshots in `store/raw/` are still from v1 (a demo school that has been deleted). Take new ones from a real school account before updating the listing.
 
 App Check is installed but **not enabled yet**. Until Play Integrity is linked, token requests fail slowly and delay the first sign-in by about 20 seconds. The Play App Signing SHA-256 is already registered in Firebase. Remaining steps: link Play Integrity to the project, build with `--dart-define=APP_CHECK=true`, then turn on enforcement in the Firebase Console.
+
+## License
+
+All rights reserved. The source code is public for reference only. See [LICENSE](LICENSE).
