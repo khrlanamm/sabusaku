@@ -40,12 +40,15 @@ UNTUK SISWA
 
 UNTUK PENANGGUNG JAWAB
 
-• Dashboard sekolah: siswa yang aktif, perlu perhatian, tidak aktif, dan yang belum punya buku, untuk seluruh sekolah atau per ekstrakurikuler.
+• Dashboard sekolah: siswa yang aktif, perlu perhatian, tidak aktif, dan yang belum punya buku, untuk seluruh sekolah, siswa binaanmu, satu kelas, atau satu ekstrakurikuler. Kartu buku aktif, jurnal bulan ini, dan peringkat bisa dibuka.
+• Atur peranmu sebagai wali kelas atau pembina ekstrakurikuler, lalu lihat siswa binaanmu dengan satu ketukan.
+• Notifikasi setiap pagi saat ada siswa binaan yang belum menulis jurnal beberapa hari.
 • Saring siswa menurut kelas, ekstrakurikuler, dan status, lengkap dengan progres bukunya.
 • Tambah siswa cukup dengan email, satu per satu atau lewat berkas CSV. Nama dan kelas boleh dilengkapi siswa sendiri.
 • Buka jurnal siswa dan tulis komentar.
 • Lihat peringkat siswa dan lencana setiap siswa.
 • Atur label kelas, ekstrakurikuler, hari libur, dan ambang status.
+• Tambah penanggung jawab lain di sekolahmu, lengkap dengan perannya.
 • Rawat katalog bersama: tambah, ubah, hapus, dan pulihkan buku, termasuk cover-nya.
 • Tinjau buku usulan siswa, lalu terapkan ke katalog atau tolak.
 • Rekomendasikan buku untuk sekolahmu. Buku rekomendasi tampil paling atas saat siswa mencari.

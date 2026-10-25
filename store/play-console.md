@@ -68,26 +68,28 @@ Signing (on ✓, SHA-1/SHA-256 registered in Firebase ✓) need no action.
 | Field | Value |
 |---|---|
 | Name | `Penanggung jawab (teacher) account` |
-| Username | `benevology@gmail.com` |
+| Username | `benevology+review@gmail.com` |
 | Password | from `secret/play-reviewer.txt` |
 | Any other instructions | text below |
 | "No other information is required" checkbox | leave unticked (the instructions explain the flow) |
 
 ```text
-Sign in on the first screen with the email and password above (tap "Masuk"; do NOT use "Masuk dengan Google"). No OTP, 2-step verification, school code or location is needed, and the account works from any country. It does not expire.
-
-This is a "penanggung jawab" (teacher) account of SMA Negeri 1 Sukodadi. On first sign-in the app shows the terms of use: tap "Saya setuju". You then see the teacher area: Dashboard, Siswa (students and their reading journals; you can comment), Buku (the shared book catalog: search, add, edit, recommend, review student suggestions, deleted books), Sekolah (class and extracurricular labels, reports "Laporan", settings) and Profil.
-
-The student area (start a book from the catalog, daily journal, teacher comments, explore the catalog) is shown in the store screenshots; student accounts are created only for e-mails a school registers.
-
-Reporting: the "Laporkan" menu is on comments, journals, books, suggestions and student pages. Account deletion: Profil > Hapus akun (please do not delete this review account).
+Tap "Masuk" and sign in with the email and password above (not "Masuk dengan Google"). No OTP or 2-step verification; works from any country. Accept the terms ("Saya setuju"). This teacher account of a real school opens Dashboard (status, active books, leaderboard), Siswa (journals, comments), Buku (catalog), Sekolah (labels, add teachers, reports) and Profil ("Peran": wali kelas/pembina). Student screens are in the store screenshots. Please do not remove users or delete this account.
 ```
+
+The field takes at most 500 characters (this text: 489).
 
 - Also enter the same login under **Test and release → Pre-launch report →
   Settings** (§7.3).
 - Credentials rules met: reusable, no expiry, no 2FA, valid worldwide,
-  English instructions. Data visible to the reviewer: real school data of
-  SMA Negeri 1 Sukodadi (the user chose this account, 16–17 Oct 2026).
+  English instructions. The account is a plain penanggung jawab of SMA
+  Negeri 1 Sukodadi with no wali kelas or pembina role, so it gets no
+  morning notification and is in no student's view. It was made for review
+  on 18 Oct 2026 with `functions/tools/add-guru.ts` and
+  `functions/tools/create-login.ts` (email verified, password from the
+  file). Up to 1.2.1 the reviewer signed in as benevology@gmail.com, which
+  became the superadmin; its old login is in
+  `secret/play-reviewer-benevology.txt`.
 
 ### 2.3 Ads / *Iklan*
 
