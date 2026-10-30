@@ -1242,6 +1242,7 @@ export const CORRECTIONS: Record<
   bk_35b40c117ca27d5a: {isbn13: "9789794335963"}, // Sang Pencerah (was 9787974335963)
   bk_16413bd8d52a7cd9: {isbn13: "9789795611776"}, // Awas! Bahaya Lidah (was 9799795611775)
   bk_f933facfdf67ad7c: {isbn13: null}, // Anak Semua Bangsa, Hasta Mitra 1980: Penguin's ISBN for the English translation
+  bk_8326add768e01788: {isbn13: null}, // Refrein di Sudut Dam: the ISBN belongs to a Bentang translation of Tears of the Giraffe
   bk_94c39a7abd2651c2: {
     description:
       "Buku kedua kisah Gajah Mada karya Langit Kresna Hariadi. Di tengah perebutan takhta dan intrik di istana Majapahit, Gajah Mada berjuang menjaga keselamatan raja dan keutuhan negeri.",
