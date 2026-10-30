@@ -1343,6 +1343,7 @@ export const CORRECTIONS: Record<
   bk_35b40c117ca27d5a: {isbn13: "9789794335963"}, // Sang Pencerah (was 9787974335963)
   bk_16413bd8d52a7cd9: {isbn13: "9789795611776"}, // Awas! Bahaya Lidah (was 9799795611775)
   bk_670bc324ae232ee6: {title: "Rectoverso"}, // was "Rectosrev"
+  bk_d08a4591e6bed608: {authors: ["Mochammad Faizal", "Dirga Fradika", "Rega Eggitya Suyono"]}, // (Digital) Executive Legislator: co-authors
   bk_995962c59d558df7: {authors: ["Iwan Awaluddin Yusuf", "Wisnu Martha Adiputra", "Masduki"]}, // Pelarangan Buku di Indonesia: co-authors
   bk_5cfe1f51d5ddbe19: {isbn13: null}, // Nyanyian Maldoror dan Poésies: the stored ISBN fails its checksum
   bk_9f1f53fc85a39c5a: {isbn13: "9789797571894"}, // Panduan Membangun Rumah: the stored ISBN failed its checksum
