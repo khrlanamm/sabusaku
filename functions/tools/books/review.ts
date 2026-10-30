@@ -452,10 +452,50 @@ export const REJECTED_BOOKS: Record<string, string> = {
   bk_05940328ef04e081: "tidak ada cover yang benar", // Mochtar Lubis Bicara Lurus
   bk_2f3dbc5f1ae5b681: "tidak ada cover yang benar", // Refleksi dan Gagasan Kebijakan Fiskal
   bk_f96cd6a4184a4cdf: "tidak ada cover yang benar", // Taoko
+  // ---- Review of the 30 Oct 2026 run ----
+  bk_62c07e2a7f462762: "tinjauan: ebook terbitan penulis tanpa ISBN, bukan edisi cetak", // Dompet Ayah Sepatu Ibu
+  bk_237d91ddb8d22f66: "tinjauan: ebook terbitan penulis tanpa ISBN, bukan edisi cetak", // Kami (Bukan) Jongos Berdasi - Unedited Version
+  bk_5da40644a4f4a494: "tinjauan: bukan buku utuh (cuplikan)", // Jika Kita Tak Pernah Jadi Apa-Apa: Chapter 1
+  bk_f0755583f382426f: "tinjauan: bukan buku utuh (cuplikan)", // Refrain [chapter 2]
+  bk_07865356ddd67a89: "tinjauan: edisi lain dari buku yang sudah ada", // Tidak Ada New York Hari Ini (dwibahasa)
+  bk_7a593ee32f580cfb: "tinjauan: konten dewasa", // Tuhan, Izinkan Aku Menjadi Pelacur!
+  bk_dad5b5d2634fb90c: "tinjauan: konten dewasa", // Centhini, Tambangraras-Amongraga
+  bk_1dead35b81273f58: "tinjauan: bacaan anak kecil", // Batu Belah Batu Bertangkup
+  bk_ec77b20f8eeb1ec9: "tinjauan: bacaan anak kecil", // Buku Abjad ABC Binatang
+  bk_5ed170731ee32969: "tinjauan: bacaan anak kecil", // Hadiah Alam
+  bk_e2e1ae32c05ca413: "tinjauan: bacaan anak kecil", // Nyi Rambut Kasih
+  bk_475f7cc3003768dc: "tinjauan: bacaan anak kecil", // Persahabatan
+  bk_caa8951fb83410b9: "tinjauan: bacaan anak kecil", // Ratu Sejati dan Lutung Baik Hati
+  bk_fdf2e9023a2e2b8b: "tinjauan: politik praktis/polemik", // Dia: Sebentuk Potret Diri Megawati Soekarnoputri
+  bk_116e9bac4d35f14f: "tinjauan: politik praktis/polemik", // Perang Yang Tidak Akan Kita Menangkan
+  bk_1f5def9a1ac665f3: "tinjauan: politik praktis/polemik", // Blok Pembangkang
+  bk_09b499c3d4f2bde0: "tinjauan: buku teks/kajian akademik", // Diksi dan Gaya Bahasa
+  bk_06f8c8da67a34f9b: "tinjauan: buku teks/kajian akademik", // Getar Gender
+  bk_39b49b0ecfff7df8: "tinjauan: buku teks/kajian akademik", // Hak Kekayaan Intelektual
+  bk_fa5850ef71d52163: "tinjauan: buku teks/kajian akademik", // Jalan Rel
+  bk_d3cf6859b57083c5: "tinjauan: buku teks/kajian akademik", // Karya Lengkap Abdullah Abdul Kadir Munsyi
+  bk_87fd41f650810b68: "tinjauan: buku teks/kajian akademik", // Kumpulan Karangan (Drijarkara)
+  bk_686302c5f4dc9adf: "tinjauan: buku teks/kajian akademik", // Penggunaan Bahasa Indonesia Ragam Tulis
+  bk_e1a5f82390f64db0: "tinjauan: buku teks/kajian akademik", // Prosa Tradisional
+  bk_bac77b7f3b81699a: "tinjauan: buku teks/kajian akademik", // Riau Sebagai Pusat Bahasa dan Kebudayaan Melayu
+  bk_5385287841173454: "tinjauan: buku teks/kajian akademik", // Ritumpanna Wélenrénngé
+  bk_9c68323b4b2b9adb: "tinjauan: buku teks/kajian akademik", // Sejarah Pemikiran Hak-Hak Asasi Manusia
+  bk_774cfb30b5783967: "tinjauan: buku teks/kajian akademik", // Teater Lenong Betawi
+  bk_9d4d20d6c2b3696c: "tinjauan: buku teks/kajian akademik", // Teori Ekonomi, Politik Ekonomi dan Orde Ekonomi
+  bk_11ce32c8a8f6d51c: "tinjauan: buku teks/kajian akademik", // Sunda Sebelum Perang
+  bk_70af8e91637c7b9b: "tinjauan: buku teks/kajian akademik", // Ornamen Rumah Adat Batak Toba
+  bk_8621a1f1a22d6cb5: "bukan bacaan umum (katalog/kamus/panduan)", // Tentang Sejumlah Orang Sulawesi Selatan
+  bk_a195d740dedf98a6: "bukan bacaan umum (katalog/kamus/panduan)", // Kabar Baik (traktat)
+  bk_07f315bfb91c418b: "bukan bacaan umum (katalog/kamus/panduan)", // Umat Allah Menegaskan Arah
+  bk_d36528d5e6ce6dbb: "tinjauan: terbitan mandiri luar negeri", // Semanyun Senyuman Mahasiswa
 };
 
 /** Cover URLs that show the wrong book, a person, a placeholder or a page. */
 export const REJECTED_COVERS = new Set<string>([
+  "https://covers.openlibrary.org/b/id/5328897-L.jpg?default=false", // Cerita Rakyat Jawa Barat, shows Karnadi Bandar Bangkong
+  "https://books.google.com/books/content?id=guQhfqYvU8EC&printsec=frontcover&img=1&zoom=1&fife=w600", // Dari Pendjara ke Pendjara, library binding
+  "https://covers.openlibrary.org/b/id/13495632-L.jpg?default=false", // Dibawah Bendera Revolusi, photos of people
+  "https://books.google.com/books/content?id=die4AAAAIAAJ&printsec=frontcover&img=1&zoom=1&fife=w600", // Sepotong Hati di Sudut Kamar, library binding
   "https://books.google.com/books/content?id=z5xkAAAAMAAJ&printsec=frontcover&img=1&zoom=1&fife=w600", // Deru Campur Debu, library binding or title-page scan
   "https://books.google.com/books/content?id=Zo-5AAAAIAAJ&printsec=frontcover&img=1&zoom=1&fife=w600", // Canting, library binding or title-page scan
   "https://books.google.com/books/content?vid=ISBN9789794030875&printsec=frontcover&img=1&zoom=1", // Cinta Olimpiade, library binding or title-page scan
@@ -1104,6 +1144,15 @@ export const CATEGORY_OVERRIDES: Record<string, Category[]> = {
   bk_d8c737fa6b62ce04: ["Remaja"], // Tragedi Sinemata (Hilman)
   bk_0e5f9ddb09d108d7: ["Nonfiksi Umum", "Agama"], // Humor Ngaji Kaum Santri
   bk_7a4b8031314beca9: ["Puisi"], // Matahari-Matahari Kecil: Pilihan Sajak
+  // Review of the 30 Oct 2026 run
+  bk_537da5f566f1c802: ["Puisi"], // Tidak Ada New York Hari Ini
+  bk_79778833e1217d83: ["Agama"], // 7 Malam Pertama di Alam Kubur
+  bk_696ccfa38fd2d88d: ["Kumpulan Cerpen"], // Cerita Rakyat Jawa Barat
+  bk_1917f696340d6967: ["Nonfiksi Umum", "Sejarah"], // Pandangan Hidup (Tan Malaka)
+  bk_1727709630d2909d: ["Novel"], // Sepotong Hati di Sudut Kamar
+  bk_55293b0908d49009: ["Agama", "Remaja"], // Ngefriend Sama Islam
+  bk_0523619ce5b0a2bc: ["Novel", "Anak"], // Kokokan Mencari Arumbawangi
+  bk_eb9e2a90f979d47e: ["Kumpulan Cerpen"], // Tugu Kemakmuran
 };
 
 /** normalizeSearchText(source title) → title to use. */
@@ -1146,6 +1195,7 @@ export const CORRECTIONS: Record<
   },
   // Open Library lumps the Catalan translation into the work, with its translator as author (30 Oct 2026).
   bk_f371d7978c36a232: {authors: ["Eka Kurniawan"]},
+  bk_537da5f566f1c802: {title: "Tidak Ada New York Hari Ini", subtitle: null},
   bk_94c39a7abd2651c2: {
     description:
       "Buku kedua kisah Gajah Mada karya Langit Kresna Hariadi. Di tengah perebutan takhta dan intrik di istana Majapahit, Gajah Mada berjuang menjaga keselamatan raja dan keutuhan negeri.",
