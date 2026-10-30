@@ -496,6 +496,7 @@ export const REJECTED_BOOKS: Record<string, string> = {
   bk_346776a26373eaae: "kurasi: edisi bahasa asing", // Personality Plus (Monarch)
   bk_fe70a22066d436d8: "kurasi: edisi bahasa asing", // Never Let Me Go (Faber cover)
   bk_ff236145addc576a: "kurasi: edisi bahasa asing", // Being Indonesian (written in English)
+  bk_3d49ead6af1f17f1: "kurasi: buku teks/kajian akademik", // Sunda: Dalam Jaring Esterika Suara-Suara Kelas (literary criticism)
 };
 
 /** Cover URLs that show the wrong book, a person, a placeholder or a page. */
@@ -1246,6 +1247,7 @@ export const CORRECTIONS: Record<
   bk_670bc324ae232ee6: {title: "Rectoverso"}, // was "Rectosrev"
   // A book about David Tobing, written by Rita Triana Budiarti.
   bk_d385b9015fb8ab64: {authors: ["Rita Triana Budiarti"]},
+  bk_e543af6abc95dfea: {isbn13: null}, // Biografi Daripada Soeharto: the ISBN belongs to "Chic & modis kerudung"
   bk_8326add768e01788: {isbn13: null}, // Refrein di Sudut Dam: the ISBN belongs to a Bentang translation of Tears of the Giraffe
   bk_94c39a7abd2651c2: {
     description:
