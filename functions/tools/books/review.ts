@@ -1170,6 +1170,8 @@ export const CATEGORY_OVERRIDES: Record<string, Category[]> = {
   bk_bd5c9aba1a235359: ["Kumpulan Cerpen"], // Lipstik dalam Tas Doni
   bk_f767d779232939b7: ["Nonfiksi Umum"], // Ideologi Politik dan Teater Modern Indonesia
   bk_f85b4f5055478c01: ["Sejarah"], // Di Bawah Lentera Merah
+  bk_d06d8491fe089b3f: ["Puisi"], // Nyanyian Integrasi Bangsa
+  bk_0b7fcd9ca2ccae06: ["Puisi"], // Ghirah Gatha
 };
 
 /** normalizeSearchText(source title) → title to use. */
