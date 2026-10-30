@@ -1153,6 +1153,14 @@ export const CATEGORY_OVERRIDES: Record<string, Category[]> = {
   bk_55293b0908d49009: ["Agama", "Remaja"], // Ngefriend Sama Islam
   bk_0523619ce5b0a2bc: ["Novel", "Anak"], // Kokokan Mencari Arumbawangi
   bk_eb9e2a90f979d47e: ["Kumpulan Cerpen"], // Tugu Kemakmuran
+  // Books left as "Lainnya" (30 Oct 2026)
+  bk_017d315acfd549f5: ["Bisnis", "Biografi"], // The Ciputra's Way
+  bk_20cfd4e6df4fa66a: ["Novel"], // The Darkness of Gatotkaca
+  bk_37fb561c7fbdc607: ["Remaja", "Novel"], // Mimi Elektrik
+  bk_87a0642aef025b3d: ["Kumpulan Cerpen"], // Dunia di Kepala Alice
+  bk_bd5c9aba1a235359: ["Kumpulan Cerpen"], // Lipstik dalam Tas Doni
+  bk_f767d779232939b7: ["Nonfiksi Umum"], // Ideologi Politik dan Teater Modern Indonesia
+  bk_f85b4f5055478c01: ["Sejarah"], // Di Bawah Lentera Merah
 };
 
 /** normalizeSearchText(source title) → title to use. */
@@ -1184,7 +1192,16 @@ export const AUTHOR_RENAMES: Record<string, string> = {
  */
 export const CORRECTIONS: Record<
   string,
-  {title?: string; subtitle?: string | null; authors?: string[]; description?: string | null}
+  {
+    title?: string;
+    subtitle?: string | null;
+    authors?: string[];
+    publisher?: string;
+    publishedYear?: number;
+    isbn13?: string;
+    isbn10?: string;
+    description?: string | null;
+  }
 > = {
   bk_ca03cf8cb4132e4e: {title: "Atomic Habits", subtitle: "Perubahan Kecil yang Memberikan Hasil Luar Biasa"},
   bk_49e859417a3d8420: {title: "Kami (Bukan) Sarjana Kertas"},
