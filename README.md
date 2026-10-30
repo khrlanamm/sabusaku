@@ -130,6 +130,8 @@ Run them from `functions/`. Without `--emulator`, a script works on **production
 | `npx tsx tools/export-school.ts --code sman1` | Export all school data to `secret/exports/` |
 | `npx tsx tools/delete-school.ts --code sman1 --confirm sman1` | Delete a school with its data and memberships. Cannot be undone |
 
+The book catalog pipeline is in `functions/tools/books/`. Its hand-collected synopses and book records hold text that belongs to publishers and stores, so they are not in this repo. They live in a private repo, cloned to `functions/tools/books/private/`. Without the clone the pipeline runs with none of them.
+
 ## User guide
 
 The guide for students and teachers is `docs/manual/panduan-sabu-saku.pdf`, also served at [sabusaku.web.app/panduan.pdf](https://sabusaku.web.app/panduan.pdf) (`hosting/panduan.pdf`). Rebuild both with:

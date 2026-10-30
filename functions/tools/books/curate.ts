@@ -15,8 +15,8 @@
 //     are left alone.
 //   - CORRECTIONS and CATEGORY_OVERRIDES are written to books no teacher has
 //     edited (updatedBy.kind is still "import"); a teacher's edit always wins.
-//   - SYNOPSES (manual-synopses.ts) fill the synopsis of such books when it
-//     is still empty.
+//   - SYNOPSES (private-data.ts) fill the synopsis of such books when it is
+//     still empty.
 //
 // Every change gets a history entry by "Kurasi pengembang".
 
@@ -31,7 +31,7 @@ import {rebuildCatalog} from "../../src/infra/catalog";
 import {booksCol, db} from "../../src/infra/firebase";
 import {OUT, hasFlag, readJson} from "./common";
 import {ImportBook, cleanDescription} from "./normalize";
-import {SYNOPSES} from "./manual-synopses";
+import {SYNOPSES} from "./private-data";
 import {CATEGORY_OVERRIDES, CORRECTIONS, REJECTED_BOOKS} from "./review";
 
 const ACTOR = {name: "Kurasi pengembang", kind: "import"} as const;

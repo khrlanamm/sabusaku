@@ -6,7 +6,7 @@
 //     with the same effect as a teacher's review in the app
 //     (reviewSuggestion): the book joins the catalog, or is linked to the
 //     catalog book it really is, and the students' programs point at it;
-//   - MANUAL_BOOKS (manual-books.ts) that are not in the catalog yet.
+//   - MANUAL_BOOKS (private-data.ts) that are not in the catalog yet.
 //
 //   npx tsx tools/books/manual.ts [--apply] [--emulator]
 //
@@ -41,7 +41,7 @@ import {
 import {upsertCatalogEntry} from "../../src/infra/catalog";
 import {booksCol, bookSuggestionsCol, db} from "../../src/infra/firebase";
 import {OUT, ensureDir, getBinary, hasFlag, sha1} from "./common";
-import {MANUAL_BOOKS} from "./manual-books";
+import {MANUAL_BOOKS} from "./private-data";
 import {ManualBook, SUGGESTION_DECISIONS} from "./review";
 
 const ACTOR = {name: "Kurasi pengembang", kind: "import"} as const;

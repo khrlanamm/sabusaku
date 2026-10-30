@@ -1406,7 +1406,7 @@ export interface ManualBook {
 export type SuggestionDecision = ({action: "create"} & ManualBook) | {action: "link"; bookId: string};
 
 export const SUGGESTION_DECISIONS: Record<string, SuggestionDecision> = {
-  // ---- 30 Oct 2026 ----
+  // ---- 30 Oct 2026. All applied; their synopses are in production, not here. ----
   dIZUHMGJ72mfwUJcxjkG: {action: "link", bookId: "bk_f371d7978c36a232"}, // Cantik Itu Luka
   // 133 pages typed: the novel (135), not the poetry collection (120).
   ArLffXvgzBB2AzS8kOlm: {

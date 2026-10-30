@@ -57,6 +57,9 @@ firebase-debug.log*
 # Book catalog import: raw API cache, covers and reports (not committed)
 functions/tools/books/out/
 
+# Book catalog text from publishers and stores: clone of a private repo
+functions/tools/books/private/
+
 # Golden test diff output
 **/failures/
 

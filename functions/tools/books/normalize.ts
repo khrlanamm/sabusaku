@@ -10,7 +10,7 @@ import {resolve} from "node:path";
 
 import {BOOK_CATEGORIES, bookKey, normalizeSearchText} from "../../src/domain/search";
 import {Candidate, OUT, authorMatches, properName, readJson, sha1, writeJson} from "./common";
-import {SYNOPSES} from "./manual-synopses";
+import {SYNOPSES} from "./private-data";
 import {AUTHOR_RENAMES, CATEGORY_OVERRIDES, CORRECTIONS, REJECTED_BOOKS, TITLE_RENAMES} from "./review";
 import {Category, SEED_AUTHORS, SEED_TITLES} from "./seeds";
 import {WikiBook} from "./wikipedia";
