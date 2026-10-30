@@ -1170,6 +1170,7 @@ export const CATEGORY_OVERRIDES: Record<string, Category[]> = {
   bk_bd5c9aba1a235359: ["Kumpulan Cerpen"], // Lipstik dalam Tas Doni
   bk_f767d779232939b7: ["Nonfiksi Umum"], // Ideologi Politik dan Teater Modern Indonesia
   bk_f85b4f5055478c01: ["Sejarah"], // Di Bawah Lentera Merah
+  bk_8f7eea18d53902df: ["Puisi"], // Angin Sumilir: Javanese guritan
   bk_b732737250359663: ["Novel"], // Meretas Ungu
   bk_243d0b7c5137ab47: ["Biografi"], // Interupsi!
   bk_13e867aed168e993: ["Nonfiksi Umum"], // Romansa Cyber
@@ -1256,6 +1257,7 @@ export const CORRECTIONS: Record<
   bk_16413bd8d52a7cd9: {isbn13: "9789795611776"}, // Awas! Bahaya Lidah (was 9799795611775)
   bk_f933facfdf67ad7c: {isbn13: null}, // Anak Semua Bangsa, Hasta Mitra 1980: Penguin's ISBN for the English translation
   bk_670bc324ae232ee6: {title: "Rectoverso"}, // was "Rectosrev"
+  bk_38d0b844fd16e26e: {title: "Yuni Shara, 35 Cangkir Kopi"}, // was "Yuni Shara & Cangkir Kopi"
   bk_0696e252848a6faa: {title: "Menjadi Manusia Indonesia"}, // published without "Seutuhnya"
   bk_25928744b24f9a8b: {authors: ["Martha Tilaar", "Wulan Tilaar Widarto"]}, // Leadership Quotient: co-author missing
   bk_31ca0c23675b01c8: {title: "Catatan Masa Lalu Banten"}, // was "Catatan Masalalu Banten"
