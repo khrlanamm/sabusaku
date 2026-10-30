@@ -8,7 +8,12 @@
 //   AUTHOR_RENAMES     canonical authors, keyed by the normalised source name
 import type {Category} from "./seeds";
 
-/** Book ID → reason. */
+/**
+ * Book ID → reason. On 30 Oct 2026 the user decided that adult, political
+ * and technical or academic books belong in the catalog: only non-books and
+ * incomplete books are kept out. The curation's soft deletes for those
+ * reasons were lifted, so curate.ts restores them.
+ */
 export const REJECTED_BOOKS: Record<string, string> = {
   // ---- Review of the books added on 17 Oct 2026 (new IDs of books already in production count as duplicates) ----
   bk_d683f8977266dd5f: "tinjauan: buku teks/kajian akademik", // Menuju Era Wakaf Produktif
@@ -40,23 +45,6 @@ export const REJECTED_BOOKS: Record<string, string> = {
   bk_75b89165960be70b: "duplikat: sudah ada sebagai bk_4f10875a86b3127b", // Senja di Jakarta
   bk_0a6f24ecee1e2f14: "duplikat: sudah ada sebagai bk_13680be1fda7d8e5", // Seperti Dendam, Rindu Harus Dibayar Tuntas
   // ---- Curation of the production catalog (17 Oct 2026, curate.ts soft-deletes them) ----
-  bk_ce95b2ed0bd844a3: "kurasi: konten dewasa", // Saman
-  bk_9091dabd2bea65fb: "kurasi: konten dewasa", // Larung
-  bk_a2389da179a04b52: "kurasi: konten dewasa", // Pengakuan Eks Parasit Lajang
-  bk_c53cef1ffe57f1c8: "kurasi: konten dewasa", // Cerita Cinta Enrico
-  bk_472bef9d519b5036: "kurasi: konten dewasa", // Nayla
-  bk_447938d611903a14: "kurasi: konten dewasa", // Mereka Bilang, Saya Monyet!
-  bk_734b290aa24f1515: "kurasi: konten dewasa", // Cerita Pendek tentang Cerita Cinta Pendek
-  bk_1eddb869538e4a4e: "kurasi: konten dewasa", // Pillow Talk
-  bk_2f5e80dd6498db2a: "kurasi: konten dewasa", // Mouth To Mouth
-  bk_b614646feae1ad0b: "kurasi: konten dewasa", // Good Fight
-  bk_d8ae91ac6ff3341e: "kurasi: konten dewasa", // With You
-  bk_caa743a96cd6a698: "kurasi: konten dewasa", // Coklat Stroberi
-  bk_c0d82a72a5666e29: "kurasi: konten dewasa", // Kuta Bali
-  bk_64cb7e67ac9f2513: "kurasi: konten dewasa", // Misteri Perawan Kubur
-  bk_5cfe1f51d5ddbe19: "kurasi: konten dewasa", // Nyanyian Maldoror dan Poésies
-  bk_693362707e658e9a: "kurasi: konten dewasa", // The Last Don
-  bk_4c737fb8ee0779ec: "kurasi: konten dewasa", // Deadline
   bk_a8967eef3bf408b2: "kurasi: bukan buku utuh / bukan bacaan", // A Moment To Love You Chapter 1
   bk_9d88d8a9cf10aa14: "kurasi: bukan buku utuh / bukan bacaan", // Paranormal
   bk_a03b8b3ce034300b: "kurasi: bukan buku utuh / bukan bacaan", // Sebuah Catatan, Untuk Kita Renungkan
@@ -75,25 +63,6 @@ export const REJECTED_BOOKS: Record<string, string> = {
   bk_c282a85fb88dd935: "kurasi: bacaan anak kecil", // Komik Tadabur Al-Qur`an
   bk_793e56a0139f7b0b: "kurasi: bacaan anak kecil", // Haid Pertamaku
   bk_36567d6c4ac1f0b2: "kurasi: bacaan anak kecil", // Si Untung
-  bk_ab2703fb60d74d37: "kurasi: buku teks/teknis", // Syarah Shahih Muslim, Tahqiq Khalil Ma'mun Syiha
-  bk_0a128ebfaad7b15d: "kurasi: buku teks/teknis", // Berbagai Aliran di dalam dan di Sekitar Gereja
-  bk_3baf4be2f4fece52: "kurasi: buku teks/teknis", // Dekolonisasi Gereja di Indonesia
-  bk_2e26a1cbca5d1ec4: "kurasi: buku teks/teknis", // Berkawan Harimau Bersama Alam
-  bk_08e40fc369324eaa: "kurasi: buku teks/teknis", // Sepak Bola Indonesia
-  bk_f6ab7935f3b7bba9: "kurasi: buku teks/teknis", // Ekologi
-  bk_aa418dbf1f1fbf97: "kurasi: buku teks/teknis", // Membidik Pasar Indonesia
-  bk_e0252582b70ce31e: "kurasi: buku teks/teknis", // Danger Zone
-  bk_5977d3bc7f265f4f: "kurasi: buku teks/teknis", // Hipnoterapi
-  bk_a92692d8ecff48f9: "kurasi: buku teks/teknis", // Sejarah Satrya Dalem Cili Ularan dari Majapahit
-  bk_388fbe28b49917f7: "kurasi: politik praktis/polemik/judul kasar", // 10 Dosa Besar Soeharto
-  bk_b3035d87b0568f30: "kurasi: politik praktis/polemik/judul kasar", // Agenda Mendesak Bangsa
-  bk_c368392e0418a763: "kurasi: politik praktis/polemik/judul kasar", // Gerakan Politik Indonesia
-  bk_b15fd025216108fa: "kurasi: politik praktis/polemik/judul kasar", // Gus Dur Garis Miring PKB
-  bk_681b92c3e96d67c5: "kurasi: politik praktis/polemik/judul kasar", // Mengapa Partai Islam Kalah?
-  bk_be9809f46f7aa2a0: "kurasi: politik praktis/polemik/judul kasar", // Sang Pemimpin
-  bk_6264830ee7073fd5: "kurasi: politik praktis/polemik/judul kasar", // Bunuh Sang Nabi!
-  bk_904c0f5e81fc04cf: "kurasi: politik praktis/polemik/judul kasar", // Umat Islam Menghadapi Tantangan Kristenisasi dan Sekularisas
-  bk_5fed3ca829de8a95: "kurasi: politik praktis/polemik/judul kasar", // Jiwo J[a]ncuk
   // ---- Books that came in after the title-case rerun (16 Oct 2026) ----
   bk_8b96295e6634bde9: "tidak relevan untuk siswa SMA", // Istri Kontrak
   bk_6dec0a255e6efa69: "tidak relevan untuk siswa SMA", // Kawin Kontrak
@@ -496,7 +465,6 @@ export const REJECTED_BOOKS: Record<string, string> = {
   bk_346776a26373eaae: "kurasi: edisi bahasa asing", // Personality Plus (Monarch)
   bk_fe70a22066d436d8: "kurasi: edisi bahasa asing", // Never Let Me Go (Faber cover)
   bk_ff236145addc576a: "kurasi: edisi bahasa asing", // Being Indonesian (written in English)
-  bk_3d49ead6af1f17f1: "kurasi: buku teks/kajian akademik", // Sunda: Dalam Jaring Esterika Suara-Suara Kelas (literary criticism)
 };
 
 /** Cover URLs that show the wrong book, a person, a placeholder or a page. */

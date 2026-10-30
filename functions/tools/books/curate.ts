@@ -10,6 +10,9 @@
 //     the reason), exactly as a teacher's "Hapus buku" does: they leave search,
 //     programs that use them keep their copy, and any teacher can restore them
 //     from "Buku terhapus".
+//   - Books this tool deleted whose decision has since left REJECTED_BOOKS are
+//     restored, exactly as a teacher's restore does. Books a teacher deleted
+//     are left alone.
 //   - CORRECTIONS and CATEGORY_OVERRIDES are written to books no teacher has
 //     edited (updatedBy.kind is still "import"); a teacher's edit always wins.
 //   - SYNOPSES (manual-synopses.ts) fill the synopsis of such books when it
@@ -54,6 +57,10 @@ async function main() {
   const rejected = await load(Object.keys(REJECTED_BOOKS));
   const deletes = [...rejected].filter(([, data]) => data.status === "active");
   console.log(`Hapus lunak: ${deletes.length} buku aktif dari ${Object.keys(REJECTED_BOOKS).length} keputusan tolak`);
+  const deleted = await booksCol().where("status", "==", "deleted").get();
+  const restores = deleted.docs.filter((doc) => doc.get("deletedBy.name") === ACTOR.name && !REJECTED_BOOKS[doc.id]);
+  console.log(`Pulihkan: ${restores.length} buku yang keputusan tolaknya sudah dicabut`);
+  for (const doc of restores) console.log(`  - ${doc.get("title")} (${doc.id}): ${doc.get("deleteReason")}`);
   for (const [id, data] of deletes) {
     const readers = (data.readerCount as number | undefined) ?? 0;
     console.log(`  - ${data.title} (${id})${readers ? `, dipakai ${readers} program` : ""}: ${REJECTED_BOOKS[id]}`);
@@ -131,6 +138,21 @@ async function main() {
         note: REJECTED_BOOKS[id].replace(/^kurasi: /, ""),
       },
     })),
+    ...restores.map((doc) => ({
+      id: doc.id,
+      update: {
+        status: "active",
+        deletedAt: FieldValue.delete(),
+        deletedBy: FieldValue.delete(),
+        deleteReason: FieldValue.delete(),
+        duplicateOf: FieldValue.delete(),
+      },
+      history: {
+        type: "restored",
+        changes: {status: {from: "deleted", to: "active"}},
+        note: "Keputusan tolak dicabut",
+      },
+    })),
     ...patches.map(({id, patch, changes}) => ({
       id,
       update: patch,
@@ -153,7 +175,9 @@ async function main() {
   }
   // The catalog trigger skips writes by kind "import"; rebuild once.
   const indexed = await rebuildCatalog();
-  console.log(`Selesai: ${deletes.length} dihapus lunak, ${patches.length} dikoreksi; indeks berisi ${indexed} buku aktif.`);
+  console.log(
+    `Selesai: ${deletes.length} dihapus lunak, ${restores.length} dipulihkan, ${patches.length} dikoreksi; indeks berisi ${indexed} buku aktif.`,
+  );
 }
 
 main().then(
