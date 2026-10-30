@@ -1343,6 +1343,9 @@ export const CORRECTIONS: Record<
   bk_35b40c117ca27d5a: {isbn13: "9789794335963"}, // Sang Pencerah (was 9787974335963)
   bk_16413bd8d52a7cd9: {isbn13: "9789795611776"}, // Awas! Bahaya Lidah (was 9799795611775)
   bk_670bc324ae232ee6: {title: "Rectoverso"}, // was "Rectosrev"
+  bk_e5fb8ce962c60b2d: {title: "Taksonomi dan Bioekologi Lalat Buah Penting di Indonesia", authors: ["Sri Suharni Siwi", "Purnama Hidayat", "Suputa"]}, // "Lalat Buat", three authors in one string
+  bk_fe9ff6732885ac0e: {authors: ["Imam Ghozali"]}, // was "Imam ghozali, 2018"
+  bk_b6302ed13406acb4: {subtitle: "Membentuk Generasi Cemerlang Harapan Bangsa", authors: ["Isjoni"]}, // "Generaso"; the same author listed twice
   bk_0fabd5e5463fffe3: {authors: ["Syekh Adnan Hasan Shalih Baharits"]}, // Mendidik Anak Laki-Laki: Abdul Mun'im Ibrahim wrote the companion volume
   bk_355bd1f0bd1a4f57: {isbn13: "9786234582208"}, // Sahabiyah Stories for Kids, per Gema Insani
   bk_a6d176a4bbe9cdf9: {authors: ["Ekuslie Goestiandi", "Yusi Avianto Pareanom"]}, // Pembelajaran T.P. Rachmat: a book about him
