@@ -1170,6 +1170,7 @@ export const CATEGORY_OVERRIDES: Record<string, Category[]> = {
   bk_bd5c9aba1a235359: ["Kumpulan Cerpen"], // Lipstik dalam Tas Doni
   bk_f767d779232939b7: ["Nonfiksi Umum"], // Ideologi Politik dan Teater Modern Indonesia
   bk_f85b4f5055478c01: ["Sejarah"], // Di Bawah Lentera Merah
+  bk_13e867aed168e993: ["Nonfiksi Umum"], // Romansa Cyber
   bk_6aa80f0228219f06: ["Nonfiksi Umum"], // Uap
   bk_0bc34942b592f005: ["Nonfiksi Umum"], // BOR
   bk_c056f168a5829053: ["Kumpulan Cerpen"], // Sarapan Pagi Penuh Dusta
@@ -1262,6 +1263,7 @@ export const CORRECTIONS: Record<
   bk_d385b9015fb8ab64: {authors: ["Rita Triana Budiarti"]},
   bk_e543af6abc95dfea: {isbn13: null}, // Biografi Daripada Soeharto: the ISBN belongs to "Chic & modis kerudung"
   bk_8326add768e01788: {isbn13: null},
+  bk_e765832f8de11ad1: {isbn13: null}, // Mitologi Kanjeng Ratu Kidul: the ISBN belongs to "Dakwah Wali Songo"
   bk_c9e5daa4ad9dbbd4: {isbn13: null}, // Njoto: the ISBN belongs to the Sjahrir book of the same Tempo series // Refrein di Sudut Dam: the ISBN belongs to a Bentang translation of Tears of the Giraffe
   bk_94c39a7abd2651c2: {
     description:
