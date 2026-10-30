@@ -91,13 +91,14 @@ async function addBook(
   const fields = bookFieldsSchema.parse(manual.book);
   const searchKey = bookKey(fields.title, fields.authors[0]);
   const bookId = `bk_${sha1(fields.isbn13 ?? searchKey).slice(0, 16)}`;
-  console.log(`  tambah "${fields.title}" / ${fields.authors.join(", ")} (${bookId}), ${fields.categories.join(", ")}`);
-  if ((await booksCol().doc(bookId).get()).exists) throw new AlreadyInCatalog(`${bookId} sudah ada di katalog`);
+  const label = `"${fields.title}" / ${fields.authors.join(", ")}`;
+  if ((await booksCol().doc(bookId).get()).exists) throw new AlreadyInCatalog(`${label}: ${bookId} sudah ada di katalog`);
   const active = booksCol().where("status", "==", "active");
   const same =
     (fields.isbn13 ? (await active.where("isbn13", "==", fields.isbn13).limit(1).get()).docs[0] : undefined) ??
     (await active.where("searchKey", "==", searchKey).limit(1).get()).docs[0];
-  if (same) throw new AlreadyInCatalog(`sudah ada sebagai "${same.get("title")}" (${same.id})`);
+  if (same) throw new AlreadyInCatalog(`${label}: sudah ada sebagai "${same.get("title")}" (${same.id})`);
+  console.log(`  tambah ${label} (${bookId}), ${fields.categories.join(", ")}`);
   const jpeg = await coverJpeg(manual.cover);
   writeFileSync(resolve(PREVIEWS, `${bookId}.jpg`), jpeg);
   if (!apply) return null;
@@ -197,7 +198,7 @@ async function addManualBooks(): Promise<number> {
       if (await addBook(manual)) added++;
     } catch (error) {
       if (error instanceof AlreadyInCatalog) {
-        console.log(`    lewati: ${error.message}`);
+        console.log(`  lewati ${error.message}`);
         continue;
       }
       failed++;
