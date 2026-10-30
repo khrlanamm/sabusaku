@@ -409,7 +409,7 @@ function tidyName(raw: string): string {
   return properName(name);
 }
 
-function canonicalAuthor(name: string): string {
+export function canonicalAuthor(name: string): string {
   const seed = seedAuthorNames.find((s) => authorMatches(name, s.canonical, s.aliases));
   if (seed) return seed.canonical;
   const tidy = tidyName(name);
