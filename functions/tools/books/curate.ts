@@ -12,6 +12,8 @@
 //     from "Buku terhapus".
 //   - CORRECTIONS and CATEGORY_OVERRIDES are written to books no teacher has
 //     edited (updatedBy.kind is still "import"); a teacher's edit always wins.
+//   - SYNOPSES (manual-synopses.ts) fill the synopsis of such books when it
+//     is still empty.
 //
 // Every change gets a history entry by "Kurasi pengembang".
 
@@ -25,6 +27,7 @@ import {rebuildCatalog} from "../../src/infra/catalog";
 import {booksCol, db} from "../../src/infra/firebase";
 import {OUT, hasFlag, readJson} from "./common";
 import {ImportBook, cleanDescription} from "./normalize";
+import {SYNOPSES} from "./manual-synopses";
 import {CATEGORY_OVERRIDES, CORRECTIONS, REJECTED_BOOKS} from "./review";
 
 const ACTOR = {name: "Kurasi pengembang", kind: "import"} as const;
@@ -56,7 +59,9 @@ async function main() {
   }
 
   // ---- Corrections (CORRECTIONS, plus categories from CATEGORY_OVERRIDES)
-  const ids = [...new Set([...Object.keys(CORRECTIONS), ...Object.keys(CATEGORY_OVERRIDES)])];
+  const ids = [
+    ...new Set([...Object.keys(CORRECTIONS), ...Object.keys(CATEGORY_OVERRIDES), ...Object.keys(SYNOPSES)]),
+  ];
   const current = await load(ids);
   const patches: {id: string; title: string; patch: Record<string, unknown>; changes: Changes}[] = [];
   for (const id of ids) {
@@ -64,6 +69,7 @@ async function main() {
     if (!data || data.status !== "active" || data.updatedBy?.kind !== "import") continue;
     const wanted: Record<string, unknown> = {...CORRECTIONS[id]};
     if (CATEGORY_OVERRIDES[id]) wanted.categories = CATEGORY_OVERRIDES[id];
+    if (SYNOPSES[id] && !data.description) wanted.description = SYNOPSES[id];
     const patch: Record<string, unknown> = {};
     const changes: Changes = {};
     for (const [field, value] of Object.entries(wanted)) {

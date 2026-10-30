@@ -10,6 +10,7 @@ import {resolve} from "node:path";
 
 import {BOOK_CATEGORIES, bookKey, normalizeSearchText} from "../../src/domain/search";
 import {Candidate, OUT, authorMatches, properName, readJson, sha1, writeJson} from "./common";
+import {SYNOPSES} from "./manual-synopses";
 import {AUTHOR_RENAMES, CATEGORY_OVERRIDES, CORRECTIONS, REJECTED_BOOKS, TITLE_RENAMES} from "./review";
 import {Category, SEED_AUTHORS, SEED_TITLES} from "./seeds";
 import {WikiBook} from "./wikipedia";
@@ -762,6 +763,10 @@ function main() {
   }
 
   for (const book of kept) {
+    if (!book.description && SYNOPSES[book.id]) {
+      book.description = SYNOPSES[book.id];
+      book.descriptionSource = "review";
+    }
     const correction = CORRECTIONS[book.id];
     if (!correction) continue;
     Object.assign(book, correction);
