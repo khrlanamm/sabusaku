@@ -1200,6 +1200,7 @@ export const CORRECTIONS: Record<
     publishedYear?: number;
     isbn13?: string;
     isbn10?: string;
+    pageCount?: number;
     description?: string | null;
   }
 > = {
@@ -1213,6 +1214,23 @@ export const CORRECTIONS: Record<
   // Open Library lumps the Catalan translation into the work, with its translator as author (30 Oct 2026).
   bk_f371d7978c36a232: {authors: ["Eka Kurniawan"]},
   bk_537da5f566f1c802: {title: "Tidak Ada New York Hari Ini", subtitle: null},
+  // Fields the import left empty, matched to the edition of the stored cover (30 Oct 2026).
+  bk_026fb11ed09815ef: {publisher: "Yayasan Bung Karno & Media Pressindo"}, // Bung Karno
+  bk_131b643d895377a2: {publishedYear: 1900}, // Tjerita Si Tjonat
+  bk_1ad62dfa5a67293d: {publisher: "Iqra"}, // Binatangisme
+  bk_1c48241e581bbde1: {publishedYear: 2005}, // Prahara Buddenovsky
+  bk_2c1dbe3d9d78f0a2: {publisher: "Sinar Harapan"}, // Mencari Makna Hidupku
+  bk_2cb866b40cd04ee8: {publishedYear: 2007}, // Kapok Deh Jatuh Cinta
+  bk_30d05dc3121a584e: {publisher: "Narasi", publishedYear: 2010}, // Madilog: the cover is Narasi's, not the 1943 original
+  bk_37781dd3f3361cf2: {publisher: "Grasindo", publishedYear: 2018, isbn13: "9786024526986", isbn10: "6024526989"}, // Sebuah Seni untuk Bersikap Bodo Amat
+  bk_6fccad0cfb0b219e: {publishedYear: 2019}, // Sang Nabi
+  bk_7154a308a63400b7: {publishedYear: 2020}, // Catatan Najwa 2
+  bk_a434893e2ee76b2d: {publisher: "Gramedia Pustaka Utama", publishedYear: 2019, isbn13: "9786020636191", isbn10: "6020636194"}, // Kim Ji-Yeong, Lahir Tahun 1982
+  bk_edcaa7f83a26851e: {publisher: "Pustaka Pelajar & INSIST Press"}, // Sekolah Itu Candu
+  bk_f030e65a8bc91b6a: {publisher: "Diva Press"}, // Pasar
+  bk_f1c5f5962178a0e8: {publishedYear: 1959}, // Kepada Bangsaku
+  // Divergent: the cover is the Mizan Fantasi edition; 487 pages was the US hardcover.
+  bk_fd4ead1a47cf86ef: {publisher: "Mizan Fantasi", publishedYear: 2012, isbn13: "9789794336977", isbn10: "9794336971", pageCount: 543},
   bk_94c39a7abd2651c2: {
     description:
       "Buku kedua kisah Gajah Mada karya Langit Kresna Hariadi. Di tengah perebutan takhta dan intrik di istana Majapahit, Gajah Mada berjuang menjaga keselamatan raja dan keutuhan negeri.",
