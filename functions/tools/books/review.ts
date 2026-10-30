@@ -1128,11 +1128,15 @@ export const AUTHOR_RENAMES: Record<string, string> = {
 
 /**
  * Book ID → field values that replace what the sources give (17 Oct 2026):
- * a title that repeats its subtitle, and Wikipedia disambiguation pages
- * taken as synopses. normalize.ts applies them; curate.ts writes them to
+ * a title that repeats its subtitle, Wikipedia disambiguation pages taken
+ * as synopses, and a translator listed as author. normalize.ts applies
+ * them; curate.ts writes them to
  * books that no teacher has edited.
  */
-export const CORRECTIONS: Record<string, {title?: string; subtitle?: string | null; description?: string | null}> = {
+export const CORRECTIONS: Record<
+  string,
+  {title?: string; subtitle?: string | null; authors?: string[]; description?: string | null}
+> = {
   bk_ca03cf8cb4132e4e: {title: "Atomic Habits", subtitle: "Perubahan Kecil yang Memberikan Hasil Luar Biasa"},
   bk_49e859417a3d8420: {title: "Kami (Bukan) Sarjana Kertas"},
   bk_64363070e88550d9: {title: "Masih Ingatkah Kau Jalan Pulang"},
@@ -1140,8 +1144,177 @@ export const CORRECTIONS: Record<string, {title?: string; subtitle?: string | nu
     description:
       "Khairul Azzam, mahasiswa Indonesia di Universitas Al-Azhar, Kairo, bertahun-tahun menunda kuliahnya karena harus berjualan tempe dan bakso untuk menghidupi ibu dan adik-adiknya di Solo. Di tengah kerja kerasnya ia mulai memikirkan pendamping hidup, dan perjalanan cintanya diuji oleh kesabaran, kejujuran, dan keteguhan iman.",
   },
+  // Open Library lumps the Catalan translation into the work, with its translator as author (30 Oct 2026).
+  bk_f371d7978c36a232: {authors: ["Eka Kurniawan"]},
   bk_94c39a7abd2651c2: {
     description:
       "Buku kedua kisah Gajah Mada karya Langit Kresna Hariadi. Di tengah perebutan takhta dan intrik di istana Majapahit, Gajah Mada berjuang menjaga keselamatan raja dan keutuhan negeri.",
+  },
+};
+
+/**
+ * Students' "new book" suggestions reviewed by the developer (suggestions.ts),
+ * keyed by bookSuggestions ID. `create` adds the book with data checked
+ * online; `cover` is an image URL, or "suggestion" for the student's photo.
+ * `link` names the catalog book it already is. Suggestions not listed stay
+ * pending for the teachers.
+ */
+export type SuggestionDecision =
+  | {
+      action: "create";
+      book: {
+        title: string;
+        subtitle: string | null;
+        authors: string[];
+        publisher: string | null;
+        publishedYear: number | null;
+        isbn13: string | null;
+        isbn10: string | null;
+        pageCount: number;
+        categories: Category[];
+        description: string | null;
+      };
+      cover: string;
+    }
+  | {action: "link"; bookId: string};
+
+export const SUGGESTION_DECISIONS: Record<string, SuggestionDecision> = {
+  // ---- 30 Oct 2026 ----
+  dIZUHMGJ72mfwUJcxjkG: {action: "link", bookId: "bk_f371d7978c36a232"}, // Cantik Itu Luka
+  // 133 pages typed: the novel (135), not the poetry collection (120).
+  ArLffXvgzBB2AzS8kOlm: {
+    action: "create",
+    book: {
+      title: "Hujan Bulan Juni",
+      subtitle: null,
+      authors: ["Sapardi Djoko Damono"],
+      publisher: "Gramedia Pustaka Utama",
+      publishedYear: 2015,
+      isbn13: "9786020318431",
+      isbn10: "6020318435",
+      pageCount: 135,
+      categories: ["Novel"],
+      description: null,
+    },
+    cover: "https://books.google.com/books/content?id=Z4xKDwAAQBAJ&printsec=frontcover&img=1&zoom=0",
+  },
+  // 352 pages typed: the KataDepan edition (the GagasMedia 2023 one has 308).
+  WK8Re3JAYk1kc3nJ6rGH: {
+    action: "create",
+    book: {
+      title: "Ingkar",
+      subtitle: null,
+      authors: ["Boy Candra"],
+      publisher: "KataDepan",
+      publishedYear: 2020,
+      isbn13: "9786237567141",
+      isbn10: "6237567143",
+      pageCount: 352,
+      categories: ["Novel", "Remaja"],
+      description: null,
+    },
+    cover: "https://bukukita.com/babacms/displaybuku/114195_f.jpg",
+  },
+  bHsfQLo5Q7YyWbVqUdYV: {
+    action: "create",
+    book: {
+      title: "The Alpha Girl's Guide",
+      subtitle: "Menjadi Cewek Smart, Independen, dan Anti-Galau",
+      authors: ["Henry Manampiring"],
+      publisher: "GagasMedia",
+      publishedYear: 2020,
+      isbn13: "9789797809546",
+      isbn10: "9797809544",
+      pageCount: 264,
+      categories: ["Pengembangan Diri", "Remaja"],
+      description: null,
+    },
+    cover: "https://books.google.com/books/content?id=2SzrDwAAQBAJ&printsec=frontcover&img=1&zoom=0",
+  },
+  // 518 pages typed: the 2010 translation by Lulu Wijaya (the 2021 reissue has 520).
+  DGyPAm1rNfONVZpSwMXo: {
+    action: "create",
+    book: {
+      title: "Good Omens",
+      subtitle: "Pertanda-Pertanda Baik",
+      authors: ["Neil Gaiman", "Terry Pratchett"],
+      publisher: "Gramedia Pustaka Utama",
+      publishedYear: 2010,
+      isbn13: "9789792256222",
+      isbn10: "9792256229",
+      pageCount: 518,
+      categories: ["Novel"],
+      description: null,
+    },
+    cover: "https://i.gr-assets.com/images/S/compressed.photo.goodreads.com/books/1270825871l/7999784.jpg",
+  },
+  // The student's photo has a library sticker on it; the publisher's cover is clean.
+  GFfq3Vj4m7wJJpM4RM3h: {
+    action: "create",
+    book: {
+      title: "Muazin Pertama di Luar Angkasa",
+      subtitle: "Sehimpun Cerpen",
+      authors: ["Kiki Sulistyo"],
+      publisher: "DIVA Press",
+      publishedYear: 2021,
+      isbn13: "9786232935808",
+      isbn10: "6232935802",
+      pageCount: 140,
+      categories: ["Kumpulan Cerpen"],
+      description: null,
+    },
+    cover: "https://cdn.gramedia.com/uploads/items/9786232935808.jpg",
+  },
+  // The student typed the author as "AKU. MUNAFIK SALEH".
+  "9dlLkqAXgeEbjBKutrGX": {
+    action: "create",
+    book: {
+      title: "Membangun Karakter dengan Hati Nurani",
+      subtitle: "Pendidikan Karakter untuk Generasi Bangsa",
+      authors: ["Akh. Muwafik Saleh"],
+      publisher: "Erlangga",
+      publishedYear: 2012,
+      isbn13: "9786022410300",
+      isbn10: "6022410304",
+      pageCount: 398,
+      categories: ["Pengembangan Diri", "Agama"],
+      description: null,
+    },
+    cover:
+      "https://lms.dpk.kepriprov.go.id/resources/cover/2023-03-02_MEMBANGUN-KARAKTER-DENGAN-HATI-NURANI-PENDIDIKAN-KARAKTER-UNTUK-GENERASI-BANG_022609.jpg",
+  },
+  // 162 pages typed; the print edition has 164.
+  lKVMKIDYcRAwiBLKpi8V: {
+    action: "create",
+    book: {
+      title: "Aku Kalah, Aku Merindukanmu!",
+      subtitle: "Untukmu yang Tak Pernah Mau Kembali",
+      authors: ["Coretan Lena"],
+      publisher: "Gradien Mediatama",
+      publishedYear: 2024,
+      isbn13: "9786022083719",
+      isbn10: "6022083710",
+      pageCount: 164,
+      categories: ["Remaja", "Novel"],
+      description: null,
+    },
+    cover: "https://books.google.com/books/content?id=0USFEQAAQBAJ&printsec=frontcover&img=1&zoom=0",
+  },
+  // Light novel, M&C (Gramedia) 2026: 392 pages, the student typed 388.
+  zj00GOixD5mGdoGSFIUu: {
+    action: "create",
+    book: {
+      title: "86 —Eighty Six— Ep. 5",
+      subtitle: "Wahai Maut, Janganlah Congkak",
+      authors: ["Asato Asato"],
+      publisher: "M&C",
+      publishedYear: 2026,
+      isbn13: "9786230318955",
+      isbn10: null,
+      pageCount: 392,
+      categories: ["Novel", "Remaja"],
+      description: null,
+    },
+    cover: "https://media.mncgramedia.id/images/books/6611/20260226_115446_1774414208.jpg",
   },
 };
