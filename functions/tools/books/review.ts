@@ -1170,6 +1170,7 @@ export const CATEGORY_OVERRIDES: Record<string, Category[]> = {
   bk_bd5c9aba1a235359: ["Kumpulan Cerpen"], // Lipstik dalam Tas Doni
   bk_f767d779232939b7: ["Nonfiksi Umum"], // Ideologi Politik dan Teater Modern Indonesia
   bk_f85b4f5055478c01: ["Sejarah"], // Di Bawah Lentera Merah
+  bk_0495c3e0387450a2: ["Novel"], // Jamangilak Tak Pernah Menangis
   bk_2c1dbe3d9d78f0a2: ["Biografi"], // Mencari Makna Hidupku: Bunga Rampai Perjalanan Sujatin Kartowijono
   bk_d06d8491fe089b3f: ["Puisi"], // Nyanyian Integrasi Bangsa
   bk_0b7fcd9ca2ccae06: ["Puisi"], // Ghirah Gatha
@@ -1248,6 +1249,7 @@ export const CORRECTIONS: Record<
   bk_16413bd8d52a7cd9: {isbn13: "9789795611776"}, // Awas! Bahaya Lidah (was 9799795611775)
   bk_f933facfdf67ad7c: {isbn13: null}, // Anak Semua Bangsa, Hasta Mitra 1980: Penguin's ISBN for the English translation
   bk_670bc324ae232ee6: {title: "Rectoverso"}, // was "Rectosrev"
+  bk_25928744b24f9a8b: {authors: ["Martha Tilaar", "Wulan Tilaar Widarto"]}, // Leadership Quotient: co-author missing
   bk_31ca0c23675b01c8: {title: "Catatan Masa Lalu Banten"}, // was "Catatan Masalalu Banten"
   bk_ebd2b781a9973254: {authors: ["Goenawan Mohamad"]}, // Eksotopi: was "Gunawan Mohamad"
   bk_f565098068727b23: {authors: ["H. Krafft", "F. Wiggers", "Kwee Tek Hoay", "Lie Kim Hok", "Rustam Effendi"]}, // Antologi Drama Indonesia 1: was "Lie Kom Hok"
