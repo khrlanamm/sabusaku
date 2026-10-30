@@ -117,6 +117,14 @@ export const REJECTED_BOOKS: Record<string, string> = {
   bk_8621a1f1a22d6cb5: "bukan bacaan umum (katalog/kamus/panduan)", // Tentang Sejumlah Orang Sulawesi Selatan
   bk_a195d740dedf98a6: "bukan bacaan umum (katalog/kamus/panduan)", // Kabar Baik (traktat)
   bk_07f315bfb91c418b: "bukan bacaan umum (katalog/kamus/panduan)", // Umat Allah Menegaskan Arah
+  // Second run of 30 Oct 2026: not books to read, foreign editions, a duplicate.
+  bk_99a894692194406e: "tinjauan: Laporan penelitian fakultas (FKIP Unlam), bukan buku terbit", // Analisis Majas dalam Novel Harimau! Harimau! Karya Mochtar L
+  bk_f4bbec4c18918c8f: "tinjauan: Keputusan Menteri Kesehatan (dokumen regulasi pemerintah)", // Indikator Indonesia Sehat 2010 dan Pedoman Penetapan Indikat
+  bk_f5d4b33c267f83c3: "tinjauan: Berbahasa Inggris (tata bahasa Indonesia terbitan Routledge)", // Indonesian
+  bk_f504d337cf9ef696: "tinjauan: Prosiding seminar (Seminar Konsep Manajemen Indonesia 1979)", // Konsep Manajemen Indonesia
+  bk_516584584bb7b1e1: "tinjauan: Profil/direktori anggota DPRD, bukan buku bacaan", // Profil DPRD Provinsi Jawa Barat Periode, 2004-2009
+  bk_d20b9482f9ad2bd9: "tinjauan: Edisi bahasa Inggris (ISBN 978-1-5247, Currency/Crown)", // The Lean Startup
+  bk_7a593ee32f580cfb: "tinjauan: duplikat (Tuhan, Izinkan Aku Menjadi Pelacur!, edisi Scripta Manent)", // Tuhan, Izinkan Aku Menjadi Pelacur!
   // Foreign-language editions found in the catalog (30 Oct 2026), none with readers.
   bk_0bbf8ae36912c40b: "kurasi: edisi bahasa asing", // Rich Dad Poor Dad (Business Plus)
   bk_346776a26373eaae: "kurasi: edisi bahasa asing", // Personality Plus (Monarch)
@@ -125,6 +133,54 @@ export const REJECTED_BOOKS: Record<string, string> = {
 
 /** Cover URLs that show the wrong book, a person, a placeholder or a page. */
 export const REJECTED_COVERS = new Set<string>([
+  // Second run of 30 Oct 2026: photos, logos, screenshots, library bindings and other books.
+  "https://books.google.com/books/content?id=84tkAAAAMAAJ&printsec=frontcover&img=1&zoom=1&fife=w600", // Kalimat Efektif Bahasa Indonesia, library binding
+  "https://covers.openlibrary.org/b/id/14424646-L.jpg?default=false", // Analisis Laporan Keuangan Pemerintah Daerah
+  "https://covers.openlibrary.org/b/id/6163241-L.jpg?default=false", // Analisis Majas dalam Novel Harimau! Harimau! Karya Mochtar L
+  "https://covers.openlibrary.org/b/id/6452745-L.jpg?default=false", // Antropologi Hukum Indonesia
+  "https://covers.openlibrary.org/b/id/6290698-L.jpg?default=false", // Baca Kitab Manakib Syekh Abdul Qadir Jaelani Merusak Aqidah 
+  "https://covers.openlibrary.org/b/id/6273676-L.jpg?default=false", // Centhini, Tambangraras-Amongraga
+  "https://covers.openlibrary.org/b/id/11856614-L.jpg?default=false", // Desa Mawa Cara
+  "https://covers.openlibrary.org/b/id/11969629-L.jpg?default=false", // Filsafat Pendidikan Islam
+  "https://covers.openlibrary.org/b/id/3842633-L.jpg?default=false", // Garis-Garis Besar Hukum Gereja
+  "https://covers.openlibrary.org/b/id/6252816-L.jpg?default=false", // Hukum Acara Perdata Agama
+  "https://covers.openlibrary.org/b/id/6252823-L.jpg?default=false", // Hukum Kepailitan Selayang Pandang
+  "https://covers.openlibrary.org/b/id/6252830-L.jpg?default=false", // Hukum Perwakilan dan Kuasa
+  "https://covers.openlibrary.org/b/id/6277105-L.jpg?default=false", // Hukum Waris Adat
+  "https://covers.openlibrary.org/b/id/14824101-L.jpg?default=false", // Ilmu Negara
+  "https://covers.openlibrary.org/b/id/6295128-L.jpg?default=false", // Implementasi Pancasila Sebagai Pandangan Hidup Bangsa dan Da
+  "https://covers.openlibrary.org/b/id/6277883-L.jpg?default=false", // Indikator Indonesia Sehat 2010 dan Pedoman Penetapan Indikat
+  "https://covers.openlibrary.org/b/id/6425772-L.jpg?default=false", // Kalimat Efektif Bahasa Indonesia
+  "https://covers.openlibrary.org/b/id/6824303-L.jpg?default=false", // Kedudukan Hukum Islam dalam Sistem Hukum Indonesia
+  "https://covers.openlibrary.org/b/id/6452542-L.jpg?default=false", // Kewiraan untuk Mahasiswa
+  "https://covers.openlibrary.org/b/id/12878129-L.jpg?default=false", // Konsep Manajemen Indonesia
+  "https://books.google.com/books/content?id=8BEgAAAAMAAJ&printsec=frontcover&img=1&zoom=1&fife=w600", // Kumpulan Karangan
+  "https://covers.openlibrary.org/b/id/10462369-L.jpg?default=false", // Lembaga-Lembaga Keuangan dan Bank
+  "https://covers.openlibrary.org/b/id/5825020-L.jpg?default=false", // Makrifat Burung Surga dan Ilmu Kasampurnan Syekh Siti Jenar
+  "https://covers.openlibrary.org/b/id/7238412-L.jpg?default=false", // Manajemen Berbasis Sekolah
+  "https://covers.openlibrary.org/b/id/6296664-L.jpg?default=false", // Manajemen Publik
+  "https://covers.openlibrary.org/b/id/8277253-L.jpg?default=false", // Neurologi Klinis Dasar
+  "https://books.google.com/books/content?id=soqzFe35McEC&printsec=frontcover&img=1&zoom=1&fife=w600", // Ornamen (Ragam Hias) Rumah Adat Batak Toba
+  "https://covers.openlibrary.org/b/id/15127325-L.jpg?default=false", // Pancasila Sebagai Ideologi, Azas, dan Dasar Negara
+  "https://covers.openlibrary.org/b/id/6375887-L.jpg?default=false", // Panduan Penyelenggaraan Taman Bacaan Masyarakat
+  "https://books.google.com/books/content?id=iW5wAAAAMAAJ&printsec=frontcover&img=1&zoom=1&fife=w600", // Pembangunan Nasional dalam Perspektif Budaya
+  "https://covers.openlibrary.org/b/id/15203125-L.jpg?default=false", // Pendidikan Islam
+  "https://covers.openlibrary.org/b/id/12058484-L.jpg?default=false", // Pengantar Hukum Indonesia
+  "https://covers.openlibrary.org/b/id/10453339-L.jpg?default=false", // Pengantar Ilmu Hukum Indonesia
+  "https://books.google.com/books/content?id=8cMtAAAAMAAJ&printsec=frontcover&img=1&zoom=1&fife=w600", // Penggunaan Bahasa Indonesia Ragam Tulis dalam Penyusunan Kar
+  "https://books.google.com/books/content?id=pwrYAAAAMAAJ&printsec=frontcover&img=1&zoom=1&fife=w600", // Perjanjian Hudaibiyah
+  "https://books.google.com/books/content?id=gphkAAAAMAAJ&printsec=frontcover&img=1&zoom=1&fife=w600", // Prosa Tradisional
+  "https://books.google.com/books/content?id=pCSAAAAAMAAJ&printsec=frontcover&img=1&zoom=1&fife=w600", // Riau Sebagai Pusat Bahasa dan Kebudayaan Melayu
+  "https://books.google.com/books/content?id=NfSFAAAAMAAJ&printsec=frontcover&img=1&zoom=1&fife=w600", // Sejarah Pemikiran Hak-Hak Asasi Manusia di Indonesia
+  "https://covers.openlibrary.org/b/id/5545700-L.jpg?default=false", // Sistem Koperasi
+  "https://covers.openlibrary.org/b/id/6308196-L.jpg?default=false", // Sosiologi Hukum dalam Masyarakat
+  "https://covers.openlibrary.org/b/id/6252833-L.jpg?default=false", // Studi Kasus Hukum Internasional
+  "https://books.google.com/books/content?id=RI0tAQAAIAAJ&printsec=frontcover&img=1&zoom=1&fife=w600", // Sunda Sebelum Perang
+  "https://covers.openlibrary.org/b/id/5327793-L.jpg?default=false", // Tango
+  "https://covers.openlibrary.org/b/id/5731243-L.jpg?default=false", // Tata Rias & Busana Tari Sunda
+  "https://covers.openlibrary.org/b/id/6338568-L.jpg?default=false", // Tema Cerita Pendek Indonesia Tahun 1950-1060
+  "https://books.google.com/books/content?id=XiceAAAAMAAJ&printsec=frontcover&img=1&zoom=1&fife=w600", // Tema Islam dalam Pertunjukan Rakyat Jawa
+  "https://books.google.com/books/content?id=I-_nAAAAMAAJ&printsec=frontcover&img=1&zoom=1&fife=w600", // Teori Ekonomi, Politik Ekonomi dan Orde Ekonomi
   "https://covers.openlibrary.org/b/id/5328897-L.jpg?default=false", // Cerita Rakyat Jawa Barat, shows Karnadi Bandar Bangkong
   "https://books.google.com/books/content?id=guQhfqYvU8EC&printsec=frontcover&img=1&zoom=1&fife=w600", // Dari Pendjara ke Pendjara, library binding
   "https://covers.openlibrary.org/b/id/13495632-L.jpg?default=false", // Dibawah Bendera Revolusi, photos of people
@@ -806,6 +862,413 @@ export const CATEGORY_OVERRIDES: Record<string, Category[]> = {
   bk_2c1dbe3d9d78f0a2: ["Biografi"], // Mencari Makna Hidupku: Bunga Rampai Perjalanan Sujatin Kartowijono
   bk_d06d8491fe089b3f: ["Puisi"], // Nyanyian Integrasi Bangsa
   bk_0b7fcd9ca2ccae06: ["Puisi"], // Ghirah Gatha
+  // Second run of 30 Oct 2026 (adult, political, academic and technical books admitted)
+  bk_6b78bba280c92c4e: ["Novel", "Remaja"], // Area X
+  bk_513b19d517556f06: ["Novel"], // Bella Donna Nova
+  bk_6159d35ebbdfcf14: ["Novel"], // Sintren
+  bk_ef82acd8b537f531: ["Novel"], // Warrior
+  bk_d08a4591e6bed608: ["Nonfiksi Umum"], // (Digital) Executive Legislator
+  bk_51caf60a06f6f003: ["Nonfiksi Umum"], // 100 Efek Spektakuler Photoshop
+  bk_2d2fbefb8d269601: ["Nonfiksi Umum"], // 100 Film
+  bk_cacd84d187db4723: ["Agama"], // 200 Fikih Praktis Sehari-Hari
+  bk_55a0100e1d30f9b7: ["Pengembangan Diri"], // 40 Hari Mengatasi Kecanduan Game pada Anak
+  bk_69c8a8cadaccf8ee: ["Anak", "Agama"], // 40 Kisah Pengantar Tidur
+  bk_f8d205c4c1940d6a: ["Agama", "Pengembangan Diri"], // 60 Rahasia Jadi Ayah Hebat
+  bk_28c38ac1b9b9a376: ["Agama", "Bisnis"], // Adab Bekerja dan Berbisnis
+  bk_751cff973af95011: ["Bisnis"], // Advertising That Sells
+  bk_f4746292f6968db3: ["Agama", "Pengembangan Diri"], // Agar Ayah Enggak Masuk Neraka
+  bk_143a4d694ee8620a: ["Agama"], // Agar Muslimah Mantap Menikah
+  bk_a24a9ac8168247e8: ["Bisnis"], // Akuntansi Biaya
+  bk_2dbf09afd33de4e1: ["Sains", "Nonfiksi Umum"], // Algoritma & Pemrograman dalam Bahasa Pascal dan C Edisi Revi
+  bk_bfe78ba8a7b2107a: ["Nonfiksi Umum"], // Alternatif Kebijakan Pengaturan Hak Atas Tanah Beserta Bangu
+  bk_dc9aea6fe0fd2273: ["Nonfiksi Umum", "Biografi"], // Amien Rais Menjawab Isu-Isu Politis Seputar Kiprah Kontrover
+  bk_067760428976e433: ["Nonfiksi Umum"], // Analisa Situasi Sistem Peradilan Pidana Anak (Juvenile Justi
+  bk_330f8aea3ba105d6: ["Bisnis", "Nonfiksi Umum"], // Analisis Ekonomi Politik Indonesia
+  bk_72eadec76c2ca205: ["Bisnis"], // Analisis Laporan Keuangan
+  bk_42a522afb9d39ac6: ["Nonfiksi Umum"], // Anatomi Lelucon di Indonesia
+  bk_514357694cc47cd3: ["Bisnis"], // Anjak Piutang
+  bk_62b9fb66af0ea101: ["Agama"], // Apa Bahayanya Menikah dengan Wanita Nonmuslim?
+  bk_fe9ff6732885ac0e: ["Sains", "Nonfiksi Umum"], // Aplikasi Analisis Multivariate
+  bk_ed11b12aa9a7ed59: ["Nonfiksi Umum"], // Arbitrase dan Mediasi di Indonesia
+  bk_1479bf330634ab5f: ["Nonfiksi Umum"], // Arsitektur Radakng: Kehidupan Komunal dan Dayak Kanayatn
+  bk_427f3daacfa82ded: ["Nonfiksi Umum", "Bisnis"], // Aspek-Aspek Hukum Perbankan di Indonesia
+  bk_fb4d588d9a9022e4: ["Agama", "Sains"], // Ayat-Ayat Sehat
+  bk_0d516c8b53b5365b: ["Agama"], // Baby Guide for Muslim
+  bk_28c9d551b07d5458: ["Nonfiksi Umum"], // Bagaimana Anti-Kekerasan Melindungi Negara
+  bk_9e51b75246a13fa5: ["Kumpulan Cerpen"], // Bahaya Merokok di Ranjang
+  bk_b06fbc21c69499e9: ["Nonfiksi Umum", "Sains"], // Bangunan Air
+  bk_9fcb5fdb576a04bb: ["Bisnis", "Agama"], // Bank Syariah
+  bk_a60c5e30b6528068: ["Agama"], // Barakallahu Laka: Bahagianya Merayakan Cinta
+  bk_1dead35b81273f58: ["Anak"], // Batu Belah Batu Bertangkup
+  bk_5ff51d2ba69e0569: ["Bisnis"], // Be G2c
+  bk_eef5ddd1c5613885: ["Bisnis", "Pengembangan Diri"], // Begini Harusnya Bisnis!
+  bk_c39293a007c63a9e: ["Agama"], // Berani Mencintai Bernyali Menikahi
+  bk_932d3e77d517bd34: ["Agama", "Pengembangan Diri"], // Berjuta Rasa Menjadi Papah-Mamah Muda
+  bk_41c8512cdf8905a8: ["Agama"], // Bikin Nikah Tak Jadi Masalah
+  bk_1f5def9a1ac665f3: ["Sejarah", "Nonfiksi Umum"], // Blok Pembangkang
+  bk_7e5e7a4547f11a19: ["Agama"], // BookMagz #1: Aku Siap Menikah Sekarang!
+  bk_7d15dfdfef9f0e1e: ["Bisnis"], // Budaya Korporat dan Keunggulan Korporasi
+  bk_c9b60425f22343a5: ["Agama", "Nonfiksi Umum"], // Bukan Kapitalisme Bukan Sosialisme
+  bk_ec77b20f8eeb1ec9: ["Anak"], // Buku Abjad ABC Binatang
+  bk_465c127eab807616: ["Novel", "Remaja"], // Buku Panduan Matematika Terapan
+  bk_088c0ffdcdaab303: ["Nonfiksi Umum"], // Buku Panduan Suling Sunda Lubang 11 Multi Laras dan Surupan
+  bk_369b8c4e58d72e53: ["Nonfiksi Umum", "Bisnis"], // Buku Pintar Kepabeanan
+  bk_d37f97761d6a6476: ["Nonfiksi Umum"], // Buku Praktis Mendeley untuk Mahasiswa
+  bk_bde7aa571716dc50: ["Sains", "Nonfiksi Umum"], // Bumi Makin Panas
+  bk_1e397a125b5ea8b9: ["Bisnis", "Nonfiksi Umum"], // BUMN Indonesia
+  bk_933afb275da0ba10: ["Bisnis"], // Cara Mudah Memahami Laporan Keuangan
+  bk_99a19f540de87e55: ["Bisnis"], // Cara Simpel Berinvestasi di Pasar Modal Volume I Edisi Revis
+  bk_a92e79d70db9d6be: ["Bisnis"], // Cara Simpel Berinvestasi di Pasar Modal Volume II
+  bk_67994cb9ec52dd4b: ["Nonfiksi Umum", "Sejarah"], // Cendekiawan dan Kekuasaan dalam Negara Orde Baru
+  bk_24a9a08a8408b565: ["Agama", "Sains"], // Cerdas Dan Salehkan Bayi Anda Dengan ASI
+  bk_c71d874e4232a9c9: ["Bisnis"], // Cerdas Mengelola Keuangan
+  bk_1e4f9374cc6a26e1: ["Bisnis"], // Cerdas Mengelola Keuangan Keluarga
+  bk_a1ac21c0c8d4cdc1: ["Anak", "Agama"], // Cerita Si Ayam
+  bk_cd439ba75101d51f: ["Anak", "Agama"], // Cerita Si Katak
+  bk_ff7eef0dae1c24fb: ["Anak", "Agama"], // Cerita Si Kelinci
+  bk_c96bf1275044548f: ["Anak", "Agama"], // Cerita Si Kucing
+  bk_7804cd8955fa5274: ["Anak", "Agama"], // Cerita Si Lebah
+  bk_462f7ce246873e8d: ["Anak", "Agama"], // Cerita Si Sapi
+  bk_cdf84d88eb25deb7: ["Anak", "Agama"], // Cerita Si Singa
+  bk_73dce494beb9b192: ["Anak", "Agama"], // Cerita Si Siput
+  bk_c6408948be6f3abf: ["Anak", "Agama"], // Cerita Si Zebra
+  bk_850397e74819f1ad: ["Nonfiksi Umum", "Bisnis"], // Change Management dalam Reformasi Birokrasi
+  bk_a2db908ffd48ead2: ["Agama", "Pengembangan Diri"], // Character Building
+  bk_767fc7e2b05165b1: ["Novel"], // Cinta 24 Jam
+  bk_3bd69a5bb68f4d5b: ["Novel"], // Cinta Abadi
+  bk_876df4c2ec2c8465: ["Pengembangan Diri", "Agama"], // Dari Abah Ihsan
+  bk_d55d414f68abeeeb: ["Nonfiksi Umum"], // Dari Anak Sampai Usia Lanjut
+  bk_610c3b07dea24bc7: ["Nonfiksi Umum"], // Dari Papua Meneropong Indonesia
+  bk_86d5c1a0f591da51: ["Sains", "Nonfiksi Umum"], // Dasar Mekanika Tanah
+  bk_2626867ae47ce541: ["Bisnis"], // Dasar Penilaian Properti Rumah Mewah: Investasi, Kapitalisai
+  bk_c617521a9a0fb5f3: ["Agama"], // Dasar-Dasar Ilmu Al-Qur'an
+  bk_e5b07bca853a5a76: ["Nonfiksi Umum", "Sains"], // Deforestasi Tanpa Henti
+  bk_16ce12dbd4d116dc: ["Nonfiksi Umum"], // Delik-Delik Tertentu (Speciale Delicten) dalam KUHP
+  bk_4d21ed3aa1589533: ["Novel"], // Demi Kehormatan
+  bk_c1accc879dd2b14a: ["Nonfiksi Umum", "Sains"], // Desain Hidraulik Bangunan Irigasi
+  bk_fdf2e9023a2e2b8b: ["Biografi"], // Dia
+  bk_29644c80bc37c158: ["Agama", "Sains"], // Diet Islami
+  bk_09b499c3d4f2bde0: ["Nonfiksi Umum"], // Diksi dan Gaya Bahasa
+  bk_f49ae8f64f6cef65: ["Nonfiksi Umum", "Agama"], // Dilema PKS
+  bk_9f7a2790e64efc34: ["Nonfiksi Umum"], // Dinamika Pembangunan Pertanian dan Pedesaan
+  bk_d6b18da17b744b23: ["Nonfiksi Umum"], // Dominasi Penuh Muslihat
+  bk_d38ce0067a885f19: ["Nonfiksi Umum", "Sains"], // Drainase Perkotaan
+  bk_843ea0462d9b6f6c: ["Bisnis"], // Easy Copywriting: Contek Abis, Sampai Laris!
+  bk_822c57e641c58f7a: ["Nonfiksi Umum"], // Education Games
+  bk_f243b80825222619: ["Nonfiksi Umum", "Bisnis"], // Ekonomi Politik Media Penyiaran
+  bk_c72ab9c055a33aed: ["Biografi"], // Eksplorasi Kreativitas Dua Dasawarsa Anne Avantie
+  bk_5b6ce608ccdc7d7a: ["Bisnis"], // Family Business Responses to Future Competition
+  bk_6b245c5255d4e36c: ["Agama", "Pengembangan Diri"], // Fatherman1
+  bk_3f79b2bc7bd6fe9d: ["Nonfiksi Umum"], // Feminogr[a]fi
+  bk_0e424e6ae3be48e9: ["Agama"], // Filsafat Pendidikan Islam
+  bk_0c06a764fcf5a42c: ["Nonfiksi Umum"], // Fonetik dan Fonologi Melodi Bahasa: Prosodi
+  bk_9fbcf041353bea3f: ["Bisnis"], // Franchising, the Most Practical and Excellent Way of Succeed
+  bk_f54b2292b1be7d35: ["Bisnis"], // Fundamental vs Technical
+  bk_f61f79e7a98c8dfe: ["Nonfiksi Umum", "Agama"], // Fundamentalisme, Terorisme, dan Radikalisme
+  bk_6e8c096517d2adad: ["Novel"], // Garis Tepi Seorang Lesbian
+  bk_7b33a62c1a8ba5a1: ["Nonfiksi Umum"], // Gender dan Administrasi Publik
+  bk_4681ce21288dce4d: ["Nonfiksi Umum"], // Gender dan Strategi Pengarus-Utamaannya di Indonesia
+  bk_67a4c784c7da5f89: ["Nonfiksi Umum", "Agama", "Sejarah"], // Gerakan Perlawanan dari Masjid Kampus
+  bk_06f8c8da67a34f9b: ["Nonfiksi Umum", "Agama"], // Getar Gender
+  bk_7ed1e37eaec6b6d1: ["Agama", "Sains"], // Gigi Sehat Ibadah Dahsyat
+  bk_913e93514be5b00a: ["Nonfiksi Umum"], // Good E-Government
+  bk_ba22bf217a87a1b1: ["Komik", "Remaja"], // Grey & Jingga
+  bk_5ed170731ee32969: ["Anak", "Novel"], // Hadiah Alam
+  bk_39b49b0ecfff7df8: ["Nonfiksi Umum"], // Hak Kekayaan Intelektual
+  bk_7ac2b5a0fb640d9d: ["Sejarah", "Biografi"], // Hamengku Buwono IX dan Sistem Birokrasi Pemerintahan Yogyaka
+  bk_a6aa184db1d499d2: ["Agama", "Pengembangan Diri"], // Hati-Hati Terhadap Media Yang Merusak Anak
+  bk_12c3343e9c4d6355: ["Bisnis"], // Hermawan Kartajaya on Marketing
+  bk_45c12fde7196b328: ["Sains", "Nonfiksi Umum"], // Hidrologi Teknik
+  bk_19090d50ee6028cc: ["Agama"], // Hikmah Mempesona Dari Anakku
+  bk_ee1571cc97cfdd49: ["Nonfiksi Umum"], // Hitam Putih Prostitusi
+  bk_641f963b881f27f0: ["Bisnis", "Agama"], // HRD Syariah
+  bk_958f0bde8c4233b8: ["Nonfiksi Umum"], // Hukum Media Massa Nasional
+  bk_c1cb4f4290171add: ["Nonfiksi Umum"], // Hukum Perbatasan Darat Antarnegara
+  bk_fb6d54ec43d09061: ["Agama", "Nonfiksi Umum"], // Hukum Perdata Islam di Indonesia
+  bk_55aa4002c7db9815: ["Agama", "Nonfiksi Umum"], // Hukum Perdata Islam di Indonesia
+  bk_e2d368485a2aeeec: ["Nonfiksi Umum"], // Hukum Perjanjian Internasional
+  bk_3aed716e293ac9e1: ["Nonfiksi Umum", "Bisnis"], // Hukum Persaingan Usaha
+  bk_879399dfb4987fc3: ["Agama", "Nonfiksi Umum"], // Hukum Pidana Islam
+  bk_917424904fb686ed: ["Nonfiksi Umum"], // Hukum Tata Negara Indonesia
+  bk_fc070fbcebaef57a: ["Nonfiksi Umum", "Sains"], // Hutan & Kehutanan
+  bk_876de66f49387aee: ["Novel"], // I Love You, Om---
+  bk_f6e06e89d874c8fb: ["Nonfiksi Umum"], // Identitas Dayak
+  bk_f06ad127c5acb139: ["Agama", "Nonfiksi Umum"], // Ideologi Islam dan Utopia
+  bk_601e288d3767d86d: ["Agama", "Sejarah"], // Indonesianisasi, dari Gereja Katolik di Indonesia Menjadi Ge
+  bk_8895d40561a7a076: ["Bisnis"], // Industrialisasi dan Wiraswasta
+  bk_c208fe883c0a9f74: ["Agama", "Sejarah"], // Injil dan Marapu
+  bk_895ba9deeb8dfbad: ["Biografi", "Pengembangan Diri"], // Inspired by Indayati Utomo
+  bk_cee1d2265764b82b: ["Agama", "Nonfiksi Umum"], // Integrasi Ilmu dan Agama
+  bk_ad6c34ae97c412a3: ["Agama", "Nonfiksi Umum"], // Islam dan Dinamika Sosial Politik di Indonesia
+  bk_7235b34b51ff4202: ["Agama", "Nonfiksi Umum"], // Islam dan Kedaulatan Rakyat
+  bk_460a08ca130e09da: ["Agama"], // Islam Pribumi
+  bk_34ee7062a1d7a528: ["Agama"], // Islam Rahmatan Lil 'Alamin
+  bk_c2f3882933c91b2f: ["Agama", "Nonfiksi Umum"], // Islam Sebagai Kritik Sosial
+  bk_93064e4c70104341: ["Agama", "Nonfiksi Umum"], // Islam, Demokratisasi, dan Pemberdayaan Civil Society
+  bk_1f08c27a20f518b7: ["Agama"], // Istri Cerdas
+  bk_8b96295e6634bde9: ["Novel"], // Istri Kontrak
+  bk_f64021feae83d9f8: ["Agama", "Nonfiksi Umum"], // Istriku Seribu
+  bk_1baca87aa5fc94e2: ["Agama"], // Istriku, Aku Mencintaimu
+  bk_0374f12124b63b96: ["Nonfiksi Umum"], // Jakarta Undercover
+  bk_fa5850ef71d52163: ["Nonfiksi Umum", "Sains"], // Jalan Rel
+  bk_c143b4914185cd1d: ["Kumpulan Cerpen"], // Jangan Main-Main (Dengan Kelaminmu)
+  bk_4400faab6e90ffb7: ["Agama"], // Jundullah
+  bk_f6c39820cd5303b7: ["Novel", "Agama"], // Kabut Jihad
+  bk_1a389441acfb8939: ["Agama"], // Kado Pernikahan untuk Istriku
+  bk_ff32470b8e0d31fe: ["Nonfiksi Umum"], // Kajian Serba Linguistik
+  bk_1ce1b8cb818e8dfd: ["Nonfiksi Umum"], // Kapitalisme Televisi dan Strategi Budaya Massa
+  bk_d3cf6859b57083c5: ["Sastra Klasik", "Biografi"], // Karya Lengkap Abdullah Abdul Kadir Munsyi
+  bk_dbe807bb11ba8cc7: ["Nonfiksi Umum"], // Karya Lengkap Driyarkara
+  bk_6dec0a255e6efa69: ["Novel"], // Kawin Kontrak
+  bk_4a2f1433137bf90f: ["Bisnis", "Agama"], // Kaya Harta, Kaya Amal
+  bk_9362a2ebe5d5bb2d: ["Bisnis"], // Ke Mana Investasi?
+  bk_032700729509cfd1: ["Agama"], // Keajaiban Jihad Harta
+  bk_774d8c61b4a21d92: ["Nonfiksi Umum"], // Kebangsaan dan Globalisasi dalam Diplomasi
+  bk_71c56b58a6f0ea9a: ["Nonfiksi Umum"], // Kebhinnekaan Masyarakat di Indonesia
+  bk_da81ecdae90865e1: ["Puisi"], // Kebijakan dalam 1001 Pantun
+  bk_2d1b753f1d9a57e0: ["Bisnis"], // Kebijakan Moneter dan Fiskal di Indonesia
+  bk_73c6597525200e8a: ["Nonfiksi Umum"], // Kebijakan Pendidikan yang Unggul
+  bk_d9999cebf645221a: ["Nonfiksi Umum"], // Kebijakan Perikanan dan Kelautan
+  bk_64a0484cbc516260: ["Nonfiksi Umum"], // KEBIJAKAN PUBLIK FORMULASI Kebijakan Publik
+  bk_363c6b489d288a7d: ["Nonfiksi Umum"], // Kejaksaan RI
+  bk_3303f1489c33f6b5: ["Novel"], // Kekasih Night Wind
+  bk_6f3c04ac3f9218aa: ["Nonfiksi Umum"], // Kekhususan Rokok Indonesia
+  bk_292e2a6304643d19: ["Nonfiksi Umum"], // Kelas Kata dalam Bahasa Indonesia
+  bk_56490aceb4727d4b: ["Agama", "Biografi"], // Kepemimpinan Kharismatis
+  bk_ad4b1e1e6c268546: ["Nonfiksi Umum"], // Kepuasan Hidup dan Dukungan Sosial Lanjut Usia
+  bk_8d24ef112a91f20b: ["Agama"], // Kerukunan Umat Beragama Pilar Utama Kerukunan Berbangsa
+  bk_6d9e6926c32a9504: ["Nonfiksi Umum"], // Keteknikan Videografi
+  bk_7a8f04ace80057f8: ["Agama"], // Ketika Aku dan Kamu Jadi Kita
+  bk_266d1f98bf45e05e: ["Agama"], // Ketika Aku Mencintaimu
+  bk_2c731ccb0ec3adea: ["Agama"], // Ketika Suami Istri Hidup Bermasalah
+  bk_704ea542ea3c1c58: ["Sejarah", "Agama"], // Kiai Penghulu Jawa
+  bk_27e3ac2faf480c62: ["Bisnis"], // Kilas Kilau Bisnis
+  bk_75ec5396113b9c6a: ["Sains"], // Kimia Dasar II
+  bk_432bebad2b592591: ["Nonfiksi Umum", "Puisi"], // Kisah Wato Wele-Lia Nurat dalam Tradisi Puisi Lisan Flores T
+  bk_5c09ba721a4c7e3b: ["Nonfiksi Umum"], // Komunikasi Estetik
+  bk_8cbe654b0de7ab57: ["Nonfiksi Umum"], // Konflik dan Integrasi Politik Gerakan Aceh Merdeka
+  bk_110ef86bb1fbad4c: ["Sejarah"], // Kronik Revolusi Indonesia
+  bk_d34b92be59906b38: ["Sains"], // Kura-Kura & Buaya Indonesia dan Papua Nugini
+  bk_3c4e367ca6110b4b: ["Bisnis", "Biografi"], // Laskar Pejuang 9 Wanita Wirausaha
+  bk_9434903da207e5ba: ["Biografi", "Bisnis"], // Lead by Heart
+  bk_eaf8339254f16d98: ["Novel"], // Lelaki Terindah
+  bk_02949da2c9bbeb3f: ["Agama"], // Lihatlah Sang Manusia!
+  bk_85a4ab9c0814b04f: ["Nonfiksi Umum"], // Lobi Zionis & Rezim Bush
+  bk_a5b068ad3d24b8f2: ["Biografi", "Agama"], // M. Natsir, Dakwah dan Pemikirannya
+  bk_f407da048e1616d0: ["Nonfiksi Umum"], // Mahir Mendongeng
+  bk_0751b896d15a6d04: ["Agama", "Sains"], // Makin Sehat Dengan Jilbab
+  bk_ddf281e48596d34e: ["Bisnis", "Sains"], // Manajemen Kesehatan
+  bk_ac84284638fc4303: ["Nonfiksi Umum", "Bisnis"], // Manajemen Pendidikan Kontemporer
+  bk_30497698749ed3cf: ["Bisnis"], // Manajemen Periklanan
+  bk_e04053ce7100f724: ["Sejarah", "Nonfiksi Umum"], // Manusia Daya
+  bk_d4a42618d401e2be: ["Bisnis"], // Marketing in Crisis
+  bk_4d32f4086d48505b: ["Nonfiksi Umum"], // Maubes-Insana
+  bk_4e6a42523e3399e9: ["Nonfiksi Umum"], // Mediasi Nonlitigasi Terhadap Sengketa Medik dengan Konsep Wi
+  bk_35a1187a037ebfd2: ["Biografi", "Nonfiksi Umum"], // Megawati Soekarnoputri, Harapan dan Tantangan di Kursi Wapre
+  bk_01457cd60316bbd4: ["Sains"], // Mekanika Bahan, Jilid 2
+  bk_4da45aea851f5cb0: ["Sains"], // Mekanika Teknik
+  bk_edaa4a4826cf479c: ["Novel"], // Melisa
+  bk_ac9909f7dd1879d2: ["Nonfiksi Umum"], // Memahami Hukum di Indonesia
+  bk_7783fc0975c6fc9f: ["Bisnis"], // Memasuki Era BUMN Multinational Coorporation
+  bk_acdca0b9177ee92e: ["Nonfiksi Umum"], // Membaca Sastra
+  bk_21393282a1d39c02: ["Nonfiksi Umum"], // Membangun Pusat-Pusat di Pinggiran
+  bk_d7b9ba8b192a9bbd: ["Agama", "Nonfiksi Umum"], // Membincangkan Feminisme
+  bk_6ca69366d12a298e: ["Sejarah"], // Membongkar Supersemar!
+  bk_d1631e5cb85fa4bc: ["Bisnis"], // Memilih Bank yang Sehat
+  bk_45ab5eb725ac9f5e: ["Agama", "Anak"], // Memperkenalkan Akhlak Mulia Rasulullah kepada Anak
+  bk_78363b690bbd398d: ["Novel"], // Menaklukkan Sang Dokter
+  bk_57335b99bd974162: ["Nonfiksi Umum"], // Menata Pulau-Pulau Kecil Perbatasan
+  bk_b5a87348d25d75c1: ["Nonfiksi Umum"], // Mencapai Pertanian yang Lebih Baik
+  bk_0fabd5e5463fffe3: ["Agama", "Pengembangan Diri"], // Mendidik Anak Laki-Laki
+  bk_8c5028fd4d399fe6: ["Agama", "Pengembangan Diri"], // Mendidik Anak Perempuan
+  bk_e32d7950ff87ee97: ["Nonfiksi Umum"], // Menegakkan Hukum dan Hak Warga Negara
+  bk_c47b6b1d6e245fc9: ["Agama"], // Mengantisipasi Masa Depan
+  bk_b07cb99102df6385: ["Agama", "Pengembangan Diri"], // Mengasah Pola Pikir Anak
+  bk_0cccc7cd3d96a148: ["Sains", "Pengembangan Diri"], // Mengenal Kesehatan Jiwa: Versi PDF Tunggal
+  bk_2cdf526c72e9c187: ["Nonfiksi Umum"], // Menghadapi Tantangan Masa Depan
+  bk_88d228c7c0f46cd3: ["Agama"], // Menghadapi Tantangan, Memperjuangkan Kerukunan
+  bk_20113bcaf4d7c840: ["Sejarah", "Agama"], // Menghidupkan Kembali Jalur Sutra Baru
+  bk_fdd23f952508cc00: ["Nonfiksi Umum"], // Menguak Hubungan Dagang Indonesia-Israel
+  bk_0ed13b0baba130b2: ["Sains", "Nonfiksi Umum"], // Menguak Tabir & Potensi Jamu Gendong
+  bk_9472d51b2a580dff: ["Agama"], // Menikah Memuliakan Sunnah
+  bk_78aec39fccf267c8: ["Bisnis", "Pengembangan Diri"], // Menjadi Manajer Sukses
+  bk_a7fe337bb259f048: ["Nonfiksi Umum"], // Menjadi Pemimpin Politik
+  bk_e1dfad81d2f8de43: ["Agama", "Pengembangan Diri"], // Menjadi Suami & Ayah Hebat
+  bk_d683f8977266dd5f: ["Agama", "Bisnis"], // Menuju Era Wakaf Produktif
+  bk_9d50e7b03dd1f3c0: ["Agama"], // Menuju Halal
+  bk_e8f51afd0cc91a80: ["Nonfiksi Umum"], // Menyandera Timur Tengah
+  bk_32c37c565e496fc0: ["Agama"], // Menyelisik Penyimpangan Syi’ah
+  bk_0d904410cdd16790: ["Nonfiksi Umum"], // Merah Putih Arsitektur Nusantara
+  bk_f68297cb9cddaeed: ["Nonfiksi Umum", "Sains"], // Merancang dan Merencana Lapangan Terbang
+  bk_7f330bdb414a3a19: ["Agama"], // Mereka Bukan Thaghut
+  bk_fc13c2327fd678d7: ["Sains"], // Metode Numerik
+  bk_137f4b56fbde34b6: ["Nonfiksi Umum"], // Metode Perancangan Arsitektur
+  bk_609500a4bf61f543: ["Nonfiksi Umum"], // Metodologi Penelitian Kuantitatif
+  bk_7097ea0624088c39: ["Agama"], // Misykat
+  bk_b6302ed13406acb4: ["Nonfiksi Umum"], // Model Pembelajaran Anak Usia Dini
+  bk_468ff2c448435e68: ["Sains"], // Moluska Padang Lamun
+  bk_bb015727121b06a1: ["Sains"], // Monograph Identifikasi Mood Ibu Postpartum Menggunakan Skala
+  bk_420ada243e1dd073: ["Bisnis"], // Multibagger
+  bk_b703e1c9baa625ac: ["Nonfiksi Umum", "Agama"], // Muslim Demokrat
+  bk_c98cc5fdc0010fc5: ["Agama", "Bisnis"], // Muslim Preneur
+  bk_de70df8525df301d: ["Bisnis"], // Mutasi DNA Powerhouse
+  bk_1d7378fad074d5ce: ["Anak"], // My Baby Reads ! I Like Beach Because…
+  bk_c88117f3bb4fddef: ["Anak"], // My Baby Reads ! I Love You Because…
+  bk_acfd79d367e99044: ["Anak"], // My Baby Reads ! Is That A Bug ?
+  bk_ac1baa526f3cfcc3: ["Anak"], // My Baby Reads ! Is That My Belly Button ?
+  bk_89a5c297905866b9: ["Anak"], // My Baby Reads ! Where Is My Tail ?
+  bk_d160970c583173e4: ["Bisnis", "Nonfiksi Umum"], // Neoliberalisme
+  bk_b6e7323bb06daca0: ["Agama"], // Nikmatnya Pacaran Setelah Pernikahan
+  bk_be2b0654f28ebb54: ["Nonfiksi Umum", "Agama"], // NKRI Bersyariah atau Ruang Publik yang Manusiawi?
+  bk_e9bf84da76080b9f: ["Novel"], // Nyai Gowok
+  bk_e2e1ae32c05ca413: ["Anak"], // Nyi Rambut Kasih
+  bk_8f4571ebb4787d76: ["Sains", "Nonfiksi Umum"], // Obat-Obatan Ramuan Tradisional
+  bk_374f4f8d73541157: ["Bisnis"], // OJK dan Pengawasan Mikroprudensial
+  bk_775ab81012e02408: ["Nonfiksi Umum"], // Orang Sakai di Riau
+  bk_019e9f87c56a5d58: ["Nonfiksi Umum"], // Origami Tanks
+  bk_daa1186f5ebd5bf6: ["Nonfiksi Umum"], // Otonomi Daerah
+  bk_e5947f6035226dba: ["Bisnis"], // Pajak dan Strategi Bisnis
+  bk_7c843daa2bde4572: ["Nonfiksi Umum"], // Pancasila Budaya Bangsa Indonesia
+  bk_9f1f53fc85a39c5a: ["Nonfiksi Umum"], // Panduan Membangun Rumah
+  bk_e27adb48c7fd1e0e: ["Nonfiksi Umum"], // Panduan Pengendalian Kebakaran Hutan dan Lahan Gambut
+  bk_9ed2298a8d108a36: ["Nonfiksi Umum"], // Panorama Bahasa Indonesia
+  bk_7cb3b35e222623c0: ["Nonfiksi Umum"], // Paradigma Baru Pembangunan Pertanian
+  bk_fb286c37b6dce1b9: ["Nonfiksi Umum"], // Paradigma Sosiologi Sastra
+  bk_7446347d9ecced2b: ["Pengembangan Diri"], // PARENTime
+  bk_cadb801fecc90670: ["Bisnis", "Agama"], // Pasar Modal Syariah
+  bk_66030cca15f9d633: ["Nonfiksi Umum"], // Pelanggaran HAM dalam Hukum Keadaan Darurat di Indonesia
+  bk_9fc0ac343c79676b: ["Agama", "Sejarah"], // Pelangi di Bukit Barisan
+  bk_995962c59d558df7: ["Nonfiksi Umum"], // Pelarangan Buku di Indonesia
+  bk_d2030e30ab3c858b: ["Nonfiksi Umum", "Bisnis"], // Pelelangan Jasa Kontruksi
+  bk_b93e46da1e749643: ["Nonfiksi Umum"], // Pembangunan Pertanian
+  bk_a6d176a4bbe9cdf9: ["Bisnis", "Biografi"], // Pembelajaran T.P. Rachmat
+  bk_f7e98a575290850c: ["Nonfiksi Umum"], // Pemulung Jalanan Yogyakarta
+  bk_8ea2936deb044e61: ["Nonfiksi Umum"], // Pendidikan Indonesia
+  bk_d0ae81e7cd40109b: ["Agama"], // Pendidikan Islam
+  bk_360e5fcbdf7f9582: ["Nonfiksi Umum"], // Penerjemahan Berdasar Makna (Pedoman untuk Pemadanan Antarba
+  bk_7960e998257cc511: ["Nonfiksi Umum"], // Pengantar Ilmu Perang
+  bk_2bd3248add886d51: ["Bisnis", "Nonfiksi Umum"], // Pengantar ke Jalan Ekonomi Sosiologi
+  bk_2c499ab826dd5497: ["Nonfiksi Umum"], // Pengantar Sastra Rakyat Minangkabau
+  bk_371b51d4c71eb6c2: ["Agama"], // Pengantar Teologi Agama-Agama
+  bk_998206f5d21470ec: ["Nonfiksi Umum"], // Pengelolaan Lalu Lintas dan Angkutan Jalan
+  bk_3cf6880bc7e0155d: ["Bisnis"], // Pengembangan Koperasi
+  bk_19b28bcad8df0170: ["Bisnis"], // Penghitungan Pajak Penghasilan Pasal 21 Pegawai
+  bk_116e9bac4d35f14f: ["Sejarah"], // Perang Yang Tidak Akan Kita Menangkan
+  bk_8512e89a09aab4dc: ["Bisnis", "Agama"], // Perbandingan Sistem Ekonomi
+  bk_e9e567eb4f5d03b6: ["Bisnis"], // Perbankan
+  bk_cafbe9f3b73eee8b: ["Bisnis", "Agama"], // Perbankan Islam dan Kedudukannya dalam Tata Hukum Perbankan 
+  bk_ef3066b5c687bbcc: ["Nonfiksi Umum"], // Percikan Filsafat
+  bk_53704674fa3e20eb: ["Agama"], // Perjalanan Menjumpai Tuhan
+  bk_963ad8b673eb7b12: ["Agama"], // Perkawinan Menurut Islam dan Katolik
+  bk_373ce80c41de42c1: ["Agama", "Sejarah"], // Perkembangan Tafsir Al-Qur'an di Indonesia
+  bk_59d8f395c63a6046: ["Nonfiksi Umum"], // Perlindungan Hak Asasi Saksi dan Korban dalam Proses Peradil
+  bk_4123ccd877593ffa: ["Agama"], // Pernak-Pernik Romantis
+  bk_c007b03c55b8007b: ["Nonfiksi Umum"], // Perpustakaan Digital dari A Sampai Z
+  bk_475f7cc3003768dc: ["Anak", "Novel"], // Persahabatan
+  bk_771bae4049c933a3: ["Agama", "Nonfiksi Umum"], // Pesantren
+  bk_1ae33ef0b596ecac: ["Agama", "Nonfiksi Umum"], // Pesantren Masa Depan
+  bk_080bc2af6ecdda1d: ["Kumpulan Cerpen"], // Petualangan Celana dalam
+  bk_ae4f9defbd22e3cb: ["Sejarah", "Agama"], // Piagam Perjuangan Kebangsaan
+  bk_85c697596f7da690: ["Nonfiksi Umum"], // Pijar-Pijar Filsafat
+  bk_ff440b53812f8251: ["Nonfiksi Umum"], // Pokok-Pokok Filsafat Hukum
+  bk_6929ccc513a47449: ["Agama"], // Poligami yang Tak Melukai Hati?
+  bk_957d867a767b7ec6: ["Nonfiksi Umum"], // Politik Identitas Etnis
+  bk_fc76d8b5159a01b8: ["Agama", "Nonfiksi Umum"], // Politik Kristen di Indonesia
+  bk_000ccbbc361910c2: ["Nonfiksi Umum"], // Presidensialisme Setengah Hati
+  bk_b345a0806747cc8f: ["Puisi", "Sastra Klasik"], // Priangan Si Jelita
+  bk_65373178f0395892: ["Biografi", "Agama"], // Prof. Dr. Mgr. N.J.C. Geise, O.F.M., Juragan Visioner
+  bk_46972663545a5280: ["Nonfiksi Umum"], // Profil Budaya Politik Indonesia
+  bk_c76368423111a579: ["Bisnis"], // Profit Konsisten dengan Ichimoku Kinko Hyo
+  bk_cce6d57717833109: ["Pengembangan Diri", "Agama"], // Psikologi Pasangan: Manajemen Konflik Rumah Tangga
+  bk_d2a3d3519abbce74: ["Pengembangan Diri", "Agama"], // Psikologi Pernikahan: Menyelami Rahasia Pernikahan
+  bk_e83f3855a129b646: ["Nonfiksi Umum"], // Rakyat & Negara dalam Pengadaan Tanah untuk Pembangunan
+  bk_d9cd6e92979c62dd: ["Nonfiksi Umum"], // Rakyat Memantau Ibukota, Rakyat Memantau Jokowi Basuki
+  bk_caa8951fb83410b9: ["Anak"], // Ratu Sejati dan Lutung Baik Hati
+  bk_cd7d144915f64874: ["Nonfiksi Umum", "Agama"], // Referensi bagi Hakim Peradilan Agama tentang Kekerasan dalam
+  bk_cdde22c916926262: ["Nonfiksi Umum"], // Reinventing Indonesia
+  bk_b37fc90804af00f7: ["Nonfiksi Umum"], // Reinventing Pembangunan
+  bk_0198b45718d0e7f5: ["Nonfiksi Umum"], // Rencana Anggaran Biaya
+  bk_2630e709a0cec40a: ["Nonfiksi Umum"], // Resistensi Gaya Hidup
+  bk_5edf0aa05b8f92c5: ["Nonfiksi Umum"], // Revolusi Sistem Pendidikan Nasional dengan Metode E-Learning
+  bk_c76bac81c01591bc: ["Kumpulan Cerpen"], // Rezim Seks
+  bk_09168c84171febb5: ["Agama"], // Risalah Kubro Mujarrobat Walisanga
+  bk_5385287841173454: ["Sastra Klasik"], // Ritumpanna Wélenrénngé
+  bk_b87d1ec0cc3889a0: ["Nonfiksi Umum"], // Rumah Melayu
+  bk_d13c307f792d91f1: ["Agama", "Nonfiksi Umum"], // SANTRI-PESANTREN INDONESIA ; Siaga Jiwa Raga Menuju Indonesi
+  bk_b67022f6b42f0c31: ["Nonfiksi Umum"], // Sastra dan Ilmu Sastra ; Pengantar Teori Sastra
+  bk_063aa3fcf5141a2e: ["Agama"], // Saya Tidak Ingin Poligami Tapi Harus Poligami
+  bk_4f64af6f1d7c621b: ["Agama"], // Seandainya Saya Isteri Aa Gym
+  bk_3991695403634fe2: ["Sains", "Agama"], // Sehat & Bugar Berobat Dengan Alam
+  bk_a1fc09a78c09d223: ["Sains", "Agama"], // Sehat Itu Nikmat
+  bk_fe77e18441949047: ["Nonfiksi Umum", "Sejarah"], // Sejarah dan Kedudukan BW di Indonesia
+  bk_10ec417147e77521: ["Sejarah"], // Sejarah Indonesia
+  bk_4884839156de546b: ["Sejarah"], // Sejarah Kecil "Petite Histoire" Indonesia
+  bk_ec35472cfc530d2e: ["Sejarah"], // Sejarah Pemerintahan Kota Surabaya Sejak Masa Kolonial Sampa
+  bk_54b21ca4dfff6dd8: ["Agama", "Sejarah"], // Sejarah Perjumpaan Kristen dan Islam di Indonesia
+  bk_1c39e2dc69d4fd56: ["Sejarah", "Nonfiksi Umum"], // Sejarah Perkembangan Arsitektur Kota Islam Banten
+  bk_252a7d250466c316: ["Nonfiksi Umum", "Puisi"], // Semangat Nasionalisme dalam Puisi Sebelum Kemerdekaan
+  bk_d36528d5e6ce6dbb: ["Kumpulan Cerpen"], // Semanyun Senyuman Mahasiswa
+  bk_1e478c36081f6e76: ["Nonfiksi Umum"], // Senam Sehat Prana
+  bk_4b525a2708fcfb59: ["Agama"], // Seputar Dewan Paroki
+  bk_bf2df13a676ddd50: ["Nonfiksi Umum"], // Sesudah Filsafat
+  bk_61cc7a8f4b351626: ["Agama"], // Sex Before Married Jilid 1
+  bk_a3813ea8af8ad3dd: ["Agama"], // Sex Before Married Jilid 2
+  bk_a010e1029387cea1: ["Komik", "Bisnis"], // Si Juki vs Dompet Kosong
+  bk_7e6a112dd5017605: ["Novel", "Nonfiksi Umum"], // Sidang Susila
+  bk_2ae071cb3a384b83: ["Agama"], // Sistem Dajjal
+  bk_fca2a5518b1f3326: ["Bisnis"], // Sistem Informasi Akuntansi
+  bk_9612ec243201ea8c: ["Bisnis"], // Sistem Koperasi
+  bk_b2d07c8b2f524d66: ["Bisnis"], // Sistem Moneter dan Perbankan di Indonesia
+  bk_b5ddbcb2f83695e7: ["Nonfiksi Umum", "Sains"], // Sistem Pertanian Berkelanjutan
+  bk_337cab22262bf361: ["Sains", "Agama"], // Solusi Alami Sehatkan Diri
+  bk_675ef348bb4bd0d3: ["Nonfiksi Umum", "Sains"], // Sport Psychometrics
+  bk_b00e05cad5df8dbe: ["Nonfiksi Umum"], // Stereotip Etnis dalam Masyarakat Multietnis
+  bk_9681275a0af1baa0: ["Bisnis"], // Strategi dan Inovasi Model Bisnis Meningkatkan Kinerja Usaha
+  bk_33db395ebc13fe1f: ["Nonfiksi Umum"], // Strategi-Strategi Pembangunan Masyarakat
+  bk_98f7d7f349b536bb: ["Nonfiksi Umum", "Sains"], // Struktur Bangunan Bertingkat Tinggi
+  bk_67e6e39fc351aff0: ["Nonfiksi Umum", "Bisnis"], // Studi Complex Adaptive System (CAS) Proses Pembentukan Klast
+  bk_362b407ba07f299a: ["Kumpulan Cerpen"], // Suami Sempurna
+  bk_f711d0551436a8ea: ["Agama", "Sejarah"], // Sufisme Jawa
+  bk_8eca66e0f1003763: ["Sejarah"], // Supersemar Palsu
+  bk_bbf899c2b8ecd362: ["Agama"], // Syamsul Ma'arif
+  bk_60e18701d9d85404: ["Nonfiksi Umum"], // Tahapan dan Langkah-Langkah Penelitian
+  bk_ffd657a17debea4e: ["Nonfiksi Umum", "Sejarah"], // Tajuk-Tajuk Mochtar Lubis di Harian Indonesia Raya
+  bk_e5fb8ce962c60b2d: ["Sains"], // Taksonomi dan Bioekologi Lalat Buat Penting di Indonesia
+  bk_cc0a439512f8b0f9: ["Sejarah", "Biografi"], // Tan Malaka, Gerakan Kiri, dan Revolusi Indonesia
+  bk_1b694252ae1ecc3b: ["Kumpulan Cerpen"], // Tango
+  bk_8dd4183fc60f3b20: ["Nonfiksi Umum"], // Tangsel: Dari Politik Gragasan Ke Politik Gagasan
+  bk_6836c632bf574cae: ["Nonfiksi Umum"], // Tata Bahasa Jawa Mutakhir
+  bk_29d64035a03e6d19: ["Nonfiksi Umum"], // Tata Rias Pengantin Gaya Yogyakarta
+  bk_4994b5d79857697b: ["Nonfiksi Umum"], // Tata Upacara dan Wicara
+  bk_774cfb30b5783967: ["Nonfiksi Umum"], // Teater Lenong Betawi
+  bk_8ffefe4c0fa93b7b: ["Bisnis"], // Technical Analysis for Mega Profit
+  bk_976925ee11a5e0f2: ["Nonfiksi Umum"], // Teknik Gambar Bangunan untuk SMK, Jilid 1
+  bk_d001ccec5223eded: ["Novel"], // Tentang Cinta
+  bk_9d3a53720ef6d6f2: ["Agama"], // Teologi & Praksis Komunitas Post Modern
+  bk_0dfa64c5a0afa72a: ["Agama", "Nonfiksi Umum"], // Teologi, Pendidikan & Pembebasan
+  bk_12dc183363263842: ["Sains"], // Teori dan Aplikasi Metode Elemen Hingga
+  bk_6154c14b5a43926d: ["Pengembangan Diri"], // The Jongos Ways
+  bk_dab6a04342d98970: ["Bisnis"], // The Super Scalper
+  bk_1cded82b7da97cfe: ["Nonfiksi Umum"], // The Untold Stories
+  bk_b43c95864814d63d: ["Biografi"], // The Untold Story of Ryan
+  bk_67053120b492cd14: ["Sejarah", "Nonfiksi Umum"], // Transmigrasi di Indonesia, 1905-1985
+  bk_89df454c48f6b7b5: ["Nonfiksi Umum"], // Trik Praktis Ms Word untuk Menyusun Laporan Penelitian
+  bk_7b79bf6d13d325b3: ["Nonfiksi Umum", "Bisnis"], // Trust
+  bk_38e77fd5439b4f5b: ["Agama", "Sejarah"], // Tuaiannya Sungguh Banyak
+  bk_0750942c09e3c9bc: ["Novel"], // Tuhan, Izinkan Aku Menjadi Pelacur!
+  bk_8945a941508588c9: ["Agama"], // Tuntunan Tabligh
+  bk_7967278d9558696b: ["Sejarah", "Agama"], // Ulama & Kekuasaan
+  bk_dc5af9d35902e8d3: ["Sejarah", "Agama", "Biografi"], // Ulama-Ulama di Garda Depan Perjuangan
+  bk_48e0784d66bc9530: ["Biografi", "Sejarah"], // Untuk Negeriku
+  bk_275e5cb89eef56d1: ["Nonfiksi Umum", "Bisnis"], // Usaha Perbankan dalam Perspektif Hukum
+  bk_bb62787457d353da: ["Bisnis"], // Value Investing
+  bk_57f13946c0c0bfc5: ["Nonfiksi Umum", "Bisnis"], // Wajah Jasa Konstruksi Indonesia
+  bk_6862e1c2f3e97eec: ["Nonfiksi Umum"], // Wayang Golek Sunda
+  bk_87376c6cf4ef93b9: ["Bisnis"], // Who Wants to Be a Smiling Investor
+  bk_fbc0769c66fae1c0: ["Agama"], // Wife Diary
+  bk_ddf2d8d60ac17868: ["Bisnis", "Pengembangan Diri"], // Wirausaha Muda Mandiri
+  bk_f1e6b0709dd14a72: ["Nonfiksi Umum"], // Wiwara
+  bk_bbf59342d61dec8b: ["Nonfiksi Umum", "Sejarah"], // Yang Terus di Garis Lurus
 };
 
 /** normalizeSearchText(source title) → title to use. */
@@ -879,7 +1342,6 @@ export const CORRECTIONS: Record<
   // Mistyped ISBNs: Mizan's prefix is 979-433, Gema Insani's 979-561.
   bk_35b40c117ca27d5a: {isbn13: "9789794335963"}, // Sang Pencerah (was 9787974335963)
   bk_16413bd8d52a7cd9: {isbn13: "9789795611776"}, // Awas! Bahaya Lidah (was 9799795611775)
-  bk_f933facfdf67ad7c: {isbn13: null}, // Anak Semua Bangsa, Hasta Mitra 1980: Penguin's ISBN for the English translation
   bk_670bc324ae232ee6: {title: "Rectoverso"}, // was "Rectosrev"
   bk_38d0b844fd16e26e: {title: "Yuni Shara, 35 Cangkir Kopi"}, // was "Yuni Shara & Cangkir Kopi"
   bk_0696e252848a6faa: {title: "Menjadi Manusia Indonesia"}, // published without "Seutuhnya"
