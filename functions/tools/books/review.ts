@@ -1343,6 +1343,9 @@ export const CORRECTIONS: Record<
   bk_35b40c117ca27d5a: {isbn13: "9789794335963"}, // Sang Pencerah (was 9787974335963)
   bk_16413bd8d52a7cd9: {isbn13: "9789795611776"}, // Awas! Bahaya Lidah (was 9799795611775)
   bk_670bc324ae232ee6: {title: "Rectoverso"}, // was "Rectosrev"
+  bk_369b8c4e58d72e53: {isbn13: "9789792230437", authors: ["Abdul Sani", "R. Isis Ismail", "Fx. Suwito Marsam"]}, // Buku Pintar Kepabeanan: the stored ISBN failed its checksum
+  bk_895ba9deeb8dfbad: {title: "Inspired by Indayati Oetomo"}, // spelled Oetomo on the cover
+  bk_751cff973af95011: {authors: ["Dyah Hasto Palupi", "Teguh Sri Pambudi"]}, // Advertising That Sells: co-author
   bk_4d21ed3aa1589533: {authors: ["Sandra Brown"]}, // Demi Kehormatan: Renee Raudman narrated the audiobook
   bk_38d0b844fd16e26e: {title: "Yuni Shara, 35 Cangkir Kopi"}, // was "Yuni Shara & Cangkir Kopi"
   bk_0696e252848a6faa: {title: "Menjadi Manusia Indonesia"}, // published without "Seutuhnya"
