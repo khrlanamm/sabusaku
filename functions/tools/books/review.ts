@@ -1256,7 +1256,8 @@ export const CORRECTIONS: Record<
   // A book about David Tobing, written by Rita Triana Budiarti.
   bk_d385b9015fb8ab64: {authors: ["Rita Triana Budiarti"]},
   bk_e543af6abc95dfea: {isbn13: null}, // Biografi Daripada Soeharto: the ISBN belongs to "Chic & modis kerudung"
-  bk_8326add768e01788: {isbn13: null}, // Refrein di Sudut Dam: the ISBN belongs to a Bentang translation of Tears of the Giraffe
+  bk_8326add768e01788: {isbn13: null},
+  bk_c9e5daa4ad9dbbd4: {isbn13: null}, // Njoto: the ISBN belongs to the Sjahrir book of the same Tempo series // Refrein di Sudut Dam: the ISBN belongs to a Bentang translation of Tears of the Giraffe
   bk_94c39a7abd2651c2: {
     description:
       "Buku kedua kisah Gajah Mada karya Langit Kresna Hariadi. Di tengah perebutan takhta dan intrik di istana Majapahit, Gajah Mada berjuang menjaga keselamatan raja dan keutuhan negeri.",
