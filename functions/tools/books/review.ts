@@ -1343,6 +1343,8 @@ export const CORRECTIONS: Record<
   bk_35b40c117ca27d5a: {isbn13: "9789794335963"}, // Sang Pencerah (was 9787974335963)
   bk_16413bd8d52a7cd9: {isbn13: "9789795611776"}, // Awas! Bahaya Lidah (was 9799795611775)
   bk_670bc324ae232ee6: {title: "Rectoverso"}, // was "Rectosrev"
+  bk_0fabd5e5463fffe3: {authors: ["Syekh Adnan Hasan Shalih Baharits"]}, // Mendidik Anak Laki-Laki: Abdul Mun'im Ibrahim wrote the companion volume
+  bk_355bd1f0bd1a4f57: {isbn13: "9786234582208"}, // Sahabiyah Stories for Kids, per Gema Insani
   bk_a6d176a4bbe9cdf9: {authors: ["Ekuslie Goestiandi", "Yusi Avianto Pareanom"]}, // Pembelajaran T.P. Rachmat: a book about him
   bk_5977d3bc7f265f4f: {authors: ["Romy Rafael"]}, // Hipnoterapi: Quit Smoking! (GagasMedia 2006), not R. Cecep Eka Permana
   bk_369b8c4e58d72e53: {isbn13: "9789792230437", authors: ["Abdul Sani", "R. Isis Ismail", "Fx. Suwito Marsam"]}, // Buku Pintar Kepabeanan: the stored ISBN failed its checksum
