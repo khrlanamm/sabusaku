@@ -488,6 +488,13 @@ export const REJECTED_BOOKS: Record<string, string> = {
   bk_a195d740dedf98a6: "bukan bacaan umum (katalog/kamus/panduan)", // Kabar Baik (traktat)
   bk_07f315bfb91c418b: "bukan bacaan umum (katalog/kamus/panduan)", // Umat Allah Menegaskan Arah
   bk_d36528d5e6ce6dbb: "tinjauan: terbitan mandiri luar negeri", // Semanyun Senyuman Mahasiswa
+  // Foreign-language editions found in the catalog (30 Oct 2026), none with readers.
+  bk_0bbf8ae36912c40b: "kurasi: edisi bahasa asing", // Rich Dad Poor Dad (Business Plus)
+  bk_115d35c6af82168c: "kurasi: edisi bahasa asing", // Firedom
+  bk_5787acde4a5e3fe9: "kurasi: edisi bahasa asing", // Across the Nightingale Floor (Riverhead)
+  bk_8fa66a1b89b77235: "kurasi: edisi bahasa asing", // Neighbourhood Tales
+  bk_346776a26373eaae: "kurasi: edisi bahasa asing", // Personality Plus (Monarch)
+  bk_fe70a22066d436d8: "kurasi: edisi bahasa asing", // Never Let Me Go (Faber cover)
 };
 
 /** Cover URLs that show the wrong book, a person, a placeholder or a page. */
@@ -1198,8 +1205,8 @@ export const CORRECTIONS: Record<
     authors?: string[];
     publisher?: string;
     publishedYear?: number;
-    isbn13?: string;
-    isbn10?: string;
+    isbn13?: string | null;
+    isbn10?: string | null;
     pageCount?: number;
     description?: string | null;
   }
@@ -1231,6 +1238,10 @@ export const CORRECTIONS: Record<
   bk_f1c5f5962178a0e8: {publishedYear: 1959}, // Kepada Bangsaku
   // Divergent: the cover is the Mizan Fantasi edition; 487 pages was the US hardcover.
   bk_fd4ead1a47cf86ef: {publisher: "Mizan Fantasi", publishedYear: 2012, isbn13: "9789794336977", isbn10: "9794336971", pageCount: 543},
+  // Mistyped ISBNs: Mizan's prefix is 979-433, Gema Insani's 979-561.
+  bk_35b40c117ca27d5a: {isbn13: "9789794335963"}, // Sang Pencerah (was 9787974335963)
+  bk_16413bd8d52a7cd9: {isbn13: "9789795611776"}, // Awas! Bahaya Lidah (was 9799795611775)
+  bk_f933facfdf67ad7c: {isbn13: null}, // Anak Semua Bangsa, Hasta Mitra 1980: Penguin's ISBN for the English translation
   bk_94c39a7abd2651c2: {
     description:
       "Buku kedua kisah Gajah Mada karya Langit Kresna Hariadi. Di tengah perebutan takhta dan intrik di istana Majapahit, Gajah Mada berjuang menjaga keselamatan raja dan keutuhan negeri.",
