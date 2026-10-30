@@ -1152,31 +1152,30 @@ export const CORRECTIONS: Record<
   },
 };
 
+/** A book whose data was checked by hand online, with its cover's image URL. */
+export interface ManualBook {
+  book: {
+    title: string;
+    subtitle: string | null;
+    authors: string[];
+    publisher: string | null;
+    publishedYear: number | null;
+    isbn13: string | null;
+    isbn10: string | null;
+    pageCount: number;
+    categories: Category[];
+    description: string | null;
+  };
+  cover: string;
+}
+
 /**
- * Students' "new book" suggestions reviewed by the developer (suggestions.ts),
- * keyed by bookSuggestions ID. `create` adds the book with data checked
- * online; `cover` is an image URL, or "suggestion" for the student's photo.
- * `link` names the catalog book it already is. Suggestions not listed stay
- * pending for the teachers.
+ * Students' "new book" suggestions reviewed by the developer (manual.ts),
+ * keyed by bookSuggestions ID. `create` adds the book; `link` names the
+ * catalog book it already is. Suggestions not listed stay pending for the
+ * teachers.
  */
-export type SuggestionDecision =
-  | {
-      action: "create";
-      book: {
-        title: string;
-        subtitle: string | null;
-        authors: string[];
-        publisher: string | null;
-        publishedYear: number | null;
-        isbn13: string | null;
-        isbn10: string | null;
-        pageCount: number;
-        categories: Category[];
-        description: string | null;
-      };
-      cover: string;
-    }
-  | {action: "link"; bookId: string};
+export type SuggestionDecision = ({action: "create"} & ManualBook) | {action: "link"; bookId: string};
 
 export const SUGGESTION_DECISIONS: Record<string, SuggestionDecision> = {
   // ---- 30 Oct 2026 ----
