@@ -1170,6 +1170,8 @@ export const CATEGORY_OVERRIDES: Record<string, Category[]> = {
   bk_bd5c9aba1a235359: ["Kumpulan Cerpen"], // Lipstik dalam Tas Doni
   bk_f767d779232939b7: ["Nonfiksi Umum"], // Ideologi Politik dan Teater Modern Indonesia
   bk_f85b4f5055478c01: ["Sejarah"], // Di Bawah Lentera Merah
+  bk_b732737250359663: ["Novel"], // Meretas Ungu
+  bk_243d0b7c5137ab47: ["Biografi"], // Interupsi!
   bk_13e867aed168e993: ["Nonfiksi Umum"], // Romansa Cyber
   bk_6aa80f0228219f06: ["Nonfiksi Umum"], // Uap
   bk_0bc34942b592f005: ["Nonfiksi Umum"], // BOR
