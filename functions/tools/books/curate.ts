@@ -23,6 +23,7 @@ import {resolve} from "node:path";
 
 import {FieldValue} from "firebase-admin/firestore";
 
+import {bookKey} from "../../src/domain/search";
 import {rebuildCatalog} from "../../src/infra/catalog";
 import {booksCol, db} from "../../src/infra/firebase";
 import {OUT, hasFlag, readJson} from "./common";
@@ -78,6 +79,11 @@ async function main() {
       changes[field] = {from: data[field] ?? null, to: value};
     }
     if ("description" in patch) patch.descriptionSource = patch.description ? "review" : null;
+    if ("title" in patch || "authors" in patch) {
+      const title = (patch.title ?? data.title) as string;
+      const authors = (patch.authors ?? data.authors) as string[];
+      patch.searchKey = bookKey(title, authors[0] ?? "");
+    }
     if (Object.keys(changes).length) patches.push({id, title: data.title as string, patch, changes});
   }
   // Synopses stored before cleanDescription learned about mojibake and quote artifacts.
