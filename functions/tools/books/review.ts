@@ -16,18 +16,6 @@ import type {Category} from "./seeds";
  */
 export const REJECTED_BOOKS: Record<string, string> = {
   // ---- Review of the books added on 17 Oct 2026 (new IDs of books already in production count as duplicates) ----
-  bk_d683f8977266dd5f: "tinjauan: buku teks/kajian akademik", // Menuju Era Wakaf Produktif
-  bk_a5b068ad3d24b8f2: "tinjauan: buku teks/kajian akademik", // M. Natsir, Dakwah dan Pemikirannya
-  bk_02949da2c9bbeb3f: "tinjauan: buku teks/kajian akademik", // Lihatlah Sang Manusia! (etika Kristen)
-  bk_8d24ef112a91f20b: "tinjauan: buku teks/kajian akademik", // Kerukunan Umat Beragama Pilar Utama Kerukunan Berbangsa
-  bk_f243b80825222619: "tinjauan: buku teks/kajian akademik", // Ekonomi Politik Media Penyiaran
-  bk_ad4b1e1e6c268546: "tinjauan: buku teks/kajian akademik", // Kepuasan Hidup dan Dukungan Sosial Lanjut Usia
-  bk_d34b92be59906b38: "tinjauan: buku teks/kajian akademik", // Kura-Kura & Buaya Indonesia dan Papua Nugini
-  bk_8eca66e0f1003763: "tinjauan: politik praktis/polemik", // Supersemar Palsu
-  bk_610c3b07dea24bc7: "tinjauan: politik praktis/polemik", // Dari Papua Meneropong Indonesia
-  bk_6ca69366d12a298e: "tinjauan: politik praktis/polemik", // Membongkar Supersemar!
-  bk_b5a87348d25d75c1: "tinjauan: buku teks/kajian akademik", // Mencapai Pertanian yang Lebih Baik
-  bk_f6e06e89d874c8fb: "tinjauan: buku teks/kajian akademik", // Identitas Dayak
   bk_e5f4666c2a5a0bfe: "tinjauan: bukan buku utuh (snackbook)", // Charles Lebourne - Orang-Orang Bloomington
   bk_4037da2a8536a7b8: "tinjauan: bukan buku utuh (snackbook)", // Laki-Laki Tua Tanpa Nama - Orang-Orang Bloomington
   bk_b90f39a24170d281: "tinjauan: edisi lain dari buku yang sudah ada", // 5 cm (Hc)
@@ -35,10 +23,7 @@ export const REJECTED_BOOKS: Record<string, string> = {
   bk_b5bcdcb741a88e99: "tinjauan: edisi lain dari buku yang sudah ada", // Badai Pasti Berlalu - CU Format Baru
   bk_d021640ef918b505: "tinjauan: bukan buku utuh (cuplikan)", // Geez & Ann #1: Free Chapter
   bk_2d3710b24b973eac: "tinjauan: bukan buku utuh (cuplikan)", // Geez & Ann #2: Free Chapter
-  bk_8dd4183fc60f3b20: "tinjauan: politik praktis/polemik", // Tangsel: Dari Politik Gragasan Ke Politik Gagasan
-  bk_252a7d250466c316: "tinjauan: buku teks/kajian akademik", // Semangat Nasionalisme dalam Puisi Sebelum Kemerdekaan
   bk_f7c071f968cdd3da: "tinjauan: edisi lain dari buku yang sudah ada", // Classics: Sebatang Kara (Nobody's Boy)
-  bk_f711d0551436a8ea: "tinjauan: buku teks/kajian akademik", // Sufisme Jawa
   bk_ff2d03f2926f4cb2: "duplikat: sudah ada sebagai bk_c70a7466f524e8af", // "Membumikan" Al-Qur'an
   bk_a70308d4c5eaf269: "duplikat: sudah ada sebagai bk_d5599c5f588d42ff", // Bilangan Fu
   bk_666d9e9dfb4f08cb: "duplikat: sudah ada sebagai bk_f56fc1f1abf0c110", // Kubah
@@ -52,230 +37,18 @@ export const REJECTED_BOOKS: Record<string, string> = {
   bk_a4b951ddee1bdd4c: "kurasi: bukan buku utuh / bukan bacaan", // Asian Games 2018
   bk_d6eeda54f8f218ef: "kurasi: bukan buku utuh / bukan bacaan", // Hello Shinee
   bk_d96d2225b6c38588: "kurasi: bukan buku utuh / bukan bacaan", // Fikih Manhaji 5 – Haji dan Umrah
-  bk_5dec76d629ed9b77: "kurasi: bacaan anak kecil", // Asyiknya Bertualang di Kampung Naga
-  bk_0506668876332b48: "kurasi: bacaan anak kecil", // Babi Sombong dan Kuda Kurus
-  bk_36b346b86bdf87c9: "kurasi: bacaan anak kecil", // Kreasi Asyik Muslim Cilik
-  bk_5ecb754f1c10dd50: "kurasi: bacaan anak kecil", // Nyi Loro Kidul
-  bk_01e193382ce88821: "kurasi: bacaan anak kecil", // Animal Antics
-  bk_355bd1f0bd1a4f57: "kurasi: bacaan anak kecil", // Sahabiyah Stories for Kids: Meneladani Sifat-Sifat Mulia Sah
-  bk_04ebb9204bcafe5b: "kurasi: bacaan anak kecil", // Komik Fiqih Untuk Anak
-  bk_5144cb9e19082a51: "kurasi: bacaan anak kecil", // Komik Hari Besar Islam
-  bk_c282a85fb88dd935: "kurasi: bacaan anak kecil", // Komik Tadabur Al-Qur`an
-  bk_793e56a0139f7b0b: "kurasi: bacaan anak kecil", // Haid Pertamaku
-  bk_36567d6c4ac1f0b2: "kurasi: bacaan anak kecil", // Si Untung
   // ---- Books that came in after the title-case rerun (16 Oct 2026) ----
-  bk_8b96295e6634bde9: "tidak relevan untuk siswa SMA", // Istri Kontrak
-  bk_6dec0a255e6efa69: "tidak relevan untuk siswa SMA", // Kawin Kontrak
   // ---- Relevance review of every harvested title (16 Oct 2026) ----
-  bk_d08a4591e6bed608: "tidak relevan untuk siswa SMA", // (Digital) Executive Legislator
-  bk_f8d205c4c1940d6a: "tidak relevan untuk siswa SMA", // 60 Rahasia Jadi Ayah Hebat
-  bk_28c38ac1b9b9a376: "tidak relevan untuk siswa SMA", // Adab Bekerja dan Berbisnis
-  bk_751cff973af95011: "tidak relevan untuk siswa SMA", // Advertising that sells
-  bk_f4746292f6968db3: "tidak relevan untuk siswa SMA", // Agar Ayah Enggak Masuk Neraka
-  bk_143a4d694ee8620a: "tidak relevan untuk siswa SMA", // Agar Muslimah Mantap Menikah
-  bk_dc9aea6fe0fd2273: "tidak relevan untuk siswa SMA", // Amien Rais menjawab isu-isu politis seputar kiprah kontrover
-  bk_330f8aea3ba105d6: "tidak relevan untuk siswa SMA", // Analisis ekonomi politik Indonesia
-  bk_62b9fb66af0ea101: "tidak relevan untuk siswa SMA", // Apa Bahayanya Menikah dengan Wanita Nonmuslim?
-  bk_fb4d588d9a9022e4: "tidak relevan untuk siswa SMA", // Ayat-Ayat Sehat
-  bk_0d516c8b53b5365b: "tidak relevan untuk siswa SMA", // Baby Guide for Muslim
-  bk_3065fd6ab170e69f: "tidak relevan untuk siswa SMA", // Baca Kitab manakib Syekh Abdul Qadir Jaelani merusak aqidah 
-  bk_28c9d551b07d5458: "tidak relevan untuk siswa SMA", // Bagaimana Anti-kekerasan Melindungi Negara
-  bk_5ff51d2ba69e0569: "tidak relevan untuk siswa SMA", // Be G2c
-  bk_c39293a007c63a9e: "tidak relevan untuk siswa SMA", // Berani Mencintai Bernyali Menikahi
-  bk_932d3e77d517bd34: "tidak relevan untuk siswa SMA", // Berjuta Rasa Menjadi Papah-Mamah Muda
-  bk_41c8512cdf8905a8: "tidak relevan untuk siswa SMA", // Bikin Nikah Tak Jadi Masalah
-  bk_7e5e7a4547f11a19: "tidak relevan untuk siswa SMA", // BookMagz #1: Aku Siap Menikah Sekarang!
-  bk_7d15dfdfef9f0e1e: "tidak relevan untuk siswa SMA", // Budaya korporat dan keunggulan korporasi
-  bk_c9b60425f22343a5: "tidak relevan untuk siswa SMA", // Bukan kapitalisme bukan sosialisme
-  bk_bde7aa571716dc50: "tidak relevan untuk siswa SMA", // Bumi makin panas
-  bk_1e397a125b5ea8b9: "tidak relevan untuk siswa SMA", // BUMN Indonesia
-  bk_99a19f540de87e55: "tidak relevan untuk siswa SMA", // Cara Simpel Berinvestasi di Pasar Modal Volume I Edisi Revis
-  bk_a92e79d70db9d6be: "tidak relevan untuk siswa SMA", // Cara Simpel Berinvestasi di Pasar Modal Volume II
-  bk_67994cb9ec52dd4b: "tidak relevan untuk siswa SMA", // Cendekiawan dan kekuasaan dalam negara Orde Baru
-  bk_24a9a08a8408b565: "tidak relevan untuk siswa SMA", // Cerdas Dan Salehkan Bayi Anda Dengan ASI
-  bk_c71d874e4232a9c9: "tidak relevan untuk siswa SMA", // Cerdas Mengelola Keuangan
-  bk_1e4f9374cc6a26e1: "tidak relevan untuk siswa SMA", // Cerdas Mengelola Keuangan Keluarga
-  bk_a1ac21c0c8d4cdc1: "tidak relevan untuk siswa SMA", // Cerita Si Ayam
-  bk_cd439ba75101d51f: "tidak relevan untuk siswa SMA", // Cerita Si Katak
-  bk_ff7eef0dae1c24fb: "tidak relevan untuk siswa SMA", // Cerita Si Kelinci
-  bk_c96bf1275044548f: "tidak relevan untuk siswa SMA", // Cerita Si Kucing
-  bk_7804cd8955fa5274: "tidak relevan untuk siswa SMA", // Cerita Si Lebah (SC)
-  bk_462f7ce246873e8d: "tidak relevan untuk siswa SMA", // Cerita Si Sapi
-  bk_cdf84d88eb25deb7: "tidak relevan untuk siswa SMA", // Cerita Si Singa
-  bk_73dce494beb9b192: "tidak relevan untuk siswa SMA", // Cerita Si Siput
-  bk_c6408948be6f3abf: "tidak relevan untuk siswa SMA", // Cerita Si Zebra
-  bk_a2db908ffd48ead2: "tidak relevan untuk siswa SMA", // Character Building
-  bk_d55d414f68abeeeb: "tidak relevan untuk siswa SMA", // Dari anak sampai usia lanjut
-  bk_e5b07bca853a5a76: "tidak relevan untuk siswa SMA", // Deforestasi tanpa henti
-  bk_29644c80bc37c158: "tidak relevan untuk siswa SMA", // Diet Islami
-  bk_f49ae8f64f6cef65: "tidak relevan untuk siswa SMA", // Dilema PKS
-  bk_9f7a2790e64efc34: "tidak relevan untuk siswa SMA", // Dinamika pembangunan pertanian dan pedesaan
-  bk_d6b18da17b744b23: "tidak relevan untuk siswa SMA", // Dominasi penuh muslihat
-  bk_843ea0462d9b6f6c: "tidak relevan untuk siswa SMA", // Easy Copywriting: Contek Abis, Sampai Laris!
-  bk_822c57e641c58f7a: "tidak relevan untuk siswa SMA", // Education Games
-  bk_5b6ce608ccdc7d7a: "tidak relevan untuk siswa SMA", // Family business responses to future competition
-  bk_6b245c5255d4e36c: "tidak relevan untuk siswa SMA", // Fatherman1
-  bk_3f79b2bc7bd6fe9d: "tidak relevan untuk siswa SMA", // Feminogr[a]fi
-  bk_9fbcf041353bea3f: "tidak relevan untuk siswa SMA", // Franchising, the most practical and excellent way of succeed
-  bk_f54b2292b1be7d35: "tidak relevan untuk siswa SMA", // Fundamental Vs Technical
-  bk_f61f79e7a98c8dfe: "tidak relevan untuk siswa SMA", // Fundamentalisme, terorisme, dan radikalisme
-  bk_4681ce21288dce4d: "tidak relevan untuk siswa SMA", // Gender dan strategi pengarus-utamaannya di Indonesia
-  bk_67a4c784c7da5f89: "tidak relevan untuk siswa SMA", // Gerakan perlawanan dari masjid kampus
-  bk_7ed1e37eaec6b6d1: "tidak relevan untuk siswa SMA", // Gigi Sehat Ibadah Dahsyat
-  bk_a6aa184db1d499d2: "tidak relevan untuk siswa SMA", // Hati-Hati Terhadap Media Yang Merusak Anak
-  bk_12c3343e9c4d6355: "tidak relevan untuk siswa SMA", // Hermawan Kartajaya on marketing
-  bk_19090d50ee6028cc: "tidak relevan untuk siswa SMA", // Hikmah Mempesona Dari Anakku
-  bk_e2d368485a2aeeec: "tidak relevan untuk siswa SMA", // Hukum perjanjian internasional
-  bk_fc070fbcebaef57a: "tidak relevan untuk siswa SMA", // Hutan & kehutanan
-  bk_f06ad127c5acb139: "tidak relevan untuk siswa SMA", // Ideologi Islam dan utopia
-  bk_601e288d3767d86d: "tidak relevan untuk siswa SMA", // Indonesianisasi, dari Gereja Katolik di Indonesia menjadi Ge
-  bk_c208fe883c0a9f74: "tidak relevan untuk siswa SMA", // Injil dan marapu
-  bk_895ba9deeb8dfbad: "tidak relevan untuk siswa SMA", // Inspired by Indayati Utomo
-  bk_ad6c34ae97c412a3: "tidak relevan untuk siswa SMA", // Islam dan dinamika sosial politik di Indonesia
-  bk_7235b34b51ff4202: "tidak relevan untuk siswa SMA", // Islam dan kedaulatan rakyat
-  bk_460a08ca130e09da: "tidak relevan untuk siswa SMA", // Islam pribumi
-  bk_c2f3882933c91b2f: "tidak relevan untuk siswa SMA", // Islam sebagai kritik sosial
-  bk_93064e4c70104341: "tidak relevan untuk siswa SMA", // Islam, demokratisasi, dan pemberdayaan civil society
-  bk_1f08c27a20f518b7: "tidak relevan untuk siswa SMA", // Istri Cerdas
-  bk_1baca87aa5fc94e2: "tidak relevan untuk siswa SMA", // Istriku, Aku Mencintaimu
-  bk_4400faab6e90ffb7: "tidak relevan untuk siswa SMA", // Jundullah
-  bk_f6c39820cd5303b7: "tidak relevan untuk siswa SMA", // Kabut jihad
-  bk_1a389441acfb8939: "tidak relevan untuk siswa SMA", // Kado Pernikahan untuk Istriku
-  bk_1ce1b8cb818e8dfd: "tidak relevan untuk siswa SMA", // Kapitalisme televisi dan strategi budaya massa
-  bk_dbe807bb11ba8cc7: "tidak relevan untuk siswa SMA", // Karya lengkap Driyarkara
-  bk_4a2f1433137bf90f: "tidak relevan untuk siswa SMA", // Kaya Harta, Kaya Amal
-  bk_032700729509cfd1: "tidak relevan untuk siswa SMA", // Keajaiban Jihad Harta
-  bk_774d8c61b4a21d92: "tidak relevan untuk siswa SMA", // Kebangsaan dan globalisasi dalam diplomasi
-  bk_71c56b58a6f0ea9a: "tidak relevan untuk siswa SMA", // Kebhinnekaan masyarakat di Indonesia
-  bk_6f3c04ac3f9218aa: "tidak relevan untuk siswa SMA", // Kekhususan rokok Indonesia
-  bk_56490aceb4727d4b: "tidak relevan untuk siswa SMA", // Kepemimpinan kharismatis
-  bk_266d1f98bf45e05e: "tidak relevan untuk siswa SMA", // Ketika aku mencintaimu
-  bk_2c731ccb0ec3adea: "tidak relevan untuk siswa SMA", // Ketika Suami Istri Hidup Bermasalah
-  bk_704ea542ea3c1c58: "tidak relevan untuk siswa SMA", // Kiai penghulu Jawa
-  bk_27e3ac2faf480c62: "tidak relevan untuk siswa SMA", // Kilas kilau bisnis
-  bk_432bebad2b592591: "tidak relevan untuk siswa SMA", // Kisah Wato Wele-Lia Nurat dalam Tradisi Puisi Lisan Flores T
-  bk_9434903da207e5ba: "tidak relevan untuk siswa SMA", // Lead by heart
-  bk_85a4ab9c0814b04f: "tidak relevan untuk siswa SMA", // Lobi zionis & rezim Bush
-  bk_f407da048e1616d0: "tidak relevan untuk siswa SMA", // Mahir Mendongeng
-  bk_0751b896d15a6d04: "tidak relevan untuk siswa SMA", // Makin Sehat Dengan Jilbab
-  bk_e04053ce7100f724: "tidak relevan untuk siswa SMA", // Manusia Daya
-  bk_4d32f4086d48505b: "tidak relevan untuk siswa SMA", // Maubes-Insana
-  bk_35a1187a037ebfd2: "tidak relevan untuk siswa SMA", // Megawati Soekarnoputri, harapan dan tantangan di kursi Wapre
-  bk_21393282a1d39c02: "tidak relevan untuk siswa SMA", // Membangun pusat-pusat di pinggiran
-  bk_d7b9ba8b192a9bbd: "tidak relevan untuk siswa SMA", // Membincangkan feminisme
-  bk_d1631e5cb85fa4bc: "tidak relevan untuk siswa SMA", // Memilih bank yang sehat
-  bk_45ab5eb725ac9f5e: "tidak relevan untuk siswa SMA", // Memperkenalkan Akhlak Mulia Rasulullah kepada Anak
-  bk_57335b99bd974162: "tidak relevan untuk siswa SMA", // Menata pulau-pulau kecil perbatasan
-  bk_0fabd5e5463fffe3: "tidak relevan untuk siswa SMA", // Mendidik Anak Laki-Laki
-  bk_8c5028fd4d399fe6: "tidak relevan untuk siswa SMA", // Mendidik Anak Perempuan
-  bk_c47b6b1d6e245fc9: "tidak relevan untuk siswa SMA", // Mengantisipasi masa depan
-  bk_b07cb99102df6385: "tidak relevan untuk siswa SMA", // Mengasah Pola Pikir Anak
-  bk_2cdf526c72e9c187: "tidak relevan untuk siswa SMA", // Menghadapi tantangan masa depan
-  bk_88d228c7c0f46cd3: "tidak relevan untuk siswa SMA", // Menghadapi tantangan, memperjuangkan kerukunan
-  bk_20113bcaf4d7c840: "tidak relevan untuk siswa SMA", // Menghidupkan kembali Jalur Sutra Baru
-  bk_fdd23f952508cc00: "tidak relevan untuk siswa SMA", // Menguak hubungan dagang Indonesia-Israel
-  bk_0ed13b0baba130b2: "tidak relevan untuk siswa SMA", // Menguak tabir & potensi jamu gendong
-  bk_9472d51b2a580dff: "tidak relevan untuk siswa SMA", // Menikah Memuliakan Sunnah
-  bk_78aec39fccf267c8: "tidak relevan untuk siswa SMA", // Menjadi Manajer Sukses
-  bk_a7fe337bb259f048: "tidak relevan untuk siswa SMA", // Menjadi pemimpin politik
-  bk_e1dfad81d2f8de43: "tidak relevan untuk siswa SMA", // Menjadi Suami & Ayah Hebat
-  bk_9d50e7b03dd1f3c0: "tidak relevan untuk siswa SMA", // Menuju Halal
-  bk_e8f51afd0cc91a80: "tidak relevan untuk siswa SMA", // Menyandera Timur Tengah
-  bk_32c37c565e496fc0: "tidak relevan untuk siswa SMA", // Menyelisik Penyimpangan Syi’ah
-  bk_0d904410cdd16790: "tidak relevan untuk siswa SMA", // Merah putih arsitektur nusantara
-  bk_7f330bdb414a3a19: "tidak relevan untuk siswa SMA", // Mereka bukan thaghut
-  bk_7097ea0624088c39: "tidak relevan untuk siswa SMA", // Misykat
-  bk_468ff2c448435e68: "tidak relevan untuk siswa SMA", // Moluska padang lamun
-  bk_420ada243e1dd073: "tidak relevan untuk siswa SMA", // Multibagger
-  bk_b703e1c9baa625ac: "tidak relevan untuk siswa SMA", // Muslim demokrat
-  bk_c98cc5fdc0010fc5: "tidak relevan untuk siswa SMA", // Muslim Preneur
-  bk_d160970c583173e4: "tidak relevan untuk siswa SMA", // Neoliberalisme
-  bk_be2b0654f28ebb54: "tidak relevan untuk siswa SMA", // NKRI bersyariah atau ruang publik yang manusiawi?
-  bk_e9bf84da76080b9f: "tidak relevan untuk siswa SMA", // Nyai gowok
-  bk_8f4571ebb4787d76: "tidak relevan untuk siswa SMA", // Obat-obatan ramuan tradisional
-  bk_9ed2298a8d108a36: "tidak relevan untuk siswa SMA", // Panorama bahasa Indonesia
-  bk_7446347d9ecced2b: "tidak relevan untuk siswa SMA", // PARENTime
-  bk_cadb801fecc90670: "tidak relevan untuk siswa SMA", // Pasar Modal Syariah
-  bk_9fc0ac343c79676b: "tidak relevan untuk siswa SMA", // Pelangi di Bukit Barisan
-  bk_995962c59d558df7: "tidak relevan untuk siswa SMA", // Pelarangan buku di Indonesia
-  bk_f7e98a575290850c: "tidak relevan untuk siswa SMA", // Pemulung Jalanan Yogyakarta
-  bk_ef3066b5c687bbcc: "tidak relevan untuk siswa SMA", // Percikan Filsafat
-  bk_53704674fa3e20eb: "tidak relevan untuk siswa SMA", // Perjalanan menjumpai Tuhan
-  bk_373ce80c41de42c1: "tidak relevan untuk siswa SMA", // Perkembangan tafsir al-Qur'an di Indonesia
-  bk_4123ccd877593ffa: "tidak relevan untuk siswa SMA", // Pernak-Pernik Romantis
-  bk_1ae33ef0b596ecac: "tidak relevan untuk siswa SMA", // Pesantren masa depan
-  bk_ae4f9defbd22e3cb: "tidak relevan untuk siswa SMA", // Piagam perjuangan kebangsaan
-  bk_85c697596f7da690: "tidak relevan untuk siswa SMA", // Pijar-pijar filsafat
-  bk_6929ccc513a47449: "tidak relevan untuk siswa SMA", // Poligami yang tak melukai hati?
-  bk_957d867a767b7ec6: "tidak relevan untuk siswa SMA", // Politik identitas etnis
-  bk_fc76d8b5159a01b8: "tidak relevan untuk siswa SMA", // Politik Kristen di Indonesia
-  bk_000ccbbc361910c2: "tidak relevan untuk siswa SMA", // Presidensialisme setengah hati
-  bk_65373178f0395892: "tidak relevan untuk siswa SMA", // Prof. Dr. Mgr. N.J.C. Geise, O.F.M., juragan visioner
-  bk_46972663545a5280: "tidak relevan untuk siswa SMA", // Profil budaya politik Indonesia
-  bk_c76368423111a579: "tidak relevan untuk siswa SMA", // Profit Konsisten Dengan Ichimoku Kinko Hyo
-  bk_d2a3d3519abbce74: "tidak relevan untuk siswa SMA", // Psikologi Pernikahan: Menyelami Rahasia Pernikahan
-  bk_d9cd6e92979c62dd: "tidak relevan untuk siswa SMA", // Rakyat memantau ibukota, rakyat memantau Jokowi Basuki
-  bk_b37fc90804af00f7: "tidak relevan untuk siswa SMA", // Reinventing pembangunan
-  bk_5edf0aa05b8f92c5: "tidak relevan untuk siswa SMA", // Revolusi sistem pendidikan nasional dengan metode e-learning
-  bk_b87d1ec0cc3889a0: "tidak relevan untuk siswa SMA", // Rumah Melayu
-  bk_d13c307f792d91f1: "tidak relevan untuk siswa SMA", // SANTRI-PESANTREN INDONESIA ; Siaga Jiwa Raga Menuju Indonesi
-  bk_063aa3fcf5141a2e: "tidak relevan untuk siswa SMA", // Saya tidak ingin poligami tapi harus poligami
-  bk_4f64af6f1d7c621b: "tidak relevan untuk siswa SMA", // Seandainya saya isteri Aa Gym
-  bk_3991695403634fe2: "tidak relevan untuk siswa SMA", // Sehat & Bugar Berobat Dengan Alam
-  bk_a1fc09a78c09d223: "tidak relevan untuk siswa SMA", // Sehat Itu Nikmat
-  bk_ec35472cfc530d2e: "tidak relevan untuk siswa SMA", // Sejarah Pemerintahan Kota Surabaya Sejak Masa Kolonial Sampa
-  bk_54b21ca4dfff6dd8: "tidak relevan untuk siswa SMA", // Sejarah perjumpaan Kristen dan Islam di Indonesia
-  bk_1e478c36081f6e76: "tidak relevan untuk siswa SMA", // Senam Sehat Prana
-  bk_4b525a2708fcfb59: "tidak relevan untuk siswa SMA", // Seputar dewan paroki
-  bk_bf2df13a676ddd50: "tidak relevan untuk siswa SMA", // Sesudah filsafat
-  bk_33db395ebc13fe1f: "tidak relevan untuk siswa SMA", // Strategi-strategi pembangunan masyarakat
-  bk_4994b5d79857697b: "tidak relevan untuk siswa SMA", // Tata upacara dan wicara
-  bk_8ffefe4c0fa93b7b: "tidak relevan untuk siswa SMA", // Technical Analysis For Mega Profit
-  bk_9d3a53720ef6d6f2: "tidak relevan untuk siswa SMA", // Teologi & praksis komunitas post modern
-  bk_0dfa64c5a0afa72a: "tidak relevan untuk siswa SMA", // Teologi, pendidikan & pembebasan
-  bk_6154c14b5a43926d: "tidak relevan untuk siswa SMA", // The jongos ways
-  bk_d20b9482f9ad2bd9: "tidak relevan untuk siswa SMA", // The Lean Startup
-  bk_dab6a04342d98970: "tidak relevan untuk siswa SMA", // The Super Scalper
-  bk_1cded82b7da97cfe: "tidak relevan untuk siswa SMA", // The untold stories
-  bk_b43c95864814d63d: "tidak relevan untuk siswa SMA", // The untold story of Ryan
-  bk_67053120b492cd14: "tidak relevan untuk siswa SMA", // Transmigrasi di Indonesia, 1905-1985
-  bk_7b79bf6d13d325b3: "tidak relevan untuk siswa SMA", // Trust
-  bk_38e77fd5439b4f5b: "tidak relevan untuk siswa SMA", // Tuaiannya sungguh banyak
-  bk_8945a941508588c9: "tidak relevan untuk siswa SMA", // Tuntunan Tabligh
-  bk_7967278d9558696b: "tidak relevan untuk siswa SMA", // Ulama & kekuasaan
-  bk_bb62787457d353da: "tidak relevan untuk siswa SMA", // Value Investing
-  bk_87376c6cf4ef93b9: "tidak relevan untuk siswa SMA", // Who Wants to be a Smiling Investor
-  bk_fbc0769c66fae1c0: "tidak relevan untuk siswa SMA", // Wife Diary
-  bk_bbf59342d61dec8b: "tidak relevan untuk siswa SMA", // Yang Terus di Garis Lurus
   bk_b98f0e5a7aa38dbb: "edisi bahasa asing", // Scorpia
   // ---- Review of the seed authors' other works and Wikipedia books ----
-  bk_0750942c09e3c9bc: "konten dewasa", // Tuhan, Izinkan Aku Menjadi Pelacur!
-  bk_10ec417147e77521: "buku teks/kajian akademik", // Sejarah Indonesia
-  bk_362b407ba07f299a: "tidak relevan untuk siswa SMA", // Suami sempurna
   bk_6b56255fed7df793: "judul tidak valid", // Lihat daftar isi Yel
-  bk_7783fc0975c6fc9f: "tidak relevan untuk siswa SMA", // Memasuki era BUMN multinational coorporation
-  bk_c72ab9c055a33aed: "tidak relevan untuk siswa SMA", // Eksplorasi kreativitas dua dasawarsa Anne Avantie
   bk_cc4035257950fe1a: "duplikat (pakai Supernova 1)", // Supernova
-  bk_d4a42618d401e2be: "tidak relevan untuk siswa SMA", // Marketing in crisis
-  bk_de70df8525df301d: "tidak relevan untuk siswa SMA", // Mutasi DNA powerhouse
-  bk_eef5ddd1c5613885: "tidak relevan untuk siswa SMA", // Begini harusnya bisnis!
-  bk_f64021feae83d9f8: "tidak relevan untuk siswa SMA", // Istriku seribu
   bk_0f124f673318aa67: "tidak ada cover yang benar", // Patiwangi
   bk_b3b6ed318f9a183f: "tidak ada cover yang benar", // Inul!
   // ---- Category review of every book ----
-  bk_337cab22262bf361: "tidak relevan untuk siswa SMA (buku pengobatan herbal)", // Solusi Alami Sehatkan Diri
   bk_49e15f5cc0359538: "duplikat (Rantau 1 Muara)", // Rantau muara
-  bk_1d7378fad074d5ce: "tidak relevan untuk siswa SMA (buku balita)", // My Baby Reads ! I Like Beach Because…
-  bk_c88117f3bb4fddef: "tidak relevan untuk siswa SMA (buku balita)", // My Baby Reads ! I Love You Because…
-  bk_acfd79d367e99044: "tidak relevan untuk siswa SMA (buku balita)", // My Baby Reads ! Is That A Bug ?
-  bk_ac1baa526f3cfcc3: "tidak relevan untuk siswa SMA (buku balita)", // My Baby Reads ! Is That My Belly Button ?
-  bk_89a5c297905866b9: "tidak relevan untuk siswa SMA (buku balita)", // My Baby Reads ! Where Is My Tail ?
   bk_701b80c38ae2f894: "duplikat (Arsitektur yang Lain, Sebuah Kritik Arsitektur)", // Arsitektur yang lain
-  bk_bbf899c2b8ecd362: "tidak relevan untuk siswa SMA (kitab primbon)", // Syamsul Ma'arif
-  bk_019e9f87c56a5d58: "tidak relevan untuk siswa SMA (kerajinan)", // Origami Tanks
   bk_3af32f26c9099952: "duplikat (Di Bawah Lindungan Ka'bah)", // Di Bawah Lindungan Kabah
-  bk_876df4c2ec2c8465: "tidak relevan untuk siswa SMA (pengasuhan)", // Dari Abah Ihsan
-  bk_55a0100e1d30f9b7: "tidak relevan untuk siswa SMA (pengasuhan)", // 40 Hari Mengatasi Kecanduan Game pada Anak
   bk_1747371656b46f9a: "duplikat (Autumn in Paris)", // MetroPop: Autumn In Paris
   bk_ab3bc34c7b7b2f08: "duplikat (Membangkitkan Energi Qolbu)", // Membangkitkan energi qolbu
   bk_cc332584363d33a9: "duplikat edisi Inggris (Harry Potter dan Orde Phoenix)", // Harry Potter and the order of the Phoenix
@@ -283,10 +56,6 @@ export const REJECTED_BOOKS: Record<string, string> = {
   bk_02fedc65fcc0a5b8: "duplikat (Petualangan Tom Sawyer)", // Petualangan Tom Saeyer
   bk_7146e9bf3bb3aeee: "duplikat (Petualangan Tom Sawyer)", // Seri Sastra Dunia: Petualangan Tom Sawyer
   bk_85448cc5cc414220: "duplikat (Azab dan Sengsara)", // Azab Dan Sengsara ( Indonesian Edition )
-  bk_0374f12124b63b96: "konten dewasa", // Jakarta undercover
-  bk_a60c5e30b6528068: "tidak relevan untuk siswa SMA (pernikahan)", // Barakallahu Laka: Bahagianya Merayakan Cinta
-  bk_7a8f04ace80057f8: "tidak relevan untuk siswa SMA (pernikahan)", // Ketika Aku dan Kamu Jadi Kita
-  bk_b6e7323bb06daca0: "tidak relevan untuk siswa SMA (pernikahan)", // Nikmatnya Pacaran Setelah Pernikahan
   bk_558342c78c00a01d: "judul tidak valid (bukan karya Tan Malaka)", // Madilog: Makan Daging Cilok
   // ---- Cover review ----
   bk_ab6490cfe82c61be: "edisi bahasa asing", // 15 Février 1839
@@ -295,126 +64,44 @@ export const REJECTED_BOOKS: Record<string, string> = {
   bk_675585dac8958bb8: "bukan bacaan umum (katalog/kamus/panduan)", // A Comprehensive Indonesian-English Dictionary
   bk_4f4dd1a1d68d20af: "edisi bahasa asing", // Abraham Lincoln (1809-1865), Presiden Amerika Serikat jang k
   bk_578ded6360e14a21: "bukan bacaan umum (katalog/kamus/panduan)", // Add Me on Facebook!
-  bk_bfe78ba8a7b2107a: "buku teks/kajian akademik", // Alternatif Kebijakan Pengaturan Hak Atas Tanah Beserta Bangu
   bk_4cbb80c33e9a9b22: "bukan bacaan umum (katalog/kamus/panduan)", // An English-Indonesian-Chinese Dictionary
   bk_af62619026f4e369: "edisi bahasa asing", // And the War Is Over
-  bk_514357694cc47cd3: "buku teks/kajian akademik", // Anjak Piutang
-  bk_020ef5a46c082faa: "buku teks/kajian akademik", // Antropologi Hukum Indonesia
-  bk_ed11b12aa9a7ed59: "buku teks/kajian akademik", // Arbitrase dan Mediasi di Indonesia
-  bk_1479bf330634ab5f: "buku teks/kajian akademik", // Arsitektur Radakng: Kehidupan Komunal dan Dayak Kanayatn
-  bk_427f3daacfa82ded: "buku teks/kajian akademik", // Aspek-Aspek Hukum Perbankan di Indonesia
   bk_918c72442d437c3c: "edisi bahasa asing", // Bali in the 19th Century
-  bk_b06fbc21c69499e9: "buku teks/kajian akademik", // Bangunan Air
   bk_e8bcc43fddbe0b0e: "bukan bacaan umum (katalog/kamus/panduan)", // Batik dan Mitra =
   bk_437411d8372a4c9e: "edisi bahasa asing", // Ben Has Something to Say
-  bk_369b8c4e58d72e53: "buku teks/kajian akademik", // Buku Pintar Kepabeanan
   bk_2360eb1e38ef867f: "bukan bacaan umum (katalog/kamus/panduan)", // Cerita Boga Indonesia
-  bk_850397e74819f1ad: "buku teks/kajian akademik", // Change Management dalam Reformasi Birokrasi
   bk_5804d3ffa9b83c22: "bukan bacaan umum (katalog/kamus/panduan)", // Cindai, Pengembaraan Kain Patola India.
-  bk_767fc7e2b05165b1: "konten dewasa", // Cinta 24 Jam =
-  bk_3bd69a5bb68f4d5b: "konten dewasa", // Cinta Abadi
   bk_45cefab5fc13aaf1: "edisi bahasa asing", // Classical Sociological Theory
   bk_85ceed125cc5330b: "edisi bahasa asing", // Counseling Theory and Practice
   bk_f05d1603a468a12b: "bukan bacaan umum (katalog/kamus/panduan)", // Crypto Cash Machine
   bk_08568b855cdbd1c1: "edisi bahasa asing", // Dang Xia De Li Liang
-  bk_86d5c1a0f591da51: "buku teks/kajian akademik", // Dasar Mekanika Tanah
-  bk_2626867ae47ce541: "buku teks/kajian akademik", // Dasar Penilaian Properti Rumah Mewah: Investasi, Kapitalisai
-  bk_16ce12dbd4d116dc: "buku teks/kajian akademik", // Delik-Delik Tertentu (Speciale Delicten) dalam Kuhp
-  bk_4d21ed3aa1589533: "konten dewasa", // Demi Kehormatan (Honor Bound)
-  bk_52080942d47974a8: "buku teks/kajian akademik", // Desa Mawa Cara
-  bk_c1accc879dd2b14a: "buku teks/kajian akademik", // Desain Hidraulik Bangunan Irigasi
   bk_fd54adcb071c3550: "edisi bahasa asing", // Digital Marketing
-  bk_d38ce0067a885f19: "buku teks/kajian akademik", // Drainase Perkotaan
   bk_1c80932d52b84161: "edisi bahasa asing", // Droit Penal General
   bk_57b35f6cceb8620d: "edisi bahasa asing", // Earth Dance
-  bk_0c06a764fcf5a42c: "buku teks/kajian akademik", // Fonetik dan Fonologi Melodi Bahasa: Prosodi
-  bk_6e8c096517d2adad: "konten dewasa", // Garis Tepi Seorang Lesbian
-  bk_afea59839ebbcf3a: "buku teks/kajian akademik", // Garis-Garis Besar Hukum Gereja
-  bk_7b33a62c1a8ba5a1: "buku teks/kajian akademik", // Gender dan Administrasi Publik
   bk_c93376f0c1aa949a: "bukan bacaan umum (katalog/kamus/panduan)", // Glosarium Keuangan
-  bk_913e93514be5b00a: "buku teks/kajian akademik", // Good E-Government
-  bk_7ac2b5a0fb640d9d: "buku teks/kajian akademik", // Hamengku Buwono IX dan Sistem Birokrasi Pemerintahan Yogyaka
-  bk_45c12fde7196b328: "buku teks/kajian akademik", // Hidrologi Teknik
-  bk_ee1571cc97cfdd49: "konten dewasa", // Hitam Putih Prostitusi
-  bk_958f0bde8c4233b8: "buku teks/kajian akademik", // Hukum Media Massa Nasional
-  bk_c1cb4f4290171add: "buku teks/kajian akademik", // Hukum Perbatasan Darat Antarnegara
-  bk_3aed716e293ac9e1: "buku teks/kajian akademik", // Hukum Persaingan Usaha
-  bk_aaf5d3953be3de1b: "buku teks/kajian akademik", // Hukum Waris Adat
-  bk_876de66f49387aee: "konten dewasa", // I Love You, Om---
-  bk_8895d40561a7a076: "buku teks/kajian akademik", // Industrialisasi dan Wiraswasta
   bk_6d55447c96f2b2dd: "edisi bahasa asing", // Introduction to Alkaloids
-  bk_c143b4914185cd1d: "konten dewasa", // Jangan Main-Main (Dengan Kelaminmu)
-  bk_363c6b489d288a7d: "buku teks/kajian akademik", // Kejaksaan RI
-  bk_3303f1489c33f6b5: "konten dewasa", // Kekasih Night Wind
-  bk_292e2a6304643d19: "buku teks/kajian akademik", // Kelas Kata dalam Bahasa Indonesia
   bk_c2d7451a9a3f5a0f: "bukan bacaan umum (katalog/kamus/panduan)", // Kesehatan dan Keselamatan Kerja
-  bk_6d9e6926c32a9504: "buku teks/kajian akademik", // Keteknikan Videografi
-  bk_c39be54fe293da87: "buku teks/kajian akademik", // Kewiraan untuk Mahasiswa
   bk_e0a6d9904a7bb842: "edisi bahasa asing", // Kill the Radio (Visible Poets)
-  bk_eaf8339254f16d98: "konten dewasa", // Lelaki Terindah =
   bk_cde5f8d73b9ec8e3: "edisi bahasa asing", // Living Islam
   bk_789ba7159e749cd7: "bukan bacaan umum (katalog/kamus/panduan)", // Mahir Berbahasa Spanyol dalam Sepekan
-  bk_30497698749ed3cf: "buku teks/kajian akademik", // Manajemen Periklanan
-  bk_4e6a42523e3399e9: "buku teks/kajian akademik", // Mediasi Nonlitigasi Terhadap Sengketa Medik Dengan Konsep Wi
   bk_68ac9883d194408d: "edisi bahasa asing", // Megatrends 2000
-  bk_01457cd60316bbd4: "buku teks/kajian akademik", // Mekanika Bahan, Jilid 2
-  bk_4da45aea851f5cb0: "buku teks/kajian akademik", // Mekanika Teknik
-  bk_78363b690bbd398d: "konten dewasa", // Menaklukkan Sang Dokter
-  bk_e32d7950ff87ee97: "buku teks/kajian akademik", // Menegakkan Hukum dan Hak Warga Negara
-  bk_f68297cb9cddaeed: "buku teks/kajian akademik", // Merancang dan Merencana Lapangan Terbang
-  bk_137f4b56fbde34b6: "buku teks/kajian akademik", // Metode Perancangan Arsitektur
-  bk_bb015727121b06a1: "buku teks/kajian akademik", // Monograph Identifikasi Mood Ibu Postpartum Menggunakan Skala
-  bk_9991d550ec1f4cca: "buku teks/kajian akademik", // Neurologi Klinis Dasar
-  bk_374f4f8d73541157: "buku teks/kajian akademik", // OJK dan Pengawasan Mikroprudensial
   bk_b93a80998301ae1e: "edisi bahasa asing", // On Call
-  bk_7cb3b35e222623c0: "buku teks/kajian akademik", // Paradigma Baru Pembangunan Pertanian
-  bk_fb286c37b6dce1b9: "buku teks/kajian akademik", // Paradigma Sosiologi Sastra
-  bk_66030cca15f9d633: "buku teks/kajian akademik", // Pelanggaran Ham dalam Hukum Keadaan Darurat di Indonesia
-  bk_360e5fcbdf7f9582: "buku teks/kajian akademik", // Penerjemahan Berdasar Makna (Pedoman untuk Pemadanan Antarba
-  bk_998206f5d21470ec: "buku teks/kajian akademik", // Pengelolaan Lalu Lintas dan Angkutan Jalan
-  bk_8512e89a09aab4dc: "buku teks/kajian akademik", // Perbandingan Sistem Ekonomi
-  bk_e9e567eb4f5d03b6: "buku teks/kajian akademik", // Perbankan
-  bk_cafbe9f3b73eee8b: "buku teks/kajian akademik", // Perbankan Islam dan Kedudukannya dalam Tata Hukum Perbankan 
-  bk_963ad8b673eb7b12: "buku teks/kajian akademik", // Perkawinan menurut Islam dan Katolik
-  bk_59d8f395c63a6046: "buku teks/kajian akademik", // Perlindungan Hak Asasi Saksi dan Korban dalam Proses Peradil
-  bk_c007b03c55b8007b: "buku teks/kajian akademik", // Perpustakaan Digital dari a Sampai Z
-  bk_080bc2af6ecdda1d: "konten dewasa", // Petualangan Celana dalam
-  bk_ff440b53812f8251: "buku teks/kajian akademik", // Pokok-Pokok Filsafat Hukum
   bk_7838c3a9ffc3307c: "bukan bacaan umum (katalog/kamus/panduan)", // Smart Breastfeeding Mother
-  bk_08bf6eed31380354: "buku teks/kajian akademik", // Sosiologi Hukum dalam Masyarakat
   bk_fd84deef545d92e9: "edisi bahasa asing", // Sri Sumarah and Other Stories
-  bk_b00e05cad5df8dbe: "buku teks/kajian akademik", // Stereotip Etnis dalam Masyarakat Multietnis
-  bk_9681275a0af1baa0: "buku teks/kajian akademik", // Strategi dan Inovasi Model Bisnis Meningkatkan Kinerja Usaha
-  bk_98f7d7f349b536bb: "buku teks/kajian akademik", // Struktur Bangunan Bertingkat Tinggi
-  bk_1b694252ae1ecc3b: "konten dewasa", // Tango
-  bk_976925ee11a5e0f2: "buku teks/kajian akademik", // Teknik Gambar Bangunan untuk SMK, Jilid 1
-  bk_9680c27bcf18b880: "buku teks/kajian akademik", // Tema Cerita Pendek Indonesia Tahun 1950-1060
-  bk_d001ccec5223eded: "konten dewasa", // Tentang Cinta
   bk_dcaf812453f85716: "bukan bacaan umum (katalog/kamus/panduan)", // Tenun Ikat =
   bk_dccb0ebca9fd3de3: "edisi bahasa asing", // The Complete Poetry and Prose of Chairil Anwar.
   bk_c49e05a9949afcea: "edisi bahasa asing", // The Ecology of Sulawesi
   bk_e65bf88d2ee6309f: "edisi bahasa asing", // The Psychology of Money
   bk_4771b3c25a5ced7c: "edisi bahasa asing", // Trading Chaos
   bk_509d2ba0650223c7: "bukan bacaan umum (katalog/kamus/panduan)", // Urban / Culture: Cp Biennale 2005
-  bk_275e5cb89eef56d1: "buku teks/kajian akademik", // Usaha Perbankan dalam Perspektif Hukum
-  bk_57f13946c0c0bfc5: "buku teks/kajian akademik", // Wajah Jasa Konstruksi Indonesia
   bk_a3e3e77b3a0bdeeb: "edisi bahasa asing", // どんどんつながる漢字練習帳 初級
-  bk_0198b45718d0e7f5: "buku teks/kajian akademik", // Rencana Anggaran Biaya
   bk_440c83d933bfa2b3: "bukan bacaan umum (katalog/kamus/panduan)", // 7 Jam Belajar ArchiCAD 8 untuk Orang Awam
-  bk_4c63928c58a7cd5f: "buku teks/kajian akademik", // Kedudukan Hukum Islam dalam Sistem Hukum Indonesia
   bk_5afea7a6470b8301: "bukan bacaan umum (katalog/kamus/panduan)", // Pameran Seni Rupa
-  bk_60e18701d9d85404: "buku teks/kajian akademik", // Tahapan dan Langkah-langkah Penelitian
-  bk_725ff1b172edcf60: "buku teks/kajian akademik", // Hukum Perwakilan dan Kuasa
   bk_73bd0297fb6a70c0: "edisi bahasa asing", // The Indonesian Language
   bk_7b60efd58dd7c2a4: "edisi bahasa asing", // Village At War
   bk_9207645aa1e6e326: "bukan bacaan umum (katalog/kamus/panduan)", // Karya Arsitek Indonesia.
   bk_9bbf357a45be0b60: "edisi bahasa asing", // A biological assessment of the Wapoga River area of northwes
-  bk_ac9909f7dd1879d2: "buku teks/kajian akademik", // Memahami Hukum di Indonesia
-  bk_cd7d144915f64874: "buku teks/kajian akademik", // Referensi Bagi Hakim Peradilan Agama Tentang Kekerasan dalam
   bk_d65e87ef4f8e96e2: "bukan bacaan umum (katalog/kamus/panduan)", // Indonesian Phrase Book & Dictionary
-  bk_e5fb8ce962c60b2d: "buku teks/kajian akademik", // Taksonomi dan Bioekologi Lalat Buat Penting di Indonesia (Di
-  bk_f766932dbaef94f1: "buku teks/kajian akademik", // Hukum Kepailitan Selayang Pandang
-  bk_fe77e18441949047: "buku teks/kajian akademik", // Sejarah dan kedudukan BW di Indonesia
   bk_bb49ee0536e9caed: "tidak ada cover yang benar", // Air Mata Saudaraku
   bk_af1c773623433770: "tidak ada cover yang benar", // Burung Kolibri Merah Dadu
   bk_470d9c2f498a5f4b: "tidak ada cover yang benar", // Istri Konsul
@@ -427,44 +114,13 @@ export const REJECTED_BOOKS: Record<string, string> = {
   bk_5da40644a4f4a494: "tinjauan: bukan buku utuh (cuplikan)", // Jika Kita Tak Pernah Jadi Apa-Apa: Chapter 1
   bk_f0755583f382426f: "tinjauan: bukan buku utuh (cuplikan)", // Refrain [chapter 2]
   bk_07865356ddd67a89: "tinjauan: edisi lain dari buku yang sudah ada", // Tidak Ada New York Hari Ini (dwibahasa)
-  bk_7a593ee32f580cfb: "tinjauan: konten dewasa", // Tuhan, Izinkan Aku Menjadi Pelacur!
-  bk_dad5b5d2634fb90c: "tinjauan: konten dewasa", // Centhini, Tambangraras-Amongraga
-  bk_1dead35b81273f58: "tinjauan: bacaan anak kecil", // Batu Belah Batu Bertangkup
-  bk_ec77b20f8eeb1ec9: "tinjauan: bacaan anak kecil", // Buku Abjad ABC Binatang
-  bk_5ed170731ee32969: "tinjauan: bacaan anak kecil", // Hadiah Alam
-  bk_e2e1ae32c05ca413: "tinjauan: bacaan anak kecil", // Nyi Rambut Kasih
-  bk_475f7cc3003768dc: "tinjauan: bacaan anak kecil", // Persahabatan
-  bk_caa8951fb83410b9: "tinjauan: bacaan anak kecil", // Ratu Sejati dan Lutung Baik Hati
-  bk_fdf2e9023a2e2b8b: "tinjauan: politik praktis/polemik", // Dia: Sebentuk Potret Diri Megawati Soekarnoputri
-  bk_116e9bac4d35f14f: "tinjauan: politik praktis/polemik", // Perang Yang Tidak Akan Kita Menangkan
-  bk_1f5def9a1ac665f3: "tinjauan: politik praktis/polemik", // Blok Pembangkang
-  bk_09b499c3d4f2bde0: "tinjauan: buku teks/kajian akademik", // Diksi dan Gaya Bahasa
-  bk_06f8c8da67a34f9b: "tinjauan: buku teks/kajian akademik", // Getar Gender
-  bk_39b49b0ecfff7df8: "tinjauan: buku teks/kajian akademik", // Hak Kekayaan Intelektual
-  bk_fa5850ef71d52163: "tinjauan: buku teks/kajian akademik", // Jalan Rel
-  bk_d3cf6859b57083c5: "tinjauan: buku teks/kajian akademik", // Karya Lengkap Abdullah Abdul Kadir Munsyi
-  bk_87fd41f650810b68: "tinjauan: buku teks/kajian akademik", // Kumpulan Karangan (Drijarkara)
-  bk_686302c5f4dc9adf: "tinjauan: buku teks/kajian akademik", // Penggunaan Bahasa Indonesia Ragam Tulis
-  bk_e1a5f82390f64db0: "tinjauan: buku teks/kajian akademik", // Prosa Tradisional
-  bk_bac77b7f3b81699a: "tinjauan: buku teks/kajian akademik", // Riau Sebagai Pusat Bahasa dan Kebudayaan Melayu
-  bk_5385287841173454: "tinjauan: buku teks/kajian akademik", // Ritumpanna Wélenrénngé
-  bk_9c68323b4b2b9adb: "tinjauan: buku teks/kajian akademik", // Sejarah Pemikiran Hak-Hak Asasi Manusia
-  bk_774cfb30b5783967: "tinjauan: buku teks/kajian akademik", // Teater Lenong Betawi
-  bk_9d4d20d6c2b3696c: "tinjauan: buku teks/kajian akademik", // Teori Ekonomi, Politik Ekonomi dan Orde Ekonomi
-  bk_11ce32c8a8f6d51c: "tinjauan: buku teks/kajian akademik", // Sunda Sebelum Perang
-  bk_70af8e91637c7b9b: "tinjauan: buku teks/kajian akademik", // Ornamen Rumah Adat Batak Toba
   bk_8621a1f1a22d6cb5: "bukan bacaan umum (katalog/kamus/panduan)", // Tentang Sejumlah Orang Sulawesi Selatan
   bk_a195d740dedf98a6: "bukan bacaan umum (katalog/kamus/panduan)", // Kabar Baik (traktat)
   bk_07f315bfb91c418b: "bukan bacaan umum (katalog/kamus/panduan)", // Umat Allah Menegaskan Arah
-  bk_d36528d5e6ce6dbb: "tinjauan: terbitan mandiri luar negeri", // Semanyun Senyuman Mahasiswa
   // Foreign-language editions found in the catalog (30 Oct 2026), none with readers.
   bk_0bbf8ae36912c40b: "kurasi: edisi bahasa asing", // Rich Dad Poor Dad (Business Plus)
-  bk_115d35c6af82168c: "kurasi: edisi bahasa asing", // Firedom
-  bk_5787acde4a5e3fe9: "kurasi: edisi bahasa asing", // Across the Nightingale Floor (Riverhead)
-  bk_8fa66a1b89b77235: "kurasi: edisi bahasa asing", // Neighbourhood Tales
   bk_346776a26373eaae: "kurasi: edisi bahasa asing", // Personality Plus (Monarch)
   bk_fe70a22066d436d8: "kurasi: edisi bahasa asing", // Never Let Me Go (Faber cover)
-  bk_ff236145addc576a: "kurasi: edisi bahasa asing", // Being Indonesian (written in English)
 };
 
 /** Cover URLs that show the wrong book, a person, a placeholder or a page. */

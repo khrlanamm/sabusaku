@@ -331,21 +331,22 @@ export function looksEnglishTitle(title: string): boolean {
 
 // ---------------------------------------------------------------- filters
 
-const JUNK = new RegExp(
+/**
+ * Things that are not books to read through: exam drills and school
+ * workbooks, reference works, periodicals, theses, sets and summaries,
+ * legal texts and English editions. Since 30 Oct 2026 the user wants every
+ * other book in the catalog, adult, political, academic and technical ones
+ * included, so only these and incomplete records are filtered.
+ */
+const NOT_READING = new RegExp(
   [
     "\\bsoal\\b", "latihan soal", "\\bujian\\b", "\\butbk\\b", "\\bsbmptn\\b", "\\bcpns\\b", "kunci jawaban",
-    "\\blks\\b", "\\bmodul\\b", "bahan ajar", "tata rias", "\\bdiktat\\b", "kurikulum", "buku siswa", "buku guru", "\\bkamus\\b", "ensiklopedi",
-    "majalah", "katalog", "prosiding", "skripsi", "\\btesis\\b", "laporan", "\\bjurnal\\b(?! (harian|kecil))",
-    "\\bpaket\\b", "box ?set", "boxset", "bundle", "\\bkajian\\b", "\\btelaah\\b", "analisis (novel|cerpen|puisi)",
-    "\\bresepsi\\b", "struktur(alisme)? (novel|cerita)", "nilai-nilai .* dalam", "\\bringkasan\\b", "sinopsis",
+    "\\blks\\b", "\\bmodul\\b", "bahan ajar", "\\bdiktat\\b", "kurikulum", "buku siswa", "buku guru", "\\bkamus\\b", "ensiklopedi",
+    "majalah", "katalog", "prosiding", "skripsi", "\\btesis\\b", "\\bjurnal\\b(?! (harian|kecil))",
+    "\\bpaket\\b", "box ?set", "boxset", "bundle", "\\bringkasan\\b", "sinopsis",
     "bahasa indonesia (untuk|kelas|smp|sma)", "kelas (x|xi|xii|[1-9])\\b", "\\bsma\\b", "\\bsmp\\b", "panduan (guru|belajar)",
     "english edition", "edisi bahasa inggris", "^index\\b", "^indeks\\b", "bibliografi",
-    // How-to manuals and reference works from general publishers.
-    "microsoft", "\\bexcel\\b", "photoshop", "coreldraw", "autocad", "\\bandroid\\b", "\\bphp\\b", "\\bjava\\b",
-    "pemrograman", "\\bkomputer\\b", "\\bwindows\\b", "\\bspss\\b", "\\bresep\\b", "masakan", "\\bkue\\b",
-    "budidaya", "beternak", "akuntansi", "perpajakan", "\\bpajak\\b", "statistik", "kalkulus", "\\btoefl\\b",
-    "\\bielts\\b", "tata bahasa", "grammar", "percakapan", "\\bundang-undang\\b", "peraturan", "\\bdirektori\\b",
-    "\\batlas\\b", "\\balmanak\\b", "\\bpetunjuk\\b", "\\bteknik\\b (mesin|sipil|elektro)", "jaringan",
+    "\\bundang-undang\\b", "peraturan", "\\bdirektori\\b", "\\batlas\\b", "\\balmanak\\b",
   ].join("|"),
   "i",
 );
@@ -354,43 +355,14 @@ const JUNK = new RegExp(
 const FOREIGN_PUBLISHER =
   /penguin|hyperion|random house|harper|knopf|vintage|picador|bloomsbury|scholastic|puffin|macmillan|simon (&|and) schuster|hachette|oxford university|cambridge university|routledge|brill|springer|grove|norton|doubleday|bantam|little,? brown|faber|allen & unwin|tuttle|equinox|lontar foundation|cornell/i;
 
-/** University and school textbooks, only checked for books not found by a seed. */
-const TEXTBOOK = new RegExp(
-  [
-    "\\b(kimia|fisika|biologi|matematika|statistika|ekonomi|akuntansi) (dasar|terapan|umum|industri)\\b",
-    "\\bdasar-dasar\\b", "\\bpengantar\\b", "\\bmetodologi\\b", "metode penelitian", "multivariat", "laporan keuangan",
-    "\\bhukum (pidana|perdata|acara|tata negara|administrasi|bisnis|islam di)\\b", "\\bteori\\b", "manajemen (keuangan|sumber daya|pemasaran|operasional|strategik|strategis)",
-    "pancasila", "kewarganegaraan", "farmakologi", "keperawatan", "kebidanan", "kedokteran", "\\banatomi\\b", "mikrobiologi",
-    "ekonometrika", "\\baplikasi\\b", "\\bsistem informasi\\b", "\\bpemrograman\\b", "\\bdatabase\\b", "\\bdesain grafis\\b",
-    "\\bmanajemen\\b", "\\bpsikologi (pendidikan|perkembangan|sosial|klinis|industri)\\b", "\\bilmu\\b", "\\bpraktis\\b", "\\bpanduan\\b",
-    "\\bfilsafat pendidikan\\b", "\\bpedagogi\\b", "\\bpembelajaran\\b", "\\bkurikulum\\b", "\\bevaluasi\\b",
-  ].join("|"),
-  "i",
-);
-
-/** Titles that are clearly adult content; the readers are high-school students. */
-const MATURE = /\b(sex|seks|seksual|erotis|erotika|bercinta|birahi|ranjang|bokep|porno)\b/i;
-
-/** Academic and official publications that are not general reading. */
-const ACADEMIC = new RegExp(
-  [
-    "^(pendidikan|pembangunan|kebijakan|peranan|pengaruh|hubungan antara|studi|tinjauan|penelitian|seminar|lokakarya|pedoman|sistem|evaluasi|pengembangan|analisa|pengantar)\\b",
-    "\\b(sekolah dasar|perguruan tinggi|departemen|direktorat|proyek|pemerintah daerah|kabupaten|provinsi|sidang|kongres|simposium)\\b",
-  ].join("|"),
-  "i",
-);
 
 function rejectReason(book: ImportBook): string | null {
   if (REJECTED_BOOKS[book.id]) return `tinjauan: ${REJECTED_BOOKS[book.id]}`;
   if (book.title.length < 2 || book.title.length > 200) return "judul tidak valid";
   if (book.authors.length === 0) return "tanpa penulis";
   if (book.authors.length > 5) return "antologi banyak penulis";
-  if (JUNK.test(`${book.title} ${book.subtitle ?? ""}`)) return "bukan bacaan (soal/teks pelajaran/kajian/paket)";
+  if (NOT_READING.test(`${book.title} ${book.subtitle ?? ""}`)) return "bukan bacaan (soal/LKS/kamus/katalog/majalah/paket)";
   if (book.publisher && FOREIGN_PUBLISHER.test(book.publisher)) return "edisi bahasa asing";
-  if (MATURE.test(book.title) && !book.seeds.some((s) => s.includes(" — "))) return "konten dewasa";
-  if (ACADEMIC.test(book.title) && !book.seeds.some((s) => s.includes(" — "))) return "kajian akademik/laporan";
-  const harvested = !book.seeds.some((s) => s.includes(" — ")) && !seedFor(book.authors[0]);
-  if (harvested && TEXTBOOK.test(`${book.title} ${book.subtitle ?? ""}`)) return "buku teks/kuliah";
   if (/[\u3000-\u9fff\uac00-\ud7af\u0400-\u04ff]/.test(book.authors.join(" "))) return "nama penulis bukan huruf Latin";
   // A missing page count may still be found by enrich.ts.
   if (book.pageCount && (book.pageCount < 10 || book.pageCount > 2000)) return "jumlah halaman di luar 10–2000";
